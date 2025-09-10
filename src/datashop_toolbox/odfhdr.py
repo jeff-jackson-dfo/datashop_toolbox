@@ -9,10 +9,10 @@ from datashop_toolbox.eventhdr import EventHeader
 # from datashop_toolbox.generalhdr import GeneralCalHeader
 # from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.instrumenthdr import InstrumentHeader
-# from datashop_toolbox.meteohdr import MeteoHeader
+from datashop_toolbox.meteohdr import MeteoHeader
 from datashop_toolbox.parameterhdr import ParameterHeader
 # from datashop_toolbox.polynomialhdr import PolynomialCalHeader
-# from datashop_toolbox.qualityhdr import QualityHeader
+from datashop_toolbox.qualityhdr import QualityHeader
 # from datashop_toolbox.recordhdr import RecordHeader
 # from datashop_toolbox.records import DataRecords
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, add_commas, split_string_with_quotes, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict, check_string
@@ -30,9 +30,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
     cruise_header: CruiseHeader = Field(default_factory=CruiseHeader)
     event_header: EventHeader = Field(default_factory=EventHeader)
-    # meteo_header: Optional[MeteoHeader] = None
+    meteo_header: Optional[MeteoHeader] = None
     instrument_header: InstrumentHeader = Field(default_factory=InstrumentHeader)
-    # quality_header: Optional[QualityHeader] = None
+    quality_header: Optional[QualityHeader] = None
     
     # general_cal_headers: List[GeneralCalHeader] = Field(default_factory=list)
     # compass_cal_headers: List[CompassCalHeader] = Field(default_factory=list)
@@ -53,6 +53,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
         self.cruise_header.set_logger_and_config(self.logger, self.config)
         self.event_header.set_logger_and_config(self.logger, self.config)
         self.instrument_header.set_logger_and_config(self.logger, self.config)
+        if self.quality_header is not None:
+            self.quality_header.set_logger_and_config(self.logger, self.config)
+        if self.meteo_header is not None:
+            self.meteo_header.set_logger_and_config(self.logger, self.config)
 
     def log_odf_message(self, message: str, type: str = 'self'):
         assert isinstance(message, str), "Input argument 'message' must be a string."
@@ -109,10 +113,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
         odf_output = ""
 
         # List of optional headers
-        # optional_headers = [
-        #     ("meteo_header", self.meteo_header),
-        #     ("quality_header", self.quality_header)
-        # ]
+        optional_headers = [
+            ("meteo_header", self.meteo_header),
+            ("quality_header", self.quality_header)
+        ]
 
         # Helper to add header outputs
         def add_header_output(header, use_commas=True):
@@ -127,9 +131,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output += add_commas(self.cruise_header.print_object())
             odf_output += add_commas(self.event_header.print_object())
 
-            # for name, header in optional_headers:
-            #     if header is not None:
-            #         odf_output += add_header_output(header)
+            for name, header in optional_headers:
+                if header is not None:
+                    odf_output += add_header_output(header)
 
             odf_output += add_commas(self.instrument_header.print_object())
 
@@ -154,9 +158,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output += self.cruise_header.print_object()
             odf_output += self.event_header.print_object()
 
-            # for name, header in optional_headers:
-            #     if header is not None:
-            #         odf_output += add_header_output(header, use_commas=False)
+            for name, header in optional_headers:
+                if header is not None:
+                    odf_output += add_header_output(header, use_commas=False)
 
             odf_output += self.instrument_header.print_object()
 
@@ -250,9 +254,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 #     self.history_headers.append(history_header)
                 case "INSTRUMENT_HEADER":
                     self.instrument_header = self.instrument_header.populate_object(block_lines)
-                # case "METEO_HEADER":
-                #     self.meteo_header = MeteoHeader()
-                #     self.meteo_header.populate_object(block_lines)
+                case "METEO_HEADER":
+                    self.meteo_header = MeteoHeader()
+                    self.meteo_header.populate_object(block_lines)
                 case "ODF_HEADER":
                     for header_line in block_lines:
                         tokens = header_line.split('=', maxsplit=1)
@@ -266,9 +270,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 #     polynomial_cal_header = PolynomialCalHeader()
                 #     polynomial_cal_header.populate_object(block_lines)
                 #     self.polynomial_cal_headers.append(polynomial_cal_header)
-                # case "QUALITY_HEADER":
-                #     self.quality_header = QualityHeader()
-                #     self.quality_header.populate_object(block_lines)
+                case "QUALITY_HEADER":
+                    self.quality_header = QualityHeader()
+                    self.quality_header.populate_object(block_lines)
                 # case "RECORD_HEADER":
                 #     self.record_header = RecordHeader()
                 #     self.record_header.populate_object(block_lines)
@@ -483,7 +487,7 @@ def main():
     odf.cruise_header.end_date = '31-OCT-2022 00:00:00.00'
     odf.cruise_header.log_cruise_message("END_DATE", cedt, '31-OCT-2022 00:00:00.00')
     platform = odf.cruise_header.platform
-    odf.cruise_header.platform = "DATALANTE"
+    odf.cruise_header.platform = "LATALANTE"
     odf.cruise_header.log_cruise_message("PLATFORM", platform, "LATALANTE")
     
     station_name = odf.event_header.station_name
@@ -493,6 +497,30 @@ def main():
     desc = odf.instrument_header.description
     odf.instrument_header.log_instrument_message("DESCRIPTION", desc, "RBR Concerto CTD")
     odf.instrument_header.description = "RBR Concerto CTD"
+
+    odf.meteo_header = MeteoHeader()
+    odf.meteo_header.set_logger_and_config(odf.logger, odf.config)
+    odf.meteo_header.air_temperature = 10.0
+    ap = odf.meteo_header.atmospheric_pressure
+    odf.meteo_header.log_meteo_message("ATMOSPHERIC_PRESSURE", ap, 1063.1)
+    odf.meteo_header.atmospheric_pressure = 1063.1
+    odf.meteo_header.wind_speed = MeteoHeader.wind_speed_knots_to_ms(50.0)
+    odf.meteo_header.wind_direction = 180.0
+    odf.meteo_header.sea_state = MeteoHeader.wave_height_meters_to_wmo_code(3.0)
+    odf.meteo_header.cloud_cover = MeteoHeader.cloud_cover_percentage_to_wmo_code(0.5)
+    odf.meteo_header.ice_thickness = 0.5
+    odf.meteo_header.set_meteo_comment('This is a test comment')
+    odf.meteo_header.set_meteo_comment('This is another test comment')
+
+    odf.quality_header = QualityHeader()
+    odf.quality_header.set_logger_and_config(odf.logger, odf.config)
+    qd = odf.quality_header.quality_date
+    odf.quality_header.log_quality_message("QUALITY_DATE", qd, '01-JUL-2017 10:45:19.00')
+    odf.quality_header.quality_date = '01-JUL-2017 10:45:19.00'
+    odf.quality_header.set_quality_test('Test 1')
+    odf.quality_header.set_quality_test('Test 2')
+    odf.quality_header.quality_comments = ['Comment 1', 'Comment 2']
+
 
     param1 = ParameterHeader(
         type='DOUB',

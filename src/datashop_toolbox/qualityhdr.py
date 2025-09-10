@@ -10,12 +10,12 @@ class QualityHeader(ValidatedBase, BaseHeader):
     quality_tests: List[str] = Field(default_factory=list)
     quality_comments: List[str] = Field(default_factory=list)
 
+    def __init__(self, config=None, **data):
+        super().__init__(**data)  # Calls Pydantic's __init__
+
     def set_logger_and_config(self, logger, config):
         self.logger = logger
         self.config = config
-
-    def __init__(self, config=None, **data):
-        super().__init__(**data)  # Calls Pydantic's __init__
 
     @field_validator("quality_date", mode="before")
     @classmethod
@@ -35,7 +35,8 @@ class QualityHeader(ValidatedBase, BaseHeader):
 
     def log_quality_message(self, field: str, old_value: str, new_value: str) -> None:
         message = f"In Quality Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
-        self.log_message(message)
+        self.logger.info(message)
+        self.shared_log_list.append(message)
 
     def set_quality_test(self, quality_test: str, test_number: int = 0) -> None:
         quality_test = check_string(quality_test)
@@ -93,9 +94,14 @@ class QualityHeader(ValidatedBase, BaseHeader):
         return "\n".join(lines)
 
 def main():
-    
+
     quality_header = QualityHeader()
+    quality_header.config = BaseHeader._default_config
+    quality_header.logger = BaseHeader._default_logger
+
     print(quality_header.print_object())
+    qd = quality_header.quality_date
+    quality_header.log_quality_message("QUALITY_DATE", qd, '01-JUL-2017 10:45:19.00')
     quality_header.quality_date = '01-JUL-2017 10:45:19.00'
     quality_header.set_quality_test('Test 1')
     quality_header.set_quality_test('Test 2')
