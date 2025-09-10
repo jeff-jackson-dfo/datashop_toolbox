@@ -5,17 +5,17 @@ import re
 from datashop_toolbox.basehdr import BaseHeader
 # from datashop_toolbox.compasshdr import CompassCalHeader
 from datashop_toolbox.cruisehdr import CruiseHeader
-# from datashop_toolbox.eventhdr import EventHeader
+from datashop_toolbox.eventhdr import EventHeader
 # from datashop_toolbox.generalhdr import GeneralCalHeader
 # from datashop_toolbox.historyhdr import HistoryHeader
-# from datashop_toolbox.instrumenthdr import InstrumentHeader
+from datashop_toolbox.instrumenthdr import InstrumentHeader
 # from datashop_toolbox.meteohdr import MeteoHeader
-# from datashop_toolbox.parameterhdr import ParameterHeader
+from datashop_toolbox.parameterhdr import ParameterHeader
 # from datashop_toolbox.polynomialhdr import PolynomialCalHeader
 # from datashop_toolbox.qualityhdr import QualityHeader
 # from datashop_toolbox.recordhdr import RecordHeader
 # from datashop_toolbox.records import DataRecords
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, add_commas, split_string_with_quotes, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict
+from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, add_commas, split_string_with_quotes, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict, check_string
 from typing import Self, Optional, List
 from pydantic import Field, field_validator
 
@@ -29,16 +29,16 @@ class OdfHeader(ValidatedBase, BaseHeader):
     odf_specification_version: float = BaseHeader.NULL_VALUE
 
     cruise_header: CruiseHeader = Field(default_factory=CruiseHeader)
-    # event_header: EventHeader = Field(default_factory=EventHeader)
+    event_header: EventHeader = Field(default_factory=EventHeader)
     # meteo_header: Optional[MeteoHeader] = None
-    # instrument_header: InstrumentHeader = Field(default_factory=InstrumentHeader)
+    instrument_header: InstrumentHeader = Field(default_factory=InstrumentHeader)
     # quality_header: Optional[QualityHeader] = None
     
     # general_cal_headers: List[GeneralCalHeader] = Field(default_factory=list)
     # compass_cal_headers: List[CompassCalHeader] = Field(default_factory=list)
     # polynomial_cal_headers: List[PolynomialCalHeader] = Field(default_factory=list)
     # history_headers: List[HistoryHeader] = Field(default_factory=list)
-    # parameter_headers: List[ParameterHeader] = Field(default_factory=list)
+    parameter_headers: List[ParameterHeader] = Field(default_factory=list)
 
     # record_header: RecordHeader = Field(default_factory=RecordHeader)
     # data: DataRecords = Field(default_factory=DataRecords)
@@ -51,6 +51,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
         super().__init__(**data)  # Calls Pydantic's __init__
         BaseHeader.__init__(self, config) # Ensures logger and config are set
         self.cruise_header.set_logger_and_config(self.logger, self.config)
+        self.event_header.set_logger_and_config(self.logger, self.config)
+        self.instrument_header.set_logger_and_config(self.logger, self.config)
 
     def log_odf_message(self, message: str, type: str = 'self'):
         assert isinstance(message, str), "Input argument 'message' must be a string."
@@ -73,13 +75,14 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
     # @field_validator("general_cal_headers", "compass_cal_headers",
     #                  "polynomial_cal_headers", "history_headers", "parameter_headers")
-    # def ensure_list_items_are_models(cls, v, field):
-    #     if not all(hasattr(item, "print_object") for item in v):
-    #         raise TypeError(
-    #             f"All elements in {field.name} must be valid header objects "
-    #             f"with a 'print_object' method."
-    #         )
-    #     return v
+    @field_validator("parameter_headers")
+    def ensure_list_items_are_models(cls, v, field):
+        if not all(hasattr(item, "print_object") for item in v):
+            raise TypeError(
+                f"All elements in {field.name} must be valid header objects "
+                f"with a 'print_object' method."
+            )
+        return v
 
     # @field_validator("quality_header", "meteo_header")
     # def check_optional_headers(cls, v, field):
@@ -122,13 +125,13 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output = "ODF_HEADER,\n"
             odf_output += f"  FILE_SPECIFICATION = {self.file_specification},\n"
             odf_output += add_commas(self.cruise_header.print_object())
-            # odf_output += add_commas(self.event_header.print_object())
+            odf_output += add_commas(self.event_header.print_object())
 
             # for name, header in optional_headers:
             #     if header is not None:
             #         odf_output += add_header_output(header)
 
-            # odf_output += add_commas(self.instrument_header.print_object())
+            odf_output += add_commas(self.instrument_header.print_object())
 
             # for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
             #     odf_output += add_commas(cal.print_object())
@@ -136,8 +139,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
             # for hist in self.history_headers:
             #     odf_output += add_commas(hist.print_object())
 
-            # for param in self.parameter_headers:
-            #     odf_output += add_commas(param.print_object())
+            for param in self.parameter_headers:
+                odf_output += add_commas(param.print_object())
 
             # odf_output += add_commas(self.record_header.print_object())
             # odf_output += "-- DATA --\n"
@@ -149,13 +152,13 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output += f"  FILE_SPECIFICATION = {self.file_specification}\n"
             odf_output += f"  ODF_SPECIFICATION_VERSION = {self.odf_specification_version}\n"
             odf_output += self.cruise_header.print_object()
-            # odf_output += self.event_header.print_object()
+            odf_output += self.event_header.print_object()
 
             # for name, header in optional_headers:
             #     if header is not None:
             #         odf_output += add_header_output(header, use_commas=False)
 
-            # odf_output += self.instrument_header.print_object()
+            odf_output += self.instrument_header.print_object()
 
             # for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
             #     odf_output += cal.print_object()
@@ -163,8 +166,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
             # for hist in self.history_headers:
             #     odf_output += hist.print_object()
 
-            # for param in self.parameter_headers:
-            #     odf_output += param.print_object()
+            for param in self.parameter_headers:
+                odf_output += param.print_object()
 
             # odf_output += self.record_header.print_object()
             # odf_output += "-- DATA --\n"
@@ -235,8 +238,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 #     self.compass_cal_headers.append(compass_cal_header)
                 case "CRUISE_HEADER":
                     self.cruise_header = self.cruise_header.populate_object(block_lines)
-                # case "EVENT_HEADER":
-                #     self.event_header = self.event_header.populate_object(block_lines)
+                case "EVENT_HEADER":
+                    self.event_header = self.event_header.populate_object(block_lines)
                 # case "GENERAL_CAL_HEADER":
                 #     general_cal_header = GeneralCalHeader()
                 #     general_cal_header.populate_object(block_lines)
@@ -245,8 +248,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 #     history_header = HistoryHeader()
                 #     history_header.populate_object(block_lines)
                 #     self.history_headers.append(history_header)
-                # case "INSTRUMENT_HEADER":
-                #     self.instrument_header = self.instrument_header.populate_object(block_lines)
+                case "INSTRUMENT_HEADER":
+                    self.instrument_header = self.instrument_header.populate_object(block_lines)
                 # case "METEO_HEADER":
                 #     self.meteo_header = MeteoHeader()
                 #     self.meteo_header.populate_object(block_lines)
@@ -255,10 +258,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
                         tokens = header_line.split('=', maxsplit=1)
                         header_fields = split_lines_into_dict(tokens)
                         self.populate_object(header_fields)
-                # case "PARAMETER_HEADER":
-                #     parameter_header = ParameterHeader()
-                #     parameter_header.populate_object(block_lines)
-                #     self.parameter_headers.append(parameter_header)
+                case "PARAMETER_HEADER":
+                    parameter_header = ParameterHeader()
+                    parameter_header.populate_object(block_lines)
+                    self.parameter_headers.append(parameter_header)
                 # case "POLYNOMIAL_CAL_HEADER":
                 #     polynomial_cal_header = PolynomialCalHeader()
                 #     polynomial_cal_header.populate_object(block_lines)
@@ -271,14 +274,14 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 #     self.record_header.populate_object(block_lines)
         parameter_list = list()
         parameter_formats = dict()
-        # for parameter in self.parameter_headers:
-        #     parameter_code = parameter.code.strip("'")
-        #     parameter_list.append(parameter_code)
-        #     if parameter_code[0:4] == 'SYTM':
-        #         parameter_formats[parameter_code] = f"{parameter.print_field_width}"
-        #     else:
-        #         parameter_formats[parameter_code] = (f"{parameter.print_field_width}."
-        #                                              f"{parameter.print_decimal_places}")
+        for parameter in self.parameter_headers:
+            parameter_code = parameter.code.strip("'")
+            parameter_list.append(parameter_code)
+            if parameter_code[0:4] == 'SYTM':
+                parameter_formats[parameter_code] = f"{parameter.print_field_width}"
+            else:
+                parameter_formats[parameter_code] = (f"{parameter.print_field_width}."
+                                                     f"{parameter.print_decimal_places}")
         # self.data.populate_object(parameter_list, parameter_formats, data_lines)
         return self
 
@@ -445,6 +448,8 @@ def main():
     odf = OdfHeader()
     odf.cruise_header.config = odf.config
     odf.cruise_header.logger = odf.logger
+    odf.event_header.config = odf.config
+    odf.event_header.logger = odf.logger
 
     my_path = 'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\'
     
@@ -478,12 +483,37 @@ def main():
     odf.cruise_header.end_date = '31-OCT-2022 00:00:00.00'
     odf.cruise_header.log_cruise_message("END_DATE", cedt, '31-OCT-2022 00:00:00.00')
     platform = odf.cruise_header.platform
-    odf.cruise_header.platform = "LATALANTE"
+    odf.cruise_header.platform = "DATALANTE"
     odf.cruise_header.log_cruise_message("PLATFORM", platform, "LATALANTE")
     
-    # station_name = odf.event_header.station_name
-    # odf.event_header.station_name = 'AR7W_15'
-    # odf.event_header.log_event_message("STATION_NAME", station_name, "AR7W_15")
+    station_name = odf.event_header.station_name
+    odf.event_header.station_name = 'AR7W_15'
+    odf.event_header.log_event_message("STATION_NAME", station_name, "AR7W_15")
+
+    desc = odf.instrument_header.description
+    odf.instrument_header.log_instrument_message("DESCRIPTION", desc, "RBR Concerto CTD")
+    odf.instrument_header.description = "RBR Concerto CTD"
+
+    param1 = ParameterHeader(
+        type='DOUB',
+        name='Pressure',
+        units='decibars',
+        code='PRES_01',
+        wmo_code='PRES',
+        null_string=f'{BaseHeader.NULL_VALUE}',
+        print_field_width=10,
+        print_decimal_places=3,
+        angle_of_section=0.0,
+        magnetic_variation=0.0,
+        depth=float(check_string('0.00000000D+00')),
+        # depth=0.50000000e+02,
+        minimum_value=2.177,
+        maximum_value=176.5,
+        number_valid=1064,
+        number_null=643
+    )
+
+    odf.parameter_headers.append(param1)
 
     # Prior to loading data into an Oracle database, the null values need to be replaced with None values.
     # new_df = odf.null2empty(odf.data.data_frame)
@@ -534,7 +564,7 @@ def main():
     # out_file = f"{spec}.ODF"
     # odf.write_odf(my_path + 'tests_output\\' + out_file, version = 2.0)
 
-    odf.print_object()
+    print(odf.print_object())
 
     for log_entry in BaseHeader.shared_log_list:
         print(log_entry)

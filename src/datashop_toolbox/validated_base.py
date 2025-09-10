@@ -16,7 +16,7 @@ class ValidatedBase(BaseModel):
     model_config = {
         "extra": "allow"
     }
-    
+
     # --- Validators ---
     @field_validator("*", mode="before")
     @classmethod
@@ -40,8 +40,6 @@ class ValidatedBase(BaseModel):
 
         if isinstance(v, str):
             v = v.strip("' ")
-            if "D" in v:
-                v = v.replace("D", "E")
         return v
 
 
@@ -80,6 +78,28 @@ def list_to_dict(lst: list[Any]) -> dict[Any, Any]:
 def clean_strings(lst: list[str]) -> list[str]:
     """Strip trailing commas and whitespace from each list element."""
     return [item.rstrip(", ").strip() for item in lst]
+
+
+def check_string(value: str) -> str:
+    """Ensure value is a string. Convert Fortran-style exponents (D to E) only in numbers."""
+    if not value:
+        return ""
+    if not isinstance(value, str):
+        raise TypeError(f"Expected str, got {type(value)}: {value}")
+    # Only replace D with E in scientific notation, not everywhere
+    return re.sub(r'(\d+\.\d*)D([+-]\d+)', r'\1E\2', value)
+
+
+def check_datetime(value: str | None) -> str:
+    """Validate datetime string according to SYTM_FORMAT, or return NULL value."""
+    if value is None:
+        return BaseHeader.SYTM_NULL_VALUE
+
+    try:
+        dt = datetime.strptime(value, BaseHeader.SYTM_FORMAT)
+        return datetime.strftime(dt, BaseHeader.SYTM_FORMAT)[:-4].upper()
+    except ValueError:
+        raise ValueError(f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}")
 
 
 def split_string_with_quotes(input_string: str) -> list[str]:

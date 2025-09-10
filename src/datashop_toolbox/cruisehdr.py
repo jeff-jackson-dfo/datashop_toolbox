@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import Field, field_validator
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 from datashop_toolbox.basehdr import BaseHeader
