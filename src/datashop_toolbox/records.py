@@ -52,7 +52,7 @@ class DataRecords(ValidatedBase, BaseHeader):
 
     def log_data_message(self, field: str, old_value, new_value) -> None:
         message = f"In DataRecords field {field.upper()} was changed from '{old_value}' to '{new_value}'"
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def populate_object(

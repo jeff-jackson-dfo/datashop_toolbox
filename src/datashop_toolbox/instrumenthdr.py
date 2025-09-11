@@ -31,7 +31,7 @@ class InstrumentHeader(ValidatedBase, BaseHeader):
         if old_value == "":
             old_value = "''"
         message = f"In Instrument Header field {field.upper()} was changed from {old_value} to '{new_value}'"
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def populate_object(self, instrument_fields: list):

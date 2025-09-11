@@ -37,7 +37,7 @@ class QualityHeader(ValidatedBase, BaseHeader):
 
     def log_quality_message(self, field: str, old_value: str, new_value: str) -> None:
         message = f"In Quality Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def set_quality_test(self, quality_test: str, test_number: int = 0) -> None:

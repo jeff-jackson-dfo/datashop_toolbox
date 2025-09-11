@@ -85,7 +85,7 @@ class GeneralCalHeader(ValidatedBase, BaseHeader):
 
     def log_general_message(self, field: str, old_value, new_value) -> None:
         message = f"In General Cal Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def set_coefficient(self, general_coefficient: float, general_coefficient_number: int = 0) -> None:

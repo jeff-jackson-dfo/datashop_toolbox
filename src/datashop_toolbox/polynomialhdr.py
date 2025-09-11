@@ -58,7 +58,7 @@ class PolynomialCalHeader(ValidatedBase, BaseHeader):
 
     def log_poly_message(self, field: str, old_value, new_value) -> None:
         message = f"In Polynomial Cal Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def set_coefficient(self, coefficient: float, coefficient_number: int = 0) -> None:

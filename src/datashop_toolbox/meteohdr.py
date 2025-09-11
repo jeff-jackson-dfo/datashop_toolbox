@@ -36,7 +36,7 @@ class MeteoHeader(ValidatedBase, BaseHeader):
     def log_meteo_message(self, field: str, old_value, new_value) -> None:
         assert isinstance(field, str), "Input argument 'field' must be a string."
         message = f"In Meteo Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def set_meteo_comment(self, meteo_comment: str, comment_number: int = 0) -> None:

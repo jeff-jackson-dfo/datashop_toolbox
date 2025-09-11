@@ -68,7 +68,7 @@ class EventHeader(ValidatedBase, BaseHeader):
             message = f'In Event Header field {field} was changed from "{old_value}" to "{new_value}"'
         else:
             message = f'In Event Header field {field} was changed from {old_value} to {new_value}'
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def set_event_comment(self, event_comment: str, comment_number: int = 0) -> None:

@@ -36,7 +36,7 @@ class HistoryHeader(ValidatedBase, BaseHeader):
 
     def log_history_message(self, field: str, old_value: str, new_value: str) -> None:
         message = f'In History Header field {field.upper()} was changed from "{old_value}" to "{new_value}"'
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def set_process(self, process: str, process_number: int = 0) -> None:

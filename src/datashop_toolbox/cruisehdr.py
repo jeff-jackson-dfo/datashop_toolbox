@@ -41,7 +41,7 @@ class CruiseHeader(ValidatedBase, BaseHeader):
             message = f"In Cruise Header field {field} was changed from {old_value} to {new_value}"
         else:
             message = f'In Cruise Header field {field} was changed from "{old_value}" to "{new_value}"'
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def populate_object(self, cruise_fields: list[str]):

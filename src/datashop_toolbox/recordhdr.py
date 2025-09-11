@@ -33,7 +33,7 @@ class RecordHeader(ValidatedBase, BaseHeader):
     def log_record_message(self, field: str, old_value: Any, new_value: Any) -> None:
         assert isinstance(field, str), "Input argument 'field' must be a string."
         message = f"In Record Header field {field.upper()} was changed from {old_value} to {new_value}"
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def populate_object(self, record_fields: list) -> "RecordHeader":

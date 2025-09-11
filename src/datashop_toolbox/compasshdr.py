@@ -51,7 +51,7 @@ class CompassCalHeader(ValidatedBase, BaseHeader):
 
     def log_compass_message(self, field: str, old_value, new_value) -> None:
         message = f"In Compass Cal Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
-        self.logger.info(message)
+        # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def set_direction(self, direction: float, direction_number: int = 0) -> None:
