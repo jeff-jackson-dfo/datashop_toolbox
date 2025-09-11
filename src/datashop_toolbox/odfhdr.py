@@ -6,12 +6,12 @@ from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.compasshdr import CompassCalHeader
 from datashop_toolbox.cruisehdr import CruiseHeader
 from datashop_toolbox.eventhdr import EventHeader
-# from datashop_toolbox.generalhdr import GeneralCalHeader
+from datashop_toolbox.generalhdr import GeneralCalHeader
 from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.instrumenthdr import InstrumentHeader
 from datashop_toolbox.meteohdr import MeteoHeader
 from datashop_toolbox.parameterhdr import ParameterHeader
-# from datashop_toolbox.polynomialhdr import PolynomialCalHeader
+from datashop_toolbox.polynomialhdr import PolynomialCalHeader
 from datashop_toolbox.qualityhdr import QualityHeader
 from datashop_toolbox.recordhdr import RecordHeader
 # from datashop_toolbox.records import DataRecords
@@ -34,9 +34,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
     instrument_header: InstrumentHeader = Field(default_factory=InstrumentHeader)
     quality_header: Optional[QualityHeader] = None
     
-    # general_cal_headers: List[GeneralCalHeader] = Field(default_factory=list)
+    general_cal_headers: List[GeneralCalHeader] = Field(default_factory=list)
     compass_cal_headers: List[CompassCalHeader] = Field(default_factory=list)
-    # polynomial_cal_headers: List[PolynomialCalHeader] = Field(default_factory=list)
+    polynomial_cal_headers: List[PolynomialCalHeader] = Field(default_factory=list)
     history_headers: List[HistoryHeader] = Field(default_factory=list)
     parameter_headers: List[ParameterHeader] = Field(default_factory=list)
 
@@ -134,8 +134,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
             odf_output += add_commas(self.instrument_header.print_object())
 
-            # for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
-            for cal in self.compass_cal_headers:
+            for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
                 odf_output += add_commas(cal.print_object())
 
             for hist in self.history_headers:
@@ -162,8 +161,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
             odf_output += self.instrument_header.print_object()
 
-            # for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
-            for cal in self.compass_cal_headers:
+            for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
                 odf_output += cal.print_object()
 
             for hist in self.history_headers:
@@ -243,10 +241,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
                     self.cruise_header = self.cruise_header.populate_object(block_lines)
                 case "EVENT_HEADER":
                     self.event_header = self.event_header.populate_object(block_lines)
-                # case "GENERAL_CAL_HEADER":
-                #     general_cal_header = GeneralCalHeader()
-                #     general_cal_header.populate_object(block_lines)
-                #     self.general_cal_headers.append(general_cal_header)
+                case "GENERAL_CAL_HEADER":
+                    general_cal_header = GeneralCalHeader()
+                    general_cal_header.populate_object(block_lines)
+                    self.general_cal_headers.append(general_cal_header)
                 case "HISTORY_HEADER":
                     history_header = HistoryHeader()
                     history_header.populate_object(block_lines)
@@ -265,10 +263,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
                     parameter_header = ParameterHeader()
                     parameter_header.populate_object(block_lines)
                     self.parameter_headers.append(parameter_header)
-                # case "POLYNOMIAL_CAL_HEADER":
-                #     polynomial_cal_header = PolynomialCalHeader()
-                #     polynomial_cal_header.populate_object(block_lines)
-                #     self.polynomial_cal_headers.append(polynomial_cal_header)
+                case "POLYNOMIAL_CAL_HEADER":
+                    polynomial_cal_header = PolynomialCalHeader()
+                    polynomial_cal_header.populate_object(block_lines)
+                    self.polynomial_cal_headers.append(polynomial_cal_header)
                 case "QUALITY_HEADER":
                     self.quality_header = QualityHeader()
                     self.quality_header.populate_object(block_lines)
@@ -289,8 +287,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
         return self
 
     def update_odf(self) -> None:
-        # if self.record_header.num_calibration != len(self.polynomial_cal_headers):
-        #     self.record_header.num_calibration = len(self.polynomial_cal_headers)
+        if self.record_header.num_calibration != len(self.general_cal_headers):
+            self.record_header.num_calibration = len(self.general_cal_headers)
+        if self.record_header.num_calibration != len(self.polynomial_cal_headers):
+            self.record_header.num_calibration = len(self.polynomial_cal_headers)
         if self.record_header.num_history != len(self.history_headers):
             self.record_header.num_history = len(self.history_headers)
         if self.record_header.num_swing != len(self.compass_cal_headers):
@@ -532,6 +532,44 @@ def main():
     compass_cal_header.populate_object(compass_cal_fields)
     odf.compass_cal_headers.append(compass_cal_header)
 
+    general_cal_header = GeneralCalHeader()
+    general_cal_header.config = BaseHeader._default_config
+    general_cal_header.logger = BaseHeader._default_logger
+    general_cal_header.parameter_code = 'PSAR_01'
+    general_cal_header.calibration_type = 'Linear'
+    general_cal_header.calibration_date = '28-May-2020 00:00:00.00'
+    general_cal_header.application_date = '14-Oct-2020 23:59:59.99'
+    general_cal_header.number_coefficients = 2
+    general_cal_header.coefficients = [0.75, 1.05834]
+    general_cal_header.calibration_equation = 'y = mx + b'
+    general_cal_header.set_calibration_comment('This is a comment')
+    general_cal_header.log_general_message('calibration_equation', general_cal_header.calibration_equation, 'Y = X^2 + MX + B')
+    general_cal_header.set_coefficient(3.5, 1)
+    odf.general_cal_headers.append(general_cal_header)
+
+    poly1 = PolynomialCalHeader()
+    poly1.config = BaseHeader._default_config
+    poly1.logger = BaseHeader._default_logger
+    poly1.parameter_code = 'PRES_01'
+    poly1.calibration_date = '11-JUN-1995 05:35:46.82'
+    poly1.application_date = '11-JUN-1995 05:35:46.82'
+    poly1.number_coefficients = 2
+    poly1.coefficients = [0.60000000e+01, 0.15000001e+00]
+
+    poly2 = PolynomialCalHeader()
+    poly2.config = BaseHeader._default_config
+    poly2.logger = BaseHeader._default_logger
+    poly2.parameter_code = 'TEMP_01'
+    poly2.calibration_date = '11-JUN-1995 05:35:46.83'
+    poly2.application_date = '11-JUN-1995 05:35:46.83'
+    poly2.number_coefficients = 4
+    poly2.coefficients = [0.0, 80.0, 0.60000000e+01, 0.15000001e+00]
+    poly2.log_poly_message('coefficient 2', poly2.coefficients[1], 9.750)
+    poly2.set_coefficient(9.750, 2)
+
+    odf.polynomial_cal_headers.append(poly1)
+    odf.polynomial_cal_headers.append(poly2)
+
     history_header = HistoryHeader()
     history_header.set_logger_and_config(odf.logger, odf.config)
     history_fields = ["CREATION_DATE = '01-JUN-2021 05:30:12.00'",
@@ -624,11 +662,13 @@ def main():
     # out_file = f"{spec}.ODF"
     # odf.write_odf(my_path + 'tests_output\\' + out_file, version = 2.0)
 
+    odf.update_odf()
+
     print(odf.print_object())
 
     for log_entry in BaseHeader.shared_log_list:
         print(log_entry)
 
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     main()

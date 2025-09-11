@@ -5,6 +5,7 @@ from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_s
 
 class MeteoHeader(ValidatedBase, BaseHeader):
     """ A class to represent a Meteo Header in an ODF object. """
+    
     air_temperature: float = Field(default=BaseHeader.NULL_VALUE)
     atmospheric_pressure: float = Field(default=BaseHeader.NULL_VALUE)
     wind_speed: float = Field(default=BaseHeader.NULL_VALUE)

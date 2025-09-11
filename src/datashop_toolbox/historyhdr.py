@@ -4,9 +4,7 @@ from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 class HistoryHeader(ValidatedBase, BaseHeader):
-    """
-    A class to represent a History Header in an ODF object.
-    """
+    """ A class to represent a History Header in an ODF object. """
 
     creation_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
     processes: List[str] = Field(default_factory=list)
@@ -36,7 +34,8 @@ class HistoryHeader(ValidatedBase, BaseHeader):
 
     def log_history_message(self, field: str, old_value: str, new_value: str) -> None:
         message = f'In History Header field {field.upper()} was changed from "{old_value}" to "{new_value}"'
-        self.log_message(message)
+        self.logger.info(message)
+        self.shared_log_list.append(message)
 
     def set_process(self, process: str, process_number: int = 0) -> None:
         process = process.strip("' ")

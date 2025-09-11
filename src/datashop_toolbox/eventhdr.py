@@ -26,12 +26,12 @@ class EventHeader(ValidatedBase, BaseHeader):
     set_number: str = ""
     event_comments: list[str] = Field(default_factory=list)
 
+    def __init__(self, config=None, **data):
+        super().__init__(**data)  # Calls Pydantic's __init__
+
     def set_logger_and_config(self, logger, config):
         self.logger = logger
         self.config = config
-
-    def __init__(self, config=None, **data):
-        super().__init__(**data)  # Calls Pydantic's __init__
 
     @field_validator("*", mode="before")
     @classmethod

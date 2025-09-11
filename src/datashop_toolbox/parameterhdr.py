@@ -23,12 +23,12 @@ class ParameterHeader(ValidatedBase, BaseHeader):
     number_valid: int = 0
     number_null: int = 0
 
+    def __init__(self, config=None, **data):
+        super().__init__(**data)  # Calls Pydantic's __init__
+
     def set_logger_and_config(self, logger, config):
         self.logger = logger
         self.config = config
-
-    def __init__(self, config=None, **data):
-        super().__init__(**data)  # Calls Pydantic's __init__
 
     @field_validator("*", mode="before")
     @classmethod
@@ -40,7 +40,8 @@ class ParameterHeader(ValidatedBase, BaseHeader):
     def log_parameter_message(self, field: str, old_value: str, new_value: str) -> None:
         assert isinstance(field, str), "Input argument 'field' must be a string."
         message = f"In Parameter Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
-        self.log_message(message)
+        self.logger.info(message)
+        self.shared_log_list.append(message)
 
     def populate_object(self, parameter_fields: list) -> "ParameterHeader":
         assert isinstance(parameter_fields, list), "Input argument 'parameter_fields' must be a list."

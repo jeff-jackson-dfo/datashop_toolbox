@@ -5,6 +5,7 @@ from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 class RecordHeader(ValidatedBase, BaseHeader):
     """ A class to represent a Record Header in an ODF object. """
+    
     num_calibration: int = Field(default=0)
     num_swing: int = Field(default=0)
     num_history: int = Field(default=0)

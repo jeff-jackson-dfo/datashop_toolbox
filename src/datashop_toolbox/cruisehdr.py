@@ -17,12 +17,12 @@ class CruiseHeader(ValidatedBase, BaseHeader):
     cruise_name: str = ""
     cruise_description: str = ""
 
+    def __init__(self, config=None, **data):
+        super().__init__(**data)  # Calls Pydantic's __init__
+
     def set_logger_and_config(self, logger, config):
         self.logger = logger
         self.config = config
-
-    def __init__(self, config=None, **data):
-        super().__init__(**data)  # Calls Pydantic's __init__
 
     # --- Validators to strip whitespace ---
     @field_validator("*", mode="before")

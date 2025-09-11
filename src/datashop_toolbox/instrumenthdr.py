@@ -4,18 +4,18 @@ from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 class InstrumentHeader(ValidatedBase, BaseHeader):
     """A class to represent an Instrument Header in an ODF object."""
-
+    
     instrument_type: str = ""
     model: str = ""
     serial_number: str = ""
     description: str = ""
 
+    def __init__(self, config=None, **data):
+        super().__init__(**data)  # Calls Pydantic's __init__
+
     def set_logger_and_config(self, logger, config):
         self.logger = logger
         self.config = config
-
-    def __init__(self, config=None, **data):
-        super().__init__(**data)  # Calls Pydantic's __init__
 
     @field_validator("*", mode="before")
     @classmethod
