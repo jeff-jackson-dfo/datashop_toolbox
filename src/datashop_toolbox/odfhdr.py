@@ -1,6 +1,5 @@
 from datetime import datetime
 import pandas as pd
-import re
 
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.compasshdr import CompassCalHeader
@@ -15,8 +14,8 @@ from datashop_toolbox.polynomialhdr import PolynomialCalHeader
 from datashop_toolbox.qualityhdr import QualityHeader
 from datashop_toolbox.recordhdr import RecordHeader
 from datashop_toolbox.records import DataRecords
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, add_commas, split_string_with_quotes, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict, check_string
-from typing import Self, Optional, List
+from datashop_toolbox.validated_base import ValidatedBase, add_commas, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict, check_string
+from typing import Optional, List
 from pydantic import Field, field_validator, ConfigDict
 
 class OdfHeader(ValidatedBase, BaseHeader):
@@ -107,7 +106,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
         assert isinstance(file_version, float), "Input argument 'file_version' must be a float."
 
         # Add modifications to the OdfHeader instance before outputting it
-        # self.add_log_to_history()
+        self.add_log_to_history()
 
         odf_output = ""
 
@@ -318,27 +317,27 @@ class OdfHeader(ValidatedBase, BaseHeader):
         creation_date = dt[:-4]
         return creation_date
 
-    # def add_history(self) -> None:
-    #     nhh = HistoryHeader()
-    #     nhh.creation_date = self.generate_creation_date()
-    #     self.history_headers.append(nhh)
+    def add_history(self) -> None:
+        nhh = HistoryHeader()
+        nhh.creation_date = self.generate_creation_date()
+        self.history_headers.append(nhh)
 
-    # def add_to_history(self, history_comment) -> None:
-    #     if history_comment is not None:
-    #         if len(self.history_headers) > 0:
-    #             self.history_headers[-1].add_process(history_comment)
-    #         else:
-    #             self.history_headers.append(history_comment)
+    def add_to_history(self, history_comment) -> None:
+        if history_comment is not None:
+            if len(self.history_headers) > 0:
+                self.history_headers[-1].add_process(history_comment)
+            else:
+                self.history_headers.append(history_comment)
 
-    # def add_log_to_history(self) -> None:
-    #     # Access the log records stored in the custom handler
-    #     for log_entry in self.shared_log_list:
-    #         self.add_to_history(log_entry)
+    def add_log_to_history(self) -> None:
+        # Access the log records stored in the custom handler
+        for log_entry in self.shared_log_list:
+            self.add_to_history(log_entry)
 
-    # def add_to_log(self, message: str) -> None:
-    #     assert isinstance(message, str), "Input argumnet 'message' must be a string."
-    #     # Access the log records stored in the custom handler
-    #     self.shared_log_list.append(message)
+    def add_to_log(self, message: str) -> None:
+        assert isinstance(message, str), "Input argumnet 'message' must be a string."
+        # Access the log records stored in the custom handler
+        self.shared_log_list.append(message)
 
     # def update_parameter(self, parameter_code: str, attribute: str, value) -> None:
     #     assert isinstance(parameter_code, str), "Input argumnet 'parameter_code' must be a string."
@@ -676,9 +675,10 @@ def main():
         # my_file = 'CTD_91001_1_1_DN.ODF'
         # my_file = 'CTD_BCD2024669_001_01_DN.ODF'
         # my_file = 'CTD_SCD2022277_002_01_DN.ODF'
-        # my_file = 'file_with_leading_spaces.ODF'
+        my_file = 'file_with_leading_spaces.ODF'
         # my_file = 'file_with_null_data_values.ODF'
-        my_file = 'D146a013.ODF'
+        # my_file = 'D146a013.ODF'
+        # my_file = 'MADCP_HUD2016027_1999_3469-31_3600.ODF'
         my_path = 'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\'    
 
         BaseHeader.reset_logging
@@ -687,17 +687,28 @@ def main():
         odf.read_odf(my_path + "tests\\ODF\\" + my_file)
 
         # Add a new History Header to record the modifications that are made.
-        # odf.add_history()
+        odf.add_history()
         user = 'Jeff Jackson'
         odf.log_odf_message(f'{user} made the following modifications to this file:', 'base')
-        
+
+        odf.event_header.set_event_comment('We had a successful trip!', 1)
+
+        odf.quality_header = QualityHeader()
+        odf.quality_header.set_logger_and_config(odf.logger, odf.config)
+        qd = odf.quality_header.quality_date
+        odf.quality_header.log_quality_message("QUALITY_DATE", qd, '01-JUL-2017 10:45:19.00')
+        odf.quality_header.quality_date = '01-JUL-2017 10:45:19.00'
+        odf.quality_header.set_quality_test('Test 1')
+        odf.quality_header.set_quality_test('Test 2')
+        odf.quality_header.quality_comments = ['Comment 1', 'Comment 2']
+
         odf.update_odf()
 
         # Write the ODF file to disk.
         file_spec = odf.generate_file_spec()
         odf.file_specification = file_spec
         out_file = f"{file_spec}.ODF"
-        odf.write_odf(my_path + 'tests_output\\' + out_file, version = 2.0)
+        odf.write_odf(my_path + 'tests\\Output\\' + out_file, version = 2.0)
 
 if __name__ == '__main__':
     main()
