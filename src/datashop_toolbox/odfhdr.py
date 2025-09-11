@@ -3,17 +3,17 @@ import pandas as pd
 import re
 
 from datashop_toolbox.basehdr import BaseHeader
-# from datashop_toolbox.compasshdr import CompassCalHeader
+from datashop_toolbox.compasshdr import CompassCalHeader
 from datashop_toolbox.cruisehdr import CruiseHeader
 from datashop_toolbox.eventhdr import EventHeader
 # from datashop_toolbox.generalhdr import GeneralCalHeader
-# from datashop_toolbox.historyhdr import HistoryHeader
+from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.instrumenthdr import InstrumentHeader
 from datashop_toolbox.meteohdr import MeteoHeader
 from datashop_toolbox.parameterhdr import ParameterHeader
 # from datashop_toolbox.polynomialhdr import PolynomialCalHeader
 from datashop_toolbox.qualityhdr import QualityHeader
-# from datashop_toolbox.recordhdr import RecordHeader
+from datashop_toolbox.recordhdr import RecordHeader
 # from datashop_toolbox.records import DataRecords
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, add_commas, split_string_with_quotes, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict, check_string
 from typing import Self, Optional, List
@@ -35,17 +35,13 @@ class OdfHeader(ValidatedBase, BaseHeader):
     quality_header: Optional[QualityHeader] = None
     
     # general_cal_headers: List[GeneralCalHeader] = Field(default_factory=list)
-    # compass_cal_headers: List[CompassCalHeader] = Field(default_factory=list)
+    compass_cal_headers: List[CompassCalHeader] = Field(default_factory=list)
     # polynomial_cal_headers: List[PolynomialCalHeader] = Field(default_factory=list)
-    # history_headers: List[HistoryHeader] = Field(default_factory=list)
+    history_headers: List[HistoryHeader] = Field(default_factory=list)
     parameter_headers: List[ParameterHeader] = Field(default_factory=list)
 
-    # record_header: RecordHeader = Field(default_factory=RecordHeader)
+    record_header: RecordHeader = Field(default_factory=RecordHeader)
     # data: DataRecords = Field(default_factory=DataRecords)
-
-    # class Config:
-    #     # Exclude None fields automatically when exporting
-    #     exclude_none = True
 
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
@@ -57,6 +53,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
             self.quality_header.set_logger_and_config(self.logger, self.config)
         if self.meteo_header is not None:
             self.meteo_header.set_logger_and_config(self.logger, self.config)
+        self.record_header.set_logger_and_config(self.logger, self.config)
 
     def log_odf_message(self, message: str, type: str = 'self'):
         assert isinstance(message, str), "Input argument 'message' must be a string."
@@ -79,7 +76,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
     # @field_validator("general_cal_headers", "compass_cal_headers",
     #                  "polynomial_cal_headers", "history_headers", "parameter_headers")
-    @field_validator("parameter_headers")
+    @field_validator("compass_cal_headers", "history_headers", "parameter_headers")
     def ensure_list_items_are_models(cls, v, field):
         if not all(hasattr(item, "print_object") for item in v):
             raise TypeError(
@@ -88,11 +85,11 @@ class OdfHeader(ValidatedBase, BaseHeader):
             )
         return v
 
-    # @field_validator("quality_header", "meteo_header")
-    # def check_optional_headers(cls, v, field):
-    #     if v is not None and not hasattr(v, "print_object"):
-    #         raise TypeError(f"{field.name} must be None or a valid header object.")
-    #     return v
+    @field_validator("quality_header", "meteo_header")
+    def check_optional_headers(cls, v, field):
+        if v is not None and not hasattr(v, "print_object"):
+            raise TypeError(f"{field.name} must be None or a valid header object.")
+        return v
     
     def populate_object(self, odf_dict: dict):
         assert isinstance(odf_dict, dict), "Input argument 'value' must be a dict."        
@@ -138,15 +135,16 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output += add_commas(self.instrument_header.print_object())
 
             # for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
-            #     odf_output += add_commas(cal.print_object())
+            for cal in self.compass_cal_headers:
+                odf_output += add_commas(cal.print_object())
 
-            # for hist in self.history_headers:
-            #     odf_output += add_commas(hist.print_object())
+            for hist in self.history_headers:
+                odf_output += add_commas(hist.print_object())
 
             for param in self.parameter_headers:
                 odf_output += add_commas(param.print_object())
 
-            # odf_output += add_commas(self.record_header.print_object())
+            odf_output += add_commas(self.record_header.print_object())
             # odf_output += "-- DATA --\n"
             # odf_output += self.data.print_object_old_style()
 
@@ -165,15 +163,16 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output += self.instrument_header.print_object()
 
             # for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
-            #     odf_output += cal.print_object()
+            for cal in self.compass_cal_headers:
+                odf_output += cal.print_object()
 
-            # for hist in self.history_headers:
-            #     odf_output += hist.print_object()
+            for hist in self.history_headers:
+                odf_output += hist.print_object()
 
             for param in self.parameter_headers:
                 odf_output += param.print_object()
 
-            # odf_output += self.record_header.print_object()
+            odf_output += self.record_header.print_object()
             # odf_output += "-- DATA --\n"
             # odf_output += self.data.print_object()
 
@@ -236,10 +235,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
             y = header_field_range.at[i, 'End']
             block_lines = list(header_lines[x:y + 1])
             match header_block:
-                # case "COMPASS_CAL_HEADER":
-                #     compass_cal_header = CompassCalHeader()
-                #     compass_cal_header.populate_object(block_lines)
-                #     self.compass_cal_headers.append(compass_cal_header)
+                case "COMPASS_CAL_HEADER":
+                    compass_cal_header = CompassCalHeader()
+                    compass_cal_header.populate_object(block_lines)
+                    self.compass_cal_headers.append(compass_cal_header)
                 case "CRUISE_HEADER":
                     self.cruise_header = self.cruise_header.populate_object(block_lines)
                 case "EVENT_HEADER":
@@ -248,10 +247,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 #     general_cal_header = GeneralCalHeader()
                 #     general_cal_header.populate_object(block_lines)
                 #     self.general_cal_headers.append(general_cal_header)
-                # case "HISTORY_HEADER":
-                #     history_header = HistoryHeader()
-                #     history_header.populate_object(block_lines)
-                #     self.history_headers.append(history_header)
+                case "HISTORY_HEADER":
+                    history_header = HistoryHeader()
+                    history_header.populate_object(block_lines)
+                    self.history_headers.append(history_header)
                 case "INSTRUMENT_HEADER":
                     self.instrument_header = self.instrument_header.populate_object(block_lines)
                 case "METEO_HEADER":
@@ -273,9 +272,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 case "QUALITY_HEADER":
                     self.quality_header = QualityHeader()
                     self.quality_header.populate_object(block_lines)
-                # case "RECORD_HEADER":
-                #     self.record_header = RecordHeader()
-                #     self.record_header.populate_object(block_lines)
+                case "RECORD_HEADER":
+                    self.record_header = RecordHeader()
+                    self.record_header.populate_object(block_lines)
         parameter_list = list()
         parameter_formats = dict()
         for parameter in self.parameter_headers:
@@ -289,17 +288,17 @@ class OdfHeader(ValidatedBase, BaseHeader):
         # self.data.populate_object(parameter_list, parameter_formats, data_lines)
         return self
 
-    # def update_odf(self) -> None:
-    #     if self.record_header.num_calibration != len(self.polynomial_cal_headers):
-    #         self.record_header.num_calibration = len(self.polynomial_cal_headers)
-    #     if self.record_header.num_history != len(self.history_headers):
-    #         self.record_header.num_history = len(self.history_headers)
-    #     if self.record_header.num_swing != len(self.compass_cal_headers):
-    #         self.record_header.num_swing = len(self.compass_cal_headers)
-    #     if self.record_header.num_param != len(self.parameter_headers):
-    #         self.record_header.num_param = len(self.parameter_headers)
-    #     if self.record_header.num_cycle != len(self.data):
-    #         self.record_header.num_cycle = len(self.data)
+    def update_odf(self) -> None:
+        # if self.record_header.num_calibration != len(self.polynomial_cal_headers):
+        #     self.record_header.num_calibration = len(self.polynomial_cal_headers)
+        if self.record_header.num_history != len(self.history_headers):
+            self.record_header.num_history = len(self.history_headers)
+        if self.record_header.num_swing != len(self.compass_cal_headers):
+            self.record_header.num_swing = len(self.compass_cal_headers)
+        if self.record_header.num_param != len(self.parameter_headers):
+            self.record_header.num_param = len(self.parameter_headers)
+        # if self.record_header.num_cycle != len(self.data):
+        #     self.record_header.num_cycle = len(self.data)
 
     def write_odf(self, odf_file_path: str, version: float = 2.0) -> None:
         assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
@@ -521,6 +520,30 @@ def main():
     odf.quality_header.set_quality_test('Test 2')
     odf.quality_header.quality_comments = ['Comment 1', 'Comment 2']
 
+    compass_cal_header = CompassCalHeader()
+    compass_cal_fields = [
+        "PARAMETER_NAME = PARAMETER_CODE",
+        "PARAMETER_CODE = SOG_01",
+        "CALIBRATION_DATE = 25-mar-2021 00:00:00.00",
+        "APPLICATION_DATE = 31-jan-2022 00:00:00.00",
+        "DIRECTIONS = 0.0 90.0 180.0 270.0",
+        "CORRECTIONS = 70.0 0.0 0.0 0.0"
+    ]
+    compass_cal_header.populate_object(compass_cal_fields)
+    odf.compass_cal_headers.append(compass_cal_header)
+
+    history_header = HistoryHeader()
+    history_header.set_logger_and_config(odf.logger, odf.config)
+    history_fields = ["CREATION_DATE = '01-JUN-2021 05:30:12.00'",
+                    "PROCESS = First process",
+                    "PROCESS = Second process",
+                    "PROCESS = Blank process",
+                    "PROCESS = Fourth process",
+                    "PROCESS = Last process"]
+    history_header.populate_object(history_fields)
+    history_header.log_history_message('process', history_header.processes[1], 'Bad Cast')
+    history_header.set_process('Bad Cast', 2)
+    odf.history_headers.append(history_header)
 
     param1 = ParameterHeader(
         type='DOUB',
@@ -542,6 +565,15 @@ def main():
     )
 
     odf.parameter_headers.append(param1)
+
+    record_fields = [
+        "NUM_CALIBRATION = 0",
+        "NUM_HISTORY = 0",
+        "NUM_SWING = 0",
+        "NUM_PARAM = 1",
+        "NUM_CYCLE = 0"
+    ]
+    odf.record_header.populate_object(record_fields)
 
     # Prior to loading data into an Oracle database, the null values need to be replaced with None values.
     # new_df = odf.null2empty(odf.data.data_frame)
