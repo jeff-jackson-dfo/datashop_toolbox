@@ -109,11 +109,23 @@ def split_string_with_quotes(input_string: str) -> list[str]:
     return shlex.split(input_string)
 
 
+def convert_to_float(item: Any) -> Any:
+    """Convert value to float if possible, otherwise return unchanged."""
+    try:
+        return float(item)
+    except (ValueError, TypeError):
+        return item
+
+
 def convert_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """Convert DataFrame values to floats where possible."""
     if not isinstance(df, pd.DataFrame):
         raise TypeError(f"Expected pandas.DataFrame, got {type(df)}")
-    return df.apply(pd.to_numeric, errors="ignore")
+    # Use applymap with a safe conversion to float, fallback to original value if conversion fails
+    if isinstance(df, pd.Series):
+        return df[0].apply(convert_to_float)
+    elif isinstance(df, pd.DataFrame):
+        return df.map(convert_to_float)
 
 
 def add_commas(lines: str, skip_last: bool = False) -> str:
@@ -134,19 +146,20 @@ def get_current_date_time() -> str:
 # ---------------------------
 # File handling
 # ---------------------------
-def read_file_lines(file_with_path: str) -> list[str] | str:
-    """Read all lines from a file and strip whitespace."""
+def read_file_lines(file_with_path: str) -> list[str]:
+    """Read all lines from a file and strip whitespace. Print errors to console, always return a list."""
     if not isinstance(file_with_path, str):
-        raise TypeError(f"'file_with_path' must be str, got {type(file_with_path).__name__}")
-
+        print(f"'file_with_path' must be str, got {type(file_with_path).__name__}")
+        return []
     try:
-        with open(file_with_path, "r", encoding="utf-8") as file:
+        with open(file_with_path, "r", encoding="iso-8859-1") as file:
             return [line.strip() for line in file if line.strip()]
     except FileNotFoundError:
-        return f"File not found: {file_with_path}"
+        print(f"File not found: {file_with_path}")
+        return []
     except Exception as e:
-        return f"An error occurred while reading the file: {e}"
-
+        print(f"An error occurred while reading the file: {e}")
+        return []
 
 def find_lines_with_text(odf_file_lines: list[str], separator: str) -> list[tuple[int, str]]:
     """Find all lines containing a given substring and return (index, line)."""
@@ -174,3 +187,15 @@ def split_lines_into_dict(lines: list) -> dict:
     assert isinstance(lines, list), \
         f"Input argument 'lines' is not of type list: {lines}"
     return list_to_dict(lines)
+
+def main():
+    # Example usage of read_file_lines
+    file_path = "example.txt"  # Replace with your file path
+
+    lines = read_file_lines(file_path)
+    print(f"Lines read from {file_path}:")
+    for i, line in enumerate(lines, 1):
+        print(f"{i}: {line}")
+
+if __name__ == "__main__":
+    main()

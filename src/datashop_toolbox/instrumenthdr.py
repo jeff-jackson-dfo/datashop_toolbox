@@ -1,10 +1,12 @@
-from pydantic import field_validator
+from pydantic import field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 class InstrumentHeader(ValidatedBase, BaseHeader):
     """A class to represent an Instrument Header in an ODF object."""
-    
+
+    model_config = ConfigDict(validate_assignment=True)
+
     instrument_type: str = ""
     model: str = ""
     serial_number: str = ""

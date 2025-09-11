@@ -1,11 +1,13 @@
 from typing import Any
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 class RecordHeader(ValidatedBase, BaseHeader):
     """ A class to represent a Record Header in an ODF object. """
-    
+
+    model_config = ConfigDict(validate_assignment=True)
+
     num_calibration: int = Field(default=0)
     num_swing: int = Field(default=0)
     num_history: int = Field(default=0)

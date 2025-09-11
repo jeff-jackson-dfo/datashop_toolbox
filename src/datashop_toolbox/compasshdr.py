@@ -1,12 +1,14 @@
 from typing import List
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase
 import datashop_toolbox.validated_base as odfutils
 
 class CompassCalHeader(ValidatedBase, BaseHeader):
     """ A class to represent a Compass Cal Header in an ODF object. """
-    
+
+    model_config = ConfigDict(validate_assignment=True)
+
     parameter_code: str = ""
     calibration_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
     application_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)

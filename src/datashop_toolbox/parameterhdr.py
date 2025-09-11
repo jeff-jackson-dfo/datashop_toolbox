@@ -1,10 +1,12 @@
 from typing import Any
-from pydantic import field_validator
+from pydantic import field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_datetime, check_string
 
 class ParameterHeader(ValidatedBase, BaseHeader):
     """A class to represent a Parameter Header in an ODF object."""
+
+    model_config = ConfigDict(validate_assignment=True)
 
     type: str = ""
     name: str = ""
@@ -42,6 +44,17 @@ class ParameterHeader(ValidatedBase, BaseHeader):
         message = f"In Parameter Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
         self.logger.info(message)
         self.shared_log_list.append(message)
+
+    @staticmethod
+    def is_float_and_int(value) -> bool:
+        try:
+            # Attempt to convert the string to a float
+            f = float(value)
+            # Check if the float is an integer (i.e., has no fractional part)
+            return f.is_integer()
+        except ValueError:
+            # If conversion to float fails, it's not a valid number (int or float)
+            return False
 
     def populate_object(self, parameter_fields: list) -> "ParameterHeader":
         assert isinstance(parameter_fields, list), "Input argument 'parameter_fields' must be a list."
@@ -83,8 +96,8 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                         if self.type == 'SYTM':
                             self.minimum_value = check_datetime(value) if value else BaseHeader.SYTM_NULL_VALUE
                         elif self.type == 'INTE':
-                            if value.is_integer():
-                                self.minimum_value = int(value)
+                            if self.is_float_and_int(value):
+                                self.minimum_value = int(float(value))
                             else:
                                 raise ValueError(f"Invalid integer value: {value}")
                         elif self.type in ('SING', 'DOUB'):
@@ -95,8 +108,8 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                         if self.type == 'SYTM':
                             self.maximum_value = check_datetime(value) if value else BaseHeader.SYTM_NULL_VALUE
                         elif self.type == 'INTE':
-                            if value.is_integer():
-                                self.maximum_value = int(value)
+                            if self.is_float_and_int(value):
+                                self.maximum_value = int(float(value))
                             else:
                                 raise ValueError(f"Invalid integer value: {value}")
                         elif self.type in ('SING', 'DOUB'):

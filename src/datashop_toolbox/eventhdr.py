@@ -1,9 +1,11 @@
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 class EventHeader(ValidatedBase, BaseHeader):
     """A class to represent an Event Header in an ODF object."""
+
+    model_config = ConfigDict(validate_assignment=True)
 
     data_type: str = ""
     event_number: str = ""
@@ -40,6 +42,19 @@ class EventHeader(ValidatedBase, BaseHeader):
             return v.strip("' ").strip()
         return v
 
+    @field_validator("initial_latitude", "initial_longitude", "end_latitude", "end_longitude",
+                     "min_depth", "max_depth", "sampling_interval", "sounding", "depth_off_bottom", mode="before")
+    @classmethod
+    def validate_floats(cls, v, info):
+        if isinstance(v, float):
+            return v
+        if isinstance(v, str):
+            try:
+                return float(v)
+            except ValueError:
+                raise ValueError(f"{info.field_name} string value '{v}' cannot be converted to float")
+        raise TypeError(f"{info.field_name} must be a float or string representing a float, got {type(v)}")
+
     def log_event_message(self, field: str, old_value, new_value) -> None:
         field = field.upper()
         if field == 'EVENT_COMMENTS':
@@ -73,8 +88,30 @@ class EventHeader(ValidatedBase, BaseHeader):
             for key, value in event_dict.items():
                 key = key.strip().lower()
                 if hasattr(self, key):
-                    setattr(self, key, value.strip("' ") if isinstance(value, str) else value)
+                    # If event_comments is a string then make it a list with one string.
+                    if key == 'event_comments':
+                        if isinstance(value, str):
+                            value = [value]
+                    # Handle list values
+                    if isinstance(value, list):
+                        # If the attribute is also a list, extend or assign
+                        attr = getattr(self, key, None)
+                        if isinstance(attr, list):
+                            attr.extend(
+                                v.strip("' ") if isinstance(v, str) else v for v in value
+                            )
+                            setattr(self, key, attr)
+                        else:
+                            # Try to convert single-item list to scalar if possible
+                            if len(value) == 1:
+                                v = value[0]
+                                setattr(self, key, v.strip("' ") if isinstance(v, str) else v)
+                            else:
+                                setattr(self, key, value)
+                    else:
+                        setattr(self, key, value.strip("' ") if isinstance(value, str) else value)
         return self
+    
 
     def print_object(self) -> str:
         lines = [
@@ -88,10 +125,10 @@ class EventHeader(ValidatedBase, BaseHeader):
             f"  START_DATE_TIME = '{self.start_date_time}'",
             f"  END_DATE_TIME = '{self.end_date_time}'",
             f"  INITIAL_LATITUDE = {self.initial_latitude:.6f}" if self.initial_latitude != BaseHeader.NULL_VALUE else f"  INITIAL_LATITUDE = {self.initial_latitude}",
-            f"  INITIAL_LONGITUDE = {self.initial_longitude:.6f}" if self.initial_longitude != BaseHeader.NULL_VALUE else f"  INITIAL_LONGITUDE = {self.initial_longitude}",
-            f"  END_LATITUDE = {self.end_latitude:.6f}" if self.end_latitude != BaseHeader.NULL_VALUE else f"  END_LATITUDE = {self.end_latitude}",
-            f"  END_LONGITUDE = {self.end_longitude:.6f}" if self.end_longitude != BaseHeader.NULL_VALUE else f"  END_LONGITUDE = {self.end_longitude}",
-            f"  MIN_DEPTH = {self.min_depth:.2f}" if self.min_depth != BaseHeader.NULL_VALUE else f"  MIN_DEPTH = {self.min_depth}",
+            f"  INITIAL_LONGITUDE = {float(self.initial_longitude):.6f}" if self.initial_longitude != BaseHeader.NULL_VALUE else f"  INITIAL_LONGITUDE = {self.initial_longitude}",
+            f"  END_LATITUDE = {float(self.end_latitude):.6f}" if self.end_latitude != BaseHeader.NULL_VALUE else f"  END_LATITUDE = {self.end_latitude}",
+            f"  END_LONGITUDE = {float(self.end_longitude):.6f}" if self.end_longitude != BaseHeader.NULL_VALUE else f"  END_LONGITUDE = {self.end_longitude}",
+            f"  MIN_DEPTH = {float(self.min_depth):.2f}" if self.min_depth != BaseHeader.NULL_VALUE else f"  MIN_DEPTH = {self.min_depth}",
             f"  MAX_DEPTH = {self.max_depth:.2f}" if self.max_depth != BaseHeader.NULL_VALUE else f"  MAX_DEPTH = {self.max_depth}",
             f"  SAMPLING_INTERVAL = {self.sampling_interval}",
             f"  SOUNDING = {self.sounding:.2f}" if self.sounding != BaseHeader.NULL_VALUE else f"  SOUNDING = {self.sounding}",

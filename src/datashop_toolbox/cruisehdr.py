@@ -1,10 +1,12 @@
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 from datashop_toolbox.basehdr import BaseHeader
 
 
 class CruiseHeader(ValidatedBase, BaseHeader):
     """A class to represent a Cruise Header in an ODF object."""
+
+    model_config = ConfigDict(validate_assignment=True)
 
     country_institute_code: int = Field(default=0, description="Country/Institute code")
     cruise_number: str = ""

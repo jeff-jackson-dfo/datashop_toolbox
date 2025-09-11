@@ -14,17 +14,20 @@ from datashop_toolbox.parameterhdr import ParameterHeader
 from datashop_toolbox.polynomialhdr import PolynomialCalHeader
 from datashop_toolbox.qualityhdr import QualityHeader
 from datashop_toolbox.recordhdr import RecordHeader
-# from datashop_toolbox.records import DataRecords
+from datashop_toolbox.records import DataRecords
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, add_commas, split_string_with_quotes, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict, check_string
 from typing import Self, Optional, List
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 
 class OdfHeader(ValidatedBase, BaseHeader):
-    """
+    """ 
     Odf Header Class
     This class is responsible for storing the metadata associated with an ODF object (file).
     It contains a series of header subclasses that store metadata associated with various aspects of the ODF object.
     """
+
+    model_config = ConfigDict(validate_assignment=True)
+
     file_specification: str = ''
     odf_specification_version: float = BaseHeader.NULL_VALUE
 
@@ -41,7 +44,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
     parameter_headers: List[ParameterHeader] = Field(default_factory=list)
 
     record_header: RecordHeader = Field(default_factory=RecordHeader)
-    # data: DataRecords = Field(default_factory=DataRecords)
+    data: DataRecords = Field(default_factory=DataRecords)
 
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
@@ -62,8 +65,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
             self.logger.info(f"In ODF Header field {message}")
             self.shared_log_list.append(f"In ODF Header field {message}")
         elif type == "base":
-            self.logger.info(message)
-            self.shared_log_list.append(message)
+            self.log_message(message)
 
     # -------------------
     # Validators
@@ -144,8 +146,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 odf_output += add_commas(param.print_object())
 
             odf_output += add_commas(self.record_header.print_object())
-            # odf_output += "-- DATA --\n"
-            # odf_output += self.data.print_object_old_style()
+            odf_output += "-- DATA --\n"
+            odf_output += self.data.print_object_old_style()
 
         elif file_version >= 3:
             self.odf_specification_version = 3.0
@@ -171,12 +173,11 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 odf_output += param.print_object()
 
             odf_output += self.record_header.print_object()
-            # odf_output += "-- DATA --\n"
-            # odf_output += self.data.print_object()
+            odf_output += "-- DATA --\n"
+            odf_output += self.data.print_object()
 
         return odf_output
 
-    # def read_header(odf: Type[newOdfHeader], lines: list) -> newOdfHeader:
     def read_odf(self, odf_file_path: str):
         assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
         file_lines = read_file_lines(odf_file_path)
@@ -283,22 +284,22 @@ class OdfHeader(ValidatedBase, BaseHeader):
             else:
                 parameter_formats[parameter_code] = (f"{parameter.print_field_width}."
                                                      f"{parameter.print_decimal_places}")
-        # self.data.populate_object(parameter_list, parameter_formats, data_lines)
+        if isinstance(data_lines, list):
+            self.data.populate_object(parameter_list, parameter_formats, data_lines)
         return self
 
     def update_odf(self) -> None:
-        if self.record_header.num_calibration != len(self.general_cal_headers):
-            self.record_header.num_calibration = len(self.general_cal_headers)
-        if self.record_header.num_calibration != len(self.polynomial_cal_headers):
-            self.record_header.num_calibration = len(self.polynomial_cal_headers)
+        number_of_calibrations = len(self.polynomial_cal_headers) + len(self.general_cal_headers)
+        if self.record_header.num_calibration != number_of_calibrations:
+            self.record_header.num_calibration = number_of_calibrations
         if self.record_header.num_history != len(self.history_headers):
             self.record_header.num_history = len(self.history_headers)
         if self.record_header.num_swing != len(self.compass_cal_headers):
             self.record_header.num_swing = len(self.compass_cal_headers)
         if self.record_header.num_param != len(self.parameter_headers):
             self.record_header.num_param = len(self.parameter_headers)
-        # if self.record_header.num_cycle != len(self.data):
-        #     self.record_header.num_cycle = len(self.data)
+        if self.record_header.num_cycle != len(self.data):
+            self.record_header.num_cycle = len(self.data)
 
     def write_odf(self, odf_file_path: str, version: float = 2.0) -> None:
         assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
@@ -348,27 +349,27 @@ class OdfHeader(ValidatedBase, BaseHeader):
     #     else:
     #         eval(f"self.parameter_headers[codes.index(parameter_code)].set_{attribute}({value})")
 
-    # def get_parameter_codes(self) -> list:
-    #     parameter_codes = list()
-    #     for ph1 in self.parameter_headers:
-    #         parameter_codes.append(ph1.code)
-    #     return parameter_codes
+    def get_parameter_codes(self) -> list:
+        parameter_codes = list()
+        for ph1 in self.parameter_headers:
+            parameter_codes.append(ph1.code)
+        return parameter_codes
 
-    # def get_parameter_names(self) -> list:
-    #     parameter_names = list()
-    #     for ph2 in self.parameter_headers:
-    #         parameter_names.append(ph2.name)
-    #     return parameter_names
+    def get_parameter_names(self) -> list:
+        parameter_names = list()
+        for ph2 in self.parameter_headers:
+            parameter_names.append(ph2.name)
+        return parameter_names
 
-    # def generate_file_spec(self) -> str:
-    #     dt = self.event_header.data_type.strip("'")
-    #     cn = self.cruise_header.cruise_number.strip("'")
-    #     en = self.event_header.event_number.strip("'")
-    #     eq1 = self.event_header.event_qualifier1.strip("'")
-    #     eq2 = self.event_header.event_qualifier2.strip("'")
-    #     file_spec = f"{dt}_{cn}_{en}_{eq1}_{eq2}"
-    #     file_spec = file_spec
-    #     return file_spec
+    def generate_file_spec(self) -> str:
+        dt = self.event_header.data_type.strip("'")
+        cn = self.cruise_header.cruise_number.strip("'")
+        en = self.event_header.event_number.strip("'")
+        eq1 = self.event_header.event_qualifier1.strip("'")
+        eq2 = self.event_header.event_qualifier2.strip("'")
+        file_spec = f"{dt}_{cn}_{en}_{eq1}_{eq2}"
+        file_spec = file_spec
+        return file_spec
 
     # def fix_parameter_codes(self, new_codes: list = []) -> Self:
     #     assert isinstance(new_codes, list), "Input argument 'new_codes' must be a list."
@@ -433,242 +434,270 @@ class OdfHeader(ValidatedBase, BaseHeader):
     #             print(f"Item {poly_code} not found in old_codes list.")
     #     return self
 
-    # def is_parameter_code(self, code: str) -> bool:
-    #     assert isinstance(code, str), "Input argument 'code' must be a string."
-    #     codes = self.get_parameter_codes()
-    #     return code in codes
+    def is_parameter_code(self, code: str) -> bool:
+        assert isinstance(code, str), "Input argument 'code' must be a string."
+        codes = self.get_parameter_codes()
+        return code in codes
 
-    # @staticmethod
-    # def null2empty(df: pd.DataFrame) -> pd.DataFrame:
-    #     assert isinstance(df, pd.DataFrame), "Input argument 'df' must be a Pandas DataFrame."
-    #     new_df = df.replace(BaseHeader.NULL_VALUE, None, inplace=False)
-    #     return new_df
+    @staticmethod
+    def null2empty(df: pd.DataFrame) -> pd.DataFrame:
+        assert isinstance(df, pd.DataFrame), "Input argument 'df' must be a Pandas DataFrame."
+        new_df = df.replace(BaseHeader.NULL_VALUE, None, inplace=False)
+        return new_df
                 
 
 def main():
 
-    BaseHeader.reset_logging
-    odf = OdfHeader()
-    odf.cruise_header.config = odf.config
-    odf.cruise_header.logger = odf.logger
-    odf.event_header.config = odf.config
-    odf.event_header.logger = odf.logger
+    test_creation = 0
 
-    my_path = 'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\'
+    if test_creation:
     
-    # Test file(s) to read in.
-    # my_file = 'CTD_2000037_102_1_DN.ODF'
-    # my_file = 'CTD_91001_1_1_DN.ODF'
-    # my_file = 'CTD_BCD2024669_001_01_DN.ODF'
-    # my_file = 'CTD_SCD2022277_002_01_DN.ODF'
-    # my_file = 'file_with_leading_spaces.ODF'
-    # my_file = 'file_with_null_data_values.ODF'
-    my_file = 'D146a013.ODF'
-    
-    # odf.read_odf(my_path + "tests\\ODF\\" + my_file)
+        BaseHeader.reset_logging
+        odf = OdfHeader()
+        
+        # Add a new History Header to record the modifications that are made.
+        # odf.add_history()
+        user = 'Jeff Jackson'
+        odf.log_odf_message(f'{user} made the following modifications to this file:', 'base')
 
-    # Add a new History Header to record the modifications that are made.
-    # odf.add_history()
-    user = 'Jeff Jackson'
-    odf.log_odf_message(f'{user} made the following modifications to this file:', 'base')
+        # Modify some of the odf metadata
+        odf.cruise_header.set_logger_and_config(odf.logger, odf.config)
+        org = odf.cruise_header.organization
+        odf.cruise_header.log_cruise_message("CHIEF_SCIENTIST", org, 'DFO BIO')
+        odf.cruise_header.organization = 'DFO BIO'
+        cs = odf.cruise_header.chief_scientist
+        odf.cruise_header.log_cruise_message("CHIEF_SCIENTIST", cs, 'GLEN HARRISON')
+        odf.cruise_header.chief_scientist = 'GLEN HARRISON'
+        csdt = odf.cruise_header.start_date
+        odf.cruise_header.start_date = '01-APR-2022 00:00:00.00'
+        odf.cruise_header.log_cruise_message("START_DATE", csdt, '01-APR-2022 00:00:00.00')
+        cedt = odf.cruise_header.end_date
+        odf.cruise_header.end_date = '31-OCT-2022 00:00:00.00'
+        odf.cruise_header.log_cruise_message("END_DATE", cedt, '31-OCT-2022 00:00:00.00')
+        platform = odf.cruise_header.platform
+        odf.cruise_header.platform = "LATALANTE"
+        odf.cruise_header.log_cruise_message("PLATFORM", platform, "LATALANTE")
+        
+        station_name = odf.event_header.station_name
+        odf.event_header.set_logger_and_config(odf.logger, odf.config)
+        odf.event_header.station_name = 'AR7W_15'
+        odf.event_header.log_event_message("STATION_NAME", station_name, "AR7W_15")
 
-    # Modify some of the odf metadata
-    org = odf.cruise_header.organization
-    odf.cruise_header.log_cruise_message("CHIEF_SCIENTIST", org, 'DFO BIO')
-    odf.cruise_header.organization = 'DFO BIO'
-    cs = odf.cruise_header.chief_scientist
-    odf.cruise_header.log_cruise_message("CHIEF_SCIENTIST", cs, 'GLEN HARRISON')
-    odf.cruise_header.chief_scientist = 'GLEN HARRISON'
-    csdt = odf.cruise_header.start_date
-    odf.cruise_header.start_date = '01-APR-2022 00:00:00.00'
-    odf.cruise_header.log_cruise_message("START_DATE", csdt, '01-APR-2022 00:00:00.00')
-    cedt = odf.cruise_header.end_date
-    odf.cruise_header.end_date = '31-OCT-2022 00:00:00.00'
-    odf.cruise_header.log_cruise_message("END_DATE", cedt, '31-OCT-2022 00:00:00.00')
-    platform = odf.cruise_header.platform
-    odf.cruise_header.platform = "LATALANTE"
-    odf.cruise_header.log_cruise_message("PLATFORM", platform, "LATALANTE")
-    
-    station_name = odf.event_header.station_name
-    odf.event_header.station_name = 'AR7W_15'
-    odf.event_header.log_event_message("STATION_NAME", station_name, "AR7W_15")
+        desc = odf.instrument_header.description
+        odf.instrument_header.set_logger_and_config(odf.logger, odf.config)
+        odf.instrument_header.log_instrument_message("DESCRIPTION", desc, "RBR Concerto CTD")
+        odf.instrument_header.description = "RBR Concerto CTD"
 
-    desc = odf.instrument_header.description
-    odf.instrument_header.log_instrument_message("DESCRIPTION", desc, "RBR Concerto CTD")
-    odf.instrument_header.description = "RBR Concerto CTD"
+        odf.meteo_header = MeteoHeader()
+        odf.meteo_header.set_logger_and_config(odf.logger, odf.config)
+        odf.meteo_header.air_temperature = 10.0
+        ap = odf.meteo_header.atmospheric_pressure
+        odf.meteo_header.log_meteo_message("ATMOSPHERIC_PRESSURE", ap, 1063.1)
+        odf.meteo_header.atmospheric_pressure = 1063.1
+        odf.meteo_header.wind_speed = MeteoHeader.wind_speed_knots_to_ms(50.0)
+        odf.meteo_header.wind_direction = 180.0
+        odf.meteo_header.sea_state = MeteoHeader.wave_height_meters_to_wmo_code(3.0)
+        odf.meteo_header.cloud_cover = MeteoHeader.cloud_cover_percentage_to_wmo_code(0.5)
+        odf.meteo_header.ice_thickness = 0.5
+        odf.meteo_header.set_meteo_comment('This is a test comment')
+        odf.meteo_header.set_meteo_comment('This is another test comment')
 
-    odf.meteo_header = MeteoHeader()
-    odf.meteo_header.set_logger_and_config(odf.logger, odf.config)
-    odf.meteo_header.air_temperature = 10.0
-    ap = odf.meteo_header.atmospheric_pressure
-    odf.meteo_header.log_meteo_message("ATMOSPHERIC_PRESSURE", ap, 1063.1)
-    odf.meteo_header.atmospheric_pressure = 1063.1
-    odf.meteo_header.wind_speed = MeteoHeader.wind_speed_knots_to_ms(50.0)
-    odf.meteo_header.wind_direction = 180.0
-    odf.meteo_header.sea_state = MeteoHeader.wave_height_meters_to_wmo_code(3.0)
-    odf.meteo_header.cloud_cover = MeteoHeader.cloud_cover_percentage_to_wmo_code(0.5)
-    odf.meteo_header.ice_thickness = 0.5
-    odf.meteo_header.set_meteo_comment('This is a test comment')
-    odf.meteo_header.set_meteo_comment('This is another test comment')
+        odf.quality_header = QualityHeader()
+        odf.quality_header.set_logger_and_config(odf.logger, odf.config)
+        qd = odf.quality_header.quality_date
+        odf.quality_header.log_quality_message("QUALITY_DATE", qd, '01-JUL-2017 10:45:19.00')
+        odf.quality_header.quality_date = '01-JUL-2017 10:45:19.00'
+        odf.quality_header.set_quality_test('Test 1')
+        odf.quality_header.set_quality_test('Test 2')
+        odf.quality_header.quality_comments = ['Comment 1', 'Comment 2']
 
-    odf.quality_header = QualityHeader()
-    odf.quality_header.set_logger_and_config(odf.logger, odf.config)
-    qd = odf.quality_header.quality_date
-    odf.quality_header.log_quality_message("QUALITY_DATE", qd, '01-JUL-2017 10:45:19.00')
-    odf.quality_header.quality_date = '01-JUL-2017 10:45:19.00'
-    odf.quality_header.set_quality_test('Test 1')
-    odf.quality_header.set_quality_test('Test 2')
-    odf.quality_header.quality_comments = ['Comment 1', 'Comment 2']
+        compass_cal_header = CompassCalHeader()
+        compass_cal_header.set_logger_and_config(odf.logger, odf.config)
+        compass_cal_fields = [
+            "PARAMETER_NAME = PARAMETER_CODE",
+            "PARAMETER_CODE = SOG_01",
+            "CALIBRATION_DATE = 25-mar-2021 00:00:00.00",
+            "APPLICATION_DATE = 31-jan-2022 00:00:00.00",
+            "DIRECTIONS = 0.0 90.0 180.0 270.0",
+            "CORRECTIONS = 70.0 0.0 0.0 0.0"
+        ]
+        compass_cal_header.populate_object(compass_cal_fields)
+        odf.compass_cal_headers.append(compass_cal_header)
 
-    compass_cal_header = CompassCalHeader()
-    compass_cal_fields = [
-        "PARAMETER_NAME = PARAMETER_CODE",
-        "PARAMETER_CODE = SOG_01",
-        "CALIBRATION_DATE = 25-mar-2021 00:00:00.00",
-        "APPLICATION_DATE = 31-jan-2022 00:00:00.00",
-        "DIRECTIONS = 0.0 90.0 180.0 270.0",
-        "CORRECTIONS = 70.0 0.0 0.0 0.0"
-    ]
-    compass_cal_header.populate_object(compass_cal_fields)
-    odf.compass_cal_headers.append(compass_cal_header)
+        general_cal_header = GeneralCalHeader()
+        general_cal_header.set_logger_and_config(odf.logger, odf.config)
+        general_cal_header.logger = BaseHeader._default_logger
+        general_cal_header.parameter_code = 'PSAR_01'
+        general_cal_header.calibration_type = 'Linear'
+        general_cal_header.calibration_date = '28-May-2020 00:00:00.00'
+        general_cal_header.application_date = '14-Oct-2020 23:59:59.99'
+        general_cal_header.number_coefficients = 2
+        general_cal_header.coefficients = [0.75, 1.05834]
+        general_cal_header.calibration_equation = 'y = mx + b'
+        general_cal_header.set_calibration_comment('This is a comment')
+        general_cal_header.log_general_message('calibration_equation', general_cal_header.calibration_equation, 'Y = X^2 + MX + B')
+        general_cal_header.set_coefficient(3.5, 1)
+        odf.general_cal_headers.append(general_cal_header)
 
-    general_cal_header = GeneralCalHeader()
-    general_cal_header.config = BaseHeader._default_config
-    general_cal_header.logger = BaseHeader._default_logger
-    general_cal_header.parameter_code = 'PSAR_01'
-    general_cal_header.calibration_type = 'Linear'
-    general_cal_header.calibration_date = '28-May-2020 00:00:00.00'
-    general_cal_header.application_date = '14-Oct-2020 23:59:59.99'
-    general_cal_header.number_coefficients = 2
-    general_cal_header.coefficients = [0.75, 1.05834]
-    general_cal_header.calibration_equation = 'y = mx + b'
-    general_cal_header.set_calibration_comment('This is a comment')
-    general_cal_header.log_general_message('calibration_equation', general_cal_header.calibration_equation, 'Y = X^2 + MX + B')
-    general_cal_header.set_coefficient(3.5, 1)
-    odf.general_cal_headers.append(general_cal_header)
+        poly1 = PolynomialCalHeader()
+        poly1.set_logger_and_config(odf.logger, odf.config)
+        poly1.parameter_code = 'PRES_01'
+        poly1.calibration_date = '11-JUN-1995 05:35:46.82'
+        poly1.application_date = '11-JUN-1995 05:35:46.82'
+        poly1.number_coefficients = 2
+        poly1.coefficients = [0.60000000e+01, 0.15000001e+00]
+        poly2 = PolynomialCalHeader()
+        poly2.set_logger_and_config(odf.logger, odf.config)
+        poly2.parameter_code = 'TEMP_01'
+        poly2.calibration_date = '11-JUN-1995 05:35:46.83'
+        poly2.application_date = '11-JUN-1995 05:35:46.83'
+        poly2.number_coefficients = 4
+        poly2.coefficients = [0.0, 80.0, 0.60000000e+01, 0.15000001e+00]
+        poly2.log_poly_message('coefficient 2', poly2.coefficients[1], 9.750)
+        poly2.set_coefficient(9.750, 2)
+        odf.polynomial_cal_headers.append(poly1)
+        odf.polynomial_cal_headers.append(poly2)
 
-    poly1 = PolynomialCalHeader()
-    poly1.config = BaseHeader._default_config
-    poly1.logger = BaseHeader._default_logger
-    poly1.parameter_code = 'PRES_01'
-    poly1.calibration_date = '11-JUN-1995 05:35:46.82'
-    poly1.application_date = '11-JUN-1995 05:35:46.82'
-    poly1.number_coefficients = 2
-    poly1.coefficients = [0.60000000e+01, 0.15000001e+00]
+        history_header = HistoryHeader()
+        history_header.set_logger_and_config(odf.logger, odf.config)
+        history_fields = ["CREATION_DATE = '01-JUN-2021 05:30:12.00'",
+                        "PROCESS = First process",
+                        "PROCESS = Second process",
+                        "PROCESS = Blank process",
+                        "PROCESS = Fourth process",
+                        "PROCESS = Last process"]
+        history_header.populate_object(history_fields)
+        history_header.log_history_message('process', history_header.processes[1], 'Bad Cast')
+        history_header.set_process('Bad Cast', 2)
+        odf.history_headers.append(history_header)
 
-    poly2 = PolynomialCalHeader()
-    poly2.config = BaseHeader._default_config
-    poly2.logger = BaseHeader._default_logger
-    poly2.parameter_code = 'TEMP_01'
-    poly2.calibration_date = '11-JUN-1995 05:35:46.83'
-    poly2.application_date = '11-JUN-1995 05:35:46.83'
-    poly2.number_coefficients = 4
-    poly2.coefficients = [0.0, 80.0, 0.60000000e+01, 0.15000001e+00]
-    poly2.log_poly_message('coefficient 2', poly2.coefficients[1], 9.750)
-    poly2.set_coefficient(9.750, 2)
+        param1 = ParameterHeader(
+            type='DOUB',
+            name='Pressure',
+            units='decibars',
+            code='PRES_01',
+            wmo_code='PRES',
+            null_string=f'{BaseHeader.NULL_VALUE}',
+            print_field_width=10,
+            print_decimal_places=3,
+            angle_of_section=0.0,
+            magnetic_variation=0.0,
+            depth=float(check_string('0.00000000D+00')),
+            # depth=0.50000000e+02,
+            minimum_value=2.177,
+            maximum_value=176.5,
+            number_valid=1064,
+            number_null=643
+        )
+        param1.set_logger_and_config(odf.logger, odf.config)
+        odf.parameter_headers.append(param1)
 
-    odf.polynomial_cal_headers.append(poly1)
-    odf.polynomial_cal_headers.append(poly2)
+        records = DataRecords()
+        records.set_logger_and_config(odf.logger, odf.config)
+        df = pd.DataFrame(
+            {
+                "PRES_01": [1, 4, 7],
+                "TEMP_01": [8.2, 5.6, 2.45],
+                "PSAL_01": [31.5, 32.0, 32.88],
+            }
+        )
+        records.data_frame = df
+        records.parameter_list = ["PRES_01", "TEMP_01", "PSAL_01"]
+        records.print_formats = {"PRES_01": "10.1", "TEMP_01": "10.4", "PSAL_01": "10.4"}
+        odf.data = records
 
-    history_header = HistoryHeader()
-    history_header.set_logger_and_config(odf.logger, odf.config)
-    history_fields = ["CREATION_DATE = '01-JUN-2021 05:30:12.00'",
-                    "PROCESS = First process",
-                    "PROCESS = Second process",
-                    "PROCESS = Blank process",
-                    "PROCESS = Fourth process",
-                    "PROCESS = Last process"]
-    history_header.populate_object(history_fields)
-    history_header.log_history_message('process', history_header.processes[1], 'Bad Cast')
-    history_header.set_process('Bad Cast', 2)
-    odf.history_headers.append(history_header)
+        record_fields = [
+            "NUM_CALIBRATION = 0",
+            "NUM_HISTORY = 0",
+            "NUM_SWING = 0",
+            "NUM_PARAM = 0",
+            "NUM_CYCLE = 0"
+        ]
+        odf.record_header.populate_object(record_fields)
+        odf.record_header.set_logger_and_config(odf.logger, odf.config)
 
-    param1 = ParameterHeader(
-        type='DOUB',
-        name='Pressure',
-        units='decibars',
-        code='PRES_01',
-        wmo_code='PRES',
-        null_string=f'{BaseHeader.NULL_VALUE}',
-        print_field_width=10,
-        print_decimal_places=3,
-        angle_of_section=0.0,
-        magnetic_variation=0.0,
-        depth=float(check_string('0.00000000D+00')),
-        # depth=0.50000000e+02,
-        minimum_value=2.177,
-        maximum_value=176.5,
-        number_valid=1064,
-        number_null=643
-    )
+        # Prior to loading data into an Oracle database, the null values need to be replaced with None values.
+        # new_df = odf.null2empty(odf.data.data_frame)
+        # odf.data.data_frame = new_df
 
-    odf.parameter_headers.append(param1)
+        # Remove the CRAT_01 parameter.
+        # from datashop_toolbox.remove_parameter import remove_parameter
+        # odf = remove_parameter(odf, 'CRAT_01')
+        # odf = remove_parameter(odf, 'UNKN_01')
 
-    record_fields = [
-        "NUM_CALIBRATION = 0",
-        "NUM_HISTORY = 0",
-        "NUM_SWING = 0",
-        "NUM_PARAM = 1",
-        "NUM_CYCLE = 0"
-    ]
-    odf.record_header.populate_object(record_fields)
+        # for meteo_comment in odf.meteo_header.get_meteo_comments():
+        #     ic(meteo_comment)
 
-    # Prior to loading data into an Oracle database, the null values need to be replaced with None values.
-    # new_df = odf.null2empty(odf.data.data_frame)
-    # odf.data.data_frame = new_df
+        # Retrieve the data from the input ODF structure.
+        # data = odf.data.data_frame
 
-    # Remove the CRAT_01 parameter.
-    # from datashop_toolbox.remove_parameter import remove_parameter
-    # odf = remove_parameter(odf, 'CRAT_01')
-    # odf = remove_parameter(odf, 'UNKN_01')
+        # Get the number of data rows and columns.
+        # nrows, ncols = data.shape
 
-    # for meteo_comment in odf.meteo_header.get_meteo_comments():
-    #     ic(meteo_comment)
+        # Retrieve the Parameter Headers from the input ODF structure.
+        # parameter_headers = odf.parameter_headers
+        # parameter_codes = odf.get_parameter_codes()
 
-    # Retrieve the data from the input ODF structure.
-    # data = odf.data.data_frame
+        # sytm_index = [i for i,pcode in enumerate(parameter_codes) if pcode[0:4] == 'SYTM']
+        # if sytm_index != []:
+        #     sytm_index = sytm_index[0]
 
-    # Get the number of data rows and columns.
-    # nrows, ncols = data.shape
+        # for j, parameter_header in enumerate(parameter_headers):
 
-    # Retrieve the Parameter Headers from the input ODF structure.
-    # parameter_headers = odf.parameter_headers
-    # parameter_codes = odf.get_parameter_codes()
+        #     parameter_code = parameter_header.code.strip("'")
+        #     try:
+        #         _, sensor_number = parameter_code.split("_")
+        #     except ValueError:
+        #         sensor_number = 1
+        #         continue
+        #     sensor_number = float(sensor_number)          
 
-    # sytm_index = [i for i,pcode in enumerate(parameter_codes) if pcode[0:4] == 'SYTM']
-    # if sytm_index != []:
-    #     sytm_index = sytm_index[0]
+        #     if data.loc[:, parameter_code].isnull().all():
 
-    # for j, parameter_header in enumerate(parameter_headers):
+        #         # Suggest removing parameter columns that only contain null values.
+        #         print(f'Should the data for {parameter_code} be deleted from '
+        #                 'the ODF structure since it only contains NULL values?')
 
-    #     parameter_code = parameter_header.code.strip("'")
-    #     try:
-    #         _, sensor_number = parameter_code.split("_")
-    #     except ValueError:
-    #         sensor_number = 1
-    #         continue
-    #     sensor_number = float(sensor_number)          
+        # odf.update_odf()
 
-    #     if data.loc[:, parameter_code].isnull().all():
+        odf.update_odf()
 
-    #         # Suggest removing parameter columns that only contain null values.
-    #         print(f'Should the data for {parameter_code} be deleted from '
-    #                 'the ODF structure since it only contains NULL values?')
+        odf.file_specification = odf.generate_file_spec()
 
-    # odf.update_odf()
+        print(odf.print_object())
 
-    # Write the ODF file to disk.
-    # spec = odf.generate_file_spec()
-    # out_file = f"{spec}.ODF"
-    # odf.write_odf(my_path + 'tests_output\\' + out_file, version = 2.0)
+        for log_entry in BaseHeader.shared_log_list:
+            print(log_entry)
 
-    odf.update_odf()
+    else:
 
-    print(odf.print_object())
+        # Test file(s) to read in.
+        # my_file = 'CTD_2000037_102_1_DN.ODF'
+        # my_file = 'CTD_91001_1_1_DN.ODF'
+        # my_file = 'CTD_BCD2024669_001_01_DN.ODF'
+        # my_file = 'CTD_SCD2022277_002_01_DN.ODF'
+        # my_file = 'file_with_leading_spaces.ODF'
+        # my_file = 'file_with_null_data_values.ODF'
+        my_file = 'D146a013.ODF'
+        my_path = 'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\'    
 
-    for log_entry in BaseHeader.shared_log_list:
-        print(log_entry)
+        BaseHeader.reset_logging
+        odf = OdfHeader()
 
+        odf.read_odf(my_path + "tests\\ODF\\" + my_file)
+
+        # Add a new History Header to record the modifications that are made.
+        # odf.add_history()
+        user = 'Jeff Jackson'
+        odf.log_odf_message(f'{user} made the following modifications to this file:', 'base')
+        
+        odf.update_odf()
+
+        # Write the ODF file to disk.
+        file_spec = odf.generate_file_spec()
+        odf.file_specification = file_spec
+        out_file = f"{file_spec}.ODF"
+        odf.write_odf(my_path + 'tests_output\\' + out_file, version = 2.0)
 
 if __name__ == '__main__':
     main()

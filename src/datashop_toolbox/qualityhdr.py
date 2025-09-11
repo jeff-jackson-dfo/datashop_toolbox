@@ -1,10 +1,12 @@
 from typing import List
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, check_string, check_datetime, list_to_dict
 
 class QualityHeader(ValidatedBase, BaseHeader):
     """ A class to represent a Quality Header in an ODF object. """
+
+    model_config = ConfigDict(validate_assignment=True)
 
     quality_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
     quality_tests: List[str] = Field(default_factory=list)

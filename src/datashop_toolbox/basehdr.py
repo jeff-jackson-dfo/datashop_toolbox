@@ -60,7 +60,6 @@ class BaseHeader:
     def log_message(self, message: str) -> None:
         """Log a message and store it in the shared log list."""
         entry = f"{self.__class__.__name__}: {message}"
-        self.logger.info(entry)
         self.shared_log_list.append(entry)
 
     def reset_logging(self) -> None:

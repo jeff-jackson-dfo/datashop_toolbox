@@ -1,11 +1,13 @@
 from typing import List
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_string
 
 class MeteoHeader(ValidatedBase, BaseHeader):
     """ A class to represent a Meteo Header in an ODF object. """
-    
+
+    model_config = ConfigDict(validate_assignment=True)
+
     air_temperature: float = Field(default=BaseHeader.NULL_VALUE)
     atmospheric_pressure: float = Field(default=BaseHeader.NULL_VALUE)
     wind_speed: float = Field(default=BaseHeader.NULL_VALUE)
