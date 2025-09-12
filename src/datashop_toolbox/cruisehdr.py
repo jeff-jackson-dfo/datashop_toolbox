@@ -19,20 +19,34 @@ class CruiseHeader(ValidatedBase, BaseHeader):
     cruise_name: str = ""
     cruise_description: str = ""
 
+
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
+
 
     def set_logger_and_config(self, logger, config):
         self.logger = logger
         self.config = config
 
+
+    # --- Validators to handle empty dates
+    @field_validator("start_date", "end_date", mode="before")
+    @classmethod
+    def handle_empty_dates(cls, v):
+        # If assigned an empty string, use the SYTM_NULL_VALUE
+        if isinstance(v, str) and v.strip() == "":
+            return BaseHeader.SYTM_NULL_VALUE
+        return v
+
+
     # --- Validators to strip whitespace ---
     @field_validator("*", mode="before")
     @classmethod
-    def strip_strings(cls, v):
+    def strip_strings(cls, v, info):
         if isinstance(v, str):
             return v.strip("' ").strip()
         return v
+
 
     def log_cruise_message(self, field: str, old_value, new_value) -> None:
         """Log field changes."""
@@ -44,6 +58,7 @@ class CruiseHeader(ValidatedBase, BaseHeader):
         # self.logger.info(message)
         self.shared_log_list.append(message)
 
+
     def populate_object(self, cruise_fields: list[str]):
         """Populate fields from header lines like 'KEY = VALUE'."""
         for header_line in cruise_fields:
@@ -54,6 +69,7 @@ class CruiseHeader(ValidatedBase, BaseHeader):
                 if hasattr(self, key_lower):
                     setattr(self, key_lower, value.strip())
         return self
+
 
     def print_object(self, file_version: float = 2.0) -> str:
         """Render cruise header as text."""

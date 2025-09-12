@@ -39,7 +39,7 @@ class EventHeader(ValidatedBase, BaseHeader):
     @classmethod
     def strip_strings(cls, v):
         if isinstance(v, str):
-            return v.strip("' ").strip()
+            return v.strip("' *").strip()
         return v
 
     @field_validator("initial_latitude", "initial_longitude", "end_latitude", "end_longitude",

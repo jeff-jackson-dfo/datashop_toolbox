@@ -78,7 +78,10 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                         if self.code == "":
                             self.code = value
                     case 'null_value':
-                        self.null_string = value
+                        if self.type == 'SYTM':
+                            self.null_string = f"{check_datetime(value)}"
+                        else:
+                            self.null_string = f"{float(check_string(value))}"
                     case 'print_field_order':
                         self.print_field_order = int(float(value))
                     case 'print_field_width':
@@ -94,24 +97,30 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                         self.depth = float(value)
                     case 'minimum_value':
                         if self.type == 'SYTM':
-                            self.minimum_value = check_datetime(value) if value else BaseHeader.SYTM_NULL_VALUE
+                            try:
+                                self.minimum_value = check_datetime(value) if value else BaseHeader.SYTM_NULL_VALUE
+                            except:
+                                raise ValueError(f"{self.__class__.__name__}: Invalid SYTM value: {value}")
                         elif self.type == 'INTE':
                             if self.is_float_and_int(value):
                                 self.minimum_value = int(float(value))
                             else:
-                                raise ValueError(f"Invalid integer value: {value}")
+                                raise ValueError(f"{self.__class__.__name__}: Invalid integer value: {value}")
                         elif self.type in ('SING', 'DOUB'):
                             self.minimum_value = float(value)
                         else:
                             self.minimum_value = BaseHeader.NULL_VALUE
                     case 'maximum_value':
                         if self.type == 'SYTM':
-                            self.maximum_value = check_datetime(value) if value else BaseHeader.SYTM_NULL_VALUE
+                            try:
+                                self.maximum_value = check_datetime(value) if value else BaseHeader.SYTM_NULL_VALUE
+                            except:
+                                raise ValueError(f"{self.__class__.__name__}: Invalid SYTM value: {value}")
                         elif self.type == 'INTE':
                             if self.is_float_and_int(value):
                                 self.maximum_value = int(float(value))
                             else:
-                                raise ValueError(f"Invalid integer value: {value}")
+                                raise ValueError(f"{self.__class__.__name__}: Invalid integer value: {value}")
                         elif self.type in ('SING', 'DOUB'):
                             self.maximum_value = float(value)
                         else:

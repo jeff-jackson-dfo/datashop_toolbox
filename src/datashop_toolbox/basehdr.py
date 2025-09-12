@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 from enum import Enum
 from typing import ClassVar, Optional
@@ -39,7 +40,7 @@ class BaseHeader:
 
     SYTM_FORMAT: ClassVar[str] = "%d-%b-%Y %H:%M:%S.%f"
     NULL_VALUE: ClassVar[float] = -999.0
-    SYTM_NULL_VALUE: ClassVar[str] = "17-NOV-1858 00:00:00.00"
+    SYTM_NULL_VALUE: ClassVar[str] = "17-NOV-1858 00:00:00.000000"
 
     _default_config: ClassVar[LoggerConfig] = LoggerConfig()
     _default_logger: ClassVar[logging.Logger] = _default_config.configure_logger()
@@ -70,6 +71,16 @@ class BaseHeader:
     def reset_log_list(cls) -> None:
         """Clear the shared log list."""
         cls.shared_log_list.clear()
+
+    @staticmethod
+    def matches_sytm_format(date_str: str) -> bool:
+        fmt = BaseHeader.SYTM_FORMAT
+        try:
+            datetime.strptime(date_str, fmt)
+            return True
+        except ValueError:
+            return False
+
 
 def main():
 

@@ -671,14 +671,20 @@ def main():
     else:
 
         # Test file(s) to read in.
-        # my_file = 'CTD_2000037_102_1_DN.ODF'
         # my_file = 'CTD_91001_1_1_DN.ODF'
         # my_file = 'CTD_BCD2024669_001_01_DN.ODF'
         # my_file = 'CTD_SCD2022277_002_01_DN.ODF'
-        my_file = 'file_with_leading_spaces.ODF'
+        # my_file = 'file_with_leading_spaces.ODF'
         # my_file = 'file_with_null_data_values.ODF'
         # my_file = 'D146a013.ODF'
-        # my_file = 'MADCP_HUD2016027_1999_3469-31_3600.ODF'
+        # my_file = 'MADCP_HUD2016027_1999_3469-31_3600.ODF'  # Fails because of incorrect date format
+        # my_file = 'MCM_HUD2010014_1771_1039_3600.ODF'
+        # my_file = 'MCTD_GRP2019001_2104_11689_1800.ODF'  # Fails due to incorrect date value in parameter header
+        # my_file = 'CTD_88N112_006_1_DN.ODF'
+        # my_file = 'D24010004.ODF'  # Remove all occurences of * in EVENT_QUALIFIER1
+        # my_file = 'MTR_BCD2014999_2_352816_300.ODF'
+        # my_file = 'MTR_98600_RATB1_1215_1800.ODF'
+        my_file = 'mcm_82917_20555a_20555_1200.odf'
         my_path = 'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\'    
 
         BaseHeader.reset_logging

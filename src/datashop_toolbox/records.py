@@ -87,20 +87,21 @@ class DataRecords(ValidatedBase, BaseHeader):
         return buffer.getvalue()
 
     def print_object_old_style(self) -> str:
-        """Return V2 style formatted string representation of the data."""
+        # """Return V2 style formatted string representation of the data."""
         formatters = {}
         for key, value in self.print_formats.items():
             width = value
-            if key == "SYTM_01":
-                formatters[key] = ("{:>" + width + "}").format
+            if key[:5] == "SYTM":
+                fmt = "{:>" + str(width) + "}"
+                formatters[key] = lambda x, f=fmt: f"'{f.format(x)}'"
             else:
-                formatters[key] = ("{:>" + width + "f}").format
+                formatters[key] = lambda x, w=width: f"{float(x):>{w}f}" if x is not None else ""
 
         return self.data_frame.to_string(
-            columns=self.parameter_list,
-            index=False,
-            header=False,
-            formatters=formatters,
+            columns = self.parameter_list,
+            index = False,
+            header = False,
+            formatters = formatters,
         )
 
 def main():

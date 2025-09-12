@@ -3,10 +3,10 @@ from __future__ import annotations
 import re
 import shlex
 from datetime import datetime
-from typing import Any, Optional, get_type_hints, get_args, Union
+from typing import Any, get_type_hints
 
 import pandas as pd
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, field_validator, ValidationInfo
 from datashop_toolbox.basehdr import BaseHeader
 
 
@@ -87,7 +87,7 @@ def check_string(value: str) -> str:
     if not isinstance(value, str):
         raise TypeError(f"Expected str, got {type(value)}: {value}")
     # Only replace D with E in scientific notation, not everywhere
-    return re.sub(r'(\d+\.\d*)D([+-]\d+)', r'\1E\2', value)
+    return re.sub(r'([+-]?\d*\.\d+)D([+-]?\d+)', r'\1E\2', value)
 
 
 def check_datetime(value: str | None) -> str:
