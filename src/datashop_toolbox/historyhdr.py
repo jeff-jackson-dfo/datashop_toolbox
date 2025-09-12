@@ -99,6 +99,22 @@ def main():
     history_header.log_history_message('process', history_header.processes[1], 'Bad Cast')
     history_header.set_process('Bad Cast', 2)
     print(history_header.print_object())
+
+    history_header.set_process('CONSTANT, RESULT=CRAT_1, VALUE=0.0, TYPE=DOUB, FORMAT=10:6,')
+    history_header.set_process('NEVER_NULL=NO')
+    history_header.set_process('SELECT_FILE,')
+    history_header.set_process('FILE_SPEC=D3:[DATA.MARION]M*.ODF')
+    history_header.set_process('OPEN_ASCII_FILE')
+    history_header.set_process('READ_ASCII_HEADERS')
+    history_header.set_process('READ_ASCII_DATA,FILE_FORMAT=ODF')
+    history_header.set_process('EDIT_VARIABLE,VARIABLE=CRAT_1,FORMAT=10:6')
+    history_header.set_process('***EXPORT_ASCII,EVENT_FILTER=Y,FILE_FORMAT=ODF,EXTENSION=ODF,')
+    history_header.set_process('PATH=D3:[DATA.TEMP1]')
+    history_header.set_process('$')
+    history_header.set_process('END')
+
+    print(history_header.print_object())
+
     for log_entry in BaseHeader.shared_log_list:
         print(log_entry)
     print()

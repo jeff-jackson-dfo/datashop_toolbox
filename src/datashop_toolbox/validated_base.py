@@ -94,7 +94,6 @@ def check_datetime(value: str | None) -> str:
     """Validate datetime string according to SYTM_FORMAT, or return NULL value."""
     if value is None:
         return BaseHeader.SYTM_NULL_VALUE
-
     try:
         dt = datetime.strptime(value, BaseHeader.SYTM_FORMAT)
         return datetime.strftime(dt, BaseHeader.SYTM_FORMAT)[:-4].upper()
@@ -161,27 +160,59 @@ def read_file_lines(file_with_path: str) -> list[str]:
         print(f"An error occurred while reading the file: {e}")
         return []
 
-def find_lines_with_text(odf_file_lines: list[str], separator: str) -> list[tuple[int, str]]:
-    """Find all lines containing a given substring and return (index, line)."""
-    if not isinstance(separator, str):
-        raise TypeError(f"separator must be str, got {type(separator)}")
+# def find_lines_with_text(odf_file_lines: list[str], separator: str) -> list[tuple[int, str]]:
+#     """Find all lines containing a given substring and return (index, line)."""
+#     if not isinstance(separator, str):
+#         raise TypeError(f"separator must be str, got {type(separator)}")
+#     if not isinstance(odf_file_lines, list):
+#         raise TypeError(f"odf_file_lines must be list[str], got {type(odf_file_lines)}")
+
+#     return [(i, line) for i, line in enumerate(odf_file_lines) if separator in line]
+
+def find_lines_with_text(odf_file_lines: list[str], substrings: list[str]) -> list[tuple[int, str]]:
+    """
+    Find all lines containing any of the given substrings.
+    If a substring ends with 'HEADER', the line must also end with 'HEADER' or 'HEADER,'.
+    Returns (index, cleaned_line).
+    """
+    if not isinstance(substrings, list) or not all(isinstance(s, str) for s in substrings):
+        raise TypeError("substrings must be a list[str]")
     if not isinstance(odf_file_lines, list):
         raise TypeError(f"odf_file_lines must be list[str], got {type(odf_file_lines)}")
 
-    return [(i, line) for i, line in enumerate(odf_file_lines) if separator in line]
+    result = []
+    for i, line in enumerate(odf_file_lines):
+        if not isinstance(line, str):
+            continue
 
-def safe_find_lines_with_text(file_path: str, text_to_find: str) -> list[tuple[int, str]] | str:
-    """
-    Safely read a file and find lines containing a given substring.
-    Returns a list of (index, line) tuples or an error message string.
-    """
-    file_lines = read_file_lines(file_path)
+        for sub in substrings:
+            if sub in line:
+                if sub.endswith("HEADER"):  
+                    # Enforce HEADER rule
+                    if line.rstrip().endswith(("HEADER", "HEADER,")):
+                        cleaned = line.rstrip().rstrip(",")
+                        result.append((i, cleaned))
+                        break
+                else:
+                    # Just a normal substring match
+                    result.append((i, line.rstrip()))
+                    break
+    return result
 
-    if isinstance(file_lines, list):
-        return find_lines_with_text(file_lines, text_to_find)
-    else:
-        # file_lines is an error message string
-        return file_lines
+
+# def safe_find_lines_with_text(file_path: str, substring_list; list) -> list[tuple[int, str]] | str:
+#     """
+#     Safely read a file and find lines containing a given substring.
+#     Returns a list of (index, line) tuples or an error message string.
+#     """
+#     file_lines = read_file_lines(file_path)
+
+#     if isinstance(file_lines, list):
+#         return find_lines_with_text(file_lines, substrings = substring_list)
+#     else:
+#         # file_lines is an error message string
+#         return file_lines
+
 
 def split_lines_into_dict(lines: list) -> dict:
     assert isinstance(lines, list), \

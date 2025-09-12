@@ -91,9 +91,9 @@ class DataRecords(ValidatedBase, BaseHeader):
         formatters = {}
         for key, value in self.print_formats.items():
             width = value
-            if key[:5] == "SYTM":
+            if key.startswith("SYTM"):
                 fmt = "{:>" + str(width) + "}"
-                formatters[key] = lambda x, f=fmt: f"'{f.format(x)}'"
+                formatters[key] = lambda x, f=fmt: f"{f.format(x)}"
             else:
                 formatters[key] = lambda x, w=width: f"{float(x):>{w}f}" if x is not None else ""
 

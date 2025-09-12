@@ -180,10 +180,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
     def read_odf(self, odf_file_path: str):
         assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
         file_lines = read_file_lines(odf_file_path)
-
-        text_to_find = "_HEADER"
+        
+        substrings_to_find = ["_HEADER"]
         if isinstance(file_lines, list):
-            header_lines_with_indices = find_lines_with_text(file_lines, text_to_find)
+            header_lines_with_indices = find_lines_with_text(file_lines, substrings_to_find)
         header_starts_list = list()
         header_indices = list()
         header_names = list()
@@ -194,14 +194,14 @@ class OdfHeader(ValidatedBase, BaseHeader):
         header_blocks_df = pd.DataFrame(header_starts_list, columns=["index", "name"])
 
         data_line = '-- DATA --'
-
+        substrings_to_find = [data_line]
         if isinstance(file_lines, list):
-            data_lines_with_indices = find_lines_with_text(file_lines, data_line)
+            data_lines_with_indices = find_lines_with_text(file_lines, substrings_to_find)
         else:
             print(file_lines)  # or handle the error string appropriately
 
         if isinstance(file_lines, list):
-            data_lines_with_indices = find_lines_with_text(file_lines, data_line)
+            data_lines_with_indices = find_lines_with_text(file_lines, substrings_to_find)
         data_lines = List[str]
         data_line_start = -1
         for index, line in data_lines_with_indices:
@@ -248,6 +248,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 case "HISTORY_HEADER":
                     history_header = HistoryHeader()
                     history_header.populate_object(block_lines)
+                    history_header.print_object()
                     self.history_headers.append(history_header)
                 case "INSTRUMENT_HEADER":
                     self.instrument_header = self.instrument_header.populate_object(block_lines)
@@ -299,6 +300,15 @@ class OdfHeader(ValidatedBase, BaseHeader):
             self.record_header.num_param = len(self.parameter_headers)
         if self.record_header.num_cycle != len(self.data):
             self.record_header.num_cycle = len(self.data)
+        # Update the parameter headers if required.
+        for ph in self.parameter_headers:
+            param_data = self.data.data_frame[ph.code]
+            if ph.type == 'SYTM':
+                ph.minimum_value = param_data.iloc[0]
+                ph.maximum_value = param_data.iloc[-1]
+            else:
+                ph.minimum_value = min(param_data)
+                ph.maximum_value = max(param_data)
 
     def write_odf(self, odf_file_path: str, version: float = 2.0) -> None:
         assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
@@ -684,8 +694,12 @@ def main():
         # my_file = 'D24010004.ODF'  # Remove all occurences of * in EVENT_QUALIFIER1
         # my_file = 'MTR_BCD2014999_2_352816_300.ODF'
         # my_file = 'MTR_98600_RATB1_1215_1800.ODF'
-        my_file = 'mcm_82917_20555a_20555_1200.odf'
-        my_path = 'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\'    
+        # my_file = 'mcm_82917_20555a_20555_1200.odf'
+        # my_file = 'mcm_95007_1197_4430830_900.odf'
+        # my_file = 'mtr_79999_46_61036_14400.odf'
+        # my_file = 'MADCPS_BCD2004909_1544_1269-60_3600.ODF' # Fails due to bad null_value in SYTM parameter header and bad data in SYTM channel.
+        my_file = 'MCTD_CAR2023648_2264_11689_1800.ODF'
+        my_path = 'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\'
 
         BaseHeader.reset_logging
         odf = OdfHeader()
