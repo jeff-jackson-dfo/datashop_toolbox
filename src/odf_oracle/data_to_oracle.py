@@ -1,5 +1,5 @@
-from odf_toolbox.odfhdr import OdfHeader
-from odf_toolbox.remove_parameter import remove_parameter
+from datashop_toolbox.odfhdr import OdfHeader
+from datashop_toolbox.remove_parameter import remove_parameter
 from odf_oracle.sytm_to_timestamp import sytm_to_timestamp
 
 def data_to_oracle(odfobj: OdfHeader, connection, infile: str):

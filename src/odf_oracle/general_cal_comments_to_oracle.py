@@ -1,4 +1,4 @@
-from odf_toolbox.generalhdr import GeneralCalHeader
+from datashop_toolbox.generalhdr import GeneralCalHeader
 
 def general_cal_comments_to_oracle(general_cal_header: GeneralCalHeader, 
                                    connection, 

@@ -1,7 +1,7 @@
 from typing import Any
 from pydantic import field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_datetime, check_string
+from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_datetime, check_string, is_valid_datetime, coerce_datetime, matches_datetime_format
 
 class ParameterHeader(ValidatedBase, BaseHeader):
     """A class to represent a Parameter Header in an ODF object."""
@@ -79,12 +79,18 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                             self.code = value
                     case 'null_value':
                         if self.type == 'SYTM':
-                            if isinstance(float(value), float) or isinstance(int(value), int):
-                                self.null_string = BaseHeader.SYTM_NULL_VALUE 
+                            if is_valid_datetime(value):
+                                if matches_datetime_format(value, BaseHeader.SYTM_FORMAT):
+                                    self.null_string = check_datetime(value)
+                                else:
+                                    self.null_string = coerce_datetime(value)
                             else:
-                                self.null_string = f"{check_datetime(value)}"
+                                self.null_string = BaseHeader.SYTM_NULL_VALUE
                         else:
-                            self.null_string = f"{float(check_string(value))}"
+                            if is_valid_datetime(value):
+                                self.null_string = value
+                            else:
+                                self.null_string = f"{float(check_string(value))}"                                                
                     case 'print_field_order':
                         self.print_field_order = int(float(value))
                     case 'print_field_width':
@@ -100,13 +106,13 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                         self.depth = float(value)
                     case 'minimum_value':
                         if self.type == 'SYTM':
-                            if isinstance(float(value), float) or isinstance(int(value), int):
-                                self.minimum_value = BaseHeader.SYTM_NULL_VALUE 
+                            if is_valid_datetime(value):
+                                if matches_datetime_format(value, BaseHeader.SYTM_FORMAT):
+                                    self.minimum_value = check_datetime(value)
+                                else:
+                                    self.minimum_value = coerce_datetime(value)
                             else:
-                                try:
-                                    self.minimum_value = check_datetime(value) if value else BaseHeader.SYTM_NULL_VALUE
-                                except:
-                                    raise ValueError(f"{self.__class__.__name__}: Invalid SYTM value: {value}")
+                                self.minimum_value = BaseHeader.SYTM_NULL_VALUE
                         elif self.type == 'INTE':
                             if self.is_float_and_int(value):
                                 self.minimum_value = int(float(value))
@@ -118,13 +124,13 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                             self.minimum_value = BaseHeader.NULL_VALUE
                     case 'maximum_value':
                         if self.type == 'SYTM':
-                            if isinstance(float(value), float) or isinstance(int(value), int):
-                                self.maximum_value = BaseHeader.SYTM_NULL_VALUE 
+                            if is_valid_datetime(value):
+                                if matches_datetime_format(value, BaseHeader.SYTM_FORMAT):
+                                    self.maximum_value = check_datetime(value)
+                                else:
+                                    self.maximum_value = coerce_datetime(value)
                             else:
-                                try:
-                                    self.maximum_value = check_datetime(value) if value else BaseHeader.SYTM_NULL_VALUE
-                                except:
-                                    raise ValueError(f"{self.__class__.__name__}: Invalid SYTM value: {value}")
+                                self.maximum_value = BaseHeader.SYTM_NULL_VALUE
                         elif self.type == 'INTE':
                             if self.is_float_and_int(value):
                                 self.maximum_value = int(float(value))

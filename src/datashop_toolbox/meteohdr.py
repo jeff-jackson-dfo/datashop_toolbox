@@ -58,6 +58,7 @@ class MeteoHeader(ValidatedBase, BaseHeader):
             for key, value in meteo_dict.items():
                 key = key.strip().upper()
                 value = value.strip()
+                print(f"Value is {value} with type {type(value)}")
                 match key:
                     case 'AIR_TEMPERATURE':
                         self.air_temperature = float(value)

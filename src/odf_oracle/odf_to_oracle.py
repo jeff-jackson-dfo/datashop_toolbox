@@ -2,7 +2,7 @@ import os
 import glob
 from dotenv import load_dotenv
 
-from odf_toolbox.odfhdr import OdfHeader
+from datashop_toolbox.odfhdr import OdfHeader
 from odf_oracle.database_connection_pool import get_database_pool
 from odf_oracle import cruise_event_to_oracle
 from odf_oracle import event_comments_to_oracle
@@ -123,19 +123,19 @@ def odf_to_oracle(wildcard: str, user: str, password: str, oracle_host: str,
 def main():
 
   load_dotenv(r'C:\Users\JacksonJ\OneDrive - DFO-MPO\Documents\.env')
-  username = os.environ.get("ODF_ARCHIVE_USERNAME")
-  userpwd = os.environ.get("ODF_ARCHIVE_PASSWORD")
-  oracle_host = os.environ.get("ORACLE_HOST")
-  oracle_service_name = os.environ.get("ORACLE_SERVICE_NAME")
+  username = str(os.environ.get("ODF_ARCHIVE_USERNAME"))
+  userpwd = str(os.environ.get("ODF_ARCHIVE_PASSWORD"))
+  oracle_host = str(os.environ.get("ORACLE_HOST"))
+  oracle_service_name = str(os.environ.get("ORACLE_SERVICE_NAME"))
   
   odf_to_oracle(wildcard = '*.ODF', 
                 user = username, 
                 password = userpwd, 
                 oracle_host = oracle_host,
                 oracle_service_name = oracle_service_name,
-                mypath = r'C:\\DEV\\LOAD_TO_ODF_ARCHIVE\\')
-                # mypath = r'C:\\DEV\\TEMP\\TEST\\')
-                # mypath = r'C:\\DEV\\GitHub\\odf_toolbox\\tests\\LOAD_TO_ORACLE\\')
+                mypath = r'C:\\DFO-MPO\\DEV\\LOAD_TO_ODF_ARCHIVE\\')
+                # mypath = r'C:\\DFO-MPO\\DEV\\TEMP\\TEST\\')
+                # mypath = r'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\tests\\LOAD_TO_ORACLE\\')
 
 if __name__ == "__main__":
   main()

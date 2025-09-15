@@ -1,4 +1,4 @@
-from odf_toolbox.odfhdr import OdfHeader
+from datashop_toolbox.odfhdr import OdfHeader
 from icecream import ic
 
 def meteo_comments_to_oracle(odfobj: OdfHeader, connection, infile):

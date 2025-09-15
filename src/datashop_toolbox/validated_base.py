@@ -101,6 +101,33 @@ def check_datetime(value: str | None) -> str:
         raise ValueError(f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}")
 
 
+def is_valid_datetime(date_str: str) -> bool:
+    try:
+        pd.to_datetime(date_str, errors="raise")
+        # print(x)
+        # print("valid date time")
+        return True
+    except (ValueError, TypeError):
+        # print("invalid date time")
+        return False
+
+
+def matches_datetime_format(date_str: str, fmt: str) -> bool:
+    """Return True if date_str matches the datetime format fmt."""
+    try:
+        datetime.strptime(date_str, fmt)
+        return True
+    except ValueError:
+        return False
+
+def coerce_datetime(date_str: str, output_fmt: str = "%d-%b-%Y %H:%M:%S.%f") -> str:
+    try:
+        dt = pd.to_datetime(date_str, errors="raise")
+        return dt.strftime(output_fmt).upper()
+    except (ValueError, TypeError):
+        return date_str
+
+
 def split_string_with_quotes(input_string: str) -> list[str]:
     """Split a string into tokens, respecting quoted substrings."""
     if not isinstance(input_string, str):
