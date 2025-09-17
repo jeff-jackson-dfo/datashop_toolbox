@@ -178,8 +178,18 @@ class ParameterHeader(ValidatedBase, BaseHeader):
             lines.append(f"  MINIMUM_VALUE = '{check_datetime(self.minimum_value)}'")
             lines.append(f"  MAXIMUM_VALUE = '{check_datetime(self.maximum_value)}'")
         else:
-            lines.append(f"  MINIMUM_VALUE = {self.minimum_value:{self.print_field_width}.{self.print_decimal_places} if self.minimum_value is not None else BaseHeader.NULL_VALUE}")
-            lines.append(f"  MAXIMUM_VALUE = {self.maximum_value:{self.print_field_width}.{self.print_decimal_places} if self.maximum_value is not None else BaseHeader.NULL_VALUE}")
+            if self.minimum_value is not None:
+                fmt = f"{{:.{self.print_decimal_places}f}}"
+                formatted_value = fmt.format(self.minimum_value)
+                lines.append(f"  MINIMUM_VALUE = {formatted_value}")
+            else:
+                lines.append(str(BaseHeader.NULL_VALUE))
+            if self.maximum_value is not None:
+                fmt = f"{{:.{self.print_decimal_places}f}}"
+                formatted_value = fmt.format(self.maximum_value)
+                lines.append(f"  MAXIMUM_VALUE = {formatted_value}")
+            else:
+                lines.append(str(BaseHeader.NULL_VALUE))
         if self.number_valid is not None:
             lines.append(f"  NUMBER_VALID = {self.number_valid}")
         if self.number_null is not None:
