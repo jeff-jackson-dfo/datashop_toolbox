@@ -231,7 +231,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
             header_block = str(header_blocks_df.at[i, 'name'])
             x = header_field_range.at[i, 'Start']
             y = header_field_range.at[i, 'End']
-            block_lines = list(header_lines[x:y + 1])
+            block_lines = list(header_lines[x:(y + 1)])
             match header_block:
                 case "COMPASS_CAL_HEADER":
                     compass_cal_header = CompassCalHeader()
