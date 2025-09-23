@@ -38,7 +38,7 @@ def lookup_parameter(database: str, parameter: str) -> ParamInfo:
 
         case 'sqlite':
 
-            with sqlite3.connect('C:/DFO-MPO/Dev/GitHub/odf_toolbox/database/parameters.db') as conn:
+            with sqlite3.connect('C:/DFO-MPO/Dev/GitHub/datashop_toolbox/database/parameters.db') as conn:
 
                 sql_statement = f"select * from ODF_PARAMETERS where code = '{parameter}'"
 
