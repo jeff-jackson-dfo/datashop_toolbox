@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 import pandas as pd
 import os
 from typing import ClassVar
@@ -85,17 +86,21 @@ class ThermographHeader(OdfHeader):
             return False
 
     @staticmethod
-    def fix_datetime(df: pd.DataFrame) -> pd.DataFrame:
+    def fix_datetime(df: pd.DataFrame, date_times: bool) -> pd.DataFrame:
         """ Fix the date and time columns in the data frame. """
 
-        # Replace all NaN values with 12:00 in times as this is not important other than to have a time.
-        df['time'] = df['time'].fillna('12:00')
+        if date_times == False:
+            # Replace all NaN values with 12:00 in times as this is not important other than to have a time.
+            df['time'] = df['time'].fillna('12:00')
 
-        # Add a datetime column.
-        df['date'] = df['date'].astype("string")
-        df['time'] = df['time'].astype("string")
-        datetimes = []
+            # Add a datetime column.
+            df['date'] = df['date'].astype("string")
+            df['time'] = df['time'].astype("string")
+        else:
+            df['date'] = df['datetime'].dt.date.astype(str)
+            df['time'] = df['datetime'].dt.time.astype(str)
 
+        datetimes = []                
         for i in range(len(df)):
             date_str = df['date'].iloc[i]
             time_str = df['time'].iloc[i]
@@ -104,6 +109,8 @@ class ThermographHeader(OdfHeader):
             # Check the date format.
             if ThermographHeader.check_datetime_format(df['date'][i], r"%d/%m/%Y"):
                 meta_date_format = r"%d/%m/%Y"
+            elif ThermographHeader.check_datetime_format(df['date'][i], "%d/%m/%y"):
+                meta_date_format = "%d/%m/%y"
             elif ThermographHeader.check_datetime_format(df['date'][i], "%d-%m-%Y"):
                 meta_date_format = "%d-%m-%Y"
             elif ThermographHeader.check_datetime_format(df['date'][i], "%b-%d-%y"):
@@ -196,64 +203,138 @@ class ThermographHeader(OdfHeader):
     
 
     @staticmethod
-    def read_mtr(mtrfile: str) -> dict:
-        """ Read an MTR data file and return a pandas DataFrame. """
+    def is_minilog_file(file_path: str) -> bool:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            for i, line in enumerate(f):
+                if i >= 8:  # only check first 8 lines
+                    break
+                if "minilog" in line.lower():
+                    return True
+        return False
+
+
+    @staticmethod
+    def read_mtr(mtrfile: str, instrument_type: str = "minilog") -> dict:
+        """ 
+        Read an MTR data file and return a pandas DataFrame. 
+
+        :mtrfile: Full path to the thermograph source data text file.
+        :instrument_type: Type of instrument used to acquire the data ('minilog' or 'hobo')
+        """
         
         mtr_dict = dict()
 
-        # Read the data lines from the MTR file.
-        dfmtr = pd.read_table(mtrfile, sep = ',', header = None, encoding = 'iso8859_1', skiprows = 8)
-        
-        # rename the columns
-        dfmtr.columns = ['date', 'time', 'temperature']
+        if instrument_type == 'minilog':
 
-        mtr_dict['df'] = dfmtr
+            # Read the data lines from the MTR file.
+            dfmtr = pd.read_table(mtrfile, sep = ',', header = None, encoding = 'iso8859_1', skiprows = 8)
+            
+            # rename the columns
+            dfmtr.columns = ['date', 'time', 'temperature']
 
-        # Get the instrument type and gauge (serial number) from the MTR file.
-        with open(mtrfile, 'r', encoding = 'iso8859_1') as f:
-            for i in range(8):
-                line = f.readline()
-                if 'Source Device:' in line:
-                    info = line.split(':')[1]
-                    inst_model = info.rsplit('-', 1)[0]
-                    gauge = info.split('-')[-1].strip()
-                    break
-        
-        mtr_dict['inst_model'] = inst_model
-        mtr_dict['gauge'] = gauge
-        mtr_dict['filename'] = mtrfile
+            mtr_dict['df'] = dfmtr
+
+            # Get the instrument type and gauge (serial number) from the MTR file.
+            with open(mtrfile, 'r', encoding = 'iso8859_1') as f:
+                for i in range(8):
+                    line = f.readline()
+                    if 'Source Device:' in line:
+                        info = line.split(':')[1]
+                        inst_model = info.rsplit('-', 1)[0]
+                        gauge = info.split('-')[-1].strip()
+                        break
+            
+            mtr_dict['inst_model'] = inst_model
+            mtr_dict['gauge'] = gauge
+            mtr_dict['filename'] = mtrfile
+
+        elif instrument_type == 'hobo':
+
+            # Read the data lines from the MTR file.
+            dfmtr = pd.read_table(mtrfile, sep = ',', header = 0, encoding = 'utf-8', skiprows = 1)
+            
+            # drop the row number column
+            dfmtr.drop(columns=['#'], inplace=True)
+
+            # Extract required info from columns and rename them with shorter names
+            cols = dfmtr.columns
+            column_names = []
+            cols_to_keep = []
+            for i, col in enumerate(cols):
+                cnames = col.split(",")
+                # print(cnames)
+                cname = cnames[0]
+                # print(cname)
+                if cname == "Date Time":
+                    column_names.append("date_time")
+                    cols_to_keep.append(i)
+                elif cname == "Abs Pres":
+                    column_names.append("pressure")
+                    cols_to_keep.append(i)
+                elif cname == "Temp":
+                    column_names.append("temperature")
+                    cols_to_keep.append(i)
+                    toks = cnames[1].split(":")
+                    inst_id = toks[0]
+                else: # ignore other columns
+                    continue
+
+            # Keep only selected columns
+            dfmtr = dfmtr[dfmtr.columns[cols_to_keep]]
+
+            # Rename the kept columns
+            dfmtr.columns = column_names
+
+            # halifax_tz = pytz.timezone("America/Halifax")
+            dt_format_string = "%m/%d/%y %I:%M:%S %p"
+            dt_halifax = dfmtr['date_time']
+            datetime_objects = [datetime.strptime(dt_str, dt_format_string).astimezone(pytz.utc) for dt_str in dt_halifax]
+            dfmtr['date_time'] = datetime_objects
+
+            mtr_dict['df'] = dfmtr
+            mtr_dict['inst_id'] = inst_id
+            mtr_dict['filename'] = mtrfile
 
         return mtr_dict
 
 
     @staticmethod
-    def read_metadata(metafile: str) -> pd.DataFrame:
+    def read_metadata(metafile: str, meta_source: str) -> pd.DataFrame:
         """
         Read a Metadata file and return a pandas DataFrame.
+
+        :metafile: The file containing the metadata information.
+        :meta_source: A string identifying the group who supplied the metadata. (currently "fsrs" or "bio")
         """
-        # read the file
-        dfmeta = pd.read_table(metafile, encoding = 'iso8859_1')
 
-        # Change some column types.
-        dfmeta['LFA'].astype(int)
-        dfmeta['Vessel Code'].astype(int)
-        dfmeta['Gauge'].astype(int)
-        dfmeta['Soak Days'].astype(int)
+        if meta_source == 'fsrs':
 
-        # Drop some columns.
-        dfmeta.drop(columns=['Date.1', 'Latitude', 'Longitude', 'Depth'], inplace = True)
+            dfmeta = pd.read_table(metafile, encoding = 'iso8859_1')
 
-        # Rename some columns.
-        dfmeta.rename(columns={'Date': 'date', 'Time': 'time', 'LFA': 'lfa', 
-                            'Vessel Code': 'vessel_code', 'Gauge': 'gauge', 
-                            'Soak Days': 'soak_days', 
-                            'Latitude (degrees)': 'latitude', 
-                            'Longitude (degrees)': 'longitude',
-                            'Depth (m)': 'depth', 'Temp': 'temperature'},
-                            inplace = True)
+            # Change some column types.
+            dfmeta['LFA'].astype(int)
+            dfmeta['Vessel Code'].astype(int)
+            dfmeta['Gauge'].astype(int)
+            dfmeta['Soak Days'].astype(int)
 
-        # Fix the date and time columns.
-        dfmeta = ThermographHeader.fix_datetime(dfmeta)
+            # Drop some columns.
+            dfmeta.drop(columns=['Date.1', 'Latitude', 'Longitude', 'Depth'], inplace = True)
+
+            # Rename some columns.
+            dfmeta.rename(columns={'Date': 'date', 'Time': 'time', 'LFA': 'lfa', 
+                                'Vessel Code': 'vessel_code', 'Gauge': 'gauge', 
+                                'Soak Days': 'soak_days', 
+                                'Latitude (degrees)': 'latitude', 
+                                'Longitude (degrees)': 'longitude',
+                                'Depth (m)': 'depth', 'Temp': 'temperature'},
+                                inplace = True)
+
+            # Fix the date and time columns.
+            dfmeta = ThermographHeader.fix_datetime(dfmeta, False)
+
+        elif meta_source == 'bio':
+
+            dfmeta = pd.read_excel(metafile)
 
         return dfmeta
 
@@ -266,89 +347,189 @@ def main():
     # operator = input('Enter the name of the operator: ')
     operator = 'Jeff Jackson'
 
-    # Change to the drive's root folder
-    os.chdir('\\')
-    drive = os.getcwd()
-    pathlist = ['DFO-MPO', 'DEV', 'MTR', 'FSRS_data_2013_2014', 'LFA_27_14']
-    top_folder = os.path.join(drive, *pathlist)
-    os.chdir(top_folder)
+    # meta_source = 'fsrs'
+    meta_source = 'bio'
 
-    # mtr_file = 'Bin4255RonFraser14.csv'
-    # mtr_file = 'Minilog-T_4239_2014JayMacDonald_1.csv'
-    mtr_file = 'Minilog-T_4655_201JordanWadden_1.csv'
-    mtr_path = os.path.join(top_folder, mtr_file)
-    print(f'\nProcessing MTR file: {mtr_path}\n')
+    if meta_source == 'fsrs':
 
-    mydict = mtr.read_mtr(mtr_path)
-    df = mydict['df']
-    inst_model = mydict['inst_model']
-    gauge = mydict['gauge']
-    print(df.head())
+        # Change to the drive's root folder
+        os.chdir('\\')
+        drive = os.getcwd()
+        pathlist = ['DFO-MPO', 'DEV', 'MTR', 'FSRS_data_2013_2014', 'LFA_27_14']
+        top_folder = os.path.join(drive, *pathlist)
+        os.chdir(top_folder)
 
-    metadata_file = 'LatLong LFA 27_14.txt'
-    metadata_path = os.path.join(top_folder, metadata_file)
-    print(f'\nProcessing metadata file: {metadata_path}\n')
-    
-    meta = mtr.read_metadata(metadata_path)
+        # mtr_file = 'Bin4255RonFraser14.csv'
+        # mtr_file = 'Minilog-T_4239_2014JayMacDonald_1.csv'
+        mtr_file = 'Minilog-T_4655_201JordanWadden_1.csv'
+        mtr_path = os.path.join(top_folder, mtr_file)
+        print(f'\nProcessing MTR file: {mtr_path}\n')
 
-    meta_subset = meta[meta['gauge'] == int(gauge)]
+        mydict = mtr.read_mtr(mtr_path, 'minilog')
+        df = mydict['df']
+        inst_model = mydict['inst_model']
+        gauge = mydict['gauge']
+        print(df.head())
 
-    print(meta_subset.head())
-    print('\n')
+        metadata_file = 'LatLong LFA 27_14.txt'
+        metadata_path = os.path.join(top_folder, metadata_file)
+        print(f'\nProcessing metadata file: {metadata_path}\n')
+        
+        meta = mtr.read_metadata(metadata_path, 'fsrs')
 
-    mtr.cruise_header.country_institute_code = 1899
-    cruise_year = df['date'].to_string(index=False).split('-')[0]
-    cruise_number = f'BCD{cruise_year}603'
-    mtr.cruise_header.cruise_number = cruise_number
-    start_date = f"{mtr.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
-    mtr.cruise_header.start_date = start_date
-    end_date = f"{mtr.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
-    mtr.cruise_header.end_date = end_date
-    mtr.cruise_header.organization = 'FSRS'
-    mtr.cruise_header.chief_scientist = 'Shannon Scott-Tibbetts'
-    mtr.cruise_header.cruise_description = 'Fishermen and Scientists Research Society'
-    
-    mtr.event_header.data_type = 'MTR'
-    mtr.event_header.event_qualifier1 = gauge
-    mtr.event_header.event_qualifier2 = str(mtr.sampling_interval(df))
-    mtr.event_header.creation_date = get_current_date_time()
-    mtr.event_header.orig_creation_date = get_current_date_time()
-    mtr.event_header.start_date_time = mtr.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-    mtr.event_header.end_date_time = mtr.end_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-    lat = meta_subset['latitude'].iloc[0]
-    long = meta_subset['longitude'].iloc[0]
-    if lat < 0:
-        lat = lat * -1
-    if long > 0:
-        long = long * -1
-    mtr.event_header.initial_latitude = lat
-    mtr.event_header.initial_longitude = long
-    mtr.event_header.end_latitude = lat
-    mtr.event_header.end_longitude = long
-    depth = meta_subset['depth']
-    mtr.event_header.min_depth = min(depth)
-    mtr.event_header.max_depth = max(depth)
-    mtr.event_header.event_number = str(meta_subset['vessel_code'].iloc[0])
-    mtr.event_header.sampling_interval = float(mtr.sampling_interval(df))
-    
-    if 'minilog' in inst_model.lower():
-        mtr.instrument_header.instrument_type = 'MINILOG'
-    mtr.instrument_header.model = inst_model
-    mtr.instrument_header.serial_number = gauge
-    mtr.instrument_header.description = 'Temperature data logger'
+        meta_subset = meta[meta['gauge'] == int(gauge)]
 
-    history_header = HistoryHeader()
-    history_header.creation_date = get_current_date_time()
-    history_header.set_process(f'Initial file creation by {operator}')
-    mtr.history_headers.append(history_header)
+        print(meta_subset.head())
+        print('\n')
 
-    new_df = mtr.create_sytm(df)
+        mtr.cruise_header.country_institute_code = 1899
+        cruise_year = df['date'].to_string(index=False).split('-')[0]
+        cruise_number = f'BCD{cruise_year}603'
+        mtr.cruise_header.cruise_number = cruise_number
+        start_date = f"{mtr.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
+        mtr.cruise_header.start_date = start_date
+        end_date = f"{mtr.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
+        mtr.cruise_header.end_date = end_date
+        mtr.cruise_header.organization = 'FSRS'
+        mtr.cruise_header.chief_scientist = 'Shannon Scott-Tibbetts'
+        mtr.cruise_header.cruise_description = 'Fishermen and Scientists Research Society'
+        
+        mtr.event_header.data_type = 'MTR'
+        mtr.event_header.event_qualifier1 = gauge
+        mtr.event_header.event_qualifier2 = str(mtr.sampling_interval(df))
+        mtr.event_header.creation_date = get_current_date_time()
+        mtr.event_header.orig_creation_date = get_current_date_time()
+        mtr.event_header.start_date_time = mtr.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+        mtr.event_header.end_date_time = mtr.end_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+        lat = meta_subset['latitude'].iloc[0]
+        long = meta_subset['longitude'].iloc[0]
+        if lat < 0:
+            lat = lat * -1
+        if long > 0:
+            long = long * -1
+        mtr.event_header.initial_latitude = lat
+        mtr.event_header.initial_longitude = long
+        mtr.event_header.end_latitude = lat
+        mtr.event_header.end_longitude = long
+        depth = meta_subset['depth']
+        mtr.event_header.min_depth = min(depth)
+        mtr.event_header.max_depth = max(depth)
+        mtr.event_header.event_number = str(meta_subset['vessel_code'].iloc[0])
+        mtr.event_header.sampling_interval = float(mtr.sampling_interval(df))
+        
+        if 'minilog' in inst_model.lower():
+            mtr.instrument_header.instrument_type = 'MINILOG'
+        mtr.instrument_header.model = inst_model
+        mtr.instrument_header.serial_number = gauge
+        mtr.instrument_header.description = 'Temperature data logger'
 
-    mtr = mtr.populate_parameter_headers(new_df)
+        history_header = HistoryHeader()
+        history_header.creation_date = get_current_date_time()
+        history_header.set_process(f'Initial file creation by {operator}')
+        mtr.history_headers.append(history_header)
 
-    for x, column in enumerate(new_df.columns):
-        code = mtr.parameter_headers[x].code
-        new_df.rename(columns={column: code}, inplace=True)
+        new_df = mtr.create_sytm(df)
+
+        mtr = mtr.populate_parameter_headers(new_df)
+
+        for x, column in enumerate(new_df.columns):
+            code = mtr.parameter_headers[x].code
+            new_df.rename(columns={column: code}, inplace=True)
+
+    elif meta_source == 'bio':
+
+        # Change to the drive's root folder
+        os.chdir('\\')
+        drive = os.getcwd()
+        # pathlist = ['DFO-MPO', 'DEV', 'MTR', 'BCD2015999']
+        pathlist = ['DFO-MPO', 'DEV', 'MTR', '999_test']
+        top_folder = os.path.join(drive, *pathlist)
+        os.chdir(top_folder)
+
+        metadata_file = 'MetaData_BCD2015999_Reformatted.xlsx'
+        metadata_path = os.path.join(top_folder, metadata_file)
+        print(f'\nProcessing metadata file: {metadata_path}\n')        
+        meta = mtr.read_metadata(metadata_path, 'bio')
+        print(meta.head())
+        print('\n')
+
+        # mtr_file = 'Baddeck_10011598.csv'  # BCD2015999
+        # mtr_file = 'Liscomb_12m_353372_20160415_1.csv'  # BCD2015999
+        mtr_file = 'BCD2018999_Hobo-u20-001-01_10231582_1_SouthBar_xxx_nov17_may18.csv'  # 99_Test
+        mtr_path = os.path.join(top_folder, mtr_file)
+        print(f'\nProcessing MTR file: {mtr_path}\n')
+
+        if ThermographHeader.is_minilog_file(mtr_path):
+            instrument_type = 'minilog'
+            print('Processing Minilog data file')
+
+        else:
+            instrument_type = 'hobo'
+            print('Processing Hobo data file')
+
+        mydict = mtr.read_mtr(mtr_path, instrument_type)
+        df = mydict['df']
+        print(df.head())
+
+        if instrument_type == 'minilog':
+            inst_model = mydict['inst_model']
+            gauge = mydict['gauge']
+        elif instrument_type == 'hobo':
+            inst_id = mydict['inst_id']
+
+        mtr.cruise_header.country_institute_code = 1810
+        cruise_year = df['date_time'].to_string(index=False).split('-')[0]
+        cruise_number = f'BCD{cruise_year}999'
+        mtr.cruise_header.cruise_number = cruise_number
+        # start_date = f"{mtr.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
+        # mtr.cruise_header.start_date = start_date
+        # end_date = f"{mtr.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
+        # mtr.cruise_header.end_date = end_date
+        # mtr.cruise_header.organization = 'DFO BIO'
+        # mtr.cruise_header.chief_scientist = 'unknown'
+        # mtr.cruise_header.cruise_description = ''
+        
+        mtr.event_header.data_type = 'MTR'
+        # mtr.event_header.event_qualifier1 = gauge
+        # mtr.event_header.event_qualifier2 = str(mtr.sampling_interval(df))
+        # mtr.event_header.creation_date = get_current_date_time()
+        # mtr.event_header.orig_creation_date = get_current_date_time()
+        # mtr.event_header.start_date_time = mtr.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+        # mtr.event_header.end_date_time = mtr.end_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+        # lat = meta_subset['latitude'].iloc[0]
+        # long = meta_subset['longitude'].iloc[0]
+        # if lat < 0:
+        #     lat = lat * -1
+        # if long > 0:
+        #     long = long * -1
+        # mtr.event_header.initial_latitude = lat
+        # mtr.event_header.initial_longitude = long
+        # mtr.event_header.end_latitude = lat
+        # mtr.event_header.end_longitude = long
+        # depth = meta_subset['depth']
+        # mtr.event_header.min_depth = min(depth)
+        # mtr.event_header.max_depth = max(depth)
+        # mtr.event_header.event_number = str(meta_subset['vessel_code'].iloc[0])
+        # mtr.event_header.sampling_interval = float(mtr.sampling_interval(df))
+        
+        # if 'minilog' in inst_model.lower():
+        #     mtr.instrument_header.instrument_type = 'MINILOG'
+        # mtr.instrument_header.model = inst_model
+        # mtr.instrument_header.serial_number = gauge
+        # mtr.instrument_header.description = 'Temperature data logger'
+
+        # history_header = HistoryHeader()
+        # history_header.creation_date = get_current_date_time()
+        # history_header.set_process(f'Initial file creation by {operator}')
+        # mtr.history_headers.append(history_header)
+
+        # new_df = mtr.create_sytm(df)
+
+        # mtr = mtr.populate_parameter_headers(new_df)
+
+        # for x, column in enumerate(new_df.columns):
+        #     code = mtr.parameter_headers[x].code
+        #     new_df.rename(columns={column: code}, inplace=True)
 
     file_spec = mtr.generate_file_spec()
     mtr.file_specification = file_spec

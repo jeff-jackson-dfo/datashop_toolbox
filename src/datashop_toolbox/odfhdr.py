@@ -1,5 +1,6 @@
 from datetime import datetime
 import pandas as pd
+from typing import TypedDict
 
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.compasshdr import CompassCalHeader
@@ -17,6 +18,11 @@ from datashop_toolbox.records import DataRecords
 from datashop_toolbox.validated_base import ValidatedBase, add_commas, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict, check_string
 from typing import Optional, List
 from pydantic import Field, field_validator, ConfigDict
+
+
+class HeaderFieldRangeSchema(TypedDict):
+    Start: int
+    End: int
 
 class OdfHeader(ValidatedBase, BaseHeader):
     """ 
@@ -192,6 +198,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
             header_names.append(line.strip(" ,"))
             header_starts_list.append([index, line.strip(" ,")])
         header_blocks_df = pd.DataFrame(header_starts_list, columns=["index", "name"])
+        header_blocks_df["index"] = header_blocks_df["index"].astype(int)
 
         data_line = '-- DATA --'
         substrings_to_find = [data_line]
@@ -202,7 +209,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
         if isinstance(file_lines, list):
             data_lines_with_indices = find_lines_with_text(file_lines, substrings_to_find)
-        data_lines = List[str]
+        # data_lines = List[str]
         data_line_start = -1
         for index, line in data_lines_with_indices:
             data_line_start = index + 1
@@ -214,17 +221,29 @@ class OdfHeader(ValidatedBase, BaseHeader):
         # Get the line range for the list of fields in each header block
         if isinstance(header_lines, list):
             header_lines = clean_strings(header_lines)
-        ndf = len(header_blocks_df)
+
+        # Prepare the header_field_range DataFrame
         header_field_range = pd.DataFrame(columns=["Name", "Start", "End"])
-        for i in range(ndf):
-            header_field_range.at[i, 'Name'] = header_blocks_df.at[i, 'name']
-            header_field_range.at[i, 'Start'] = header_blocks_df.at[i, 'index'] + 1
-        for i in range(ndf):
-            if 0 < i < ndf - 1:
-                header_field_range.at[i - 1, 'End'] = header_blocks_df.at[i, 'index'] - 1
-            elif i == ndf - 1:
-                header_field_range.at[i - 1, 'End'] = header_blocks_df.at[i, 'index'] - 1
-                header_field_range.at[i, 'End'] = data_line_start - 1
+
+        ndf = len(header_blocks_df)
+
+        # for i in range(ndf):
+        #     start_val: int = int(header_blocks_df.at[i, "index"]) + 1
+        #     header_field_range.at[i, 'Name'] = header_blocks_df.at[i, 'name']
+        #     header_field_range.at[i, 'Start'] = start_val
+
+        # for i in range(ndf):
+        #     if 0 < i < ndf - 1:
+        #         header_field_range.at[i - 1, "End"] = int(header_blocks_df.at[i, "index"]) - 1
+        #     elif i == ndf - 1:
+        #         header_field_range.at[i - 1, "End"] = int(header_blocks_df.at[i, "index"]) - 1
+        #         header_field_range.at[i, "End"] = data_line_start - 1
+
+        header_field_range = pd.DataFrame({
+            "Name": header_blocks_df["name"],
+            "Start": header_blocks_df["index"] + 1,
+            "End": header_blocks_df["index"].shift(-1, fill_value=data_line_start) - 1
+        })
 
         # Loop through the header lines, populating the OdfHeader object as it goes.
         for i in range(ndf):

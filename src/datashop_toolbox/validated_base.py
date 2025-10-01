@@ -187,14 +187,6 @@ def read_file_lines(file_with_path: str) -> list[str]:
         print(f"An error occurred while reading the file: {e}")
         return []
 
-# def find_lines_with_text(odf_file_lines: list[str], separator: str) -> list[tuple[int, str]]:
-#     """Find all lines containing a given substring and return (index, line)."""
-#     if not isinstance(separator, str):
-#         raise TypeError(f"separator must be str, got {type(separator)}")
-#     if not isinstance(odf_file_lines, list):
-#         raise TypeError(f"odf_file_lines must be list[str], got {type(odf_file_lines)}")
-
-#     return [(i, line) for i, line in enumerate(odf_file_lines) if separator in line]
 
 def find_lines_with_text(odf_file_lines: list[str], substrings: list[str]) -> list[tuple[int, str]]:
     """
@@ -227,24 +219,11 @@ def find_lines_with_text(odf_file_lines: list[str], substrings: list[str]) -> li
     return result
 
 
-# def safe_find_lines_with_text(file_path: str, substring_list; list) -> list[tuple[int, str]] | str:
-#     """
-#     Safely read a file and find lines containing a given substring.
-#     Returns a list of (index, line) tuples or an error message string.
-#     """
-#     file_lines = read_file_lines(file_path)
-
-#     if isinstance(file_lines, list):
-#         return find_lines_with_text(file_lines, substrings = substring_list)
-#     else:
-#         # file_lines is an error message string
-#         return file_lines
-
-
 def split_lines_into_dict(lines: list) -> dict:
     assert isinstance(lines, list), \
         f"Input argument 'lines' is not of type list: {lines}"
     return list_to_dict(lines)
+
 
 def main():
     # Example usage of read_file_lines
@@ -254,6 +233,7 @@ def main():
     print(f"Lines read from {file_path}:")
     for i, line in enumerate(lines, 1):
         print(f"{i}: {line}")
+
 
 if __name__ == "__main__":
     main()

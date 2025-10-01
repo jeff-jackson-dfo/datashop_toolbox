@@ -13,8 +13,9 @@ from datashop_toolbox.qualityhdr import QualityHeader
 from datashop_toolbox.recordhdr import RecordHeader
 from datashop_toolbox.records import DataRecords
 from datashop_toolbox.validated_base import ValidatedBase
+from datashop_toolbox.thermograph import ThermographHeader
+from datashop_toolbox import select_metadata_file_and_data_folder
 # from datashop_toolbox import remove_parameter
-# from datashop_toolbox.thermograph import ThermographHeader
 # from datashop_toolbox.multinet import MultinetHeader
 
 __all__ = ['BaseHeader', 
@@ -22,7 +23,8 @@ __all__ = ['BaseHeader',
            'GeneralCalHeader', 'HistoryHeader', 'InstrumentHeader', 
            'MeteoHeader', 'OdfHeader', 'ParameterHeader', 
            'PolynomialCalHeader', 'QualityHeader', 'RecordHeader', 
-           'DataRecords', 'ValidatedBase', 
+           'DataRecords', 'ValidatedBase', 'ThermographHeader', 
+           'select_metadata_file_and_data_folder'
         #    'remove_parameter', 'MtrHeader'
            ]
 
