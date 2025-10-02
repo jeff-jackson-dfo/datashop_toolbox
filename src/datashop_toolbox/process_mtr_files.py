@@ -79,10 +79,11 @@ for file_name in files:
     print(f'\nProcessing metadata file: {metadata_file_path}\n')
 
     meta = mtr.read_metadata(metadata_file_path, institution=institution)
+    # print(meta.head())
 
     # Subset "meta" to only include the rows for the gauge of interest.
-    meta = meta[meta['gauge'] == int(gauge)]
-    print(meta)
+    meta_subset = meta[meta['gauge'] == int(gauge)]
+    print(meta_subset)
     print('\n')
 
     mtr.cruise_header.country_institute_code = 1899
