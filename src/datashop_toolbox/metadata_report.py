@@ -7,8 +7,8 @@ import openpyxl
 from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
 
-# Import required odf_toolbox libraries
-from odf_toolbox.odfhdr import OdfHeader
+# Import required datashop_toolbox libraries
+from datashop_toolbox.odfhdr import OdfHeader
 
 
 def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
@@ -69,6 +69,9 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
     worksheet = workbook.active
 
     # Add the report headings as the first row
+    if worksheet is None:
+        raise ValueError("No active worksheet found in workbook.")
+    
     worksheet.append(report_headings)
 
     os.chdir(file_path)
@@ -118,9 +121,9 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
         # Add the metadata from the current ODF file to the report
         worksheet.append(meta)
 
-        for col in worksheet.columns:
+        for i, col in enumerate(worksheet.columns, start=1):
             max_length = 0
-            column = col[0].column_letter  # Get the column name
+            column = get_column_letter(i)
             for cell in col:
                 try:  # Necessary to avoid error on empty cells
                     max_length = max(len(str(cell.value)), max_length)
@@ -143,4 +146,4 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
 
 
 if __name__ == "__main__":
-    generate_report("C:/DEV/LAT2025146/CTD_PROCESSING/2025146LAT/ODF/", "D*.odf", "CTD_Metadata.xlsx")
+    generate_report("C:/DFO-MPO/DEV/Data/2025/LAT2025146/CTD/DATASHOP_PROCESSING/Step_2_Apply_Calibrations/ODF/", "D*.odf", "CTD_Metadata.xlsx")

@@ -65,7 +65,7 @@ def main():
     drive = os.getcwd()
 
     # pathlist = ['DEV', 'Data', '2025', 'LAT2025146', 'CTD', 'DATASHOP_PROCESSING', 'Step_2_Apply_Calibrations', 'ctddata']
-    pathlist = ['DEV', 'GitHub', 'odf_toolbox', 'tests']
+    pathlist = ['DEV', 'GitHub', 'datashop_toolbox', 'tests']
 
     # Generate the top folder path
     top_folder = os.path.join(drive, *pathlist)

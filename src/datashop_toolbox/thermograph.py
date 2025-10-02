@@ -262,20 +262,21 @@ class ThermographHeader(OdfHeader):
             cols_to_keep = []
             for i, col in enumerate(cols):
                 cnames = col.split(",")
-                # print(cnames)
                 cname = cnames[0]
-                # print(cname)
                 if cname == "Date Time":
                     column_names.append("date_time")
                     cols_to_keep.append(i)
                 elif cname == "Abs Pres":
                     column_names.append("pressure")
                     cols_to_keep.append(i)
+                    toks = cnames[1].split(":")
+                    inst_id = toks[0]
                 elif cname == "Temp":
                     column_names.append("temperature")
                     cols_to_keep.append(i)
-                    toks = cnames[1].split(":")
-                    inst_id = toks[0]
+                elif cname == "DO conc":
+                    column_names.append("dissolved_oxygen")
+                    cols_to_keep.append(i)
                 else: # ignore other columns
                     continue
 
@@ -292,22 +293,24 @@ class ThermographHeader(OdfHeader):
             dfmtr['date_time'] = datetime_objects
 
             mtr_dict['df'] = dfmtr
-            mtr_dict['inst_id'] = inst_id
+            mtr_dict['gauge'] = inst_id
             mtr_dict['filename'] = mtrfile
+            print(mtr_dict)
 
         return mtr_dict
 
 
     @staticmethod
-    def read_metadata(metafile: str, meta_source: str) -> pd.DataFrame:
+    def read_metadata(metafile: str, institution: str) -> pd.DataFrame:
         """
         Read a Metadata file and return a pandas DataFrame.
 
         :metafile: The file containing the metadata information.
-        :meta_source: A string identifying the group who supplied the metadata. (currently "fsrs" or "bio")
+        :institution: A string identifying the group who supplied the metadata. (currently "FSRS" or "BIO")
         """
+        dfmeta = pd.DataFrame()
 
-        if meta_source == 'fsrs':
+        if institution == 'FSRS':
 
             dfmeta = pd.read_table(metafile, encoding = 'iso8859_1')
 
@@ -332,7 +335,7 @@ class ThermographHeader(OdfHeader):
             # Fix the date and time columns.
             dfmeta = ThermographHeader.fix_datetime(dfmeta, False)
 
-        elif meta_source == 'bio':
+        elif institution == 'BIO':
 
             dfmeta = pd.read_excel(metafile)
 
@@ -347,10 +350,10 @@ def main():
     # operator = input('Enter the name of the operator: ')
     operator = 'Jeff Jackson'
 
-    # meta_source = 'fsrs'
-    meta_source = 'bio'
+    institution_name = 'FSRS'
+    # institution_name = 'BIO'
 
-    if meta_source == 'fsrs':
+    if institution_name == 'FSRS':
 
         # Change to the drive's root folder
         os.chdir('\\')
@@ -375,7 +378,7 @@ def main():
         metadata_path = os.path.join(top_folder, metadata_file)
         print(f'\nProcessing metadata file: {metadata_path}\n')
         
-        meta = mtr.read_metadata(metadata_path, 'fsrs')
+        meta = mtr.read_metadata(metadata_path, 'FSRS')
 
         meta_subset = meta[meta['gauge'] == int(gauge)]
 
@@ -436,7 +439,7 @@ def main():
             code = mtr.parameter_headers[x].code
             new_df.rename(columns={column: code}, inplace=True)
 
-    elif meta_source == 'bio':
+    elif institution_name == 'BIO':
 
         # Change to the drive's root folder
         os.chdir('\\')
@@ -449,33 +452,37 @@ def main():
         metadata_file = 'MetaData_BCD2015999_Reformatted.xlsx'
         metadata_path = os.path.join(top_folder, metadata_file)
         print(f'\nProcessing metadata file: {metadata_path}\n')        
-        meta = mtr.read_metadata(metadata_path, 'bio')
+        meta = mtr.read_metadata(metadata_path, 'BIO')
         print(meta.head())
         print('\n')
 
-        # mtr_file = 'Baddeck_10011598.csv'  # BCD2015999
+        mtr_file = 'Baddeck_10011598.csv'  # BCD2015999
         # mtr_file = 'Liscomb_12m_353372_20160415_1.csv'  # BCD2015999
-        mtr_file = 'BCD2018999_Hobo-u20-001-01_10231582_1_SouthBar_xxx_nov17_may18.csv'  # 99_Test
+        # mtr_file = 'BCD2018999_Hobo-u20-001-01_10231582_1_SouthBar_xxx_nov17_may18.csv'  # 99_Test
+        # mtr_file = 'Liscomb_15m_352964_20160415_1.csv'  # BCD2015999 - Minilog
         mtr_path = os.path.join(top_folder, mtr_file)
         print(f'\nProcessing MTR file: {mtr_path}\n')
 
         if ThermographHeader.is_minilog_file(mtr_path):
             instrument_type = 'minilog'
             print('Processing Minilog data file')
-
         else:
             instrument_type = 'hobo'
             print('Processing Hobo data file')
 
         mydict = mtr.read_mtr(mtr_path, instrument_type)
+        print(mydict)
+        
         df = mydict['df']
         print(df.head())
 
+        gauge = mydict['gauge']
+        print(gauge)
+
+        # meta_subset = meta[meta['gauge'] == int(gauge)]
+
         if instrument_type == 'minilog':
             inst_model = mydict['inst_model']
-            gauge = mydict['gauge']
-        elif instrument_type == 'hobo':
-            inst_id = mydict['inst_id']
 
         mtr.cruise_header.country_institute_code = 1810
         cruise_year = df['date_time'].to_string(index=False).split('-')[0]

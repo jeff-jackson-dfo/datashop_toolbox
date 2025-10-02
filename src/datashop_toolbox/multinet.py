@@ -4,16 +4,16 @@ import numpy as np
 import os
 from typing import NoReturn, ClassVar
 
-from odf_toolbox.lookup_parameter import lookup_parameter
-from odf_toolbox.basehdr import BaseHeader
-from odf_toolbox.odfhdr import OdfHeader
-from odf_toolbox.cruisehdr import CruiseHeader
-from odf_toolbox.eventhdr import EventHeader
-from odf_toolbox.historyhdr import HistoryHeader
-from odf_toolbox.recordhdr import RecordHeader
-from odf_toolbox.parameterhdr import ParameterHeader
-from odf_toolbox.records import DataRecords
-from odf_toolbox import odfutils
+from datashop_toolbox.lookup_parameter import lookup_parameter
+from datashop_toolbox.basehdr import BaseHeader
+from datashop_toolbox.odfhdr import OdfHeader
+from datashop_toolbox.cruisehdr import CruiseHeader
+from datashop_toolbox.eventhdr import EventHeader
+from datashop_toolbox.historyhdr import HistoryHeader
+from datashop_toolbox.recordhdr import RecordHeader
+from datashop_toolbox.parameterhdr import ParameterHeader
+from datashop_toolbox.records import DataRecords
+from datashop_toolbox import odfutils
 
 class MultinetHeader(OdfHeader):
     """

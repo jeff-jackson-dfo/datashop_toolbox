@@ -8,10 +8,10 @@ import os
 import pandas as pd
 from typing import NoReturn
 
-from odf_toolbox.odfhdr import OdfHeader
-from odf_toolbox.parameterhdr import ParameterHeader
-from odf_toolbox.historyhdr import HistoryHeader
-from odf_toolbox.lookup_parameter import lookup_parameter
+from datashop_toolbox.odfhdr import OdfHeader
+from datashop_toolbox.parameterhdr import ParameterHeader
+from datashop_toolbox.historyhdr import HistoryHeader
+from datashop_toolbox.lookup_parameter import lookup_parameter
 
 class NetCdfHeader(OdfHeader):
     """

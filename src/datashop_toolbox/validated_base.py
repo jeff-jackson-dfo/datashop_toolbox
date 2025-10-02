@@ -103,12 +103,12 @@ def check_datetime(value: str | None) -> str:
 
 def is_valid_datetime(date_str: str) -> bool:
     try:
-        pd.to_datetime(date_str, errors="raise")
-        # print(x)
-        # print("valid date time")
+        if date_str[:2] == '%d':
+            pd.to_datetime(date_str, errors = "raise", dayfirst = True)
+        else:
+            pd.to_datetime(date_str, errors = "raise", dayfirst = False)
         return True
     except (ValueError, TypeError):
-        # print("invalid date time")
         return False
 
 
@@ -122,7 +122,7 @@ def matches_datetime_format(date_str: str, fmt: str) -> bool:
 
 def coerce_datetime(date_str: str, output_fmt: str = "%d-%b-%Y %H:%M:%S.%f") -> str:
     try:
-        dt = pd.to_datetime(date_str, errors="raise")
+        dt = pd.to_datetime(date_str, errors = "raise", dayfirst = True)
         return dt.strftime(output_fmt).upper()
     except (ValueError, TypeError):
         return date_str
@@ -226,6 +226,7 @@ def split_lines_into_dict(lines: list) -> dict:
 
 
 def main():
+
     # Example usage of read_file_lines
     file_path = "example.txt"  # Replace with your file path
 

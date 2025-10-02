@@ -35,6 +35,9 @@ if select_file_folder.line_edit_text == '':
 else:
     operator = select_file_folder.line_edit_text
 
+institution = select_file_folder.institution
+instrument = select_file_folder.instrument
+
 # Change to folder containing files to be modified
 os.chdir(data_folder_path)
 
@@ -70,11 +73,12 @@ for file_name in files:
     df = mydict['df']
     inst_model = mydict['inst_model']
     gauge = mydict['gauge']
+    print(gauge)
     # time.sleep(4.0) # Pause for 4 seconds
 
     print(f'\nProcessing metadata file: {metadata_file_path}\n')
 
-    meta = mtr.read_metadata(metadata_file_path, 'fsrs')
+    meta = mtr.read_metadata(metadata_file_path, institution=institution)
 
     # Subset "meta" to only include the rows for the gauge of interest.
     meta = meta[meta['gauge'] == int(gauge)]
