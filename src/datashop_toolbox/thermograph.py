@@ -1,9 +1,16 @@
 from datetime import datetime
+import glob
 import os
+import posixpath
 import pytz
+import sys
 import pandas as pd
 from pathlib import Path
 from typing import ClassVar
+
+from PyQt6.QtWidgets import (
+    QApplication
+)
 
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import check_datetime, get_current_date_time
@@ -11,6 +18,8 @@ from datashop_toolbox.odfhdr import OdfHeader
 from datashop_toolbox.parameterhdr import ParameterHeader
 from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.lookup_parameter import lookup_parameter
+from datashop_toolbox import select_metadata_file_and_data_folder
+
 
 class ThermographHeader(OdfHeader):
     """
@@ -523,11 +532,10 @@ class ThermographHeader(OdfHeader):
             self.event_header.event_number = f"{matching_indices[0]:03d}"
             if instrument_type == 'minilog':
                 self.event_header.sampling_interval = float(self.sampling_interval(df))
-            elif instrument_type == 'hobo':
-                self.event_header.sampling_interval = sampling_interval
-            
-            if 'minilog' in inst_model.lower():
                 self.instrument_header.instrument_type = 'MINILOG'
+            elif instrument_type == 'hobo':
+                self.event_header.sampling_interval = sampling_interval            
+                self.instrument_header.instrument_type = 'HOBO'
             self.instrument_header.model = inst_model
             self.instrument_header.serial_number = gauge
             self.instrument_header.description = 'Temperature data logger'
@@ -545,41 +553,120 @@ class ThermographHeader(OdfHeader):
 
 def main():
 
-    # Generate an empty MTR object.
-    mtr = ThermographHeader()
+    use_gui = True
 
-    operator = 'Jeff Jackson'
+    if use_gui:
 
-    # institution_name = 'FSRS'
-    # instrument_type = 'minilog'
-    # metadata_file = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LatLong LFA 30_14.txt' # FSRS
-    # data_folder_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/' # FSRS
-    # data_file_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/Minilog-II-T_354633_2014jmacleod_1.csv' # FSRS
+        # Create the GUI to select the metadata file and data folder
+        app = QApplication(sys.argv)
+        select_inputs = select_metadata_file_and_data_folder.MainWindow()
+        select_inputs.show()
+        app.exec()
 
-    institution_name = 'BIO'
-    # instrument_type = 'minilog'
-    instrument_type = 'hobo'
-    metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
-    data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
-    # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
-    data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Baddeck_10011598.csv'  # BIO
+        if select_inputs.result != "accept":
+            print('\n****  Operation cancelled by user, exiting program.  ****\n')
+            exit()
 
-    history_header = HistoryHeader()
-    history_header.creation_date = get_current_date_time()
-    history_header.set_process(f'Initial file creation by {operator}')
-    mtr.history_headers.append(history_header)
+        if select_inputs.metadata_file == '' or select_inputs.data_folder == '':
+            print('\n****  Improper selections made, exiting program.  ****\n')
+            exit()
+        else:
+            metadata_file_path = select_inputs.metadata_file
+            data_folder_path = select_inputs.data_folder
 
-    mtr.process_thermograph(institution_name, instrument_type, metadata_file, data_file_path)
+        # Get the operator's name so it is identified in the history header.
+        if select_inputs.line_edit_text == '':
+            operator = input('Please enter the name of the analyst performing the data processing: ')
+        else:
+            operator = select_inputs.line_edit_text
 
-    os.chdir(data_folder_path)
+        institution = select_inputs.institution
+        instrument = select_inputs.instrument
 
-    file_spec = mtr.generate_file_spec()
-    mtr.file_specification = file_spec
+        # Change to folder containing files to be modified
+        os.chdir(data_folder_path)
 
-    mtr.update_odf()
+        # Find all CSV files in the current directory.
+        files = glob.glob('*.CSV')
 
-    odf_file_path = os.path.join(data_folder_path, file_spec + '.ODF')
-    mtr.write_odf(odf_file_path, version = 2.0)
+        # Check if no data files were found.
+        if files == []:
+            print(f"****  No data files found in selected folder {data_folder_path}  ****\n")
+        else:
+            # Create the required subfolder, if necessary
+            if not os.path.isdir(os.path.join(data_folder_path, 'Step_1_Create_ODF')):
+                os.mkdir('Step_1_Create_ODF')
+            odf_path = os.path.join(data_folder_path, 'Step_1_Create_ODF')
+
+        # Loop through the CSV files to generate an ODF file for each.
+        for file_name in files:
+
+            print()
+            print('#######################################################################')
+            print(f'Processing MTR file: {file_name}')
+            print('#######################################################################')
+            print()
+
+            mtr_path = posixpath.join(data_folder_path, file_name)
+            print(f'\nProcessing MTR raw file: {mtr_path}\n')
+
+            mtr = ThermographHeader()
+
+            history_header = HistoryHeader()
+            history_header.creation_date = get_current_date_time()
+            history_header.set_process(f'Initial file creation by {operator}')
+            mtr.history_headers.append(history_header)
+
+            mtr.process_thermograph(institution.upper(), instrument.lower(), metadata_file_path, mtr_path)
+
+            file_spec = mtr.generate_file_spec()
+            mtr.file_specification = file_spec
+
+            mtr.update_odf()
+
+            odf_file_path = os.path.join(odf_path, file_spec + '.ODF')
+            mtr.write_odf(odf_file_path, version = 2.0)
+
+            # Reset the shared log list
+            BaseHeader.reset_log_list() 
+
+    else:
+
+        # Generate an empty MTR object.
+        mtr = ThermographHeader()
+
+        operator = 'Jeff Jackson'
+
+        # institution_name = 'FSRS'
+        # instrument_type = 'minilog'
+        # metadata_file = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LatLong LFA 30_14.txt' # FSRS
+        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/' # FSRS
+        # data_file_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/Minilog-II-T_354633_2014jmacleod_1.csv' # FSRS
+
+        institution_name = 'BIO'
+        # instrument_type = 'minilog'
+        instrument_type = 'hobo'
+        metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
+        data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
+        # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
+        data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Canso_10231582.csv'  # BIO
+
+        history_header = HistoryHeader()
+        history_header.creation_date = get_current_date_time()
+        history_header.set_process(f'Initial file creation by {operator}')
+        mtr.history_headers.append(history_header)
+
+        mtr.process_thermograph(institution_name.upper(), instrument_type.lower(), metadata_file, data_file_path)
+
+        os.chdir(data_folder_path)
+
+        file_spec = mtr.generate_file_spec()
+        mtr.file_specification = file_spec
+
+        mtr.update_odf()
+
+        odf_file_path = os.path.join(data_folder_path, file_spec + '.ODF')
+        mtr.write_odf(odf_file_path, version = 2.0)
     
 
 if __name__ == "__main__":
