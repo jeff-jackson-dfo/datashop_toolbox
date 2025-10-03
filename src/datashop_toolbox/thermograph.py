@@ -80,15 +80,8 @@ class ThermographHeader(OdfHeader):
     def create_sytm(self, df: pd.DataFrame) -> pd.DataFrame:
         """ Updated the data frame with the proper SYTM column. """
         if 'date_time' in df.columns:
-            df['dates'] = df['date_time'].map(lambda x: datetime.strptime(x, ThermographHeader.date_format).date())
-            df['dates'] = df['dates'].astype("string")
-            df['times'] = df['date_time'].map(lambda x: datetime.strptime(x, ThermographHeader.time_format).time())
-            df['times'] = df['times'].astype("string")
-            df['datetimes'] = df['dates'] + ' ' + df['times']
-            df = df.drop(columns=['date', 'time', 'dates', 'times'], axis=1)
-            df['datetimes'] = pd.to_datetime(df['datetimes'])
-            df['sytm'] = df['datetimes'].map(lambda x: datetime.strftime(x, BaseHeader.SYTM_FORMAT)).str.upper()
-            df = df.drop('datetimes', axis=1)
+            df['sytm'] = df['date_time'].map(lambda x: datetime.strftime(x, BaseHeader.SYTM_FORMAT)).str.upper()
+            df = df.drop('date_time', axis=1)
             df['sytm'] = df['sytm'].str[:-4]
             df['sytm'] = df['sytm'].map(lambda x: "'" + str(x) + "'")
         else:
@@ -113,6 +106,7 @@ class ThermographHeader(OdfHeader):
             return True
         except ValueError:
             return False
+
 
     @staticmethod
     def fix_datetime(df: pd.DataFrame, date_times: bool) -> pd.DataFrame:
@@ -167,6 +161,7 @@ class ThermographHeader(OdfHeader):
 
         return df
 
+
     @staticmethod
     def convert_to_decimal_degrees(pos: str) -> float:
         toks = pos.split(' ')
@@ -175,58 +170,60 @@ class ThermographHeader(OdfHeader):
         dd = deg + dm/60
         return dd
 
+
     def populate_parameter_headers(self, df: pd.DataFrame):
         """ Populate the parameter headers and the data object. """
         parameter_list = list()
         print_formats = dict()
         number_of_rows = df.count().iloc[0]
+        param_name = ''
         for column in df.columns:
             parameter_header = ParameterHeader()
             number_null = int(df[column].isnull().sum())
             number_valid = int(number_of_rows - number_null)
             if column == 'sytm':
-                # parameter_info = lookup_parameter('oracle', 'SYTM')
-                parameter_info = lookup_parameter('sqlite', 'SYTM')
-                parameter_header.type = 'SYTM'
-                parameter_header.name = parameter_info.get('description')
-                parameter_header.units = parameter_info.get('units')
-                parameter_header.code = 'SYTM_01'
-                parameter_header.null_string = BaseHeader.SYTM_NULL_VALUE
-                parameter_header.print_field_width = parameter_info.get('print_field_width')
-                parameter_header.print_decimal_places = parameter_info.get('print_decimal_places')
-                parameter_header.angle_of_section = BaseHeader.NULL_VALUE
-                parameter_header.magnetic_variation = BaseHeader.NULL_VALUE
-                parameter_header.depth = BaseHeader.NULL_VALUE
+                param_name = 'SYTM'
+                param_code = f"{param_name}_01"
+                parameter_header.type = param_name
                 min_date = df[column].iloc[0].strip("\'")
                 max_date = df[column].iloc[-1].strip("\'")
                 parameter_header.minimum_value = min_date
                 parameter_header.maximum_value = max_date
-                parameter_header.number_valid = number_valid
-                parameter_header.number_null = number_null
-                parameter_list.append('SYTM_01')
-                print_formats['SYTM_01'] = (f"{parameter_header.print_field_width}")
+                parameter_header.null_string = BaseHeader.SYTM_NULL_VALUE
             elif column == 'temperature':
-                # parameter_info = lookup_parameter('oracle', 'TE90')
-                parameter_info = lookup_parameter('sqlite', 'TE90')
-                parameter_header.type = 'DOUB'        
-                parameter_header.name = parameter_info.get('description')
-                parameter_header.units = parameter_info.get('units')
-                parameter_header.code = 'TE90_01'
-                parameter_header.null_string = str(BaseHeader.NULL_VALUE)
-                parameter_header.print_field_width = parameter_info.get('print_field_width')
-                parameter_header.print_decimal_places = parameter_info.get('print_decimal_places')
-                parameter_header.angle_of_section = BaseHeader.NULL_VALUE
-                parameter_header.magnetic_variation = BaseHeader.NULL_VALUE
-                parameter_header.depth = BaseHeader.NULL_VALUE
+                param_name = 'TE90'
+                parameter_header.type = 'DOUB'
+            elif column == 'pressure':
+                param_name = 'PRES'
+                parameter_header.type = 'DOUB'
+            if parameter_header.type == 'DOUB':
+                param_code = f"{param_name}_01"
                 min_temp = df[column].min()
                 max_temp = df[column].max()
                 parameter_header.minimum_value = min_temp
                 parameter_header.maximum_value = max_temp
-                parameter_header.number_valid = number_valid
-                parameter_header.number_null = number_null
-                parameter_list.append('TE90_01')
-                print_formats['TE90_01'] = (f"{parameter_header.print_field_width}."
+                parameter_header.null_string = str(BaseHeader.NULL_VALUE)
+
+            # parameter_info = lookup_parameter('oracle', param_name)
+            parameter_info = lookup_parameter('sqlite', param_name)
+            parameter_header.name = parameter_info.get('description')
+            parameter_header.units = parameter_info.get('units')
+            parameter_header.code = param_code
+            parameter_header.angle_of_section = BaseHeader.NULL_VALUE
+            parameter_header.magnetic_variation = BaseHeader.NULL_VALUE
+            parameter_header.depth = BaseHeader.NULL_VALUE
+            if param_name == 'SYTM':
+                parameter_header.print_field_width = parameter_info.get('print_field_width')
+                parameter_header.print_decimal_places = parameter_info.get('print_decimal_places')
+                print_formats[param_code] = (f"{parameter_header.print_field_width}")
+            else:
+                parameter_header.print_field_width = parameter_info.get('print_field_width')
+                parameter_header.print_decimal_places = parameter_info.get('print_decimal_places')
+                print_formats[param_code] = (f"{parameter_header.print_field_width}."
                                             f"{parameter_header.print_decimal_places}")
+            parameter_header.number_valid = number_valid
+            parameter_header.number_null = number_null
+            parameter_list.append(param_code)
             
             # Add the new parameter header to the list.
             self.parameter_headers.append(parameter_header)
@@ -497,7 +494,7 @@ class ThermographHeader(OdfHeader):
                 self.event_header.event_qualifier2 = str(self.sampling_interval(df))
             elif instrument_type == 'hobo':
                 sampling_interval = float(meta_subset['Sampling@ (min)'].iloc[0]) * 60
-                self.event_header.event_qualifier2 = str(meta_subset['Sampling@ (min)'].iloc[0])  
+                self.event_header.event_qualifier2 = str(int(sampling_interval))
             self.event_header.creation_date = get_current_date_time()
             self.event_header.orig_creation_date = get_current_date_time()
             self.event_header.start_date_time = self.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
