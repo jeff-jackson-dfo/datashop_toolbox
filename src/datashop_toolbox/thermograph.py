@@ -1,7 +1,8 @@
 from datetime import datetime
+import os
 import pytz
 import pandas as pd
-import os
+from pathlib import Path
 from typing import ClassVar
 
 from datashop_toolbox.basehdr import BaseHeader
@@ -138,6 +139,13 @@ class ThermographHeader(OdfHeader):
 
         return df
 
+    @staticmethod
+    def convert_to_decimal_degrees(pos: str) -> float:
+        toks = pos.split(' ')
+        deg = float(toks[0])
+        dm = float(toks[1])
+        dd = deg + dm/60
+        return dd
 
     def populate_parameter_headers(self, df: pd.DataFrame):
         """ Populate the parameter headers and the data object. """
@@ -270,7 +278,7 @@ class ThermographHeader(OdfHeader):
                     column_names.append("pressure")
                     cols_to_keep.append(i)
                     toks = cnames[1].split(":")
-                    inst_id = toks[0]
+                    inst_id = toks[1]
                 elif cname == "Temp":
                     column_names.append("temperature")
                     cols_to_keep.append(i)
@@ -341,209 +349,192 @@ class ThermographHeader(OdfHeader):
 
         return dfmeta
 
+    def process_thermograph(self, institution_name: str, instrument_type: str, metadata_file_path: str, data_file_path: str):
+
+        if institution_name == 'FSRS':
+
+            print(f'\nProcessing Metadata file: {metadata_file_path}\n')
+            meta = self.read_metadata(metadata_file_path, institution_name)
+
+            print(f'\nProcessing Thermograph Data file: {data_file_path}\n')
+            mydict = self.read_mtr(data_file_path, instrument_type)
+
+            df = mydict['df']
+            inst_model = mydict['inst_model']
+            gauge = mydict['gauge']
+            print(df.head())
+
+            meta_subset = meta[meta['gauge'] == int(gauge)]
+            print(meta_subset.head())
+            print('\n')
+
+            self.cruise_header.country_institute_code = 1899
+            cruise_year = df['date'].to_string(index=False).split('-')[0]
+            cruise_number = f'BCD{cruise_year}603'
+            self.cruise_header.cruise_number = cruise_number
+            start_date = f"{self.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
+            self.cruise_header.start_date = start_date
+            end_date = f"{self.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
+            self.cruise_header.end_date = end_date
+            self.cruise_header.organization = 'FSRS'
+            self.cruise_header.chief_scientist = 'Shannon Scott-Tibbetts'
+            self.cruise_header.cruise_description = 'Fishermen and Scientists Research Society'
+            
+            self.event_header.data_type = 'MTR'
+            self.event_header.event_qualifier1 = gauge
+            self.event_header.event_qualifier2 = str(self.sampling_interval(df))
+            self.event_header.creation_date = get_current_date_time()
+            self.event_header.orig_creation_date = get_current_date_time()
+            self.event_header.start_date_time = self.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+            self.event_header.end_date_time = self.end_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+            lat = meta_subset['latitude'].iloc[0]
+            long = meta_subset['longitude'].iloc[0]
+            if lat < 0:
+                lat = lat * -1
+            if long > 0:
+                long = long * -1
+            self.event_header.initial_latitude = lat
+            self.event_header.initial_longitude = long
+            self.event_header.end_latitude = lat
+            self.event_header.end_longitude = long
+            depth = meta_subset['depth']
+            self.event_header.min_depth = min(depth)
+            self.event_header.max_depth = max(depth)
+            self.event_header.event_number = str(meta_subset['vessel_code'].iloc[0])
+            self.event_header.sampling_interval = float(self.sampling_interval(df))
+            
+            if 'minilog' in inst_model.lower():
+                self.instrument_header.instrument_type = 'MINILOG'
+            self.instrument_header.model = inst_model
+            self.instrument_header.serial_number = gauge
+            self.instrument_header.description = 'Temperature data logger'
+
+            new_df = self.create_sytm(df)
+
+            self.populate_parameter_headers(new_df)
+
+            for x, column in enumerate(new_df.columns):
+                code = self.parameter_headers[x].code
+                new_df.rename(columns={column: code}, inplace=True)
+
+        elif institution_name == 'BIO':
+
+            print(f'\nProcessing Metadata file: {metadata_file_path}\n')
+            meta = self.read_metadata(metadata_file_path, institution_name)
+
+            print(f'\nProcessing Thermograph Data file: {data_file_path}\n')
+            mydict = self.read_mtr(data_file_path, instrument_type)
+
+            df = mydict['df']
+            if 'inst_model' in mydict:
+                inst_model = mydict['inst_model']
+            gauge = mydict['gauge']
+            print(df.head())
+
+            meta_subset = meta[meta['ID'] == int(gauge)]
+            print(meta_subset.head())
+            print('\n')
+
+            matching_indices = meta[meta['ID'] == int(gauge)].index
+
+            inst_model = meta_subset['Instrument'].iloc[0]
+
+            self.cruise_header.country_institute_code = 1810
+            cruise_year = df['date'].to_string(index=False).split('-')[0]
+            cruise_number = f'BCD{cruise_year}999'
+            self.cruise_header.cruise_number = cruise_number
+            start_date = f"{self.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
+            self.cruise_header.start_date = start_date
+            end_date = f"{self.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
+            self.cruise_header.end_date = end_date
+            self.cruise_header.organization = 'DFO BIO'
+            self.cruise_header.chief_scientist = 'Adam Drozdowski'
+            self.cruise_header.cruise_description = ''
+            
+            self.event_header.data_type = 'MTR'
+            self.event_header.event_qualifier1 = gauge
+            self.event_header.event_qualifier2 = str(self.sampling_interval(df))
+            self.event_header.creation_date = get_current_date_time()
+            self.event_header.orig_creation_date = get_current_date_time()
+            self.event_header.start_date_time = self.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+            self.event_header.end_date_time = self.end_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+            lat = meta_subset['lat_dep'].iloc[0]
+            if isinstance(lat, str):
+                lat = self.convert_to_decimal_degrees(lat)
+            long = meta_subset['lon_dep'].iloc[0]
+            if isinstance(long, str):
+                long = self.convert_to_decimal_degrees(long)
+            if lat < 0:
+                lat = lat * -1
+            if long > 0:
+                long = long * -1
+            self.event_header.initial_latitude = lat
+            self.event_header.initial_longitude = long
+            self.event_header.end_latitude = lat
+            self.event_header.end_longitude = long
+            depth = []
+            dep_dep = str(meta_subset['dep_dep'].iloc[0])
+            depth.append(dep_dep.split(' ')[0])
+            dep_rec = str(meta_subset['dep_rec'].iloc[0])
+            depth.append(dep_rec.split(' ')[0])
+            self.event_header.min_depth = min(depth)
+            self.event_header.max_depth = max(depth)
+            self.event_header.event_number = f"{matching_indices[0]:03d}"
+            self.event_header.sampling_interval = float(self.sampling_interval(df))
+            
+            if 'minilog' in inst_model.lower():
+                self.instrument_header.instrument_type = 'MINILOG'
+            self.instrument_header.model = inst_model
+            self.instrument_header.serial_number = gauge
+            self.instrument_header.description = 'Temperature data logger'
+
+            new_df = self.create_sytm(df)
+
+            self.populate_parameter_headers(new_df)
+
+            for x, column in enumerate(new_df.columns):
+                code = self.parameter_headers[x].code
+                new_df.rename(columns={column: code}, inplace=True)
+        
+        return self
+
 
 def main():
 
     # Generate an empty MTR object.
     mtr = ThermographHeader()
 
-    # operator = input('Enter the name of the operator: ')
     operator = 'Jeff Jackson'
 
-    institution_name = 'FSRS'
-    # institution_name = 'BIO'
+    # institution_name = 'FSRS'
+    # instrument_type = 'minilog'
+    # metadata_file = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LatLong LFA 30_14.txt' # FSRS
+    # data_folder_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/' # FSRS
+    # data_file_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/Minilog-T_5665_2014GMacCuspic_1.csv' # FSRS
 
-    if institution_name == 'FSRS':
+    institution_name = 'BIO'
+    # instrument_type = 'minilog'
+    instrument_type = 'hobo'
+    metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
+    data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
+    # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
+    data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Baddeck_10011598.csv'  # BIO
 
-        # Change to the drive's root folder
-        os.chdir('\\')
-        drive = os.getcwd()
-        pathlist = ['DFO-MPO', 'DEV', 'MTR', 'FSRS_data_2013_2014', 'LFA_27_14']
-        top_folder = os.path.join(drive, *pathlist)
-        os.chdir(top_folder)
+    history_header = HistoryHeader()
+    history_header.creation_date = get_current_date_time()
+    history_header.set_process(f'Initial file creation by {operator}')
+    mtr.history_headers.append(history_header)
 
-        # mtr_file = 'Bin4255RonFraser14.csv'
-        # mtr_file = 'Minilog-T_4239_2014JayMacDonald_1.csv'
-        mtr_file = 'Minilog-T_4655_201JordanWadden_1.csv'
-        mtr_path = os.path.join(top_folder, mtr_file)
-        print(f'\nProcessing MTR file: {mtr_path}\n')
+    mtr.process_thermograph(institution_name, instrument_type, metadata_file, data_file_path)
 
-        mydict = mtr.read_mtr(mtr_path, 'minilog')
-        df = mydict['df']
-        inst_model = mydict['inst_model']
-        gauge = mydict['gauge']
-        print(df.head())
-
-        metadata_file = 'LatLong LFA 27_14.txt'
-        metadata_path = os.path.join(top_folder, metadata_file)
-        print(f'\nProcessing metadata file: {metadata_path}\n')
-        
-        meta = mtr.read_metadata(metadata_path, 'FSRS')
-
-        meta_subset = meta[meta['gauge'] == int(gauge)]
-
-        print(meta_subset.head())
-        print('\n')
-
-        mtr.cruise_header.country_institute_code = 1899
-        cruise_year = df['date'].to_string(index=False).split('-')[0]
-        cruise_number = f'BCD{cruise_year}603'
-        mtr.cruise_header.cruise_number = cruise_number
-        start_date = f"{mtr.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
-        mtr.cruise_header.start_date = start_date
-        end_date = f"{mtr.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
-        mtr.cruise_header.end_date = end_date
-        mtr.cruise_header.organization = 'FSRS'
-        mtr.cruise_header.chief_scientist = 'Shannon Scott-Tibbetts'
-        mtr.cruise_header.cruise_description = 'Fishermen and Scientists Research Society'
-        
-        mtr.event_header.data_type = 'MTR'
-        mtr.event_header.event_qualifier1 = gauge
-        mtr.event_header.event_qualifier2 = str(mtr.sampling_interval(df))
-        mtr.event_header.creation_date = get_current_date_time()
-        mtr.event_header.orig_creation_date = get_current_date_time()
-        mtr.event_header.start_date_time = mtr.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-        mtr.event_header.end_date_time = mtr.end_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-        lat = meta_subset['latitude'].iloc[0]
-        long = meta_subset['longitude'].iloc[0]
-        if lat < 0:
-            lat = lat * -1
-        if long > 0:
-            long = long * -1
-        mtr.event_header.initial_latitude = lat
-        mtr.event_header.initial_longitude = long
-        mtr.event_header.end_latitude = lat
-        mtr.event_header.end_longitude = long
-        depth = meta_subset['depth']
-        mtr.event_header.min_depth = min(depth)
-        mtr.event_header.max_depth = max(depth)
-        mtr.event_header.event_number = str(meta_subset['vessel_code'].iloc[0])
-        mtr.event_header.sampling_interval = float(mtr.sampling_interval(df))
-        
-        if 'minilog' in inst_model.lower():
-            mtr.instrument_header.instrument_type = 'MINILOG'
-        mtr.instrument_header.model = inst_model
-        mtr.instrument_header.serial_number = gauge
-        mtr.instrument_header.description = 'Temperature data logger'
-
-        history_header = HistoryHeader()
-        history_header.creation_date = get_current_date_time()
-        history_header.set_process(f'Initial file creation by {operator}')
-        mtr.history_headers.append(history_header)
-
-        new_df = mtr.create_sytm(df)
-
-        mtr = mtr.populate_parameter_headers(new_df)
-
-        for x, column in enumerate(new_df.columns):
-            code = mtr.parameter_headers[x].code
-            new_df.rename(columns={column: code}, inplace=True)
-
-    elif institution_name == 'BIO':
-
-        # Change to the drive's root folder
-        os.chdir('\\')
-        drive = os.getcwd()
-        # pathlist = ['DFO-MPO', 'DEV', 'MTR', 'BCD2015999']
-        pathlist = ['DFO-MPO', 'DEV', 'MTR', '999_test']
-        top_folder = os.path.join(drive, *pathlist)
-        os.chdir(top_folder)
-
-        metadata_file = 'MetaData_BCD2015999_Reformatted.xlsx'
-        metadata_path = os.path.join(top_folder, metadata_file)
-        print(f'\nProcessing metadata file: {metadata_path}\n')        
-        meta = mtr.read_metadata(metadata_path, 'BIO')
-        print(meta.head())
-        print('\n')
-
-        mtr_file = 'Baddeck_10011598.csv'  # BCD2015999
-        # mtr_file = 'Liscomb_12m_353372_20160415_1.csv'  # BCD2015999
-        # mtr_file = 'BCD2018999_Hobo-u20-001-01_10231582_1_SouthBar_xxx_nov17_may18.csv'  # 99_Test
-        # mtr_file = 'Liscomb_15m_352964_20160415_1.csv'  # BCD2015999 - Minilog
-        mtr_path = os.path.join(top_folder, mtr_file)
-        print(f'\nProcessing MTR file: {mtr_path}\n')
-
-        if ThermographHeader.is_minilog_file(mtr_path):
-            instrument_type = 'minilog'
-            print('Processing Minilog data file')
-        else:
-            instrument_type = 'hobo'
-            print('Processing Hobo data file')
-
-        mydict = mtr.read_mtr(mtr_path, instrument_type)
-        print(mydict)
-        
-        df = mydict['df']
-        print(df.head())
-
-        gauge = mydict['gauge']
-        print(gauge)
-
-        # meta_subset = meta[meta['gauge'] == int(gauge)]
-
-        if instrument_type == 'minilog':
-            inst_model = mydict['inst_model']
-
-        mtr.cruise_header.country_institute_code = 1810
-        cruise_year = df['date_time'].to_string(index=False).split('-')[0]
-        cruise_number = f'BCD{cruise_year}999'
-        mtr.cruise_header.cruise_number = cruise_number
-        # start_date = f"{mtr.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
-        # mtr.cruise_header.start_date = start_date
-        # end_date = f"{mtr.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
-        # mtr.cruise_header.end_date = end_date
-        # mtr.cruise_header.organization = 'DFO BIO'
-        # mtr.cruise_header.chief_scientist = 'unknown'
-        # mtr.cruise_header.cruise_description = ''
-        
-        mtr.event_header.data_type = 'MTR'
-        # mtr.event_header.event_qualifier1 = gauge
-        # mtr.event_header.event_qualifier2 = str(mtr.sampling_interval(df))
-        # mtr.event_header.creation_date = get_current_date_time()
-        # mtr.event_header.orig_creation_date = get_current_date_time()
-        # mtr.event_header.start_date_time = mtr.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-        # mtr.event_header.end_date_time = mtr.end_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-        # lat = meta_subset['latitude'].iloc[0]
-        # long = meta_subset['longitude'].iloc[0]
-        # if lat < 0:
-        #     lat = lat * -1
-        # if long > 0:
-        #     long = long * -1
-        # mtr.event_header.initial_latitude = lat
-        # mtr.event_header.initial_longitude = long
-        # mtr.event_header.end_latitude = lat
-        # mtr.event_header.end_longitude = long
-        # depth = meta_subset['depth']
-        # mtr.event_header.min_depth = min(depth)
-        # mtr.event_header.max_depth = max(depth)
-        # mtr.event_header.event_number = str(meta_subset['vessel_code'].iloc[0])
-        # mtr.event_header.sampling_interval = float(mtr.sampling_interval(df))
-        
-        # if 'minilog' in inst_model.lower():
-        #     mtr.instrument_header.instrument_type = 'MINILOG'
-        # mtr.instrument_header.model = inst_model
-        # mtr.instrument_header.serial_number = gauge
-        # mtr.instrument_header.description = 'Temperature data logger'
-
-        # history_header = HistoryHeader()
-        # history_header.creation_date = get_current_date_time()
-        # history_header.set_process(f'Initial file creation by {operator}')
-        # mtr.history_headers.append(history_header)
-
-        # new_df = mtr.create_sytm(df)
-
-        # mtr = mtr.populate_parameter_headers(new_df)
-
-        # for x, column in enumerate(new_df.columns):
-        #     code = mtr.parameter_headers[x].code
-        #     new_df.rename(columns={column: code}, inplace=True)
+    os.chdir(data_folder_path)
 
     file_spec = mtr.generate_file_spec()
     mtr.file_specification = file_spec
 
     mtr.update_odf()
 
-    odf_file_path = os.path.join(top_folder, file_spec + '.ODF')
+    odf_file_path = os.path.join(data_folder_path, file_spec + '.ODF')
     mtr.write_odf(odf_file_path, version = 2.0)
     
 
