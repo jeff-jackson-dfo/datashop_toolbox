@@ -30,11 +30,11 @@ class MainWindow(QMainWindow):
         self.line_edit.editingFinished.connect(self.editing_finished)
 
         self.institution_combo = QComboBox()
-        self.institution_combo.addItems(["BIO", "FSRS"])
+        self.institution_combo.addItems(["Unknown", "BIO", "FSRS"])
         self.institution_combo.currentTextChanged.connect( self.institution_text_changed )  # Sends the current text (string) of the selected item.
 
         self.instrument_combo = QComboBox()
-        self.instrument_combo.addItems(["Minilog", "Hobo"])
+        self.instrument_combo.addItems(["Unknown", "Minilog", "Hobo"])
         self.instrument_combo.currentTextChanged.connect( self.instrument_text_changed )  # Sends the current text (string) of the selected item.
 
         self.file_button = QPushButton("Select the Metadata file\n(e.g. LFA .txt file, \nor Excel file)")

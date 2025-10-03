@@ -33,19 +33,34 @@ class ThermographHeader(OdfHeader):
         return ThermographHeader.time_format
 
 
-    def start_date_time(self, df: pd.Series) -> datetime:
+    # @staticmethod
+    # def is_date_only(value):
+    #     if isinstance(value, date) and not isinstance(value, datetime):
+    #         return True
+    #     if isinstance(value, datetime):
+    #         return value.time() == datetime.min.time()
+    #     return False
+
+
+    def start_date_time(self, df: pd.DataFrame) -> datetime:
         """ Retrieve the first date-time value from the data frame. """
-        start_date = datetime.strptime(df['date'].iloc[0], ThermographHeader.date_format)
-        start_time = datetime.strptime(df['time'].iloc[0], ThermographHeader.time_format).time()
-        start_date_time = datetime.combine(start_date, start_time)
+        if 'date_time' in df.columns:
+            start_date_time = df['date_time'].iloc[0]
+        else:
+            start_date = datetime.strptime(df['date'].iloc[0], ThermographHeader.date_format)
+            start_time = datetime.strptime(df['time'].iloc[0], ThermographHeader.time_format).time()
+            start_date_time = datetime.combine(start_date, start_time)
         return start_date_time
 
 
-    def end_date_time(self, df: pd.Series) -> datetime:
+    def end_date_time(self, df: pd.DataFrame) -> datetime:
         """ Retrieve the last date-time value from the data frame. """
-        end_date = datetime.strptime(df['date'].iloc[-1], ThermographHeader.date_format)
-        end_time = datetime.strptime(df['time'].iloc[-1], ThermographHeader.time_format).time()
-        end_date_time = datetime.combine(end_date, end_time)
+        if 'date_time' in df.columns:
+            end_date_time = df['date_time'].iloc[-1]
+        else:
+            end_date = datetime.strptime(df['date'].iloc[-1], ThermographHeader.date_format)
+            end_time = datetime.strptime(df['time'].iloc[-1], ThermographHeader.time_format).time()
+            end_date_time = datetime.combine(end_date, end_time)
         return end_date_time
 
 
@@ -64,17 +79,30 @@ class ThermographHeader(OdfHeader):
 
     def create_sytm(self, df: pd.DataFrame) -> pd.DataFrame:
         """ Updated the data frame with the proper SYTM column. """
-        df['dates'] = df['date'].map(lambda x: datetime.strptime(x, ThermographHeader.date_format).date())
-        df['dates'] = df['dates'].astype("string")
-        df['times'] = df['time'].map(lambda x: datetime.strptime(x, ThermographHeader.time_format).time())
-        df['times'] = df['times'].astype("string")
-        df['datetimes'] = df['dates'] + ' ' + df['times']
-        df = df.drop(columns=['date', 'time', 'dates', 'times'], axis=1)
-        df['datetimes'] = pd.to_datetime(df['datetimes'])
-        df['sytm'] = df['datetimes'].map(lambda x: datetime.strftime(x, BaseHeader.SYTM_FORMAT)).str.upper()
-        df = df.drop('datetimes', axis=1)
-        df['sytm'] = df['sytm'].str[:-4]
-        df['sytm'] = df['sytm'].map(lambda x: "'" + str(x) + "'")
+        if 'date_time' in df.columns:
+            df['dates'] = df['date_time'].map(lambda x: datetime.strptime(x, ThermographHeader.date_format).date())
+            df['dates'] = df['dates'].astype("string")
+            df['times'] = df['date_time'].map(lambda x: datetime.strptime(x, ThermographHeader.time_format).time())
+            df['times'] = df['times'].astype("string")
+            df['datetimes'] = df['dates'] + ' ' + df['times']
+            df = df.drop(columns=['date', 'time', 'dates', 'times'], axis=1)
+            df['datetimes'] = pd.to_datetime(df['datetimes'])
+            df['sytm'] = df['datetimes'].map(lambda x: datetime.strftime(x, BaseHeader.SYTM_FORMAT)).str.upper()
+            df = df.drop('datetimes', axis=1)
+            df['sytm'] = df['sytm'].str[:-4]
+            df['sytm'] = df['sytm'].map(lambda x: "'" + str(x) + "'")
+        else:
+            df['dates'] = df['date'].map(lambda x: datetime.strptime(x, ThermographHeader.date_format).date())
+            df['dates'] = df['dates'].astype("string")
+            df['times'] = df['time'].map(lambda x: datetime.strptime(x, ThermographHeader.time_format).time())
+            df['times'] = df['times'].astype("string")
+            df['datetimes'] = df['dates'] + ' ' + df['times']
+            df = df.drop(columns=['date', 'time', 'dates', 'times'], axis=1)
+            df['datetimes'] = pd.to_datetime(df['datetimes'])
+            df['sytm'] = df['datetimes'].map(lambda x: datetime.strftime(x, BaseHeader.SYTM_FORMAT)).str.upper()
+            df = df.drop('datetimes', axis=1)
+            df['sytm'] = df['sytm'].str[:-4]
+            df['sytm'] = df['sytm'].map(lambda x: "'" + str(x) + "'")
         return df
     
 
@@ -231,16 +259,16 @@ class ThermographHeader(OdfHeader):
         """
         
         mtr_dict = dict()
+        instrument_type = instrument_type.lower()
 
         if instrument_type == 'minilog':
 
             # Read the data lines from the MTR file.
             dfmtr = pd.read_table(mtrfile, sep = ',', header = None, encoding = 'iso8859_1', skiprows = 8)
-            
+            print(dfmtr.head())
+
             # rename the columns
             dfmtr.columns = ['date', 'time', 'temperature']
-
-            mtr_dict['df'] = dfmtr
 
             # Get the instrument type and gauge (serial number) from the MTR file.
             with open(mtrfile, 'r', encoding = 'iso8859_1') as f:
@@ -252,6 +280,7 @@ class ThermographHeader(OdfHeader):
                         gauge = info.split('-')[-1].strip()
                         break
             
+            mtr_dict['df'] = dfmtr
             mtr_dict['inst_model'] = inst_model
             mtr_dict['gauge'] = gauge
             mtr_dict['filename'] = mtrfile
@@ -355,7 +384,7 @@ class ThermographHeader(OdfHeader):
 
             print(f'\nProcessing Metadata file: {metadata_file_path}\n')
             meta = self.read_metadata(metadata_file_path, institution_name)
-
+        
             print(f'\nProcessing Thermograph Data file: {data_file_path}\n')
             mydict = self.read_mtr(data_file_path, instrument_type)
 
@@ -431,7 +460,15 @@ class ThermographHeader(OdfHeader):
             gauge = mydict['gauge']
             print(df.head())
 
+            # path = Path(metadata_file_path)
             meta_subset = meta[meta['ID'] == int(gauge)]
+
+            if len(meta_subset) > 1:
+                path1 = Path(data_file_path)
+                # path2 = Path(str(meta['file_name']))
+                print(f"{path1.stem}.hobo")
+                meta_subset = meta[meta['file_name'] == f"{path1.stem}.hobo"]
+
             print(meta_subset.head())
             print('\n')
 
@@ -440,7 +477,10 @@ class ThermographHeader(OdfHeader):
             inst_model = meta_subset['Instrument'].iloc[0]
 
             self.cruise_header.country_institute_code = 1810
-            cruise_year = df['date'].to_string(index=False).split('-')[0]
+            if instrument_type == 'minilog':
+                cruise_year = df['date'].to_string(index=False).split('-')[0]
+            elif instrument_type == 'hobo':
+                cruise_year = df['date_time'].to_string(index=False).split('-')[0]
             cruise_number = f'BCD{cruise_year}999'
             self.cruise_header.cruise_number = cruise_number
             start_date = f"{self.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
@@ -453,7 +493,11 @@ class ThermographHeader(OdfHeader):
             
             self.event_header.data_type = 'MTR'
             self.event_header.event_qualifier1 = gauge
-            self.event_header.event_qualifier2 = str(self.sampling_interval(df))
+            if instrument_type == 'minilog':
+                self.event_header.event_qualifier2 = str(self.sampling_interval(df))
+            elif instrument_type == 'hobo':
+                sampling_interval = float(meta_subset['Sampling@ (min)'].iloc[0]) * 60
+                self.event_header.event_qualifier2 = str(meta_subset['Sampling@ (min)'].iloc[0])  
             self.event_header.creation_date = get_current_date_time()
             self.event_header.orig_creation_date = get_current_date_time()
             self.event_header.start_date_time = self.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
@@ -480,7 +524,10 @@ class ThermographHeader(OdfHeader):
             self.event_header.min_depth = min(depth)
             self.event_header.max_depth = max(depth)
             self.event_header.event_number = f"{matching_indices[0]:03d}"
-            self.event_header.sampling_interval = float(self.sampling_interval(df))
+            if instrument_type == 'minilog':
+                self.event_header.sampling_interval = float(self.sampling_interval(df))
+            elif instrument_type == 'hobo':
+                self.event_header.sampling_interval = sampling_interval
             
             if 'minilog' in inst_model.lower():
                 self.instrument_header.instrument_type = 'MINILOG'
@@ -510,7 +557,7 @@ def main():
     # instrument_type = 'minilog'
     # metadata_file = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LatLong LFA 30_14.txt' # FSRS
     # data_folder_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/' # FSRS
-    # data_file_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/Minilog-T_5665_2014GMacCuspic_1.csv' # FSRS
+    # data_file_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/Minilog-II-T_354633_2014jmacleod_1.csv' # FSRS
 
     institution_name = 'BIO'
     # instrument_type = 'minilog'
