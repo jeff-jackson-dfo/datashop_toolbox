@@ -1,6 +1,9 @@
 from odf_oracle.database_connection_pool import get_database_pool
 import sqlite3
 from typing import TypedDict
+import os
+from pathlib import Path
+import posixpath
 
 class ParamInfo(TypedDict):
     description: str
@@ -38,7 +41,9 @@ def lookup_parameter(database: str, parameter: str) -> ParamInfo:
 
         case 'sqlite':
 
-            with sqlite3.connect('C:/DFO-MPO/Dev/GitHub/datashop_toolbox/database/parameters.db') as conn:
+            top_path = Path(os.getcwd())
+            db_path = posixpath.join(top_path, 'database/parameters.db')
+            with sqlite3.connect(db_path) as conn:
 
                 sql_statement = f"select * from ODF_PARAMETERS where code = '{parameter}'"
 
@@ -61,8 +66,8 @@ def main():
 
     # Get parameter information for TEMP from the ODF database.
     parameter = 'TEMP'
-    pinfo = lookup_parameter('oracle', parameter)
-    # pinfo = lookup_parameter('sqlite', parameter)
+    # pinfo = lookup_parameter('oracle', parameter)
+    pinfo = lookup_parameter('sqlite', parameter)
     print(pinfo)
 
 
