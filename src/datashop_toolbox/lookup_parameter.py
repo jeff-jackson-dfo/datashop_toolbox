@@ -1,8 +1,8 @@
 from odf_oracle.database_connection_pool import get_database_pool
 import sqlite3
 from typing import TypedDict
-import os
-from pathlib import Path, PurePosixPath
+from pathlib import Path
+from importlib.resources import files
 
 class ParamInfo(TypedDict):
     description: str
@@ -40,9 +40,8 @@ def lookup_parameter(database: str, parameter: str) -> ParamInfo:
 
         case 'sqlite':
 
-            top_path = Path(os.getcwd())
-            top_path = top_path.as_posix()
-            db_path = PurePosixPath(top_path, 'database/parameters.db')
+            db_path = Path(files("datashop_toolbox") / "database/parameters.db")
+            print(db_path)
             with sqlite3.connect(db_path) as conn:
 
                 sql_statement = f"select * from ODF_PARAMETERS where code = '{parameter}'"
