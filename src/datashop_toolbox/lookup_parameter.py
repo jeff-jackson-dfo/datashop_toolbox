@@ -2,7 +2,7 @@ from odf_oracle.database_connection_pool import get_database_pool
 import sqlite3
 from typing import TypedDict
 from pathlib import Path
-from importlib.resources import files
+from importlib import resources
 
 class ParamInfo(TypedDict):
     description: str
@@ -40,23 +40,24 @@ def lookup_parameter(database: str, parameter: str) -> ParamInfo:
 
         case 'sqlite':
 
-            db_path = Path(files("datashop_toolbox") / "database/parameters.db")
-            print(db_path)
-            with sqlite3.connect(db_path) as conn:
+            # Get a safe, real filesystem path to the packaged parameters.db
+            with resources.as_file(
+                resources.files("datashop_toolbox.database").joinpath("parameters.db")
+            ) as db_path:            
+                with sqlite3.connect(db_path) as conn:
+                    sql_statement = f"select * from ODF_PARAMETERS where code = '{parameter}'"
 
-                sql_statement = f"select * from ODF_PARAMETERS where code = '{parameter}'"
+                    cursor = conn.execute(sql_statement)
 
-                cursor = conn.execute(sql_statement)
+                    for row in cursor:
+                        result = row
 
-                for row in cursor:
-                    result = row
-
-                column_names = [desc[0].lower() for desc in cursor.description]
-                pinfo = dict(zip(column_names, result))
-                parameter_info["description"] = pinfo.get("description", "Unknown")
-                parameter_info["units"] = pinfo.get("units", "Unknown")
-                parameter_info["print_field_width"] = pinfo.get("print_field_width", 0)
-                parameter_info["print_decimal_places"] = pinfo.get("print_decimal_places", 0)
+                    column_names = [desc[0].lower() for desc in cursor.description]
+                    pinfo = dict(zip(column_names, result))
+                    parameter_info["description"] = pinfo.get("description", "Unknown")
+                    parameter_info["units"] = pinfo.get("units", "Unknown")
+                    parameter_info["print_field_width"] = pinfo.get("print_field_width", 0)
+                    parameter_info["print_decimal_places"] = pinfo.get("print_decimal_places", 0)
 
     return parameter_info
 
