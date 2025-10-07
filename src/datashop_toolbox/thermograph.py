@@ -487,15 +487,15 @@ class ThermographHeader(OdfHeader):
                 path1 = Path(data_file_path)
                 if instrument_type == 'hobo':
                     print(f"{path1.stem}.hobo")
-                    meta_subset = meta[meta['file_name'] == f"{path1.stem}.hobo"]
+                    meta_subset = meta_subset[meta_subset['file_name'] == f"{path1.stem}.hobo"]
                 else:
                     print(f"{path1.stem}.vld")
-                    meta_subset = meta[meta['file_name'] == f"{path1.stem}.vld"]
+                    meta_subset = meta_subset[meta_subset['file_name'] == f"{path1.stem}.vld"]
 
             print(meta_subset.head())
             print('\n')
 
-            matching_indices = meta[meta['ID'] == int(gauge)].index
+            matching_indices = meta_subset[meta_subset['ID'] == int(gauge)].index
 
             inst_model = meta_subset['Instrument'].iloc[0]
 
@@ -512,6 +512,7 @@ class ThermographHeader(OdfHeader):
             self.cruise_header.end_date = end_date
             self.cruise_header.organization = 'DFO BIO'
             self.cruise_header.chief_scientist = 'Adam Drozdowski'
+            self.cruise_header.cruise_name = meta_subset['location'].iloc[0]
             self.cruise_header.cruise_description = ''
             
             self.event_header.data_type = 'MTR'
