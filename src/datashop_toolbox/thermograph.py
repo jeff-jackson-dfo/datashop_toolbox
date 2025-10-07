@@ -431,7 +431,7 @@ class ThermographHeader(OdfHeader):
             
             self.event_header.data_type = 'MTR'
             self.event_header.event_qualifier1 = gauge
-            self.event_header.event_qualifier2 = str(self.get_sampling_interval(df))
+            self.event_header.event_qualifier2 = str(int(self.get_sampling_interval(df)))
             self.event_header.creation_date = get_current_date_time()
             self.event_header.orig_creation_date = get_current_date_time()
             self.event_header.start_date_time = self.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
@@ -517,7 +517,7 @@ class ThermographHeader(OdfHeader):
             self.event_header.data_type = 'MTR'
             self.event_header.event_qualifier1 = gauge
             sampling_interval = self.get_sampling_interval(df)
-            self.event_header.event_qualifier2 = str(sampling_interval)
+            self.event_header.event_qualifier2 = str(int(sampling_interval))
             self.event_header.creation_date = get_current_date_time()
             self.event_header.orig_creation_date = get_current_date_time()
             self.event_header.start_date_time = self.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()

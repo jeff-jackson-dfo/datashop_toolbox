@@ -29,10 +29,16 @@ class MainWindow(QMainWindow):
         self.line_edit.setFont(font)
         self.line_edit.editingFinished.connect(self.editing_finished)
 
+        self.institution_combo_label = QLabel("Select institution:")
+        self.institution_combo_label.setFixedSize(225, 10)
         self.institution_combo = QComboBox()
         self.institution_combo.addItems(["Unknown", "BIO", "FSRS"])
         self.institution_combo.currentTextChanged.connect( self.institution_text_changed )  # Sends the current text (string) of the selected item.
 
+        self.instrument_combo_label = QLabel("Select instrument:")
+        self.instrument_combo_label.setFixedSize(225, 10)
+        font = self.instrument_combo_label.font
+        
         self.instrument_combo = QComboBox()
         self.instrument_combo.addItems(["Unknown", "Minilog", "Hobo"])
         self.instrument_combo.currentTextChanged.connect( self.instrument_text_changed )  # Sends the current text (string) of the selected item.
@@ -82,10 +88,20 @@ class MainWindow(QMainWindow):
         v_layout1.addWidget(self.line_edit_title)
         v_layout1.addWidget(self.line_edit)
 
-        # Horizontal layout for combo boxes
+        # Vertical layout for institution label + combo box
+        v_layout2 = QVBoxLayout()
+        v_layout2.addWidget(self.institution_combo_label)
+        v_layout2.addWidget(self.institution_combo)
+
+        # Vertical layout for instrument label + combo box
+        v_layout3 = QVBoxLayout()
+        v_layout3.addWidget(self.instrument_combo_label)
+        v_layout3.addWidget(self.instrument_combo)
+
+        # Horizontal layout for combo boxes and their labels
         h_layout1 = QHBoxLayout()
-        h_layout1.addWidget(self.institution_combo)
-        h_layout1.addWidget(self.instrument_combo)
+        h_layout1.addLayout(v_layout2)
+        h_layout1.addLayout(v_layout3)
 
         # Horizontal layout for buttons to open file and folder dialogs
         h_layout2 = QHBoxLayout()
@@ -102,9 +118,9 @@ class MainWindow(QMainWindow):
         h_layout4.addWidget(self.data_folder_label)
         h_layout4.addWidget(self.data_folder_path_text)
 
-        v_layout2 = QVBoxLayout()
-        v_layout2.addLayout(h_layout3)
-        v_layout2.addLayout(h_layout4)
+        v_layout4 = QVBoxLayout()
+        v_layout4.addLayout(h_layout3)
+        v_layout4.addLayout(h_layout4)
 
         # Horizontal layout for buttons used to close the window
         h_layout5 = QHBoxLayout()
@@ -115,7 +131,7 @@ class MainWindow(QMainWindow):
         # Add horizontal layouts into vertical layout
         v_layout1.addLayout(h_layout1)
         v_layout1.addLayout(h_layout2)
-        v_layout1.addLayout(v_layout2)
+        v_layout1.addLayout(v_layout4)
         v_layout1.addLayout(h_layout5)
 
         container = QWidget()
