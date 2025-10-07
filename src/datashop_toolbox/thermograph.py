@@ -1,8 +1,10 @@
 from datetime import datetime
 import glob
+import math
 import os
 import posixpath
 import pytz
+import re
 import sys
 import pandas as pd
 from pathlib import Path
@@ -73,16 +75,22 @@ class ThermographHeader(OdfHeader):
         return end_date_time
 
 
-    def sampling_interval(self, df: pd.Series) -> int:
+    def get_sampling_interval(self, df: pd.Series) -> float:
         """ Compute the time interval between the first two date-time values. """
-        date1 = datetime.strptime(df['date'].iloc[0], ThermographHeader.date_format)
-        time1 = datetime.strptime(df['time'].iloc[0], ThermographHeader.time_format).time()
-        datetime1 = datetime.combine(date1, time1)
-        date2 = datetime.strptime(df['date'].iloc[1], ThermographHeader.date_format)
-        time2 = datetime.strptime(df['time'].iloc[1], ThermographHeader.time_format).time()
-        datetime2 = datetime.combine(date2, time2)
-        time_interval = datetime2 - datetime1
-        time_interval = time_interval.seconds
+        if 'date_time' in df.columns:
+            datetime1 = df['date_time'][0]
+            datetime2 = df['date_time'][1]
+            time_interval = datetime2 - datetime1
+            time_interval = float(time_interval.seconds)
+        else:
+            date1 = datetime.strptime(df['date'].iloc[0], ThermographHeader.date_format)
+            time1 = datetime.strptime(df['time'].iloc[0], ThermographHeader.time_format).time()
+            datetime1 = datetime.combine(date1, time1)
+            date2 = datetime.strptime(df['date'].iloc[1], ThermographHeader.date_format)
+            time2 = datetime.strptime(df['time'].iloc[1], ThermographHeader.time_format).time()
+            datetime2 = datetime.combine(date2, time2)
+            time_interval = datetime2 - datetime1
+            time_interval = float(time_interval.seconds)
         return time_interval
 
 
@@ -178,6 +186,12 @@ class ThermographHeader(OdfHeader):
         dm = float(toks[1])
         dd = deg + dm/60
         return dd
+
+
+    @staticmethod
+    def extract_number(s: str) -> float | None:
+        match = re.sub(r'[^0-9.]', '', s)
+        return float(match) if match else None
 
 
     def populate_parameter_headers(self, df: pd.DataFrame):
@@ -388,10 +402,10 @@ class ThermographHeader(OdfHeader):
 
         if institution_name == 'FSRS':
 
-            print(f'\nProcessing Metadata file: {metadata_file_path}\n')
+            # print(f'\nProcessing Metadata file: {metadata_file_path}\n')
             meta = self.read_metadata(metadata_file_path, institution_name)
         
-            print(f'\nProcessing Thermograph Data file: {data_file_path}\n')
+            # print(f'\nProcessing Thermograph Data file: {data_file_path}\n')
             mydict = self.read_mtr(data_file_path, instrument_type)
 
             df = mydict['df']
@@ -417,7 +431,7 @@ class ThermographHeader(OdfHeader):
             
             self.event_header.data_type = 'MTR'
             self.event_header.event_qualifier1 = gauge
-            self.event_header.event_qualifier2 = str(self.sampling_interval(df))
+            self.event_header.event_qualifier2 = str(self.get_sampling_interval(df))
             self.event_header.creation_date = get_current_date_time()
             self.event_header.orig_creation_date = get_current_date_time()
             self.event_header.start_date_time = self.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
@@ -436,7 +450,7 @@ class ThermographHeader(OdfHeader):
             self.event_header.min_depth = min(depth)
             self.event_header.max_depth = max(depth)
             self.event_header.event_number = str(meta_subset['vessel_code'].iloc[0])
-            self.event_header.sampling_interval = float(self.sampling_interval(df))
+            self.event_header.sampling_interval = float(self.get_sampling_interval(df))
             
             if 'minilog' in inst_model.lower():
                 self.instrument_header.instrument_type = 'MINILOG'
@@ -454,10 +468,10 @@ class ThermographHeader(OdfHeader):
 
         elif institution_name == 'BIO':
 
-            print(f'\nProcessing Metadata file: {metadata_file_path}\n')
+            # print(f'\nProcessing Metadata file: {metadata_file_path}\n')
             meta = self.read_metadata(metadata_file_path, institution_name)
 
-            print(f'\nProcessing Thermograph Data file: {data_file_path}\n')
+            # print(f'\nProcessing Thermograph Data file: {data_file_path}\n')
             mydict = self.read_mtr(data_file_path, instrument_type)
 
             df = mydict['df']
@@ -467,13 +481,16 @@ class ThermographHeader(OdfHeader):
             print(df.head())
 
             # path = Path(metadata_file_path)
-            meta_subset = meta[meta['ID'] == int(gauge)]
+            meta_subset = meta[meta['ID'] == float(gauge)]
 
             if len(meta_subset) > 1:
                 path1 = Path(data_file_path)
-                # path2 = Path(str(meta['file_name']))
-                print(f"{path1.stem}.hobo")
-                meta_subset = meta[meta['file_name'] == f"{path1.stem}.hobo"]
+                if instrument_type == 'hobo':
+                    print(f"{path1.stem}.hobo")
+                    meta_subset = meta[meta['file_name'] == f"{path1.stem}.hobo"]
+                else:
+                    print(f"{path1.stem}.vld")
+                    meta_subset = meta[meta['file_name'] == f"{path1.stem}.vld"]
 
             print(meta_subset.head())
             print('\n')
@@ -499,11 +516,8 @@ class ThermographHeader(OdfHeader):
             
             self.event_header.data_type = 'MTR'
             self.event_header.event_qualifier1 = gauge
-            if instrument_type == 'minilog':
-                self.event_header.event_qualifier2 = str(self.sampling_interval(df))
-            elif instrument_type == 'hobo':
-                sampling_interval = float(meta_subset['Sampling@ (min)'].iloc[0]) * 60
-                self.event_header.event_qualifier2 = str(int(sampling_interval))
+            sampling_interval = self.get_sampling_interval(df)
+            self.event_header.event_qualifier2 = str(sampling_interval)
             self.event_header.creation_date = get_current_date_time()
             self.event_header.orig_creation_date = get_current_date_time()
             self.event_header.start_date_time = self.start_date_time(df).strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
@@ -523,15 +537,25 @@ class ThermographHeader(OdfHeader):
             self.event_header.end_latitude = lat
             self.event_header.end_longitude = long
             depth = []
+            min_val = None
+            max_val = None
             dep_dep = str(meta_subset['dep_dep'].iloc[0])
-            depth.append(dep_dep.split(' ')[0])
+            dep_dep = self.extract_number(dep_dep)
+            if not pd.isna(dep_dep):
+                depth.append(dep_dep)
             dep_rec = str(meta_subset['dep_rec'].iloc[0])
-            depth.append(dep_rec.split(' ')[0])
-            self.event_header.min_depth = min(depth)
-            self.event_header.max_depth = max(depth)
+            dep_rec = self.extract_number(dep_rec)
+            if not pd.isna(dep_rec):
+                depth.append(dep_rec)
+            valid_depths = [d for d in depth if not math.isnan(d)]                
+            if valid_depths:  # avoid ValueError if list is empty
+                min_val = min(valid_depths)
+                max_val = max(valid_depths)
+                self.event_header.min_depth = min_val
+                self.event_header.max_depth = max_val
             self.event_header.event_number = f"{matching_indices[0]:03d}"
             if instrument_type == 'minilog':
-                self.event_header.sampling_interval = float(self.sampling_interval(df))
+                self.event_header.sampling_interval = float(self.get_sampling_interval(df))
                 self.instrument_header.instrument_type = 'MINILOG'
             elif instrument_type == 'hobo':
                 self.event_header.sampling_interval = sampling_interval            
@@ -608,7 +632,6 @@ def main():
             print()
 
             mtr_path = posixpath.join(data_folder_path, file_name)
-            print(f'\nProcessing MTR raw file: {mtr_path}\n')
 
             mtr = ThermographHeader()
 
@@ -646,10 +669,11 @@ def main():
         institution_name = 'BIO'
         # instrument_type = 'minilog'
         instrument_type = 'hobo'
-        metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
+        metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2014999.xlsx' # BIO
+        # metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
         data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
-        data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Canso_10231582.csv'  # BIO
+        data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/cape_sable_summer_2014.csv'  # BIO
 
         history_header = HistoryHeader()
         history_header.creation_date = get_current_date_time()
