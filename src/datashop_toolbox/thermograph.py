@@ -326,11 +326,11 @@ class ThermographHeader(OdfHeader):
                 elif cname == "Abs Pres":
                     column_names.append("pressure")
                     cols_to_keep.append(i)
-                    toks = cnames[1].split(":")
-                    inst_id = toks[1]
                 elif cname == "Temp":
                     column_names.append("temperature")
                     cols_to_keep.append(i)
+                    toks = cnames[1].split(":")
+                    inst_id = toks[1]
                 elif cname == "DO conc":
                     column_names.append("dissolved_oxygen")
                     cols_to_keep.append(i)
@@ -477,8 +477,13 @@ class ThermographHeader(OdfHeader):
             df = mydict['df']
             if 'inst_model' in mydict:
                 inst_model = mydict['inst_model']
-            gauge = mydict['gauge']
+            gauge = int(mydict['gauge'])
             print(df.head())
+
+            # Remove any leading or trailing spaces from the file names.
+            meta['file_name'] = meta['file_name'].str.strip()
+            # Make the file
+            meta['file_name'] = meta['file_name'].str.lower()
 
             # path = Path(metadata_file_path)
             meta_subset = meta[meta['ID'] == float(gauge)]
@@ -486,16 +491,18 @@ class ThermographHeader(OdfHeader):
             if len(meta_subset) > 1:
                 path1 = Path(data_file_path)
                 if instrument_type == 'hobo':
-                    print(f"{path1.stem}.hobo")
-                    meta_subset = meta_subset[meta_subset['file_name'] == f"{path1.stem}.hobo"]
+                    hobo_file = f"{path1.stem}.hobo".lower()
+                    print(hobo_file)
+                    meta_subset = meta_subset[meta_subset['file_name'] == hobo_file]
                 else:
-                    print(f"{path1.stem}.vld")
-                    meta_subset = meta_subset[meta_subset['file_name'] == f"{path1.stem}.vld"]
+                    minilog_file = f"{path1.stem}.vld".lower()
+                    print(minilog_file)
+                    meta_subset = meta_subset[meta_subset['file_name'] == minilog_file]
 
             print(meta_subset.head())
             print('\n')
 
-            matching_indices = meta_subset[meta_subset['ID'] == int(gauge)].index
+            matching_indices = meta_subset[meta_subset['ID'] == gauge].index
 
             inst_model = meta_subset['Instrument'].iloc[0]
 
@@ -516,7 +523,7 @@ class ThermographHeader(OdfHeader):
             self.cruise_header.cruise_description = ''
             
             self.event_header.data_type = 'MTR'
-            self.event_header.event_qualifier1 = gauge
+            self.event_header.event_qualifier1 = str(gauge)
             sampling_interval = self.get_sampling_interval(df)
             self.event_header.event_qualifier2 = str(int(sampling_interval))
             self.event_header.creation_date = get_current_date_time()
@@ -562,7 +569,7 @@ class ThermographHeader(OdfHeader):
                 self.event_header.sampling_interval = sampling_interval            
                 self.instrument_header.instrument_type = 'HOBO'
             self.instrument_header.model = inst_model
-            self.instrument_header.serial_number = gauge
+            self.instrument_header.serial_number = str(gauge)
             self.instrument_header.description = 'Temperature data logger'
 
             new_df = self.create_sytm(df)
@@ -578,7 +585,7 @@ class ThermographHeader(OdfHeader):
 
 def main():
 
-    use_gui = True
+    use_gui = False
 
     if use_gui:
 
@@ -674,7 +681,8 @@ def main():
         # metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
         data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
-        data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/cape_sable_summer_2014.csv'  # BIO
+        # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/cape_sable_summer_2014.csv'  # BIO
+        data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Dundee_summer2014_1001599.csv'  # BIO
 
         history_header = HistoryHeader()
         history_header.creation_date = get_current_date_time()
