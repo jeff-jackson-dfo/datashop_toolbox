@@ -219,6 +219,9 @@ class ThermographHeader(OdfHeader):
             elif column == 'pressure':
                 param_name = 'PRES'
                 parameter_header.type = 'DOUB'
+            elif column == 'depth':
+                param_name = 'DEPH'
+                parameter_header.type = 'DOUB'
             if parameter_header.type == 'DOUB':
                 param_code = f"{param_name}_01"
                 min_temp = df[column].min()
@@ -325,6 +328,9 @@ class ThermographHeader(OdfHeader):
                     cols_to_keep.append(i)
                 elif cname == "Abs Pres":
                     column_names.append("pressure")
+                    cols_to_keep.append(i)
+                elif cname == "Sensor Depth":
+                    column_names.append("depth")
                     cols_to_keep.append(i)
                 elif cname == "Temp":
                     column_names.append("temperature")
@@ -677,12 +683,14 @@ def main():
         institution_name = 'BIO'
         # instrument_type = 'minilog'
         instrument_type = 'hobo'
-        metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2014999.xlsx' # BIO
+        metadata_file = 'C:/DFO-MPO/DEV/MTR/BCD2014999/MetaData_BCD2014999.xlsx' # BIO
         # metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
-        data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
+        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
+        data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/cape_sable_summer_2014.csv'  # BIO
-        data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Dundee_summer2014_1001599.csv'  # BIO
+        # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/LTTMP_summer2014_HLFX_1273003_south.csv'  # BIO
+        data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/Dundee_10231582.csv'  # BIO
 
         history_header = HistoryHeader()
         history_header.creation_date = get_current_date_time()
