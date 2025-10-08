@@ -51,7 +51,7 @@ else:
     # Create the required subfolder, if necessary
     if not os.path.isdir(os.path.join(data_folder_path, 'Step_1_Create_ODF')):
         os.mkdir('Step_1_Create_ODF')
-    odf_path = os.path.join(data_folder_path, 'Step_1_Create_ODF')
+    odf_path = posixpath.join(data_folder_path, 'Step_1_Create_ODF')
 
 # Loop through the CSV files to generate an ODF file for each.
 for file_name in files:
@@ -79,7 +79,7 @@ for file_name in files:
 
     mtr.update_odf()
 
-    odf_file_path = os.path.join(odf_path, file_spec + '.ODF')
+    odf_file_path = posixpath.join(odf_path, file_spec + '.ODF')
     mtr.write_odf(odf_file_path, version = 2.0)
 
     # Reset the shared log list

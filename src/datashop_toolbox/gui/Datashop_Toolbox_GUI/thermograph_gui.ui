@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ThermographMainWindow</class>
+ <widget class="QMainWindow" name="ThermographMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>750</width>
+    <height>380</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Choose Moored Thermograph Files to Process</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_main">
+    <item>
+     <layout class="QVBoxLayout" name="layout_name">
+      <item>
+       <widget class="QLabel" name="label_name">
+        <property name="text">
+         <string>Please enter the data processor's name in the text box below:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit_name"/>
+      </item>
+     </layout>
+    </item>
+
+    <item>
+     <layout class="QHBoxLayout" name="layout_combos">
+      <item>
+       <layout class="QVBoxLayout" name="layout_institution">
+        <item>
+         <widget class="QLabel" name="label_institution">
+          <property name="text">
+           <string>Select institution:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="combo_institution">
+          <item><property name="text"><string>Unknown</string></property></item>
+          <item><property name="text"><string>BIO</string></property></item>
+          <item><property name="text"><string>FSRS</string></property></item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+
+      <item>
+       <layout class="QVBoxLayout" name="layout_instrument">
+        <item>
+         <widget class="QLabel" name="label_instrument">
+          <property name="text">
+           <string>Select instrument:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="combo_instrument">
+          <item><property name="text"><string>Unknown</string></property></item>
+          <item><property name="text"><string>Minilog</string></property></item>
+          <item><property name="text"><string>Hobo</string></property></item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+
+    <item>
+     <layout class="QHBoxLayout" name="layout_buttons">
+      <item>
+       <widget class="QPushButton" name="button_metadata">
+        <property name="text">
+         <string>Select the Metadata file
+(e.g. LFA .txt or Excel file)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="button_datafolder">
+        <property name="text">
+         <string>Select the Data folder
+(Location of *.csv files)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+
+    <item>
+     <layout class="QHBoxLayout" name="layout_metadata">
+      <item><widget class="QLabel" name="label_metadata"><property name="text"><string>Metadata file selected:</string></property></widget></item>
+      <item><widget class="QLineEdit" name="lineEdit_metadata"/></item>
+     </layout>
+    </item>
+
+    <item>
+     <layout class="QHBoxLayout" name="layout_datafolder">
+      <item><widget class="QLabel" name="label_datafolder"><property name="text"><string>Data folder selected:</string></property></widget></item>
+      <item><widget class="QLineEdit" name="lineEdit_datafolder"/></item>
+     </layout>
+    </item>
+
+    <item>
+     <layout class="QHBoxLayout" name="layout_okcancel">
+      <item><spacer name="horizontalSpacer_left"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+      <item><widget class="QDialogButtonBox" name="buttonBox"><property name="standardButtons"><set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set></property></widget></item>
+      <item><spacer name="horizontalSpacer_right"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

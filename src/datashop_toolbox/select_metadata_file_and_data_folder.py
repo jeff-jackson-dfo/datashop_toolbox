@@ -32,16 +32,20 @@ class MainWindow(QMainWindow):
         self.institution_combo_label = QLabel("Select institution:")
         self.institution_combo_label.setFixedSize(225, 10)
         self.institution_combo = QComboBox()
-        self.institution_combo.addItems(["Unknown", "BIO", "FSRS"])
+        self.institution_combo.addItems(["BIO", "FSRS"])
         self.institution_combo.currentTextChanged.connect( self.institution_text_changed )  # Sends the current text (string) of the selected item.
+        self.institution_combo.setCurrentIndex(0)
+        self.institution_text_changed(self.institution_combo.currentText())
 
         self.instrument_combo_label = QLabel("Select instrument:")
         self.instrument_combo_label.setFixedSize(225, 10)
         font = self.instrument_combo_label.font
         
         self.instrument_combo = QComboBox()
-        self.instrument_combo.addItems(["Unknown", "Minilog", "Hobo"])
+        self.instrument_combo.addItems(["Minilog", "Hobo"])
         self.instrument_combo.currentTextChanged.connect( self.instrument_text_changed )  # Sends the current text (string) of the selected item.
+        self.instrument_combo.setCurrentIndex(0)
+        self.institution_text_changed(self.instrument_combo.currentText())
 
         self.file_button = QPushButton("Select the Metadata file\n(e.g. LFA .txt file, \nor Excel file)")
         self.file_button.setFixedSize(225, 100)
