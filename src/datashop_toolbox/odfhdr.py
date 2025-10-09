@@ -227,18 +227,6 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
         ndf = len(header_blocks_df)
 
-        # for i in range(ndf):
-        #     start_val: int = int(header_blocks_df.at[i, "index"]) + 1
-        #     header_field_range.at[i, 'Name'] = header_blocks_df.at[i, 'name']
-        #     header_field_range.at[i, 'Start'] = start_val
-
-        # for i in range(ndf):
-        #     if 0 < i < ndf - 1:
-        #         header_field_range.at[i - 1, "End"] = int(header_blocks_df.at[i, "index"]) - 1
-        #     elif i == ndf - 1:
-        #         header_field_range.at[i - 1, "End"] = int(header_blocks_df.at[i, "index"]) - 1
-        #         header_field_range.at[i, "End"] = data_line_start - 1
-
         header_field_range = pd.DataFrame({
             "Name": header_blocks_df["name"],
             "Start": header_blocks_df["index"] + 1,
@@ -377,6 +365,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
     #     else:
     #         eval(f"self.parameter_headers[codes.index(parameter_code)].set_{attribute}({value})")
 
+
+
     def get_parameter_codes(self) -> list:
         parameter_codes = list()
         for ph1 in self.parameter_headers:
@@ -472,7 +462,18 @@ class OdfHeader(ValidatedBase, BaseHeader):
         assert isinstance(df, pd.DataFrame), "Input argument 'df' must be a Pandas DataFrame."
         new_df = df.replace(BaseHeader.NULL_VALUE, None, inplace=False)
         return new_df
-                
+
+
+    def add_quality_flags(self):
+
+        df = self.data.data_frame
+        param_list = self.get_parameter_codes()
+        for i, param in self.parameter_headers:
+
+            print(param)
+
+        return self
+
 
 def main():
 
