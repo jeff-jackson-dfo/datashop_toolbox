@@ -519,14 +519,15 @@ class ThermographHeader(OdfHeader):
                 cruise_year = df['date_time'].to_string(index=False).split('-')[0]
             cruise_number = f'BCD{cruise_year}999'
             self.cruise_header.cruise_number = cruise_number
+            self.cruise_header.platform = 'BIO CRUISE DATA (NO ICES CODE)'
             start_date = f"{self.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
             self.cruise_header.start_date = start_date
             end_date = f"{self.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
             self.cruise_header.end_date = end_date
             self.cruise_header.organization = 'DFO BIO'
-            self.cruise_header.chief_scientist = 'Adam Drozdowski'
-            self.cruise_header.cruise_name = meta_subset['location'].iloc[0]
-            self.cruise_header.cruise_description = ''
+            self.cruise_header.chief_scientist = 'ADAM DROZDOWSKI'
+            self.cruise_header.cruise_name = f"LTTMP BIO VARIOUS SITES ({meta_subset['location'].iloc[0]})"
+            self.cruise_header.cruise_description = 'LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)'
             
             self.event_header.data_type = 'MTR'
             self.event_header.event_qualifier1 = str(gauge)
