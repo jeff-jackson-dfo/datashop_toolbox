@@ -1,4 +1,5 @@
 from datetime import datetime
+import numpy as np
 import pandas as pd
 from typing import TypedDict
 
@@ -159,26 +160,26 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output = "ODF_HEADER\n"
             odf_output += f"  FILE_SPECIFICATION = {self.file_specification}\n"
             odf_output += f"  ODF_SPECIFICATION_VERSION = {self.odf_specification_version}\n"
-            odf_output += self.cruise_header.print_object()
-            odf_output += self.event_header.print_object()
+            odf_output += self.cruise_header.print_object() + "\n"
+            odf_output += self.event_header.print_object() + "\n"
 
             for name, header in optional_headers:
                 if header is not None:
                     odf_output += add_header_output(header, use_commas=False)
 
-            odf_output += self.instrument_header.print_object()
+            odf_output += self.instrument_header.print_object() + "\n"
 
             for cal in self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers:
-                odf_output += cal.print_object()
+                odf_output += cal.print_object() + "\n"
 
             for hist in self.history_headers:
-                odf_output += hist.print_object()
+                odf_output += hist.print_object() + "\n"
 
             for param in self.parameter_headers:
-                odf_output += param.print_object()
+                odf_output += param.print_object() + "\n"
 
-            odf_output += self.record_header.print_object()
-            odf_output += "-- DATA --\n"
+            odf_output += self.record_header.print_object() + "\n"
+            odf_output += "-- DATA --" + "\n"
             odf_output += self.data.print_object()
 
         return odf_output
@@ -466,11 +467,70 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
     def add_quality_flags(self):
 
-        df = self.data.data_frame
-        param_list = self.get_parameter_codes()
-        for i, param in self.parameter_headers:
+        excluded_cols = ['SYTM', 'CNTR', 'SNCNTR']
+        qf_params = []
+        new_df = pd.DataFrame()
 
-            print(param)
+        df = self.data.data_frame
+        if df is None or df.empty:
+            raise ValueError("Data frame is empty. Cannot add quality flags.")
+        
+        default_qf_col = np.zeros(len(df), dtype=int)
+
+        # Add quality flags
+        for param_header in self.parameter_headers:
+
+            code = param_header.code
+
+            if any(code.startswith(excluded) for excluded in excluded_cols):
+                continue
+
+            qf_col = f"Q{code}"
+
+            param = ParameterHeader()
+            param.type="SING"
+            param.name = f'Quality Flag for Parameter: {code}'
+            param.units = 'none'
+            param.code = qf_col
+            param.null_string = f'{BaseHeader.NULL_VALUE}'
+            param.print_field_width = 1
+            param.print_decimal_places = 0
+            param.minimum_value = 0
+            param.maximum_value = 0
+            number_null = np.isnan(default_qf_col).sum()
+            param.number_valid = len(default_qf_col) - number_null
+            param.number_null = number_null
+
+            # Insert the new quality flag parameter header after the current parameter header
+            qf_params.append(param)
+
+        new_param_list = []
+        new_print_formats = {}
+
+        pcodes = self.get_parameter_codes()
+        index_sytm = pcodes.index('SYTM_01')
+        if index_sytm != -1:
+            new_param_list.append(self.parameter_headers[index_sytm])
+            new_df['SYTM_01'] = df['SYTM_01']
+            new_print_formats['SYTM_01'] = f"{self.parameter_headers[index_sytm].print_field_width}"
+            # Remove SYTM_01 from further processing
+            del self.parameter_headers[index_sytm]
+
+        # Continue to rebuild the parameter header list with quality flags inserted
+        for existing_param in self.parameter_headers:
+            new_param_list.append(existing_param)
+            new_df[existing_param.code] = df[existing_param.code]
+            # Look for a matching Quality Flag field (Qparam)
+            match = next((q for q in qf_params if q.code[1:] == existing_param.code), None)
+            if match:
+                new_param_list.append(match)
+                new_df[match.code] = default_qf_col
+            new_print_formats[param.code] = f"{param.print_field_width}.{param.print_decimal_places}"
+
+        self.parameter_headers = new_param_list
+        self.data.data_frame = new_df
+        self.data.parameter_list = self.get_parameter_codes()
+        self.data.print_formats = new_print_formats
 
         return self
 
@@ -646,8 +706,8 @@ def main():
         odf.record_header.set_logger_and_config(odf.logger, odf.config)
 
         # Prior to loading data into an Oracle database, the null values need to be replaced with None values.
-        # new_df = odf.null2empty(odf.data.data_frame)
-        # odf.data.data_frame = new_df
+        new_df = odf.null2empty(odf.data.data_frame)
+        odf.data.data_frame = new_df
 
         # Remove the CRAT_01 parameter.
         # from datashop_toolbox.remove_parameter import remove_parameter
@@ -749,6 +809,11 @@ def main():
         odf.file_specification = file_spec
         out_file = f"{file_spec}.ODF"
         odf.write_odf(my_path + 'tests\\Output\\' + out_file, version = 2.0)
+
+        odf.add_quality_flags()
+        qfs_out_file = f"{file_spec}_QFs.ODF"
+        odf.write_odf(my_path + 'tests\\Output\\' + qfs_out_file, version = 3.0)
+
 
 if __name__ == '__main__':
     main()
