@@ -222,6 +222,9 @@ class ThermographHeader(OdfHeader):
             elif column == 'depth':
                 param_name = 'DEPH'
                 parameter_header.type = 'DOUB'
+            elif column == 'dissolved_oxygen':
+                param_name = 'DOXY'
+                parameter_header.type = 'DOUB'
             if parameter_header.type == 'DOUB':
                 param_code = f"{param_name}_01"
                 min_temp = df[column].min()
@@ -305,7 +308,7 @@ class ThermographHeader(OdfHeader):
             
             mtr_dict['df'] = dfmtr
             mtr_dict['inst_model'] = inst_model
-            mtr_dict['gauge'] = gauge
+            mtr_dict['gauge'] = gauge.strip(",")
             mtr_dict['filename'] = mtrfile
 
         elif instrument_type == 'hobo':
@@ -682,16 +685,19 @@ def main():
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/Minilog-II-T_354633_2014jmacleod_1.csv' # FSRS
 
         institution_name = 'BIO'
-        # instrument_type = 'minilog'
-        instrument_type = 'hobo'
+        instrument_type = 'minilog'
+        # instrument_type = 'hobo'
         metadata_file = 'C:/DFO-MPO/DEV/MTR/BCD2014999/MetaData_BCD2014999.xlsx' # BIO
         # metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
         # data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
-        data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/'  # BIO
+        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/'  # BIO
+        data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Minilog/'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/cape_sable_summer_2014.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/LTTMP_summer2014_HLFX_1273003_south.csv'  # BIO
-        data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/Dundee_10231582.csv'  # BIO
+        # data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/Dundee_10231582.csv'  # BIO
+        data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Minilog/LTTMP_summer2004_HLFX_352816_east.csv'  # BIO
+        # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Whycocomagh_885_north_10m.csv'  # BIO
 
         history_header = HistoryHeader()
         history_header.creation_date = get_current_date_time()
