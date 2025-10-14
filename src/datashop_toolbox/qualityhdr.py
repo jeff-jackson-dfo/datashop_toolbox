@@ -1,7 +1,7 @@
 from typing import List
 from pydantic import Field, field_validator, ConfigDict
 from datashop_toolbox.basehdr import BaseHeader
-from datashop_toolbox.validated_base import ValidatedBase, check_string, check_datetime, list_to_dict
+from datashop_toolbox.validated_base import ValidatedBase, check_string, check_datetime, list_to_dict, get_current_date_time
 
 class QualityHeader(ValidatedBase, BaseHeader):
     """ A class to represent a Quality Header in an ODF object. """
@@ -62,6 +62,33 @@ class QualityHeader(ValidatedBase, BaseHeader):
         quality_comment = check_string(quality_comment)
         self.quality_comments.append(quality_comment)
 
+    def add_default_quality_info(self) -> None:
+        defaults_comments = [
+            'QUALITY CODES', 
+            '  0: Value has not been quality controlled', 
+            '  1: Value seems to be correct', 
+            '  2: Value appears inconsistent with other values', 
+            '  3: Value seems doubtful', 
+            '  4: Value seems erroneous', 
+            '  5: Value was modified', 
+            '  9: Value is missing', 
+            'QCFF CHANNEL', 
+            '  The QCFF flag allows one to determine from which test(s) the quality flag(s) originate.', 
+            '  It only applies to the stage 2 quality control tests.', 
+            '  Each test in this step is associated with a number 2x, where x is a whole positive number.', 
+            '  Before running the quality control, a QCFF value of 0 is attributed to each line of data.', 
+            '  When a test fails, the value of 2x that is associated with that test is added to the QCFF.', 
+            '  In this way one can easily identify which tests failed by analyzing the QCFF value.', 
+            '  If the QC flag of a record is modified by hand, a value of 1 is added to the QCFF.'
+        ]
+        if self.quality_date == BaseHeader.SYTM_NULL_VALUE:
+            self.quality_date = get_current_date_time()
+        if not self.quality_tests:
+            self.quality_tests.append('No quality tests performed')
+        for comment in defaults_comments:
+            if comment not in self.quality_comments:
+                self.quality_comments.append(comment)
+
     def populate_object(self, quality_fields: list) -> "QualityHeader":
         for header_line in quality_fields:
             tokens = header_line.split('=', maxsplit=1)
@@ -108,6 +135,9 @@ def main():
     quality_header.set_quality_test('Test 1')
     quality_header.set_quality_test('Test 2')
     quality_header.quality_comments = ['Comment 1', 'Comment 2']
+    print(quality_header.print_object())
+
+    quality_header.add_default_quality_info()
     print(quality_header.print_object())
 
 if __name__ == '__main__':
