@@ -1,5 +1,4 @@
 import glob
-from icecream import ic
 import matplotlib.pyplot as plt
 from matplotlib.widgets import LassoSelector
 from matplotlib.path import Path
@@ -47,7 +46,7 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
         # Store multiple selection groups
         selection_groups = []
 
-        # Plot
+        # Plot the temperature time series
         fig, ax = plt.subplots(figsize=(10, 6))
         pts = ax.scatter(df.index, df['Temperature'], s=10, color='blue')
         plt.title('Time Series Data')
@@ -67,7 +66,6 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
             selected_dt = mdates.num2date(selected_points[:, 0])
             selected_temp = selected_points[:, 1]
             selected_df = pd.DataFrame({'DateTime': selected_dt, 'Temperature': selected_temp, 'idx': selected_indices})
-            ic(selected_df)
             selection_groups.append(selected_df)
 
         # Activate lasso
@@ -95,15 +93,10 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
 
                 # Append safely using np.concatenate
                 indices_to_flag = np.concatenate((indices_to_flag, np.array(additional_indices, dtype=int)))
-                ic(indices_to_flag)
 
                 orig_df.loc[indices_to_flag, 'QTE90_01'] = 4
 
-                # print(f"length of indices_to_flag: {len(indices_to_flag)}")
-                # print(f"length of indices_to_flag_as_bad: {len(indices_to_flag_as_bad)}")
                 indices_to_flag_as_bad = np.append(indices_to_flag_as_bad, indices_to_flag)
-                # print(f"length of indices_to_flag_as_bad: {len(indices_to_flag_as_bad)}")
-
         else:
             print("No points were selected.")
 
