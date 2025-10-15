@@ -19,6 +19,7 @@ from datashop_toolbox.records import DataRecords
 from datashop_toolbox.validated_base import ValidatedBase, add_commas, clean_strings, read_file_lines, find_lines_with_text, split_lines_into_dict, check_string
 from typing import Optional, List
 from pydantic import Field, field_validator, ConfigDict
+from termcolor import cprint, colored
 
 
 class HeaderFieldRangeSchema(TypedDict):
@@ -327,7 +328,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
         file1 = open(odf_file_path, "w")
         file1.write(odf_file_text)
         file1.close()
-        print(f"ODF file written to {odf_file_path}\n")
+        msg1 = colored("ODF file written to: ", 'yellow')
+        msg2 = colored(f"{odf_file_path}", 'cyan')
+        msg = msg1 + msg2
+        print(msg)
 
     @staticmethod
     def generate_creation_date() -> str:
@@ -811,6 +815,8 @@ def main():
         odf.write_odf(my_path + 'tests\\Output\\' + out_file, version = 2.0)
 
         odf.add_quality_flags()
+        odf.quality_header.add_quality_codes()
+        odf.quality_header.add_qcff_info()
         qfs_out_file = f"{file_spec}_QFs.ODF"
         odf.write_odf(my_path + 'tests\\Output\\' + qfs_out_file, version = 3.0)
 

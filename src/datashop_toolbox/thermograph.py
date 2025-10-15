@@ -20,6 +20,7 @@ from datashop_toolbox.odfhdr import OdfHeader
 from datashop_toolbox.parameterhdr import ParameterHeader
 from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.lookup_parameter import lookup_parameter
+from datashop_toolbox.qualityhdr import QualityHeader
 from datashop_toolbox import select_metadata_file_and_data_folder
 
 
@@ -291,7 +292,7 @@ class ThermographHeader(OdfHeader):
 
             # Read the data lines from the MTR file.
             dfmtr = pd.read_table(mtrfile, sep = ',', header = None, encoding = 'iso8859_1', skiprows = 8)
-            print(dfmtr.head())
+            # print(dfmtr.head())
 
             # rename the columns
             dfmtr.columns = ['date', 'time', 'temperature']
@@ -361,7 +362,7 @@ class ThermographHeader(OdfHeader):
             mtr_dict['df'] = dfmtr
             mtr_dict['gauge'] = inst_id
             mtr_dict['filename'] = mtrfile
-            print(mtr_dict)
+            # print(mtr_dict)
 
         return mtr_dict
 
@@ -420,11 +421,11 @@ class ThermographHeader(OdfHeader):
             df = mydict['df']
             inst_model = mydict['inst_model']
             gauge = mydict['gauge']
-            print(df.head())
+            # print(df.head())
 
             meta_subset = meta[meta['gauge'] == int(gauge)]
-            print(meta_subset.head())
-            print('\n')
+            # print(meta_subset.head())
+            # print('\n')
 
             self.cruise_header.country_institute_code = 1899
             cruise_year = df['date'].to_string(index=False).split('-')[0]
@@ -487,7 +488,7 @@ class ThermographHeader(OdfHeader):
             if 'inst_model' in mydict:
                 inst_model = mydict['inst_model']
             gauge = int(mydict['gauge'])
-            print(df.head())
+            # print(df.head())
 
             # Remove any leading or trailing spaces from the file names.
             meta['file_name'] = meta['file_name'].str.strip()
@@ -501,15 +502,15 @@ class ThermographHeader(OdfHeader):
                 path1 = Path(data_file_path)
                 if instrument_type == 'hobo':
                     hobo_file = f"{path1.stem}.hobo".lower()
-                    print(hobo_file)
+                    # print(hobo_file)
                     meta_subset = meta_subset[meta_subset['file_name'] == hobo_file]
                 else:
                     minilog_file = f"{path1.stem}.vld".lower()
-                    print(minilog_file)
+                    # print(minilog_file)
                     meta_subset = meta_subset[meta_subset['file_name'] == minilog_file]
 
-            print(meta_subset.head())
-            print('\n')
+            # print(meta_subset.head())
+            # print('\n')
 
             matching_indices = meta_subset[meta_subset['ID'] == gauge].index
 
@@ -710,6 +711,13 @@ def main():
 
         file_spec = mtr.generate_file_spec()
         mtr.file_specification = file_spec
+
+        mtr.add_quality_flags()
+
+        quality_header = QualityHeader()
+        quality_header.quality_date = get_current_date_time()
+        quality_header.add_quality_codes()
+        mtr.quality_header = quality_header
 
         mtr.update_odf()
 
