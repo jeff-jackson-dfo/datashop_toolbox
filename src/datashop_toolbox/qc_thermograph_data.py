@@ -1,6 +1,6 @@
 import glob
 import matplotlib.pyplot as plt
-from matplotlib.widgets import LassoSelector
+from matplotlib.widgets import LassoSelector, Button
 from matplotlib.path import Path
 import matplotlib.dates as mdates
 import numpy as np
@@ -9,6 +9,9 @@ import pandas as pd
 import pathlib
 
 from datashop_toolbox.thermograph import ThermographHeader
+
+
+exit_requested = False
 
 
 def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str):
@@ -23,8 +26,11 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
 
     for mtr_file in mtr_files:
 
+        if exit_requested:
+            break
+ 
         full_path = str(pathlib.Path(in_folder_path, mtr_file))
-
+        
         mtr = ThermographHeader()
         mtr.read_odf(full_path)
 
@@ -53,6 +59,30 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
         plt.xlabel('Date Time')
         plt.ylabel('Temperature')
         plt.grid(True)
+
+        # --- Buttons (tuple positions required in Python 3.13+) ---
+        ax_continue = plt.axes((0.70, 0.01, 0.12, 0.06))
+        ax_exit = plt.axes((0.85, 0.01, 0.12, 0.06))
+
+        btn_continue = Button(ax_continue, "Continue")
+        btn_exit = Button(ax_exit, "Exit")
+
+        # --- Optional visual tweaks ---
+        btn_continue.color = "lightgreen"
+        btn_exit.color = "salmon"
+        btn_continue.hovercolor = "limegreen"
+        btn_exit.hovercolor = "red"
+
+        def on_continue(event):
+            plt.close(fig)  # close figure and continue
+
+        def on_exit(event):
+            global exit_requested
+            exit_requested = True
+            plt.close(fig)  # close figure and stop
+
+        btn_continue.on_clicked(on_continue)
+        btn_exit.on_clicked(on_exit)
 
         # Lasso callback
         def onselect(verts):
@@ -106,15 +136,21 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
         mtr.update_odf()
         file_spec = mtr.generate_file_spec()
         mtr.file_specification = file_spec
-        qfs_out_file = f"{file_spec}_QFs.ODF"
-        mtr.write_odf(out_folder_path + qfs_out_file, version = 2.0)
+        qfs_out_file = f"{file_spec}.ODF"
+        out_path = str(pathlib.Path(out_folder_path, mtr_file))
+        mtr.write_odf(out_path + qfs_out_file, version = 2.0)
 
 
 def main():
 
-    input_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'
+    # input_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'
+    input_path = 'C:/DFO-MPO/DEV/MTR/Prodyut/BCD2014999/BCD2014999/Hobos/Step_1_Create_ODF'
+
     wildcard = '*.ODF'
-    output_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Step_1_Create_ODF/'
+
+    # output_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Step_1_Create_ODF/'
+    output_path = 'C:/DFO-MPO/DEV/MTR/Prodyut/BCD2014999/BCD2014999/Hobos/Step_2_Visual_Inspection'
+
     qc_thermograph_data(input_path, wildcard, output_path)
 
 
