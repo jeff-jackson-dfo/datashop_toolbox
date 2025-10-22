@@ -1,8 +1,7 @@
 from datashop_toolbox.odfhdr import OdfHeader
 from odf_oracle.sytm_to_timestamp import sytm_to_timestamp
-from typing import NoReturn
 
-def quality_to_oracle(odfobj: OdfHeader, connection, infile: str) -> NoReturn:
+def quality_to_oracle(odfobj: OdfHeader, connection, infile: str) -> None:
     """
     Load the ODF object's quality header information into Oracle.
 

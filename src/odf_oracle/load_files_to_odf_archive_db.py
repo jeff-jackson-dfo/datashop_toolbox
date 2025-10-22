@@ -13,4 +13,4 @@ odf_to_oracle(wildcard = '*.ODF',
               password = userpwd, 
               oracle_host = oracle_host, 
               oracle_service_name = oracle_service_name, 
-              mypath = "C:\\DEV\\TEMP\\TEST\\")
+              mypath = "C:\\DFO-MPO\\DEV\\LOAD_TO_ODF_ARCHIVE\\")

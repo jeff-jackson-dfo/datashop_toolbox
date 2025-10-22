@@ -4,19 +4,19 @@ from dotenv import load_dotenv
 
 from datashop_toolbox.odfhdr import OdfHeader
 from odf_oracle.database_connection_pool import get_database_pool
-from odf_oracle import cruise_event_to_oracle
-from odf_oracle import event_comments_to_oracle
-from odf_oracle import meteo_to_oracle
-from odf_oracle import meteo_comments_to_oracle
-from odf_oracle import instrument_to_oracle
-from odf_oracle import quality_to_oracle
-from odf_oracle import quality_tests_to_oracle
-from odf_oracle import quality_comments_to_oracle
-from odf_oracle import history_to_oracle
-from odf_oracle import compass_cal_to_oracle
-from odf_oracle import polynomial_cal_to_oracle
-from odf_oracle import general_cal_to_oracle
-from odf_oracle import data_to_oracle
+from odf_oracle.cruise_event_to_oracle import cruise_event_to_oracle
+from odf_oracle.event_comments_to_oracle import event_comments_to_oracle
+from odf_oracle.meteo_to_oracle import meteo_to_oracle
+from odf_oracle.meteo_comments_to_oracle import meteo_comments_to_oracle
+from odf_oracle.instrument_to_oracle import instrument_to_oracle
+from odf_oracle.quality_to_oracle import quality_to_oracle
+from odf_oracle.quality_tests_to_oracle import quality_tests_to_oracle
+from odf_oracle.quality_comments_to_oracle import quality_comments_to_oracle
+from odf_oracle.history_to_oracle import history_to_oracle
+from odf_oracle.compass_cal_to_oracle import compass_cal_to_oracle
+from odf_oracle.polynomial_cal_to_oracle import polynomial_cal_to_oracle
+from odf_oracle.general_cal_to_oracle import general_cal_to_oracle
+from odf_oracle.data_to_oracle import data_to_oracle
 
 
 def odf_to_oracle(wildcard: str, user: str, password: str, oracle_host: str,

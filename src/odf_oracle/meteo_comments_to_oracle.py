@@ -43,7 +43,7 @@ def meteo_comments_to_oracle(odfobj: OdfHeader, connection, infile):
                         "VALUES (:comment_no, :comments, :filename)",
                         {
                             'comment_no': j,
-                            'comments': meteo_comment,
+                            'comments': meteo_comment.strip("'"),
                             'filename': infile
                         }
                         )
@@ -58,7 +58,7 @@ def meteo_comments_to_oracle(odfobj: OdfHeader, connection, infile):
                     "INSERT INTO ODF_METEO_COMMENTS (METEO_COMMENT_NUMBER, METEO_COMMENT, ODF_FILENAME) VALUES (:comment_no, :comments, :filename)",
                     {
                         'comment_no': 1,
-                        'comments': meteo_comments,
+                        'comments': meteo_comments.strip("'"),
                         'filename': infile
                     }
                 )

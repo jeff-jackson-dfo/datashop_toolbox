@@ -1,5 +1,4 @@
 from datashop_toolbox.odfhdr import OdfHeader
-from icecream import ic
 
 def event_comments_to_oracle(odfobj: OdfHeader, connection, infile: str) -> None:
     """

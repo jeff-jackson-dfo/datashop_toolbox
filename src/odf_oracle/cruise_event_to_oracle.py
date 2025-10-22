@@ -44,7 +44,8 @@ def cruise_event_to_oracle(odfobj: OdfHeader, connection, infile: str) -> str:
             # if set_number != odfobj.event_header.get_set_number():
             #     odfobj.event_header.set_set_number(set_number)
         else:
-            odf_filename = odfobj.file_specification.strip("'")
+            # odf_filename = odfobj.file_specification.strip("'")
+            odf_filename = odfobj.generate_file_spec()
             print(f'odf_filename: {odf_filename}')
             # Make the set number 0 for non-trawl surveys.
             odfobj.event_header.set_number = set_number
