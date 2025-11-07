@@ -596,7 +596,7 @@ class ThermographHeader(OdfHeader):
 
 def main():
 
-    use_gui = False
+    use_gui = True
 
     if use_gui:
 
@@ -623,8 +623,8 @@ def main():
         else:
             operator = select_inputs.line_edit_text
 
-        institution = select_inputs.institution
-        instrument = select_inputs.instrument
+        institution = select_inputs.institution.upper()
+        instrument = select_inputs.instrument.lower()
 
         # Change to folder containing files to be modified
         os.chdir(data_folder_path)
