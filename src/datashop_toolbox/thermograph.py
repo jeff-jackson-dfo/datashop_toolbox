@@ -758,7 +758,6 @@ def main():
 
         institution = select_inputs.institution.upper()
         instrument = select_inputs.instrument.lower()
-        user_input_metadata = select_inputs.user_input_meta
 
         # Change to folder containing files to be modified
         os.chdir(data_folder_path)
