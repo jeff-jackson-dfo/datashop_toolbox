@@ -536,6 +536,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
         self.data.parameter_list = self.get_parameter_codes()
         self.data.print_formats = new_print_formats
 
+        self.quality_header = QualityHeader()
+        self.quality_header.add_quality_codes()
+
         return self
 
 
