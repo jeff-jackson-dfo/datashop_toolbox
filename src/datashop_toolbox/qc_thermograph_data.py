@@ -195,8 +195,11 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
   
 
 def main_select_inputs():
-    app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    #app = QApplication(sys.argv)
+    #app.setStyle("Fusion")
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
     
     select_inputs = select_metadata_file_and_data_folder.SubWindowOne()
     select_inputs.show()
@@ -216,14 +219,13 @@ def main_select_inputs():
         result_container["input"] = input_path
         result_container["output"] = output_path
         result_container["finished"] = True
+        select_inputs.close()
 
-        # select_inputs.hide()
-        # app.quit()
 
     def on_reject():
         print("❌ QC cancelled by user.")
-        #app.quit()
         result_container["finished"] = False
+        select_inputs.close()
 
     select_inputs.buttonBox.accepted.connect(on_accept)
     select_inputs.buttonBox.rejected.connect(on_reject)
@@ -242,7 +244,6 @@ def main_select_inputs():
 
 def reload_main():    
     QApplication.quit()
-    #sys.exit(0)
     main()
     
 
@@ -252,7 +253,6 @@ def main():
         returnM = run_qc_thermograph_data(input_path, output_path, operator)
         if returnM["finished"]:
             QApplication.quit()
-            #sys.exit(0)
             reload_main()
     else:
         print("💤 Program exited with no QC action.") 
