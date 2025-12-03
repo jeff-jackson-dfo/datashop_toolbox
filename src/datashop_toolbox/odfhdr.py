@@ -546,7 +546,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
         self.quality_header = QualityHeader()
         self.quality_header.add_quality_codes()
-        
+
         return self
 
 

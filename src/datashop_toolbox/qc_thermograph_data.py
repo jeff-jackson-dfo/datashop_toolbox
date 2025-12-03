@@ -7,24 +7,60 @@ import numpy as np
 import os
 import pandas as pd
 import pathlib
+import sys
+
+from PyQt6.QtWidgets import (
+    QApplication,
+)
+
 
 from datashop_toolbox.thermograph import ThermographHeader
+from datashop_toolbox.historyhdr import HistoryHeader
+from datashop_toolbox.validated_base import get_current_date_time
+from datashop_toolbox import select_metadata_file_and_data_folder
 
 
-exit_requested = False
 
-
-def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str):
+def run_qc_thermograph_data(input_path, output_path, qc_operator):
+    wildcard = "*.ODF"
+    task_completion= qc_thermograph_data(input_path, wildcard, output_path, qc_operator)
+    if task_completion["finished"]:
+        print("✅ QC Thermograph Data task completed successfully.")
+    else:
+        print("❌ QC Thermograph Data task did not complete.")
+    return task_completion
+   
+    
+def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str, qc_operator: str):
+    
+    global exit_requested
+    exit_requested = False
+    batch_result_container = {"finished": False}
 
     cwd = os.getcwd()
 
     # Find all files selected using the wildcard in the provided input directory.
-    os.chdir(in_folder_path)
+    try:
+        os.chdir(in_folder_path)
+        print(f"Changed working dir to the input directory: {in_folder_path}")
+    except Exception as e:
+        raise RuntimeError(f"Cannot change directory: {e}")
+    
     mtr_files = glob.glob(wildcard)
+    if not mtr_files:
+        print("❌ No ODF files found in selected folder.")
+        return
+
+    # Prepare output folder
+    out_odf_path = os.path.join(out_folder_path, "Step_2_Quality_Flagging")
+    os.makedirs(out_odf_path, exist_ok=True)
+    print(f"Created a output data folder name: Step_2_Quality_Flagging and path for .odf files after initial QC: {out_odf_path}")
 
     os.chdir(cwd)
 
-    for mtr_file in mtr_files:
+    for idx, mtr_file in enumerate(mtr_files, start=1):
+        
+        print(f"Reading file {idx} of {len(mtr_files)}: {mtr_file} for QC...please wait.")
 
         if exit_requested:
             break
@@ -32,6 +68,7 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
         full_path = str(pathlib.Path(in_folder_path, mtr_file))
         
         mtr = ThermographHeader()
+
         mtr.read_odf(full_path)
 
         mtr.add_quality_flags()
@@ -55,7 +92,7 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
         # Plot the temperature time series
         fig, ax = plt.subplots(figsize=(10, 6))
         pts = ax.scatter(df.index, df['Temperature'], s=10, color='blue')
-        plt.title('Time Series Data')
+        plt.title(f'[{idx}/{len(mtr_files)}] Time Series Data- {mtr_file}')
         plt.xlabel('Date Time')
         plt.ylabel('Temperature')
         plt.grid(True)
@@ -73,16 +110,16 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
         btn_continue.hovercolor = "limegreen"
         btn_exit.hovercolor = "red"
 
-        def on_continue(event):
+        def click_continue(event):
             plt.close(fig)  # close figure and continue
 
-        def on_exit(event):
+        def click_exit(event):
             global exit_requested
             exit_requested = True
             plt.close(fig)  # close figure and stop
 
-        btn_continue.on_clicked(on_continue)
-        btn_exit.on_clicked(on_exit)
+        btn_continue.on_clicked(click_continue)
+        btn_exit.on_clicked(click_exit)
 
         # Lasso callback
         def onselect(verts):
@@ -133,27 +170,129 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
         orig_df.loc[~orig_df.index.isin(indices_to_flag_as_bad), 'QTE90_01'] = 1
 
         # Output revised ODF
+        mtr.add_history()
+        mtr.add_to_history(f'ADD QUALITY FLAG AND PERFORM VISUAL QC BY {qc_operator.upper()}')
+
         mtr.update_odf()
         file_spec = mtr.generate_file_spec()
         mtr.file_specification = file_spec
-        qfs_out_file = f"{file_spec}.ODF"
-        out_path = str(pathlib.Path(out_folder_path, mtr_file))
-        mtr.write_odf(out_path + qfs_out_file, version = 2.0)
 
+        print(f"Writing file {idx} of {len(mtr_files)}: {mtr_file} after QC...please wait.")
+        out_file = pathlib.Path(out_odf_path) / f"{file_spec}.ODF"
+        mtr.write_odf(str(out_file), version=2.0)
 
-def main():
-
-    # input_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'
-    input_path = 'C:/DFO-MPO/DEV/MTR/Prodyut/BCD2014999/BCD2014999/Hobos/Step_1_Create_ODF'
-
-    wildcard = '*.ODF'
-
-    # output_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Step_1_Create_ODF/'
-    output_path = 'C:/DFO-MPO/DEV/MTR/Prodyut/BCD2014999/BCD2014999/Hobos/Step_2_Visual_Inspection'
-
-    qc_thermograph_data(input_path, wildcard, output_path)
-
-
-if __name__ == main():
+        print(f"✔ QC completed for [{idx}/{len(mtr_files)}]: {mtr_file}")
+        print(f"    → Saved [{idx}/{len(mtr_files)}]: {out_file}")
     
+    if idx == len(mtr_files):
+        print(f"🎉 QC process completed for all {len(mtr_files)} files.")
+        batch_result_container["finished"] = True
+    else:
+        print(f"⚠️ QC process was interrupted before completion of {idx} of {len(mtr_files)} files.")
+        batch_result_container["finished"] = False
+    
+    return batch_result_container
+  
+
+def main_select_inputs():
+    #app = QApplication(sys.argv)
+    #app.setStyle("Fusion")
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+    
+    select_inputs = select_metadata_file_and_data_folder.SubWindowOne()
+    select_inputs.show()
+
+    result_container = {"finished": False, "input": None, "output": None, "operator": None}
+
+    def on_accept():
+        operator = select_inputs.qc_name.strip()
+        input_path = select_inputs.input_data_folder
+        output_path = select_inputs.output_data_folder
+
+        if not operator or not input_path or not output_path:
+            print("❌ Missing required fields.")
+            return
+
+        result_container["operator"] = operator
+        result_container["input"] = input_path
+        result_container["output"] = output_path
+        result_container["finished"] = True
+        select_inputs.close()
+
+
+    def on_reject():
+        print("❌ QC cancelled by user.")
+        result_container["finished"] = False
+        select_inputs.close()
+
+    select_inputs.buttonBox.accepted.connect(on_accept)
+    select_inputs.buttonBox.rejected.connect(on_reject)
+
+    app.exec()
+
+    if result_container["finished"]:
+        return (
+            result_container["input"],
+            result_container["output"],
+            result_container["operator"],
+        )
+    else:
+        return None, None, None
+
+
+def reload_main():    
+    QApplication.quit()
     main()
+    
+
+def main():    
+    input_path, output_path, operator = main_select_inputs()
+    if input_path and output_path and operator:
+        returnM = run_qc_thermograph_data(input_path, output_path, operator)
+        if returnM["finished"]:
+            QApplication.quit()
+            reload_main()
+    else:
+        print("💤 Program exited with no QC action.") 
+
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def main():
+
+#     # input_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'
+#     input_path = 'C:/Users/ROYPR/Desktop/DFO-ODIS-SSPPI/Python_Development/MTR_Data/minilog/Step_1_Create_ODF'
+
+#     wildcard = '*.ODF'
+#     qc_operator='Test Operator'
+
+
+#     # output_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Step_1_Create_ODF/'
+#     output_path = 'C:/Users/ROYPR/Desktop/DFO-ODIS-SSPPI/Python_Development/MTR_Data/minilog'
+
+#     qc_thermograph_data(input_path, wildcard, output_path, qc_operator)
+
+
+# if __name__ == main():
+    
+#     main()

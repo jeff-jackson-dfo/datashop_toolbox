@@ -408,9 +408,16 @@ class ThermographHeader(OdfHeader):
 
         return dfmeta
 
-    def process_thermograph(self, institution_name: str, instrument_type: str, metadata_file_path: str, data_file_path: str):
+
+    def process_thermograph(self, institution_name: str, instrument_type: str, metadata_file_path: str, data_file_path: str, user_input_metadata: dict) -> None:
 
         if institution_name == 'FSRS':
+            # Get user input metadata values with defaults
+            organization = user_input_metadata.get("organization") or "FSRS"
+            chief_scientist = user_input_metadata.get("chief_scientist") or "SHANNON SCOTT-TIBBETTS"
+            cruise_description = user_input_metadata.get("cruise_description") or "FISHERMEN AND SCIENTISTS RESEARCH SOCIETY"
+            platform_name = user_input_metadata.get("platform_name") or "FSRS CRUISE DATA (NO ICES CODE)"
+            country_code = user_input_metadata.get("country_code") or "1899"
 
             # print(f'\nProcessing Metadata file: {metadata_file_path}\n')
             meta = self.read_metadata(metadata_file_path, institution_name)
@@ -429,7 +436,7 @@ class ThermographHeader(OdfHeader):
 
             self.cruise_header.country_institute_code = 1899
             cruise_year = df['date'].to_string(index=False).split('-')[0]
-            cruise_number = f'BCD{cruise_year}603'
+            cruise_number = user_input_metadata.get("cruise_number") or f'BCD{cruise_year}603'
             self.cruise_header.cruise_number = cruise_number
             start_date = f"{self.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
             self.cruise_header.start_date = start_date
@@ -477,6 +484,12 @@ class ThermographHeader(OdfHeader):
                 new_df.rename(columns={column: code}, inplace=True)
 
         elif institution_name == 'BIO':
+            # Get user input metadata values with defaults
+            organization = user_input_metadata.get("organization") or "DFO BIO"
+            chief_scientist = user_input_metadata.get("chief_scientist") or "ADAM DROZDOWSKI"
+            cruise_description = user_input_metadata.get("cruise_description") or "LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)"
+            platform_name = user_input_metadata.get("platform_name") or "BIO CRUISE DATA (NO ICES CODE)"
+            country_code = user_input_metadata.get("country_code") or "1810"
 
             # print(f'\nProcessing Metadata file: {metadata_file_path}\n')
             meta = self.read_metadata(metadata_file_path, institution_name)
@@ -521,7 +534,7 @@ class ThermographHeader(OdfHeader):
                 cruise_year = df['date'].to_string(index=False).split('-')[0]
             elif instrument_type == 'hobo':
                 cruise_year = df['date_time'].to_string(index=False).split('-')[0]
-            cruise_number = f'BCD{cruise_year}999'
+            cruise_number = user_input_metadata.get("cruise_number") or f'BCD{cruise_year}999'
             self.cruise_header.cruise_number = cruise_number
             self.cruise_header.platform = 'BIO CRUISE DATA (NO ICES CODE)'
             start_date = f"{self.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
@@ -596,7 +609,7 @@ class ThermographHeader(OdfHeader):
 
 def main():
 
-    use_gui = True
+    use_gui = False
 
     if use_gui:
 
@@ -610,12 +623,13 @@ def main():
             print('\n****  Operation cancelled by user, exiting program.  ****\n')
             exit()
 
-        if select_inputs.metadata_file == '' or select_inputs.data_folder == '':
+        if select_inputs.metadata_file == '' or select_inputs.input_data_folder == ''or select_inputs.output_data_folder == '':
             print('\n****  Improper selections made, exiting program.  ****\n')
             exit()
         else:
             metadata_file_path = select_inputs.metadata_file
-            data_folder_path = select_inputs.data_folder
+            input_data_folder_path = select_inputs.input_data_folder
+            Output_data_folder_path = select_inputs.output_data_folder
 
         # Get the operator's name so it is identified in the history header.
         if select_inputs.line_edit_text == '':
@@ -625,21 +639,23 @@ def main():
 
         institution = select_inputs.institution.upper()
         instrument = select_inputs.instrument.lower()
+        user_input_metadata = select_inputs.user_input_meta
 
         # Change to folder containing files to be modified
-        os.chdir(data_folder_path)
+        os.chdir(input_data_folder_path)
 
         # Find all CSV files in the current directory.
         files = glob.glob('*.CSV')
 
         # Check if no data files were found.
         if files == []:
-            print(f"****  No data files found in selected folder {data_folder_path}  ****\n")
+            print(f"****  No data files found in selected folder {input_data_folder_path}  ****\n")
         else:
-            # Create the required subfolder, if necessary
-            if not os.path.isdir(os.path.join(data_folder_path, 'Step_1_Create_ODF')):
-                os.mkdir('Step_1_Create_ODF')
-            odf_path = os.path.join(data_folder_path, 'Step_1_Create_ODF')
+            # Build full path to output folder
+            odf_path = os.path.join(Output_data_folder_path, 'Step_1_Create_ODF')
+            # Create folder if needed (safe even if it exists)
+            os.makedirs(odf_path, exist_ok=True)
+            print("Created output folder path for .odf files:", odf_path)
 
         # Loop through the CSV files to generate an ODF file for each.
         for file_name in files:
@@ -650,7 +666,7 @@ def main():
             print('#######################################################################')
             print()
 
-            mtr_path = posixpath.join(data_folder_path, file_name)
+            mtr_path = posixpath.join(input_data_folder_path, file_name)
 
             mtr = ThermographHeader()
 
@@ -663,6 +679,13 @@ def main():
 
             file_spec = mtr.generate_file_spec()
             mtr.file_specification = file_spec
+
+            mtr.add_quality_flags()
+ 
+            quality_header = QualityHeader()
+            quality_header.quality_date = get_current_date_time()
+            quality_header.add_quality_codes()
+            mtr.quality_header = quality_header
 
             mtr.update_odf()
 
@@ -677,37 +700,51 @@ def main():
         # Generate an empty MTR object.
         mtr = ThermographHeader()
 
-        operator = 'Jeff Jackson'
+        operator = 'JProdyut Roy'
 
         # institution_name = 'FSRS'
         # instrument_type = 'minilog'
         # metadata_file = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LatLong LFA 30_14.txt' # FSRS
-        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/' # FSRS
+        # input_data_folder_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/' # FSRS
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/Minilog-II-T_354633_2014jmacleod_1.csv' # FSRS
 
         institution_name = 'BIO'
-        instrument_type = 'minilog'
-        # instrument_type = 'hobo'
-        metadata_file = 'C:/DFO-MPO/DEV/MTR/BCD2014999/MetaData_BCD2014999.xlsx' # BIO
+        #instrument_type = 'minilog'
+        instrument_type = 'hobo'
+        metadata_file = 'C:/MTR_Data_Processing/ReadyTo_Process_Data/BCD2014999/MetaData_BCD2014999.xlsx' # BIO
         # metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
-        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
-        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/'  # BIO
-        data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Minilog/'  # BIO
+        # input_data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
+        # input_data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/'  # BIO
+        input_data_folder_path = 'C:/MTR_Data_Processing/ReadyTo_Process_Data/BCD2014999/Hobos/MTR_Hobos_RAW_CSV'  # BIO
+        output_data_folder_path = 'C:/MTR_Data_Processing/ReadyTo_Process_Data/BCD2014999/Hobos'
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/cape_sable_summer_2014.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/LTTMP_summer2014_HLFX_1273003_south.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/Dundee_10231582.csv'  # BIO
-        data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Minilog/LTTMP_summer2004_HLFX_352816_east.csv'  # BIO
+        data_file_path = 'C:/MTR_Data_Processing/ReadyTo_Process_Data/BCD2014999/Hobos/MTR_Hobos_RAW_CSV/baddeck_10536701.csv'  # BIO
+#         data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Minilog/LTTMP_summer2004_HLFX_352816_east.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Whycocomagh_885_north_10m.csv'  # BIO
+
+        user_input_metadata = {'organization': 'DFO BIO', 
+                               'chief_scientist': 'ADAM DROZDOWSKI', 
+                               'cruise_description': 'LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)', 
+                               'platform_name': 'BIO CRUISE DATA (NO ICES CODE)', 
+                               'country_code': '1810'}
 
         history_header = HistoryHeader()
         history_header.creation_date = get_current_date_time()
         history_header.set_process(f'Initial file creation by {operator}')
         mtr.history_headers.append(history_header)
 
-        mtr.process_thermograph(institution_name.upper(), instrument_type.lower(), metadata_file, data_file_path)
+        mtr.process_thermograph(institution_name.upper(), instrument_type.lower(), metadata_file, data_file_path, user_input_metadata)
 
-        os.chdir(data_folder_path)
+        os.chdir(input_data_folder_path)
+
+        odf_path = os.path.join(output_data_folder_path, 'Step_1_Create_ODF')
+        # Create folder if needed (safe even if it exists)
+        os.makedirs(odf_path, exist_ok=True)
+        print("Created output folder path for .odf files:", odf_path)
+
 
         file_spec = mtr.generate_file_spec()
         mtr.file_specification = file_spec
@@ -721,7 +758,7 @@ def main():
 
         mtr.update_odf()
 
-        odf_file_path = os.path.join(data_folder_path, file_spec + '.ODF')
+        odf_file_path = os.path.join(odf_path, file_spec + '.ODF')
         mtr.write_odf(odf_file_path, version = 2.0)
     
 
