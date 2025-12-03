@@ -391,8 +391,16 @@ class OdfHeader(ValidatedBase, BaseHeader):
         eq1 = self.event_header.event_qualifier1.strip("'")
         eq2 = self.event_header.event_qualifier2.strip("'")
         file_spec = f"{dt}_{cn}_{en}_{eq1}_{eq2}"
-        file_spec = file_spec
         return file_spec
+
+    def generate_set_file_spec(self) -> str:
+        dt = self.event_header.data_type.strip("'")
+        cn = self.cruise_header.cruise_number.strip("'")
+        sn = self.event_header.set_number.strip("'")
+        eq1 = self.event_header.event_qualifier1.strip("'")
+        eq2 = self.event_header.event_qualifier2.strip("'")
+        set_file_spec = f"{dt}_{cn}_{sn}_{eq1}_{eq2}"
+        return set_file_spec
 
     # def fix_parameter_codes(self, new_codes: list = []) -> Self:
     #     assert isinstance(new_codes, list), "Input argument 'new_codes' must be a list."
@@ -797,6 +805,7 @@ def main():
         odf.add_history()
         user = 'Jeff Jackson'
         odf.log_odf_message(f'{user} made the following modifications to this file:', 'base')
+        odf.add_to_history('')
 
         odf.event_header.set_event_comment('We had a successful trip!', 1)
 
