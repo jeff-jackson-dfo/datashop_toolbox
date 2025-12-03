@@ -136,9 +136,8 @@ def qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str
         mtr.update_odf()
         file_spec = mtr.generate_file_spec()
         mtr.file_specification = file_spec
-        qfs_out_file = f"{file_spec}.ODF"
         out_path = str(pathlib.Path(out_folder_path, mtr_file))
-        mtr.write_odf(out_path + qfs_out_file, version = 2.0)
+        mtr.write_odf(out_path, version = 2.0)
 
 
 def main():
