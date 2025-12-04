@@ -5,7 +5,6 @@ import sys
 import traceback
 import logging
 
-from PyQt6.QtCore import Qt
 
 class LogEmitter(QObject):
     text_written = pyqtSignal(str)
@@ -104,32 +103,16 @@ class Worker(QThread):
             self.log.emit(tb)
             self.finished_failure.emit(str(e))
 
-class LogWindowUI(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Thermograph QC Log Window")
-        self.resize(700, 600)
-
-        layout = QVBoxLayout(self)
-
-        # log view
-        self.log_view = QTextEdit()
-        self.log_view.setReadOnly(True)
-        layout.addWidget(self.log_view)
-
-        # buttons
-        self.btn_start = QPushButton("Start QC")
-        self.btn_show_log = QPushButton("Open Log File")
-        self.btn_reload = QPushButton("Load Main Again")
-        self.btn_exit = QPushButton("Exit Program")
-
-        layout.addWidget(self.btn_start)
-        layout.addWidget(self.btn_show_log)
-        layout.addWidget(self.btn_reload)
-        layout.addWidget(self.btn_exit)
-
-    def append_log(self, text):
-        self.log_view.append(text)
+class SafeConsoleFilter(logging.Filter):
+    """Ensures console output is cp1252-safe by stripping unsupported characters."""
+    def filter(self, record):
+        try:
+            # Attempt cp1252 encoding (Windows terminal)
+            record.msg.encode("cp1252")
+        except UnicodeEncodeError:
+            # Remove or replace unsupported characters (emoji, symbols)
+            record.msg = record.msg.encode("ascii", "ignore").decode()
+        return True
 
 class QTextEditLogger(logging.Handler):
     """A logging.Handler that appends logs to a QTextEdit widget in the GUI."""
@@ -147,6 +130,17 @@ class QTextEditLogger(logging.Handler):
             self.text_edit.append(msg)
         except Exception:
             pass
+
+class SafeConsoleFilter(logging.Filter):
+    """Remove unsupported characters (like emojis) for console output."""
+    def filter(self, record):
+        try:
+            record.msg.encode("cp1252")
+        except UnicodeEncodeError:
+            # replace emoji with a safe fallback
+            record.msg = record.msg.encode("ascii", "ignore").decode()
+        return True
+
 
 if __name__ == "__main__":
     
