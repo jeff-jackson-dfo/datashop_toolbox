@@ -391,7 +391,6 @@ class OdfHeader(ValidatedBase, BaseHeader):
         eq1 = self.event_header.event_qualifier1.strip("'")
         eq2 = self.event_header.event_qualifier2.strip("'")
         file_spec = f"{dt}_{cn}_{en}_{eq1}_{eq2}"
-        file_spec = file_spec
         return file_spec
 
     def generate_set_file_spec(self) -> str:
@@ -806,6 +805,7 @@ def main():
         odf.add_history()
         user = 'Jeff Jackson'
         odf.log_odf_message(f'{user} made the following modifications to this file:', 'base')
+        odf.add_to_history('')
 
         odf.event_header.set_event_comment('We had a successful trip!', 1)
 
