@@ -7,11 +7,13 @@ import pytz
 import re
 import sys
 import pandas as pd
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import ClassVar
+from difflib import SequenceMatcher
 
-from PyQt6.QtWidgets import (
-    QApplication
+from PySide6.QtWidgets import (
+    QApplication, QInputDialog, QFileDialog, QMessageBox
 )
 
 from datashop_toolbox.basehdr import BaseHeader
@@ -22,7 +24,6 @@ from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.lookup_parameter import lookup_parameter
 from datashop_toolbox.qualityhdr import QualityHeader
 from datashop_toolbox import select_metadata_file_and_data_folder
-
 
 class ThermographHeader(OdfHeader):
     """
@@ -43,6 +44,22 @@ class ThermographHeader(OdfHeader):
 
     def get_time_format(self) -> str:
         return ThermographHeader.time_format
+
+
+    @staticmethod
+    def clean_lfa(value):
+        try:
+            # Try converting to float first
+            f = float(value)
+            # If it's a whole number, convert to int
+            if f.is_integer():
+                return int(f)
+            else:
+                # If float has decimal, convert to int (truncate)
+                return int(f)
+        except (ValueError, TypeError):
+            # If conversion fails (string or NaN), leave as is
+            return value
 
 
     # @staticmethod
@@ -182,11 +199,14 @@ class ThermographHeader(OdfHeader):
 
     @staticmethod
     def convert_to_decimal_degrees(pos: str) -> float:
-        toks = pos.split(' ')
-        deg = float(toks[0])
-        dm = float(toks[1])
-        dd = deg + dm/60
-        return dd
+        toks = str(pos).strip().split()
+        if len(toks) == 2:
+            deg = float(toks[0])
+            dm = float(toks[1])
+            dd = deg + dm/60
+            return dd
+        else:
+            return float(pos)
 
 
     @staticmethod
@@ -288,65 +308,208 @@ class ThermographHeader(OdfHeader):
         mtr_dict = dict()
         instrument_type = instrument_type.lower()
 
-        if instrument_type == 'minilog':
+        def similar(a, b):
+            return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
-            # Read the data lines from the MTR file.
-            dfmtr = pd.read_table(mtrfile, sep = ',', header = None, encoding = 'iso8859_1', skiprows = 8)
+        if instrument_type == 'minilog':
+            # Detect number of header lines dynamically ---
+            skiprows = 0
+            with open(mtrfile, 'r', encoding='iso8859_1') as f:
+                for i, line in enumerate(f):
+                    stripped = line.strip()
+                    # Detect the first data-like line - Typically starts with a date (e.g., "11/03/2014") or similar pattern 11-03-2014
+                    if re.match(r"^(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2})", stripped):
+                        skiprows = i
+                        break
+                    elif stripped.startswith('* Date(yyyy-mm-dd),') or stripped.startswith('Date(yyyy-mm-dd),'):
+                        skiprows = i+1
+                        break
+                    else:
+                        skiprows = 8  # Default to 8 if no match found
+                        break
+            
+            # Read the data lines from the MTR file
+            dfmtr = pd.read_table(mtrfile, sep = ',', header = None, encoding = 'iso8859_1', skiprows = skiprows)
             # print(dfmtr.head())
 
             # rename the columns
             dfmtr.columns = ['date', 'time', 'temperature']
 
             # Get the instrument type and gauge (serial number) from the MTR file.
+            inst_model, gauge, delTime_UTC = None, None, None
             with open(mtrfile, 'r', encoding = 'iso8859_1') as f:
-                for i in range(8):
-                    line = f.readline()
+                for i, line in enumerate(f):
+                    if i >= skiprows:
+                        break  # Stop after header lines
                     if 'Source Device:' in line:
-                        info = line.split(':')[1]
-                        inst_model = info.rsplit('-', 1)[0]
-                        gauge = info.split('-')[-1].strip()
-                        break
+                        info = line.split(':', 1)[1].strip()
+                        parts = info.split('-')
+                        inst_model = '-'.join(parts[:-1]).strip()
+                        gauge = parts[-1].strip().strip(',')
+                        continue
+                    if line.startswith(('* ID=', 'ID=')):
+                        inst_model = line.split('=', 1)[1].strip()
+                        continue
+                    if line.startswith(('* Serial Number=', 'Serial Number=')):
+                        gauge = line.split('=', 1)[1].strip()
+                        continue
+                    if 'Minilog Initialized:' in line:
+                        pattern = r'(?:\(UTC([+-]\d+)\)|\(GMT([+-]\d+)\))'
+                        match = re.search(pattern, line, flags=re.IGNORECASE)
+                        if match:
+                            delTime_UTC = match.group(1).strip()
+                            delTime_UTC = int(delTime_UTC) if str(delTime_UTC).lstrip('+-').isdigit() else 0
+                        continue
             
-            mtr_dict['df'] = dfmtr
-            mtr_dict['inst_model'] = inst_model
-            mtr_dict['gauge'] = gauge.strip(",")
-            mtr_dict['filename'] = mtrfile
+
+            #--- Safety defaults: ask user if not found ---
+            if inst_model is None or gauge is None:
+                msg_text = f"""❌ Instrument model or Gauge number missing in MTR file header:
+                    {mtrfile}
+                    Example MTR file header info:
+                    Source File: Minilog-II-T_351009_20130923_1.vld
+                    Source Device: Minilog-II-T-351009
+                    Study Description: Anonymous
+                    Minilog Initialized: 2013-03-26 09:36:11 (UTC-3)
+                    Study Start Time: 2013-03-26 10:00:00
+                    Study Stop Time: 2013-09-23 09:00:00
+                    Sample Interval: 00:00:00
+                    """
+                print(msg_text)
+                print("⚠️ Alternate Option: Attempting to extract instrument model and gauge from filename...")
+                filename = Path(mtrfile).name
+                pattern = r"^(Minilog-[^_]+)_(\d+)_"
+                match = re.search(pattern, filename)
+                if match:
+                    inst_model = match.group(1)
+                    gauge = match.group(2)
+                    print(f"✅ Extracted instrument model: {inst_model}, gauge: {gauge} from filename.")
+                    print("Please check the above raw MTR file header info in the file and ensure it matches the extracted values.")
+
+                else:
+                    print("⚠️ Unable to extract instrument model and gauge from filename.")
+                    print("You will be prompted to quit the application and restart the process after correcting the MTR file.")
+                    app = QApplication.instance()
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Icon.Critical)
+                    msg.setWindowTitle("Missing Instrument or Gauge model")
+                    msg.setText(msg_text)
+                    msg.setInformativeText("Please check the above raw MTR file header if present and correct the file.") 
+                    msg.setInformativeText("You must quit the application and restart the process after correcting the MTR file.") 
+                    quit_btn = msg.addButton("Quit App", QMessageBox.ButtonRole.RejectRole)
+                    ok_btn = msg.addButton("Ok", QMessageBox.ButtonRole.AcceptRole)
+                    msg.setDefaultButton(ok_btn)
+                    msg.exec()
+                    if msg.clickedButton() == quit_btn:
+                        app.quit()
+                    if msg.clickedButton() == ok_btn:
+                        raise Exception(f"MissingMetaHeaderinMTRReading: Missing instrument model or gauge number in file {mtrfile}.")
+
+
+            if delTime_UTC is None or delTime_UTC == 0:
+                print("⚠️ No UTC/GMT offset found in column headers. Setting offset = 0 and assumed Timezone is UTC")
+                delTime_UTC = 0
+            else:
+                print(f"✅ Detected time offset from header: UTC{delTime_UTC:+d}")
+            
+            # --- Assemble results ---
+            if abs(delTime_UTC) == 0:
+                mtr_dict['df'] = dfmtr
+                mtr_dict['inst_model'] = inst_model
+                mtr_dict['gauge'] = gauge.strip(",")
+                mtr_dict['filename'] = mtrfile
+            else:
+                hours = abs(float(delTime_UTC))
+                dfmtr['DateTime'] = pd.to_datetime(dfmtr['date'] + ' ' + dfmtr['time'])
+                if float(delTime_UTC) < 0:
+                    dfmtr['DateTime'] = dfmtr['DateTime'] + timedelta(hours=hours)
+                else:
+                    dfmtr['DateTime'] = dfmtr['DateTime'] - timedelta(hours=hours)
+                dfmtr['date'] = dfmtr['DateTime'].dt.date.astype(str)
+                dfmtr['time'] = dfmtr['DateTime'].dt.time.astype(str)
+                dfmtr.drop(columns=['DateTime'], inplace=True)
+                mtr_dict['df'] = dfmtr
+                mtr_dict['inst_model'] = inst_model
+                mtr_dict['gauge'] = gauge
+                mtr_dict['filename'] = mtrfile
 
         elif instrument_type == 'hobo':
+            # Detect number of header lines dynamically ---
+            skiprows = 0
+            pattern = re.compile(
+                r"^\s*\d+,\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s+\d{1,2}:\d{2}:\d{2}\s*[APap][Mm],"
+                )
+            with open(mtrfile, 'r', encoding='iso8859_1') as f:
+                for i, line in enumerate(f):
+                    stripped = line.strip()
+                    # Case 1: Header line (with column names)
+                    if stripped.startswith('"#",') or stripped.startswith('"#","Date Time'):
+                        skiprows = i
+                        break
+                    #Case 2: Direct data line (starts with record number, date-time, etc.)
+                    elif pattern.match(stripped):
+                        skiprows = i - 1 if i > 0 else 0  # avoid negative skiprows
+                        break
+                    else:
+                        skiprows = 1
+                        break  # Default to skipping first line if no match found
 
             # Read the data lines from the MTR file.
             dfmtr = pd.read_table(mtrfile, sep = ',', header = 0, encoding = 'utf-8', skiprows = 1)
             
-            # drop the row number column
-            dfmtr.drop(columns=['#'], inplace=True)
-
+            # drop the row number column & Extract offset value from UTC/GMT column header
+            delTime_UTC = None
+            for col in dfmtr.columns:
+                if similar(col, "#") > 0.8:
+                    dfmtr.drop(columns=[col], inplace=True)
+                    continue
+                match = re.search(r'(?:UTC|GMT)\s*([+-]\d{1,2})(?::?\d{2})?', col, flags=re.IGNORECASE)
+                if match:
+                    delTime_UTC = int(match.group(1))  # Extract numeric offset (e.g., -3, +2)
+                    delTime_UTC = int(delTime_UTC) if str(delTime_UTC).lstrip('+-').isdigit() else 0
+                    continue
+            if delTime_UTC is None or delTime_UTC == 0:
+                print("⚠️ No UTC/GMT offset found in column headers. Setting offset = 0 and assumed Timezone is UTC")
+                delTime_UTC = 0
+            else:
+                print(f"✅ Detected time offset from header: UTC{delTime_UTC:+d}")
+            
+            possible_map = {
+                "date_time": ["date time", "datetime", "date/time", "date-time"],
+                "pressure": ["abs pres", "pressure", "absolute pressure"],
+                "depth": ["sensor depth", "depth"],
+                "temperature": ["temp", "temperature", "water temp", "temp °c"],
+                "dissolved_oxygen": ["do conc", "dissolved oxygen", "do %"]
+            }
+        
             # Extract required info from columns and rename them with shorter names
             cols = dfmtr.columns
             column_names = []
             cols_to_keep = []
+            inst_id = None
             for i, col in enumerate(cols):
+                clean_col = col.strip().replace('"', '')
                 cnames = col.split(",")
                 cname = cnames[0]
-                if cname == "Date Time":
-                    column_names.append("date_time")
-                    cols_to_keep.append(i)
-                elif cname == "Abs Pres":
-                    column_names.append("pressure")
-                    cols_to_keep.append(i)
-                elif cname == "Sensor Depth":
-                    column_names.append("depth")
-                    cols_to_keep.append(i)
-                elif cname == "Temp":
-                    column_names.append("temperature")
-                    cols_to_keep.append(i)
-                    toks = cnames[1].split(":")
-                    inst_id = toks[1]
-                elif cname == "DO conc":
-                    column_names.append("dissolved_oxygen")
-                    cols_to_keep.append(i)
-                else: # ignore other columns
-                    continue
+                match_found = False
+                for canonical, variants in possible_map.items():
+                    if any(similar(cname, v) > 0.7 for v in variants):  # 70% similarity threshold
+                        column_names.append(canonical)
+                        cols_to_keep.append(i)
+                        temp_lookup= possible_map["temperature"] 
+                        if any(item in clean_col.lower() for item in temp_lookup) and ":" in clean_col:
+                            # Extract instrument ID if present
+                            try:
+                                inst_id = clean_col.split(":")[1].split(",")[0].strip()
+                            except Exception:
+                                pass
+                        match_found = True
+                        break
 
+                if not match_found:
+                    print(f"⚠️ Warning: Unrecognized column '{col}' in file '{mtrfile}'. This column will be ignored.")
+                    continue    
+            
             # Keep only selected columns
             dfmtr = dfmtr[dfmtr.columns[cols_to_keep]]
 
@@ -355,10 +518,14 @@ class ThermographHeader(OdfHeader):
 
             # halifax_tz = pytz.timezone("America/Halifax")
             dt_format_string = "%m/%d/%y %I:%M:%S %p"
-            dt_halifax = dfmtr['date_time']
-            datetime_objects = [datetime.strptime(dt_str, dt_format_string).astimezone(pytz.utc) for dt_str in dt_halifax]
+            dt_original = dfmtr['date_time']
+            local_tz = timezone(timedelta(hours=delTime_UTC))
+            datetime_objects = [
+            datetime.strptime(dt_str, dt_format_string).replace(tzinfo=local_tz).astimezone(timezone.utc)
+                            for dt_str in dt_original]
             dfmtr['date_time'] = datetime_objects
-
+            
+            ## Assemble results ---
             mtr_dict['df'] = dfmtr
             mtr_dict['gauge'] = inst_id
             mtr_dict['filename'] = mtrfile
@@ -379,13 +546,19 @@ class ThermographHeader(OdfHeader):
 
         if institution == 'FSRS':
 
-            dfmeta = pd.read_table(metafile, encoding = 'iso8859_1')
+            dfmeta = pd.read_table(metafile, 
+                                encoding = 'iso8859_1',  
+                                sep="\t",
+                                engine="python",
+                                skip_blank_lines=False)
+
+            dfmeta = dfmeta.dropna(how="all")  # Drop rows where all elements are NaN
 
             # Change some column types.
-            dfmeta['LFA'].astype(int)
-            dfmeta['Vessel Code'].astype(int)
-            dfmeta['Gauge'].astype(int)
-            dfmeta['Soak Days'].astype(int)
+            dfmeta['LFA'] = dfmeta['LFA'].apply(ThermographHeader.clean_lfa)
+            dfmeta['Vessel Code'] = dfmeta['Vessel Code'].astype('Int64')
+            dfmeta['Gauge'] = dfmeta['Gauge'].astype('Int64')
+            dfmeta['Soak Days'] = dfmeta['Soak Days'].astype('Int64')
 
             # Drop some columns.
             dfmeta.drop(columns=['Date.1', 'Latitude', 'Longitude', 'Depth'], inplace = True)
@@ -402,15 +575,22 @@ class ThermographHeader(OdfHeader):
             # Fix the date and time columns.
             dfmeta = ThermographHeader.fix_datetime(dfmeta, False)
 
-        elif institution == 'BIO':
+        elif institution.strip().upper() in ('BIO', 'DFO BIO'):
 
             dfmeta = pd.read_excel(metafile)
 
         return dfmeta
 
-    def process_thermograph(self, institution_name: str, instrument_type: str, metadata_file_path: str, data_file_path: str):
+
+    def process_thermograph(self, institution_name: str, instrument_type: str, metadata_file_path: str, data_file_path: str, user_input_metadata: dict) -> None:
 
         if institution_name == 'FSRS':
+            # Get user input metadata values with defaults
+            organization = user_input_metadata.get("organization") or "FSRS"
+            chief_scientist = user_input_metadata.get("chief_scientist") or "SHANNON SCOTT-TIBBETTS"
+            cruise_description = user_input_metadata.get("cruise_description") or "FISHERMEN AND SCIENTISTS RESEARCH SOCIETY"
+            platform_name = user_input_metadata.get("platform_name") or "FSRS CRUISE DATA (NO ICES CODE)"
+            country_code = user_input_metadata.get("country_code") or "1899"
 
             # print(f'\nProcessing Metadata file: {metadata_file_path}\n')
             meta = self.read_metadata(metadata_file_path, institution_name)
@@ -427,17 +607,18 @@ class ThermographHeader(OdfHeader):
             # print(meta_subset.head())
             # print('\n')
 
-            self.cruise_header.country_institute_code = 1899
+            self.cruise_header.country_institute_code = country_code
             cruise_year = df['date'].to_string(index=False).split('-')[0]
-            cruise_number = f'BCD{cruise_year}603'
+            cruise_number = user_input_metadata.get("cruise_number") or f'BCD{cruise_year}603'
             self.cruise_header.cruise_number = cruise_number
+            self.cruise_header.platform = platform_name
             start_date = f"{self.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
             self.cruise_header.start_date = start_date
             end_date = f"{self.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
             self.cruise_header.end_date = end_date
-            self.cruise_header.organization = 'FSRS'
-            self.cruise_header.chief_scientist = 'Shannon Scott-Tibbetts'
-            self.cruise_header.cruise_description = 'Fishermen and Scientists Research Society'
+            self.cruise_header.organization = organization
+            self.cruise_header.chief_scientist = chief_scientist
+            self.cruise_header.cruise_description = cruise_description
             
             self.event_header.data_type = 'MTR'
             self.event_header.event_qualifier1 = gauge
@@ -466,7 +647,7 @@ class ThermographHeader(OdfHeader):
                 self.instrument_header.instrument_type = 'MINILOG'
             self.instrument_header.model = inst_model
             self.instrument_header.serial_number = gauge
-            self.instrument_header.description = 'Temperature data logger'
+            self.instrument_header.description = 'TEMPERATURE DATA LOGGER'
 
             new_df = self.create_sytm(df)
 
@@ -477,6 +658,12 @@ class ThermographHeader(OdfHeader):
                 new_df.rename(columns={column: code}, inplace=True)
 
         elif institution_name == 'BIO':
+            # Get user input metadata values with defaults
+            organization = user_input_metadata.get("organization") or "DFO BIO"
+            chief_scientist = user_input_metadata.get("chief_scientist") or "ADAM DROZDOWSKI"
+            cruise_description = user_input_metadata.get("cruise_description") or "LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)"
+            platform_name = user_input_metadata.get("platform_name") or "BIO CRUISE DATA (NO ICES CODE)"
+            country_code = user_input_metadata.get("country_code") or "1810"
 
             # print(f'\nProcessing Metadata file: {metadata_file_path}\n')
             meta = self.read_metadata(metadata_file_path, institution_name)
@@ -485,8 +672,6 @@ class ThermographHeader(OdfHeader):
             mydict = self.read_mtr(data_file_path, instrument_type)
 
             df = mydict['df']
-            if 'inst_model' in mydict:
-                inst_model = mydict['inst_model']
             gauge = int(mydict['gauge'])
             # print(df.head())
 
@@ -503,35 +688,62 @@ class ThermographHeader(OdfHeader):
                 if instrument_type == 'hobo':
                     hobo_file = f"{path1.stem}.hobo".lower()
                     # print(hobo_file)
-                    meta_subset = meta_subset[meta_subset['file_name'] == hobo_file]
+                    meta_subset = meta_subset.copy()
+                    meta_subset["file_name_norm"] = meta_subset["file_name"].astype(str).str.lower()
+                    matched = meta_subset[meta_subset["file_name_norm"] == hobo_file]
+                    if matched.empty:
+                        matched = meta_subset[
+                            meta_subset["file_name_norm"].str.replace(".hobo", "", regex=False) == path1.stem.lower()
+                        ]
+                    if not matched.empty:
+                        meta_subset = matched
+                    meta_subset.drop(columns="file_name_norm", inplace=True)
+                    
                 else:
                     minilog_file = f"{path1.stem}.vld".lower()
                     # print(minilog_file)
-                    meta_subset = meta_subset[meta_subset['file_name'] == minilog_file]
-
+                    meta_subset = meta_subset.copy()
+                    meta_subset["file_name_norm"] = meta_subset["file_name"].astype(str).str.lower()
+                    matched = meta_subset[meta_subset["file_name_norm"] == minilog_file]
+                    if matched.empty:
+                        matched = meta_subset[
+                            meta_subset["file_name_norm"].str.replace(".vld", "", regex=False) == path1.stem.lower()
+                        ]
+                    if not matched.empty:
+                        meta_subset = matched
+                    meta_subset.drop(columns="file_name_norm", inplace=True)
+                    
+                    
             # print(meta_subset.head())
             # print('\n')
 
             matching_indices = meta_subset[meta_subset['ID'] == gauge].index
 
-            inst_model = meta_subset['Instrument'].iloc[0]
-
-            self.cruise_header.country_institute_code = 1810
+            if instrument_type.lower() == 'minilog':
+                inst_model = (
+                    mydict.get('inst_model')
+                    or meta_subset.get('Instrument', pd.Series(['minilog II'])).iloc[0]
+                    or "minilog II"
+                )
+            if instrument_type.lower() == 'hobo':
+                inst_model = (meta_subset.get('Instrument', pd.Series(['hobo'])).iloc[0]
+                              or "hobo")
+            self.cruise_header.country_institute_code = country_code
             if instrument_type == 'minilog':
                 cruise_year = df['date'].to_string(index=False).split('-')[0]
             elif instrument_type == 'hobo':
                 cruise_year = df['date_time'].to_string(index=False).split('-')[0]
-            cruise_number = f'BCD{cruise_year}999'
+            cruise_number = user_input_metadata.get("cruise_number") or f'BCD{cruise_year}999'
             self.cruise_header.cruise_number = cruise_number
-            self.cruise_header.platform = 'BIO CRUISE DATA (NO ICES CODE)'
+            self.cruise_header.platform = platform_name
             start_date = f"{self.start_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
             self.cruise_header.start_date = start_date
             end_date = f"{self.end_date_time(df).strftime(r'%d-%b-%Y')} 00:00:00.00"
             self.cruise_header.end_date = end_date
-            self.cruise_header.organization = 'DFO BIO'
-            self.cruise_header.chief_scientist = 'ADAM DROZDOWSKI'
+            self.cruise_header.organization = organization
+            self.cruise_header.chief_scientist = chief_scientist
             self.cruise_header.cruise_name = f"LTTMP BIO VARIOUS SITES ({meta_subset['location'].iloc[0]})"
-            self.cruise_header.cruise_description = 'LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)'
+            self.cruise_header.cruise_description = cruise_description
             
             self.event_header.data_type = 'MTR'
             self.event_header.event_qualifier1 = str(gauge)
@@ -548,7 +760,7 @@ class ThermographHeader(OdfHeader):
             if isinstance(long, str):
                 long = self.convert_to_decimal_degrees(long)
             if lat < 0:
-                lat = lat * -1
+                lat = abs(lat)
             if long > 0:
                 long = long * -1
             self.event_header.initial_latitude = lat
@@ -581,7 +793,7 @@ class ThermographHeader(OdfHeader):
                 self.instrument_header.instrument_type = 'HOBO'
             self.instrument_header.model = inst_model
             self.instrument_header.serial_number = str(gauge)
-            self.instrument_header.description = 'Temperature data logger'
+            self.instrument_header.description = 'TEMPERATURE DATA LOGGER'
 
             new_df = self.create_sytm(df)
 
@@ -596,7 +808,7 @@ class ThermographHeader(OdfHeader):
 
 def main():
 
-    use_gui = True
+    use_gui = False
 
     if use_gui:
 
@@ -610,12 +822,13 @@ def main():
             print('\n****  Operation cancelled by user, exiting program.  ****\n')
             exit()
 
-        if select_inputs.metadata_file == '' or select_inputs.data_folder == '':
+        if select_inputs.metadata_file == '' or select_inputs.input_data_folder == ''or select_inputs.output_data_folder == '':
             print('\n****  Improper selections made, exiting program.  ****\n')
             exit()
         else:
             metadata_file_path = select_inputs.metadata_file
-            data_folder_path = select_inputs.data_folder
+            input_data_folder_path = select_inputs.input_data_folder
+            Output_data_folder_path = select_inputs.output_data_folder
 
         # Get the operator's name so it is identified in the history header.
         if select_inputs.line_edit_text == '':
@@ -625,21 +838,23 @@ def main():
 
         institution = select_inputs.institution.upper()
         instrument = select_inputs.instrument.lower()
+        user_input_metadata = select_inputs.user_input_meta
 
         # Change to folder containing files to be modified
-        os.chdir(data_folder_path)
+        os.chdir(input_data_folder_path)
 
         # Find all CSV files in the current directory.
         files = glob.glob('*.CSV')
 
         # Check if no data files were found.
         if files == []:
-            print(f"****  No data files found in selected folder {data_folder_path}  ****\n")
+            print(f"****  No data files found in selected folder {input_data_folder_path}  ****\n")
         else:
-            # Create the required subfolder, if necessary
-            if not os.path.isdir(os.path.join(data_folder_path, 'Step_1_Create_ODF')):
-                os.mkdir('Step_1_Create_ODF')
-            odf_path = os.path.join(data_folder_path, 'Step_1_Create_ODF')
+            # Build full path to output folder
+            odf_path = os.path.join(Output_data_folder_path, 'Step_1_Create_ODF')
+            # Create folder if needed (safe even if it exists)
+            os.makedirs(odf_path, exist_ok=True)
+            print("Created output folder path for .odf files:", odf_path)
 
         # Loop through the CSV files to generate an ODF file for each.
         for file_name in files:
@@ -650,19 +865,26 @@ def main():
             print('#######################################################################')
             print()
 
-            mtr_path = posixpath.join(data_folder_path, file_name)
+            mtr_path = posixpath.join(input_data_folder_path, file_name)
 
             mtr = ThermographHeader()
 
             history_header = HistoryHeader()
             history_header.creation_date = get_current_date_time()
-            history_header.set_process(f'Initial file creation by {operator}')
+            history_header.set_process(f'INITIAL FILE CREATED BY {operator.upper()}')
             mtr.history_headers.append(history_header)
 
-            mtr.process_thermograph(institution.upper(), instrument.lower(), metadata_file_path, mtr_path)
+            mtr.process_thermograph(institution.upper(), instrument.lower(), metadata_file_path, mtr_path, user_input_metadata)
 
             file_spec = mtr.generate_file_spec()
             mtr.file_specification = file_spec
+
+            mtr.add_quality_flags()
+ 
+            quality_header = QualityHeader()
+            quality_header.quality_date = get_current_date_time()
+            quality_header.add_quality_codes()
+            mtr.quality_header = quality_header
 
             mtr.update_odf()
 
@@ -677,37 +899,50 @@ def main():
         # Generate an empty MTR object.
         mtr = ThermographHeader()
 
-        operator = 'Jeff Jackson'
+        operator = 'JProdyut Roy'
 
         # institution_name = 'FSRS'
         # instrument_type = 'minilog'
         # metadata_file = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LatLong LFA 30_14.txt' # FSRS
-        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/' # FSRS
+        # input_data_folder_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/' # FSRS
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/FSRS_data_2013_2014/LFA 30/Minilog-II-T_354633_2014jmacleod_1.csv' # FSRS
 
         institution_name = 'BIO'
-        instrument_type = 'minilog'
-        # instrument_type = 'hobo'
-        metadata_file = 'C:/DFO-MPO/DEV/MTR/BCD2014999/MetaData_BCD2014999.xlsx' # BIO
+        #instrument_type = 'minilog'
+        instrument_type = 'hobo'
+        metadata_file = 'C:/MTR_Data_Processing/ReadyTo_Process_Data/BCD2014999/MetaData_BCD2014999.xlsx' # BIO
         # metadata_file = 'C:/DFO-MPO/DEV/MTR/999_Test/MetaData_BCD2015999_Reformatted.xlsx' # BIO
-        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
-        # data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/'  # BIO
-        data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Minilog/'  # BIO
+        # input_data_folder_path = 'C:/DFO-MPO/DEV/MTR/999_Test/'  # BIO
+        # input_data_folder_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/'  # BIO
+        input_data_folder_path = 'C:/MTR_Data_Processing/ReadyTo_Process_Data/BCD2014999/Hobos/MTR_Hobos_RAW_CSV'  # BIO
+        output_data_folder_path = 'C:/MTR_Data_Processing/ReadyTo_Process_Data/BCD2014999/Hobos'
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Liscomb_15m_352964_20160415_1.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/cape_sable_summer_2014.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/LTTMP_summer2014_HLFX_1273003_south.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Hobo/Dundee_10231582.csv'  # BIO
-        data_file_path = 'C:/DFO-MPO/DEV/MTR/BCD2014999/Minilog/LTTMP_summer2004_HLFX_352816_east.csv'  # BIO
+        data_file_path = 'C:/MTR_Data_Processing/ReadyTo_Process_Data/BCD2014999/Hobos/MTR_Hobos_RAW_CSV/baddeck_10536701.csv'  # BIO
         # data_file_path = 'C:/DFO-MPO/DEV/MTR/999_Test/Whycocomagh_885_north_10m.csv'  # BIO
+
+        user_input_metadata = {'organization': 'DFO BIO', 
+                               'chief_scientist': 'ADAM DROZDOWSKI', 
+                               'cruise_description': 'LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)', 
+                               'platform_name': 'BIO CRUISE DATA (NO ICES CODE)', 
+                               'country_code': '1810'}
 
         history_header = HistoryHeader()
         history_header.creation_date = get_current_date_time()
         history_header.set_process(f'Initial file creation by {operator}')
         mtr.history_headers.append(history_header)
 
-        mtr.process_thermograph(institution_name.upper(), instrument_type.lower(), metadata_file, data_file_path)
+        mtr.process_thermograph(institution_name.upper(), instrument_type.lower(), metadata_file, data_file_path, user_input_metadata)
 
-        os.chdir(data_folder_path)
+        os.chdir(input_data_folder_path)
+
+        odf_path = os.path.join(output_data_folder_path, 'Step_1_Create_ODF')
+        # Create folder if needed (safe even if it exists)
+        os.makedirs(odf_path, exist_ok=True)
+        print("Created output folder path for .odf files:", odf_path)
+
 
         file_spec = mtr.generate_file_spec()
         mtr.file_specification = file_spec
@@ -721,7 +956,7 @@ def main():
 
         mtr.update_odf()
 
-        odf_file_path = os.path.join(data_folder_path, file_spec + '.ODF')
+        odf_file_path = os.path.join(odf_path, file_spec + '.ODF')
         mtr.write_odf(odf_file_path, version = 2.0)
     
 

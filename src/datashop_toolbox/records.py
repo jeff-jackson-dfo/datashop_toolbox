@@ -83,7 +83,9 @@ class DataRecords(ValidatedBase, BaseHeader):
             df = df.astype({p: "int" for p in q_params})
 
         buffer = io.StringIO()
-        df.to_csv(buffer, index=False, sep=",", lineterminator="\n")
+        df.to_csv(buffer, index=False, sep=",", lineterminator="\r\n")
+        # add a final newline
+        buffer.write("\n")
         return buffer.getvalue()
 
     def print_object_old_style(self) -> str:
@@ -102,7 +104,7 @@ class DataRecords(ValidatedBase, BaseHeader):
             index = False,
             header = False,
             formatters = formatters,
-        )
+        ) + "\n"
 
 def main():
 

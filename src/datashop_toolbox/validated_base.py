@@ -92,7 +92,7 @@ def check_string(value: str) -> str:
 
 def check_datetime(value: str | None) -> str:
     """Validate datetime string according to SYTM_FORMAT, or return NULL value."""
-    if value is None:
+    if value is None or value == '':
         return BaseHeader.SYTM_NULL_VALUE
     try:
         dt = datetime.strptime(value, BaseHeader.SYTM_FORMAT)

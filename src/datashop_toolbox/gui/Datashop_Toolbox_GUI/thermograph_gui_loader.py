@@ -1,6 +1,6 @@
 import sys
-from PyQt6 import uic
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PySide6 import uic
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 
 
 class ThermographMainWindow(QMainWindow):
