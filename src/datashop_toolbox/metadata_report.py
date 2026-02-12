@@ -1,6 +1,6 @@
 # Load required base libraries
-import glob
 import os
+from pathlib import Path
 
 # Load required installed libraries
 import openpyxl
@@ -27,39 +27,39 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
     """
 
     report_headings = [
-        'File Name',
-        'File_Spec',
-        'Country_Institute_Code',
-        'Cruise_Number',
-        'Organization',
-        'Chief_Scientist',
-        'Start_Date',
-        'End_Date',
-        'Platform',
-        'Cruise_Name',
-        'Cruise_Description',
-        'Data_Type',
-        'Event_Number',
-        'Event_Qualifier1',
-        'Event_Qualifier2',
-        'Creation_Date',
-        'Orig_Creation_Date',
-        'Start_Date_Time',
-        'End_Date_Time',
-        'Initial_Latitude',
-        'Initial_Longitude',
-        'Min_Depth',
-        'Max_Depth',
-        'Sampling_Interval',
-        'Sounding',
-        'Depth_Off_Bottom',
-        'Station_Name',
-        'Set_Number',
-        'Event_Comments',
-        'Inst_Type',
-        'Model',
-        'Serial_Number',
-        'Description'
+        "File Name",
+        "File_Spec",
+        "Country_Institute_Code",
+        "Cruise_Number",
+        "Organization",
+        "Chief_Scientist",
+        "Start_Date",
+        "End_Date",
+        "Platform",
+        "Cruise_Name",
+        "Cruise_Description",
+        "Data_Type",
+        "Event_Number",
+        "Event_Qualifier1",
+        "Event_Qualifier2",
+        "Creation_Date",
+        "Orig_Creation_Date",
+        "Start_Date_Time",
+        "End_Date_Time",
+        "Initial_Latitude",
+        "Initial_Longitude",
+        "Min_Depth",
+        "Max_Depth",
+        "Sampling_Interval",
+        "Sounding",
+        "Depth_Off_Bottom",
+        "Station_Name",
+        "Set_Number",
+        "Event_Comments",
+        "Inst_Type",
+        "Model",
+        "Serial_Number",
+        "Description",
     ]
 
     # Create a new Excel workbook
@@ -71,13 +71,13 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
     # Add the report headings as the first row
     if worksheet is None:
         raise ValueError("No active worksheet found in workbook.")
-    
+
     worksheet.append(report_headings)
 
     os.chdir(file_path)
-    odfFiles = glob.glob(wildcard)
+    odf_files = Path.glob(wildcard)
 
-    for odf_file in odfFiles:
+    for odf_file in odf_files:
         odf = OdfHeader()
         odf.read_odf(file_path + odf_file)
         meta = list()
@@ -136,7 +136,7 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
     for col, cname in enumerate(worksheet.columns):
         column_letter = get_column_letter(col + 1)
         for cell in worksheet[column_letter + ":" + column_letter]:
-            cell.alignment = Alignment(horizontal='center')
+            cell.alignment = Alignment(horizontal="center")
 
     # Save the workbook to a file
     workbook.save(outfile)
@@ -146,4 +146,8 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
 
 
 if __name__ == "__main__":
-    generate_report("C:/DFO-MPO/DEV/Data/2025/LAT2025146/CTD/DATASHOP_PROCESSING/Step_2_Apply_Calibrations/ODF/", "D*.odf", "CTD_Metadata.xlsx")
+    generate_report(
+        "C:/DFO-MPO/DEV/Data/2025/LAT2025146/CTD/DATASHOP_PROCESSING/Step_2_Apply_Calibrations/ODF/",
+        "D*.odf",
+        "CTD_Metadata.xlsx",
+    )

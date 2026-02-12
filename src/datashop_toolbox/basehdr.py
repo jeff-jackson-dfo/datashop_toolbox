@@ -1,11 +1,12 @@
-from datetime import datetime
+import enum
 import logging
-from enum import Enum
-from typing import ClassVar, Optional
+from datetime import datetime
+from typing import ClassVar, Final
+
 from pydantic import BaseModel, Field
 
 
-class LogLevel(str, Enum):
+class LogLevel(enum.StrEnum):
     DEBUG = "DEBUG"
     INFO = "INFO"
     WARNING = "WARNING"
@@ -14,8 +15,8 @@ class LogLevel(str, Enum):
 
 
 class LoggerConfig(BaseModel):
-
     """Configuration model for logging settings."""
+
     log_level: LogLevel = Field(default=LogLevel.INFO, description="Logging level")
 
     def configure_logger(self) -> logging.Logger:
@@ -38,14 +39,14 @@ class BaseHeader:
 
     shared_log_list: ClassVar[list[str]] = []
 
-    SYTM_FORMAT: ClassVar[str] = "%d-%b-%Y %H:%M:%S.%f"
-    NULL_VALUE: ClassVar[float] = -999.0
-    SYTM_NULL_VALUE: ClassVar[str] = "17-NOV-1858 00:00:00.000000"
+    SYTM_FORMAT: Final[str] = "%d-%b-%Y %H:%M:%S.%f"
+    NULL_VALUE: Final[float] = -999.0
+    SYTM_NULL_VALUE: Final[str] = "17-NOV-1858 00:00:00.000000"
 
     _default_config: ClassVar[LoggerConfig] = LoggerConfig()
     _default_logger: ClassVar[logging.Logger] = _default_config.configure_logger()
 
-    def __init__(self, config: Optional[LoggerConfig] = None):
+    def __init__(self, config: LoggerConfig | None = None):
         # Pydantic will call __init__, so we allow both normal + Pydantic init
         self.config = config or self._default_config
         self.logger = self.config.configure_logger()
@@ -121,6 +122,7 @@ def main():
     print("Shared log messages after new entries:")
     for log_entry in BaseHeader.shared_log_list:
         print(log_entry)
+
 
 if __name__ == "__main__":
     main()

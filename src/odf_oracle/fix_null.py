@@ -48,7 +48,7 @@ def fix_null(x):
     # null values that are possible in an ODF formatted file. If it is a null
     # value then convert it to an empty string.
     if (x == -99) or (x == -99.9) or (x == -999) or (x == -999.9):
-        y = ''
+        y = ""
     else:
         y = x
 

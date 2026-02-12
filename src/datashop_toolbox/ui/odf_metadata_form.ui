@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>odf_metadata_form</class>
+ <widget class="QWidget" name="odf_metadata_form">
+  <property name="windowModality">
+   <enum>Qt::WindowModality::NonModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>822</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>1</horstretch>
+    <verstretch>1</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QComboBox" name="mission_template_selector_combo_box">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>20</y>
+     <width>311</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ok_push_button">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>730</y>
+     <width>201</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+     <bold>true</bold>
+     <kerning>true</kerning>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mission_template_selector_label">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>10</y>
+     <width>231</width>
+     <height>39</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>MISSION TEMPLATE SELECTOR</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="cruise_header_group_box">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>110</y>
+     <width>491</width>
+     <height>282</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>CRUISE_HEADER</string>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="1" column="4" colspan="3">
+     <widget class="QLineEdit" name="cruise_number_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="6">
+     <widget class="QLineEdit" name="country_institute_code_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="2" colspan="5">
+     <widget class="QLineEdit" name="platform_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0" colspan="5">
+     <widget class="QLabel" name="cruise_desciption_label">
+      <property name="text">
+       <string>CRUISE_DESCRIPTION:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1" colspan="6">
+     <widget class="QLineEdit" name="end_date_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="6">
+     <widget class="QLabel" name="country_institute_code_label">
+      <property name="text">
+       <string>COUNTRY_INSTITUTE_CODE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="4">
+     <widget class="QLabel" name="chief_scientist_label">
+      <property name="text">
+       <string>CHIEF_SCIENTIST:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="4">
+     <widget class="QLabel" name="organization_label">
+      <property name="text">
+       <string>ORGANIZATION:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="platform_label">
+      <property name="text">
+       <string>PLATFORM:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="4" colspan="3">
+     <widget class="QLineEdit" name="organization_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="4">
+     <widget class="QLabel" name="cruise_number_label">
+      <property name="text">
+       <string>CRUISE_NUMBER:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="2">
+     <widget class="QLabel" name="start_date_label">
+      <property name="text">
+       <string>START_DATE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="2" colspan="5">
+     <widget class="QLineEdit" name="start_date_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="5" colspan="2">
+     <widget class="QLineEdit" name="cruise_desciption_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="3">
+     <widget class="QLabel" name="cruise_name_label">
+      <property name="text">
+       <string>CRUISE_NAME:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4" colspan="3">
+     <widget class="QLineEdit" name="chief_scientist_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="end_date_label">
+      <property name="text">
+       <string>END_DATE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="3" colspan="4">
+     <widget class="QLineEdit" name="cruise_name_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="cancel_push_button">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>730</y>
+     <width>201</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+     <bold>true</bold>
+     <kerning>true</kerning>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>CANCEL</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="event_header_group_box">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>110</y>
+     <width>521</width>
+     <height>590</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>EVENT_HEADER</string>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="12" column="0">
+     <widget class="QLabel" name="min_depth_label">
+      <property name="text">
+       <string>MIN_DEPTH:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="17" column="0" colspan="5">
+     <widget class="QLabel" name="station_name_label">
+      <property name="text">
+       <string>STATION_NAME:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="6">
+     <widget class="QLabel" name="event_number_label">
+      <property name="text">
+       <string>EVENT_NUMBER:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="9">
+     <widget class="QLabel" name="event_qualifier2_label">
+      <property name="text">
+       <string>EVENT_QUALIFIER2:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="0" colspan="4">
+     <widget class="QLabel" name="end_latitude_label">
+      <property name="text">
+       <string>END_LATITUDE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="15" column="0">
+     <widget class="QLabel" name="sounding_label">
+      <property name="text">
+       <string>SOUNDING:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0" colspan="12">
+     <widget class="QLabel" name="orig_creation_date_label">
+      <property name="text">
+       <string>ORIG_CREATION_DATE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="data_type_label">
+      <property name="text">
+       <string>DATA_TYPE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0" colspan="10">
+     <widget class="QLabel" name="initial_longitude_label">
+      <property name="text">
+       <string>INITIAL_LONGITUDE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="7" colspan="6">
+     <widget class="QLineEdit" name="end_date_time_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="19" column="0" colspan="10">
+     <widget class="QLabel" name="event_comments_label">
+      <property name="text">
+       <string>EVENT_COMMENTS:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0" colspan="7">
+     <widget class="QLabel" name="initial_latitude_label">
+      <property name="text">
+       <string>INITIAL_LATITUDE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="8" colspan="5">
+     <widget class="QLineEdit" name="initial_latitude_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="18" column="0" colspan="3">
+     <widget class="QLabel" name="set_number_label">
+      <property name="text">
+       <string>SET_NUMBER:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="19" column="10" colspan="3">
+     <widget class="QLineEdit" name="event_comments_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="9">
+     <widget class="QLabel" name="event_qualifier1_label">
+      <property name="text">
+       <string>EVENT_QUALIFIER1:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="13" column="0" colspan="2">
+     <widget class="QLabel" name="max_depth_label">
+      <property name="text">
+       <string>MAX_DEPTH:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="14" column="12">
+     <widget class="QLineEdit" name="sampling_interval_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="0" colspan="6">
+     <widget class="QLabel" name="end_longitude_label">
+      <property name="text">
+       <string>END_LONGITUDE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="18" column="4" colspan="9">
+     <widget class="QLineEdit" name="set_number_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="5" colspan="8">
+     <widget class="QLineEdit" name="end_latitude_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="10" colspan="3">
+     <widget class="QLineEdit" name="event_qualifier2_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="12">
+     <widget class="QLineEdit" name="orig_creation_date_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="8">
+     <widget class="QLabel" name="start_datetime_label">
+      <property name="text">
+       <string>START_DATE_TIME:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="8" colspan="5">
+     <widget class="QLineEdit" name="end_longitude_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="12" column="3" colspan="10">
+     <widget class="QLineEdit" name="min_depth_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="9" colspan="4">
+     <widget class="QLineEdit" name="start_datetime_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="13" column="3" colspan="10">
+     <widget class="QLineEdit" name="max_depth_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="16" column="0" colspan="11">
+     <widget class="QLabel" name="depth_off_bottom_label">
+      <property name="text">
+       <string>DEPTH_OFF_BOTTOM:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="15" column="2" colspan="11">
+     <widget class="QLineEdit" name="sounding_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="8" colspan="5">
+     <widget class="QLineEdit" name="event_number_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="8" colspan="5">
+     <widget class="QLineEdit" name="creation_date_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="6">
+     <widget class="QLabel" name="end_date_time_label">
+      <property name="text">
+       <string>END_DATE_TIME:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="17" column="6" colspan="7">
+     <widget class="QLineEdit" name="station_name_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="6">
+     <widget class="QLabel" name="creation_date_label">
+      <property name="text">
+       <string>CREATION_DATE:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" colspan="12">
+     <widget class="QLineEdit" name="data_type_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="11" colspan="2">
+     <widget class="QLineEdit" name="initial_longitude_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="14" column="0" colspan="12">
+     <widget class="QLabel" name="sampling_interval_label">
+      <property name="text">
+       <string>SAMPLING_INTERVAL:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="16" column="12">
+     <widget class="QLineEdit" name="depth_off_bottom_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="10" colspan="3">
+     <widget class="QLineEdit" name="event_qualifier1_line_edit">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLabel" name="year_label">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>50</y>
+     <width>341</width>
+     <height>39</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>PLEASE ENTER YEAR DATA WAS COLLECTED:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="year_line_edit">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>60</y>
+     <width>121</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

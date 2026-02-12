@@ -1,10 +1,16 @@
-from typing import List
-from pydantic import Field, field_validator, ConfigDict
+from pydantic import ConfigDict, Field, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_string, check_datetime
+from datashop_toolbox.validated_base import (
+    ValidatedBase,
+    check_datetime,
+    check_string,
+    list_to_dict,
+)
+
 
 class PolynomialCalHeader(ValidatedBase, BaseHeader):
-    """ A class to represent a Polynomial Calibration Header in an ODF object. """
+    """A class to represent a Polynomial Calibration Header in an ODF object."""
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -12,7 +18,7 @@ class PolynomialCalHeader(ValidatedBase, BaseHeader):
     calibration_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
     application_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
     number_coefficients: int = 0
-    coefficients: List[float] = Field(default_factory=list)
+    coefficients: list[float] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
@@ -74,21 +80,21 @@ class PolynomialCalHeader(ValidatedBase, BaseHeader):
     def populate_object(self, polynomial_cal_fields: list) -> "PolynomialCalHeader":
         assert isinstance(polynomial_cal_fields, list), "polynomial_cal_fields must be a list."
         for header_line in polynomial_cal_fields:
-            tokens = header_line.split('=', maxsplit=1)
+            tokens = header_line.split("=", maxsplit=1)
             poly_dict = list_to_dict(tokens)
             for key, value in poly_dict.items():
                 key = key.strip().upper()
                 value = value.strip("' ")
                 match key:
-                    case 'PARAMETER_NAME' | 'PARAMETER_CODE':
+                    case "PARAMETER_NAME" | "PARAMETER_CODE":
                         self.parameter_code = value
-                    case 'CALIBRATION_DATE':
+                    case "CALIBRATION_DATE":
                         self.calibration_date = value
-                    case 'APPLICATION_DATE':
+                    case "APPLICATION_DATE":
                         self.application_date = value
-                    case 'NUMBER_OF_COEFFICIENTS' | 'NUMBER_COEFFICIENTS':
+                    case "NUMBER_OF_COEFFICIENTS" | "NUMBER_COEFFICIENTS":
                         self.number_coefficients = int(float(value))
-                    case 'COEFFICIENTS':
+                    case "COEFFICIENTS":
                         coefficient_list = value.split()
                         self.coefficients = [float(check_string(coef)) for coef in coefficient_list]
                         self.number_coefficients = len(self.coefficients)
@@ -101,9 +107,10 @@ class PolynomialCalHeader(ValidatedBase, BaseHeader):
             f"  CALIBRATION_DATE = '{check_datetime(self.calibration_date)}'",
             f"  APPLICATION_DATE = '{check_datetime(self.application_date)}'",
             f"  NUMBER_COEFFICIENTS = {self.number_coefficients}",
-            "  COEFFICIENTS = " + " ".join(f"{float(coef):.8e}" for coef in self.coefficients)
+            "  COEFFICIENTS = " + " ".join(f"{float(coef):.8e}" for coef in self.coefficients),
         ]
         return "\n".join(lines)
+
 
 def main():
 
@@ -113,28 +120,29 @@ def main():
     poly1.logger = BaseHeader._default_logger
 
     print(poly1.print_object())
-    poly1.parameter_code = 'PRES_01'
-    poly1.calibration_date = '11-JUN-1995 05:35:46.82'
-    poly1.application_date = '11-JUN-1995 05:35:46.82'
+    poly1.parameter_code = "PRES_01"
+    poly1.calibration_date = "11-JUN-1995 05:35:46.82"
+    poly1.application_date = "11-JUN-1995 05:35:46.82"
     poly1.number_coefficients = 2
-    poly1.coefficients = [0.60000000e+01, 0.15000001e+00]
+    poly1.coefficients = [0.60000000e01, 0.15000001e00]
     print(poly1.print_object())
 
     poly2 = PolynomialCalHeader()
     poly2.config = BaseHeader._default_config
     poly2.logger = BaseHeader._default_logger
-    poly2.parameter_code = 'TEMP_01'
-    poly2.calibration_date = '11-JUN-1995 05:35:46.83'
-    poly2.application_date = '11-JUN-1995 05:35:46.83'
+    poly2.parameter_code = "TEMP_01"
+    poly2.calibration_date = "11-JUN-1995 05:35:46.83"
+    poly2.application_date = "11-JUN-1995 05:35:46.83"
     poly2.number_coefficients = 4
-    poly2.coefficients = [0.0, 80.0, 0.60000000e+01, 0.15000001e+00]
-    poly2.log_poly_message('coefficient 2', poly2.coefficients[1], 9.750)
+    poly2.coefficients = [0.0, 80.0, 0.60000000e01, 0.15000001e00]
+    poly2.log_poly_message("coefficient 2", poly2.coefficients[1], 9.750)
     poly2.set_coefficient(9.750, 2)
     print(poly2.print_object())
 
     for log_entry in BaseHeader.shared_log_list:
         print(log_entry)
     print()
+
 
 if __name__ == "__main__":
     main()

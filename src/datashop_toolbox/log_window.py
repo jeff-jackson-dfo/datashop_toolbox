@@ -1,29 +1,34 @@
 # log_window.py
-from PySide6.QtWidgets import (
-    QApplication,
-    QWidget, 
-    QVBoxLayout, 
-    QTextEdit, 
-    QPushButton, 
-    QFileDialog, 
-    QHBoxLayout,
-    QRadioButton)
-from PySide6.QtCore import Signal, QObject, QThread
+import logging
 import sys
 import traceback
-import logging
+from pathlib import Path
+
+from PySide6.QtCore import QObject, QThread, Signal
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QHBoxLayout,
+    QPushButton,
+    QRadioButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class LogEmitter(QObject):
     text_written = Signal(str)
 
+
 class LogWindow(QWidget):
     exit_requested = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Processing Log")
         self.resize(800, 420)
-        self.active_workers = [] 
+        self.active_workers = []
         self.log_box = QTextEdit()
         self.log_box.setReadOnly(True)
         self.log_box.setAcceptRichText(False)
@@ -60,17 +65,23 @@ class LogWindow(QWidget):
 
     def redirect_prints_to_log(self):
         """Call this to redirect sys.stdout to the log window (optional)."""
+
         class _Stream:
             def __init__(self, emitter):
                 self.emitter = emitter
+
             def write(self, msg):
                 if msg and msg.strip():
                     self.emitter.text_written.emit(msg)
+
             def flush(self):
                 pass
+
         sys.stdout = _Stream(self.emitter)
         sys.stderr = _Stream(self.emitter)
-        self.write("************* ❌ The log window should not be closed during processing ❌ ***************")
+        self.write(
+            "************* ❌ The log window should not be closed during processing ❌ ***************"
+        )
 
     def export_log(self):
         """Export the current log content to a text file."""
@@ -79,7 +90,7 @@ class LogWindow(QWidget):
         )
         if filename:
             try:
-                with open(filename, "w", encoding="utf-8") as f:
+                with Path.open(filename, "w", encoding="utf-8") as f:
                     f.write(self.log_box.toPlainText())
                 self._append_text(f"\n✅ Log exported to: {filename}")
             except Exception as e:
@@ -88,6 +99,7 @@ class LogWindow(QWidget):
     def _exit_app(self):
         """Emit exit request to Main Application."""
         self.exit_requested.emit()
+
 
 class Worker(QThread):
     log = Signal(str)
@@ -111,8 +123,10 @@ class Worker(QThread):
             self.log.emit(tb)
             self.finished_failure.emit(str(e))
 
+
 class SafeConsoleFilter(logging.Filter):
     """Ensures console output is cp1252-safe by stripping unsupported characters."""
+
     def filter(self, record):
         try:
             # Attempt cp1252 encoding (Windows terminal)
@@ -121,6 +135,7 @@ class SafeConsoleFilter(logging.Filter):
             # Remove or replace unsupported characters (emoji, symbols)
             record.msg = record.msg.encode("ascii", "ignore").decode()
         return True
+
 
 class QTextEditLogger(logging.Handler):
     """A logging.Handler that appends logs to a QTextEdit widget in the GUI."""
@@ -139,15 +154,6 @@ class QTextEditLogger(logging.Handler):
         except Exception:
             pass
 
-class SafeConsoleFilter(logging.Filter):
-    """Remove unsupported characters (like emojis) for console output."""
-    def filter(self, record):
-        try:
-            record.msg.encode("cp1252")
-        except UnicodeEncodeError:
-            # replace emoji with a safe fallback
-            record.msg = record.msg.encode("ascii", "ignore").decode()
-        return True
 
 class LogWindowThermographQC(QWidget):
     def __init__(self):
@@ -171,7 +177,8 @@ class LogWindowThermographQC(QWidget):
         layout.addWidget(self.btn_start)
         layout.addWidget(self.btn_exit)
         self.qtext_handler = QTextEditLogger(self.log_view)
-        
+
+
 class LogWindowProcessMTR(QWidget):
     def __init__(self):
         super().__init__()
@@ -192,14 +199,14 @@ class LogWindowProcessMTR(QWidget):
         layout.addWidget(self.btn_exit)
         self.qtext_handler = QTextEditLogger(self.log_view)
 
-if __name__ == "__main__":
-    
-    app = QApplication(sys.argv)
-    app.setStyle('Fusion')
 
-    window = LogWindowUI()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    app.setStyle("Fusion")
+
+    window = LogWindow()
     window.show()
-    #window.redirect_prints_to_log()
+    # window.redirect_prints_to_log()
 
     print("✅ Log window initialized successfully.")
 

@@ -1,27 +1,30 @@
-from typing import List
-from pydantic import Field, field_validator, ConfigDict
+from pydantic import ConfigDict, Field, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
-from datashop_toolbox.validated_base import ValidatedBase, check_string, check_datetime, list_to_dict, get_current_date_time
+from datashop_toolbox.validated_base import (
+    ValidatedBase,
+    check_datetime,
+    check_string,
+    get_current_date_time,
+    list_to_dict,
+)
 
 
 class QualityHeader(ValidatedBase, BaseHeader):
-    """ A class to represent a Quality Header in an ODF object. """
+    """A class to represent a Quality Header in an ODF object."""
 
     model_config = ConfigDict(validate_assignment=True)
 
     quality_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
-    quality_tests: List[str] = Field(default_factory=list)
-    quality_comments: List[str] = Field(default_factory=list)
-
+    quality_tests: list[str] = Field(default_factory=list)
+    quality_comments: list[str] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
 
-
     def set_logger_and_config(self, logger, config):
         self.logger = logger
         self.config = config
-
 
     @field_validator("quality_date", mode="before")
     @classmethod
@@ -29,7 +32,6 @@ class QualityHeader(ValidatedBase, BaseHeader):
         v = check_string(v)
         v = check_datetime(v)
         return v.upper()
-
 
     @field_validator("quality_tests", "quality_comments", mode="before")
     @classmethod
@@ -40,12 +42,10 @@ class QualityHeader(ValidatedBase, BaseHeader):
             return [check_string(v)]
         return [check_string(item) for item in v]
 
-
     def log_quality_message(self, field: str, old_value: str, new_value: str) -> None:
         message = f"In Quality Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
         # self.logger.info(message)
         self.shared_log_list.append(message)
-
 
     def set_quality_test(self, quality_test: str, test_number: int = 0) -> None:
         quality_test = check_string(quality_test)
@@ -54,11 +54,9 @@ class QualityHeader(ValidatedBase, BaseHeader):
         else:
             self.quality_tests[test_number - 1] = quality_test
 
-
     def add_quality_test(self, quality_test: str) -> None:
         quality_test = check_string(quality_test)
         self.quality_tests.append(quality_test)
-
 
     def set_quality_comment(self, quality_comment: str, comment_number: int = 0) -> None:
         quality_comment = check_string(quality_comment)
@@ -67,73 +65,66 @@ class QualityHeader(ValidatedBase, BaseHeader):
         else:
             self.quality_comments[comment_number - 1] = quality_comment
 
-
     def add_quality_comment(self, quality_comment: str) -> None:
         quality_comment = check_string(quality_comment)
         self.quality_comments.append(quality_comment)
 
-
     def add_quality_codes(self) -> None:
         defaults_comments = [
-            'QUALITY CODES', 
-            '  0: Value has not been quality controlled', 
-            '  1: Value seems to be correct', 
-            '  2: Value appears inconsistent with other values', 
-            '  3: Value seems doubtful', 
-            '  4: Value seems erroneous', 
-            '  5: Value was modified', 
-            '  9: Value is missing'
+            "QUALITY CODES",
+            "  0: Value has not been quality controlled",
+            "  1: Value seems to be correct",
+            "  2: Value appears inconsistent with other values",
+            "  3: Value seems doubtful",
+            "  4: Value seems erroneous",
+            "  5: Value was modified",
+            "  9: Value is missing",
         ]
         if self.quality_date == BaseHeader.SYTM_NULL_VALUE:
             self.quality_date = get_current_date_time()
         if not self.quality_tests:
-            self.quality_tests.append('No quality tests performed')
+            self.quality_tests.append("No quality tests performed")
         for comment in defaults_comments:
             if comment not in self.quality_comments:
                 self.quality_comments.append(comment)
-
 
     def add_qcff_info(self) -> None:
         defaults_comments = [
-            'QCFF CHANNEL', 
-            '  The QCFF flag allows one to determine from which test(s) the quality flag(s) originate.', 
-            '  It only applies to the stage 2 quality control tests.', 
-            '  Each test in this step is associated with a number 2x, where x is a whole positive number.', 
-            '  Before running the quality control, a QCFF value of 0 is attributed to each line of data.', 
-            '  When a test fails, the value of 2x that is associated with that test is added to the QCFF.', 
-            '  In this way one can easily identify which tests failed by analyzing the QCFF value.', 
-            '  If the QC flag of a record is modified by hand, a value of 1 is added to the QCFF.'
+            "QCFF CHANNEL",
+            "  The QCFF flag allows one to determine from which test(s) the quality flag(s) originate.",
+            "  It only applies to the stage 2 quality control tests.",
+            "  Each test in this step is associated with a number 2x, where x is a whole positive number.",
+            "  Before running the quality control, a QCFF value of 0 is attributed to each line of data.",
+            "  When a test fails, the value of 2x that is associated with that test is added to the QCFF.",
+            "  In this way one can easily identify which tests failed by analyzing the QCFF value.",
+            "  If the QC flag of a record is modified by hand, a value of 1 is added to the QCFF.",
         ]
         if self.quality_date == BaseHeader.SYTM_NULL_VALUE:
             self.quality_date = get_current_date_time()
         if not self.quality_tests:
-            self.quality_tests.append('No quality tests performed')
+            self.quality_tests.append("No quality tests performed")
         for comment in defaults_comments:
             if comment not in self.quality_comments:
                 self.quality_comments.append(comment)
 
-
     def populate_object(self, quality_fields: list) -> "QualityHeader":
         for header_line in quality_fields:
-            tokens = header_line.split('=', maxsplit=1)
+            tokens = header_line.split("=", maxsplit=1)
             quality_dict = list_to_dict(tokens)
             for key, value in quality_dict.items():
                 key = key.strip("' ").upper()
                 value = value.strip("' ")
                 match key:
-                    case 'QUALITY_DATE':
+                    case "QUALITY_DATE":
                         self.quality_date = value
-                    case 'QUALITY_TESTS':
+                    case "QUALITY_TESTS":
                         self.add_quality_test(value)
-                    case 'QUALITY_COMMENTS':
+                    case "QUALITY_COMMENTS":
                         self.add_quality_comment(value)
         return self
 
     def print_object(self) -> str:
-        lines = [
-            "QUALITY_HEADER",
-            f"  QUALITY_DATE = '{check_string(self.quality_date)}'"
-        ]
+        lines = ["QUALITY_HEADER", f"  QUALITY_DATE = '{check_string(self.quality_date)}'"]
         if not self.quality_tests:
             lines.append("  QUALITY_TESTS = ''")
         else:
@@ -146,6 +137,7 @@ class QualityHeader(ValidatedBase, BaseHeader):
                 lines.append(f"  QUALITY_COMMENTS = '{quality_comment}'")
         return "\n".join(lines)
 
+
 def main():
 
     quality_header = QualityHeader()
@@ -157,14 +149,14 @@ def main():
     print(quality_header.print_object())
 
     qd = quality_header.quality_date
-    quality_header.log_quality_message("QUALITY_DATE", qd, '01-JUL-2017 10:45:19.00')
-    quality_header.quality_date = '01-JUL-2017 10:45:19.00'
-    quality_header.set_quality_test('Test 1')
-    quality_header.set_quality_test('Test 2')
-    quality_header.quality_comments = ['Comment 1', 'Comment 2']
+    quality_header.log_quality_message("QUALITY_DATE", qd, "01-JUL-2017 10:45:19.00")
+    quality_header.quality_date = "01-JUL-2017 10:45:19.00"
+    quality_header.set_quality_test("Test 1")
+    quality_header.set_quality_test("Test 2")
+    quality_header.quality_comments = ["Comment 1", "Comment 2"]
     quality_header.add_qcff_info()
     print(quality_header.print_object())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

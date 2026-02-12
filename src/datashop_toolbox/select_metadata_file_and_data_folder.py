@@ -1,14 +1,22 @@
-import sys
-from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, 
-    QPushButton, QComboBox, QFileDialog, QLabel, QLineEdit, 
-    QWidget, QDialogButtonBox, QCheckBox
-)
-from PySide6.QtCore import Qt
-from pathlib import Path
 import json
-import os
 import re
+import sys
+from pathlib import Path
+
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDialogButtonBox,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 meta_dir = BASE_DIR / "temporary"
@@ -21,7 +29,7 @@ class MainWindow(QMainWindow):
         self.meta_store_path = meta_dir / ".mtr_last_user_metadata.json"
         self.setWindowTitle("MTR Processing Toolbox - ODF Generator")
         self.resize(750, 480)
-        
+
         self.line_edit_text = ""
         self.institution = "BIO"
         self.instrument = "Minilog"
@@ -32,9 +40,11 @@ class MainWindow(QMainWindow):
         self.user_input_meta = {}
         self.remember_input_dict = {}
         self.remember_input_choice = False
-        
+
         # --- Data Processor Name ---
-        self.line_edit_title = QLabel("Please enter the data processor's name in the text box below:")
+        self.line_edit_title = QLabel(
+            "Please enter the data processor's name in the text box below:"
+        )
         self.line_edit = QLineEdit()
         self.line_edit.setFixedHeight(25)
         font = self.line_edit_title.font()
@@ -53,7 +63,9 @@ class MainWindow(QMainWindow):
         self.institution_combo_label.setFixedSize(225, 15)
         self.institution_combo = QComboBox()
         self.institution_combo.addItems(["BIO", "FSRS"])
-        self.institution_combo.currentTextChanged.connect(self.institution_text_changed)  # Sends the current text (string) of the selected item.
+        self.institution_combo.currentTextChanged.connect(
+            self.institution_text_changed
+        )  # Sends the current text (string) of the selected item.
         self.institution_combo.setCurrentIndex(0)
 
         # --- Instrument Combo ---
@@ -62,9 +74,11 @@ class MainWindow(QMainWindow):
         self.instrument_combo_label.setFixedSize(225, 15)
         self.instrument_combo = QComboBox()
         self.instrument_combo.addItems(["Minilog", "Hobo"])
-        self.instrument_combo.currentTextChanged.connect( self.instrument_text_changed )  # Sends the current text (string) of the selected item.
+        self.instrument_combo.currentTextChanged.connect(
+            self.instrument_text_changed
+        )  # Sends the current text (string) of the selected item.
         self.instrument_combo.setCurrentIndex(0)
-        
+
         # --- Cruise Header Fields ---
         self.organization_label = QLabel("Organization:")
         self.organization_input = QLineEdit()
@@ -83,7 +97,9 @@ class MainWindow(QMainWindow):
         self.load_last_user_metadata()
 
         # --- Buttons for Metadata + Data Folder ---
-        self.file_button = QPushButton("Select meta data file\n(e.g. LFA .txt file, \nor Excel file)")
+        self.file_button = QPushButton(
+            "Select meta data file\n(e.g. LFA .txt file, \nor Excel file)"
+        )
         self.file_button.setFixedSize(225, 100)
         font = self.file_button.font()
         font.setPointSize(11)
@@ -92,7 +108,9 @@ class MainWindow(QMainWindow):
         self.file_button.setStyleSheet("font-weight: bold;")
         self.file_button.clicked.connect(self.choose_metadata_file)
 
-        self.input_data_folder_button = QPushButton("Select input data folder\n(Location of raw *.csv files)")
+        self.input_data_folder_button = QPushButton(
+            "Select input data folder\n(Location of raw *.csv files)"
+        )
         self.input_data_folder_button.setFixedSize(225, 100)
         font = self.input_data_folder_button.font()
         font.setPointSize(11)
@@ -101,7 +119,9 @@ class MainWindow(QMainWindow):
         self.input_data_folder_button.setStyleSheet("font-weight: bold;")
         self.input_data_folder_button.clicked.connect(self.choose_input_data_folder)
 
-        self.output_data_folder_button = QPushButton("Select output data folder\n(Location for *.odf files)")
+        self.output_data_folder_button = QPushButton(
+            "Select output data folder\n(Location for *.odf files)"
+        )
         self.output_data_folder_button.setFixedSize(225, 100)
         font = self.output_data_folder_button.font()
         font.setPointSize(11)
@@ -110,11 +130,8 @@ class MainWindow(QMainWindow):
         self.output_data_folder_button.setStyleSheet("font-weight: bold;")
         self.output_data_folder_button.clicked.connect(self.choose_output_data_folder)
 
-         # --- Dialog Buttons ---
-        buttons = (
-            QDialogButtonBox.StandardButton.Ok
-            | QDialogButtonBox.StandardButton.Cancel
-        )
+        # --- Dialog Buttons ---
+        buttons = QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         self.buttonBox = QDialogButtonBox(buttons)
         self.buttonBox.accepted.connect(self.on_accept)
         self.buttonBox.rejected.connect(self.on_reject)
@@ -142,17 +159,15 @@ class MainWindow(QMainWindow):
         self.output_data_folder_label.setFixedHeight(25)
         self.output_data_folder_path_text.setFixedHeight(25)
 
-
         title_layout = QHBoxLayout()
         title_layout.addWidget(self.line_edit_title)
         title_layout.addStretch()  # push checkbox to the right
         title_layout.addWidget(self.remember_meta_checkbox)
-     
-        
+
         # Vertical layout for label + line edit
         v_layout1 = QVBoxLayout()
         v_layout1.addLayout(title_layout)
-        #v_layout1.addWidget(self.line_edit_title)
+        # v_layout1.addWidget(self.line_edit_title)
         v_layout1.addWidget(self.line_edit)
 
         # Vertical layout for institution label + combo box
@@ -170,10 +185,10 @@ class MainWindow(QMainWindow):
         h_layout_1.addLayout(v_layout2_1)
         h_layout_1.addLayout(v_layout2_2)
         v_layout1.addLayout(h_layout_1)
-        
+
         # Cruise header fields
         cruise_header_layout = QVBoxLayout()
-        cruise_header_layout.setSpacing(2)  
+        cruise_header_layout.setSpacing(2)
         cruise_header_layout.setContentsMargins(0, 5, 0, 5)
         title_label = QLabel("User Meta Info:")
         title_label.setStyleSheet("font-weight: bold; margin-bottom: 2px;")
@@ -240,12 +255,12 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
     def editing_finished(self):
-            text = self.line_edit.text().strip()
-            if not text:
-                return
-            self.line_edit_text = text
-            print("\n========== MTR Data Processing Inputs ==========")
-            print(f"\n(1 of 4) Data processor: {self.line_edit_text}\n")
+        text = self.line_edit.text().strip()
+        if not text:
+            return
+        self.line_edit_text = text
+        print("\n========== MTR Data Processing Inputs ==========")
+        print(f"\n(1 of 4) Data processor: {self.line_edit_text}\n")
 
     def institution_text_changed(self, s):
         self.institution = s
@@ -258,14 +273,14 @@ class MainWindow(QMainWindow):
             # FSRS only supports Minilog
             self.instrument_combo.clear()
             self.instrument_combo.addItem("Minilog")
-            self.instrument = "Minilog"   # ensure consistency
+            self.instrument = "Minilog"  # ensure consistency
         # Update cruise header defaults
         self.populate_defaults(s)
 
     def instrument_text_changed(self, s):
         self.instrument = s
 
-    def find_raw_data_folder(self,base_dir):
+    def find_raw_data_folder(self, base_dir):
         """
         Search for a folder containing 'raw' in its name (case-insensitive)
         inside base_dir.
@@ -275,7 +290,7 @@ class MainWindow(QMainWindow):
             if p.is_dir() and any(keyword in p.name.lower() for keyword in keywords):
                 return p
         return None
-    
+
     def choose_metadata_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select the Metadata file")
         if not file_path:
@@ -291,22 +306,16 @@ class MainWindow(QMainWindow):
                 self.input_data_folder = str(raw_folder)
                 self.input_data_folder_path_text.setText(self.input_data_folder)
 
-                print(
-                    f"(3 of 4) Input data folder auto-detected: "
-                    f"{self.input_data_folder}"
-                )
+                print(f"(3 of 4) Input data folder auto-detected: {self.input_data_folder}")
             else:
                 print(
                     "⚠️ No Raw data folder found near metadata file. "
                     "Please select input folder manually."
                 )
-            
+
             self.output_data_folder = str(meta_dir)
             self.output_data_folder_path_text.setText(self.output_data_folder)
-            print(
-                f"(4 of 4) Output data folder auto-set to: "
-                f"{self.output_data_folder}\n"
-            )
+            print(f"(4 of 4) Output data folder auto-set to: {self.output_data_folder}\n")
 
     def choose_input_data_folder(self):
         input_folder_path = QFileDialog.getExistingDirectory(self, "Select the input data folder")
@@ -332,23 +341,23 @@ class MainWindow(QMainWindow):
         platform_name = self.platform_input.text().strip()
         country_code = self.country_input.text().strip()
         cruise_number_code = self.cruise_number_input.text().strip()
-        
+
         self.user_input_meta = {
-        "organization": organization,
-        "chief_scientist": chief_scientist,
-        "cruise_description": cruise_desc,
-        "platform_name": platform_name,
-        "country_code": country_code,
-        "cruise_number": cruise_number_code,
+            "organization": organization,
+            "chief_scientist": chief_scientist,
+            "cruise_description": cruise_desc,
+            "platform_name": platform_name,
+            "country_code": country_code,
+            "cruise_number": cruise_number_code,
         }
         if self.remember_meta_checkbox.isChecked():
             self.remember_input_choice = True
             self.remember_input_dict = {
-            "input_choice":self.remember_input_choice,
-            "processor_name": processor_name,
-            "institution": self.institution,
-            "instrument": self.instrument,
-            "default_user_meta": self.user_input_meta
+                "input_choice": self.remember_input_choice,
+                "processor_name": processor_name,
+                "institution": self.institution,
+                "instrument": self.instrument,
+                "default_user_meta": self.user_input_meta,
             }
             self.save_last_user_metadata()
         else:
@@ -356,7 +365,7 @@ class MainWindow(QMainWindow):
             self.remember_input_choice = False
             self.remember_input_dict = {}
         self.close()
-        #self.hide()
+        # self.hide()
 
     def on_reject(self):
         self.result = "reject"
@@ -364,7 +373,7 @@ class MainWindow(QMainWindow):
 
     def save_last_user_metadata(self):
         try:
-            with open(self.meta_store_path, "w", encoding="utf-8") as f:
+            with Path.open(self.meta_store_path, "w", encoding="utf-8") as f:
                 json.dump(self.remember_input_dict, f, indent=4)
             print("💾 User metadata saved")
         except Exception as e:
@@ -386,14 +395,18 @@ class MainWindow(QMainWindow):
             self.cruisedesc_input.setText("LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)")
             self.platform_input.setText("BIO CRUISE DATA (NO ICES CODE)")
             self.country_input.setText("1810")
-            self.cruise_number_input.setPlaceholderText("if known use the format (BCDcruise_year999) else leave blank")
+            self.cruise_number_input.setPlaceholderText(
+                "if known use the format (BCDcruise_year999) else leave blank"
+            )
         elif institution == "FSRS":
             self.organization_input.setText("FSRS")
             self.chiefscientist_input.setText("SHANNON SCOTT-TIBBETTS")
             self.cruisedesc_input.setText("FISHERMEN  AND SCIENTISTS RESEARCH SOCIETY")
             self.platform_input.setText("FSRS CRUISE DATA (NO ICES CODE)")
             self.country_input.setText("1899")
-            self.cruise_number_input.setPlaceholderText("if known use the format (BCDcruise_year603) else leave blank")
+            self.cruise_number_input.setPlaceholderText(
+                "if known use the format (BCDcruise_year603) else leave blank"
+            )
         else:
             self.organization_input.clear()
             self.chiefscientist_input.clear()
@@ -408,7 +421,7 @@ class MainWindow(QMainWindow):
             return
 
         try:
-            with open(self.meta_store_path, "r", encoding="utf-8") as f:
+            with Path.open(self.meta_store_path, encoding="utf-8") as f:
                 meta = json.load(f)
 
             # Populate fields safely
@@ -420,7 +433,6 @@ class MainWindow(QMainWindow):
                 self.line_edit.setText(processor_name)
                 self.line_edit_text = processor_name
 
-
                 institution = meta.get("institution", "BIO")
                 instrument = meta.get("instrument", "Minilog")
                 self.institution_combo.setCurrentText(institution)
@@ -428,11 +440,24 @@ class MainWindow(QMainWindow):
 
                 default_user_meta = meta.get("default_user_meta", {})
                 self.organization_input.setText(default_user_meta.get("organization", "DFO BIO"))
-                self.chiefscientist_input.setText(default_user_meta.get("chief_scientist", "ADAM DROZDOWSKI"))
-                self.cruisedesc_input.setText(default_user_meta.get("cruise_description", "LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)"))
-                self.platform_input.setText(default_user_meta.get("platform_name", "BIO CRUISE DATA (NO ICES CODE)"))
+                self.chiefscientist_input.setText(
+                    default_user_meta.get("chief_scientist", "ADAM DROZDOWSKI")
+                )
+                self.cruisedesc_input.setText(
+                    default_user_meta.get(
+                        "cruise_description", "LONG TERM TEMPERATURE MONITORING PROGRAM (LTTMP)"
+                    )
+                )
+                self.platform_input.setText(
+                    default_user_meta.get("platform_name", "BIO CRUISE DATA (NO ICES CODE)")
+                )
                 self.country_input.setText(default_user_meta.get("country_code", "1810"))
-                self.cruise_number_input.setText(default_user_meta.get("cruise_number", "if known use the format (BCDcruise_year999) else leave blank"))
+                self.cruise_number_input.setText(
+                    default_user_meta.get(
+                        "cruise_number",
+                        "if known use the format (BCDcruise_year999) else leave blank",
+                    )
+                )
 
                 self.remember_meta_checkbox.setChecked(self.remember_input_choice)
             else:
@@ -466,7 +491,6 @@ class SubWindowOne(QMainWindow):
         self.remember_input_choice = False
         self.generate_batch = ""
 
-  
         # --- QC Checker Name ---
         if self.review_mode:
             self.line_edit_title = QLabel("Please enter the QC reviewer name:")
@@ -496,12 +520,16 @@ class SubWindowOne(QMainWindow):
         self.metadata_file_path_text = QLineEdit(" ")
         self.metadata_file_path_text.setReadOnly(True)
         self.metadata_file_path_text.setFixedWidth(500)
-        
+
         # --- Input folder selection ---
         if self.review_mode:
-            self.input_label = QLabel("Select the Step_2_Assign_QFlag folder or other folder path containing .ODF files (With Previous Flagged):")
+            self.input_label = QLabel(
+                "Select the Step_2_Assign_QFlag folder or other folder path containing .ODF files (With Previous Flagged):"
+            )
         else:
-            self.input_label = QLabel("Select the Step_1_Create_ODF folder path containing .ODF files (No Previous Flagged):")
+            self.input_label = QLabel(
+                "Select the Step_1_Create_ODF folder path containing .ODF files (No Previous Flagged):"
+            )
         self.input_button = QPushButton("Choose ODF Folder")
         self.input_button.setFixedSize(200, 40)
         self.input_button.clicked.connect(self.choose_input_data_folder)
@@ -526,12 +554,8 @@ class SubWindowOne(QMainWindow):
         self.generate_batch_text.setReadOnly(True)
         self.generate_batch_text.setFixedWidth(200)
 
-
         # --- OK / Cancel buttons ---
-        buttons = (
-            QDialogButtonBox.StandardButton.Ok
-            | QDialogButtonBox.StandardButton.Cancel
-        )
+        buttons = QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         self.buttonBox = QDialogButtonBox(buttons)
         self.buttonBox.accepted.connect(self.on_accept)
         self.buttonBox.rejected.connect(self.on_reject)
@@ -541,13 +565,11 @@ class SubWindowOne(QMainWindow):
         title_layout.addWidget(self.line_edit_title)
         title_layout.addStretch()  # push checkbox to the right
         title_layout.addWidget(self.remember_meta_checkbox)
-        
-        
+
         main_layout = QVBoxLayout()
         main_layout.addLayout(title_layout)
         main_layout.addWidget(self.line_edit)
 
-        
         # Meta file row
         row0 = QHBoxLayout()
         row0.addWidget(self.meta_label)
@@ -557,8 +579,7 @@ class SubWindowOne(QMainWindow):
         row0b.addWidget(self.meta_button)
         row0b.addWidget(self.metadata_file_path_text)
         main_layout.addLayout(row0b)
-        
-        
+
         # Input folder row
         row1 = QHBoxLayout()
         row1.addWidget(self.input_label)
@@ -596,7 +617,6 @@ class SubWindowOne(QMainWindow):
         container.setLayout(main_layout)
         self.setCentralWidget(container)
 
-
     def editing_finished(self):
         text = self.line_edit.text().strip()
         if not text:
@@ -604,7 +624,7 @@ class SubWindowOne(QMainWindow):
         self.line_edit_text = text
         print("\n========== MTR Data QC Inputs ==========")
         print(f"\n(1 of 4) Data QC Reviewer: {self.line_edit_text}\n")
-        
+
     def find_raw_data_folder(self, base_dir):
         """
         Search for a folder containing 'raw' in its name (case-insensitive)
@@ -621,16 +641,18 @@ class SubWindowOne(QMainWindow):
                 if p.is_dir() and any(keyword in p.name for keyword in keywords):
                     return p
         return None
-    
+
     def build_batch_name(self, meta_path: str) -> str:
-        filename = os.path.splitext(os.path.basename(meta_path))[0]
-        lfa_match = re.search(r"LFA\s*[_\-]?\s*(\d+[A-Z]?)",filename,re.IGNORECASE)
-        
+        filename = Path(Path.name(meta_path)).stem
+        lfa_match = re.search(r"LFA\s*[_\-]?\s*(\d+[A-Z]?)", filename, re.IGNORECASE)
+
         if lfa_match:
             lfa_number = lfa_match.group(1)
 
             # Look for year patterns after LFA number
-            year_match_4 = re.search(r"LFA\s*[_\-]?\s*\d+[A-Z]?[_\-]?(\d{4})",filename,re.IGNORECASE)
+            year_match_4 = re.search(
+                r"LFA\s*[_\-]?\s*\d+[A-Z]?[_\-]?(\d{4})", filename, re.IGNORECASE
+            )
             if year_match_4:
                 year_token = year_match_4.group(1)
 
@@ -642,12 +664,13 @@ class SubWindowOne(QMainWindow):
 
                 # 2012 → keep as is
                 return f"LFA-{lfa_number}-{year_token}"
-            
-            year_match_2 = re.search(r"LFA\s*[_\-]?\s*\d+[A-Z]?[_\-]?(\d{2})",filename,re.IGNORECASE)
+
+            year_match_2 = re.search(
+                r"LFA\s*[_\-]?\s*\d+[A-Z]?[_\-]?(\d{2})", filename, re.IGNORECASE
+            )
             if year_match_2:
                 year_token = year_match_2.group(1)
                 return f"LFA-{lfa_number}-20{year_token}"
-
 
             # No year info
             return f"LFA-{lfa_number}"
@@ -658,7 +681,7 @@ class SubWindowOne(QMainWindow):
             return f"BCD-{bcd_match.group(1)}"
 
         return "UNKNOWN_BATCH"
-    
+
     def choose_metadata_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select the Metadata file")
         if not file_path:
@@ -674,23 +697,17 @@ class SubWindowOne(QMainWindow):
                 self.input_data_folder = str(raw_folder)
                 self.input_path_text.setText(self.input_data_folder)
 
-                print(
-                    f"(3 of 4) Input data folder auto-detected: "
-                    f"{self.input_data_folder}"
-                )
+                print(f"(3 of 4) Input data folder auto-detected: {self.input_data_folder}")
             else:
                 print(
                     "⚠️ No Raw data folder found near metadata file. "
                     "Please select input folder manually."
                 )
-            
+
             self.output_data_folder = str(meta_dir)
             self.output_path_text.setText(self.output_data_folder)
-            print(
-                f"(4 of 4) Output data folder auto-set to: "
-                f"{self.output_data_folder}\n"
-            )
-            #extract_meta_name = os.path.basename(file_path)
+            print(f"(4 of 4) Output data folder auto-set to: {self.output_data_folder}\n")
+            # extract_meta_name = os.path.basename(file_path)
             batchname = self.build_batch_name(file_path)
             self.generate_batch = batchname
             self.generate_batch_text.setText(self.generate_batch)
@@ -713,7 +730,7 @@ class SubWindowOne(QMainWindow):
         if not self.line_edit_text.strip():
             print("❌ QC reviewer name missing.")
             return
-        
+
         if not self.input_data_folder:
             print("❌ ODF input folder missing.")
             return
@@ -727,8 +744,8 @@ class SubWindowOne(QMainWindow):
         if self.remember_meta_checkbox.isChecked():
             self.remember_input_choice = True
             self.remember_input_dict = {
-            "input_choice":self.remember_input_choice,
-            "reviewer_name": reviewer_name
+                "input_choice": self.remember_input_choice,
+                "reviewer_name": reviewer_name,
             }
             self.save_last_user_metadata()
         else:
@@ -743,7 +760,7 @@ class SubWindowOne(QMainWindow):
 
     def save_last_user_metadata(self):
         try:
-            with open(self.meta_store_path, "w", encoding="utf-8") as f:
+            with Path.open(self.meta_store_path, "w", encoding="utf-8") as f:
                 json.dump(self.remember_input_dict, f, indent=4)
             print("💾 User metadata saved")
         except Exception as e:
@@ -763,7 +780,7 @@ class SubWindowOne(QMainWindow):
             return
 
         try:
-            with open(self.meta_store_path, "r", encoding="utf-8") as f:
+            with Path.open(self.meta_store_path, encoding="utf-8") as f:
                 meta = json.load(f)
                 print(meta)
 
@@ -789,13 +806,11 @@ class SubWindowOne(QMainWindow):
         self.line_edit.setPlaceholderText("Please Provide Reviewer Name")
 
 
-
 if __name__ == "__main__":
-    
     app = QApplication(sys.argv)
-    app.setStyle('Fusion')
+    app.setStyle("Fusion")
 
-    #window = MainWindow()
+    # window = MainWindow()
     window = SubWindowOne(True)
     window.show()
 

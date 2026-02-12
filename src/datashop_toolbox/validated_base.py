@@ -3,19 +3,19 @@ from __future__ import annotations
 import re
 import shlex
 from datetime import datetime
+from pathlib import Path
 from typing import Any, get_type_hints
 
 import pandas as pd
-from pydantic import BaseModel, field_validator, ValidationInfo
+from pydantic import BaseModel, ValidationInfo, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
 
 
 class ValidatedBase(BaseModel):
     """Base model providing validation/normalization similar to old check_* functions."""
 
-    model_config = {
-        "extra": "allow"
-    }
+    model_config = {"extra": "allow"}
 
     # --- Validators ---
     @field_validator("*", mode="before")
@@ -24,7 +24,7 @@ class ValidatedBase(BaseModel):
 
         if not info.field_name:
             return v
-        
+
         type_hints = get_type_hints(cls)
         annotation = type_hints.get(info.field_name)
         if v is None:
@@ -41,7 +41,6 @@ class ValidatedBase(BaseModel):
         if isinstance(v, str):
             v = v.strip("' ")
         return v
-
 
     @field_validator("*", mode="before")
     @classmethod
@@ -65,6 +64,7 @@ class ValidatedBase(BaseModel):
                 )
         return v
 
+
 # ---------------------------
 # Helpers still useful
 # ---------------------------
@@ -87,12 +87,12 @@ def check_string(value: str) -> str:
     if not isinstance(value, str):
         raise TypeError(f"Expected str, got {type(value)}: {value}")
     # Only replace D with E in scientific notation, not everywhere
-    return re.sub(r'([+-]?\d*\.\d+)D([+-]?\d+)', r'\1E\2', value)
+    return re.sub(r"([+-]?\d*\.\d+)D([+-]?\d+)", r"\1E\2", value)
 
 
 def check_datetime(value: str | None) -> str:
     """Validate datetime string according to SYTM_FORMAT, or return NULL value."""
-    if value is None or value == '':
+    if value is None or value == "":
         return BaseHeader.SYTM_NULL_VALUE
     try:
         dt = datetime.strptime(value, BaseHeader.SYTM_FORMAT)
@@ -103,10 +103,10 @@ def check_datetime(value: str | None) -> str:
 
 def is_valid_datetime(date_str: str) -> bool:
     try:
-        if date_str[:2] == '%d':
-            pd.to_datetime(date_str, errors = "raise", dayfirst = True)
+        if date_str[:2] == "%d":
+            pd.to_datetime(date_str, errors="raise", dayfirst=True)
         else:
-            pd.to_datetime(date_str, errors = "raise", dayfirst = False)
+            pd.to_datetime(date_str, errors="raise", dayfirst=False)
         return True
     except (ValueError, TypeError):
         return False
@@ -120,9 +120,10 @@ def matches_datetime_format(date_str: str, fmt: str) -> bool:
     except ValueError:
         return False
 
+
 def coerce_datetime(date_str: str, output_fmt: str = "%d-%b-%Y %H:%M:%S.%f") -> str:
     try:
-        dt = pd.to_datetime(date_str, errors = "raise", dayfirst = True)
+        dt = pd.to_datetime(date_str, errors="raise", dayfirst=True)
         return dt.strftime(output_fmt).upper()
     except (ValueError, TypeError):
         return date_str
@@ -169,6 +170,7 @@ def get_current_date_time() -> str:
     """Return current date/time in SYTM_FORMAT (truncated)."""
     return datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
 
+
 # ---------------------------
 # File handling
 # ---------------------------
@@ -178,7 +180,7 @@ def read_file_lines(file_with_path: str) -> list[str]:
         print(f"'file_with_path' must be str, got {type(file_with_path).__name__}")
         return []
     try:
-        with open(file_with_path, "r", encoding="iso-8859-1") as file:
+        with Path.open(file_with_path, encoding="iso-8859-1") as file:
             return [line.strip() for line in file if line.strip()]
     except FileNotFoundError:
         print(f"File not found: {file_with_path}")
@@ -206,7 +208,7 @@ def find_lines_with_text(odf_file_lines: list[str], substrings: list[str]) -> li
 
         for sub in substrings:
             if sub in line:
-                if sub.endswith("HEADER"):  
+                if sub.endswith("HEADER"):
                     # Enforce HEADER rule
                     if line.rstrip().endswith(("HEADER", "HEADER,")):
                         cleaned = line.rstrip().rstrip(",")
@@ -220,8 +222,7 @@ def find_lines_with_text(odf_file_lines: list[str], substrings: list[str]) -> li
 
 
 def split_lines_into_dict(lines: list) -> dict:
-    assert isinstance(lines, list), \
-        f"Input argument 'lines' is not of type list: {lines}"
+    assert isinstance(lines, list), f"Input argument 'lines' is not of type list: {lines}"
     return list_to_dict(lines)
 
 

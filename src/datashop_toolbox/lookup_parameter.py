@@ -1,8 +1,9 @@
-from odf_oracle.database_connection_pool import get_database_pool
 import sqlite3
-from typing import TypedDict
-from pathlib import Path
 from importlib import resources
+from typing import TypedDict
+
+from odf_oracle.database_connection_pool import get_database_pool
+
 
 class ParamInfo(TypedDict):
     description: str
@@ -10,14 +11,19 @@ class ParamInfo(TypedDict):
     print_field_width: int
     print_decimal_places: int
 
-def lookup_parameter(database: str, parameter: str) -> ParamInfo:
-    """ Get the parameter information from the a database."""
 
-    parameter_info: ParamInfo = {"description": "Unknown", "units": "Unknown", "print_field_width": 0, "print_decimal_places": 0}
-    
+def lookup_parameter(database: str, parameter: str) -> ParamInfo:
+    """Get the parameter information from the a database."""
+
+    parameter_info: ParamInfo = {
+        "description": "Unknown",
+        "units": "Unknown",
+        "print_field_width": 0,
+        "print_decimal_places": 0,
+    }
+
     match database:
-        
-        case 'oracle':
+        case "oracle":
             # Acquire a connection from the pool (will always have the new date and timestamp formats).
             pool = get_database_pool()
             connection = pool.acquire()
@@ -38,12 +44,11 @@ def lookup_parameter(database: str, parameter: str) -> ParamInfo:
             pool.drop(connection)
             pool.close()
 
-        case 'sqlite':
-
+        case "sqlite":
             # Get a safe, real filesystem path to the packaged parameters.db
             with resources.as_file(
                 resources.files("datashop_toolbox.database").joinpath("parameters.db")
-            ) as db_path:            
+            ) as db_path:
                 with sqlite3.connect(db_path) as conn:
                     sql_statement = f"select * from ODF_PARAMETERS where code = '{parameter}'"
 
@@ -65,11 +70,11 @@ def lookup_parameter(database: str, parameter: str) -> ParamInfo:
 def main():
 
     # Get parameter information for TEMP from the ODF database.
-    parameter = 'TEMP'
+    parameter = "TEMP"
     # pinfo = lookup_parameter('oracle', parameter)
-    pinfo = lookup_parameter('sqlite', parameter)
+    pinfo = lookup_parameter("sqlite", parameter)
     print(pinfo)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,7 +1,18 @@
 from typing import Any
-from pydantic import field_validator, ConfigDict
+
+from pydantic import ConfigDict, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_datetime, check_string, is_valid_datetime, coerce_datetime, matches_datetime_format
+from datashop_toolbox.validated_base import (
+    ValidatedBase,
+    check_datetime,
+    check_string,
+    coerce_datetime,
+    is_valid_datetime,
+    list_to_dict,
+    matches_datetime_format,
+)
+
 
 class ParameterHeader(ValidatedBase, BaseHeader):
     """A class to represent a Parameter Header in an ODF object."""
@@ -18,7 +29,7 @@ class ParameterHeader(ValidatedBase, BaseHeader):
     print_field_width: int = int(BaseHeader.NULL_VALUE)
     print_decimal_places: int = int(BaseHeader.NULL_VALUE)
     angle_of_section: float = BaseHeader.NULL_VALUE
-    magnetic_variation: float= BaseHeader.NULL_VALUE
+    magnetic_variation: float = BaseHeader.NULL_VALUE
     depth: float = BaseHeader.NULL_VALUE
     minimum_value: Any = None
     maximum_value: Any = None
@@ -57,28 +68,30 @@ class ParameterHeader(ValidatedBase, BaseHeader):
             return False
 
     def populate_object(self, parameter_fields: list) -> "ParameterHeader":
-        assert isinstance(parameter_fields, list), "Input argument 'parameter_fields' must be a list."
+        assert isinstance(parameter_fields, list), (
+            "Input argument 'parameter_fields' must be a list."
+        )
         for header_line in parameter_fields:
-            tokens = header_line.split('=', maxsplit=1)
+            tokens = header_line.split("=", maxsplit=1)
             parameter_dict = list_to_dict(tokens)
             for key, value in parameter_dict.items():
                 key = key.strip().lower()
                 value = value.strip("' ")
                 match key:
-                    case 'type':
+                    case "type":
                         self.type = value
-                    case 'name':
+                    case "name":
                         self.name = value
-                    case 'units':
+                    case "units":
                         self.units = value
-                    case 'code':
+                    case "code":
                         self.code = value
-                    case 'wmo_code':
+                    case "wmo_code":
                         self.wmo_code = value
                         if self.code == "":
                             self.code = value
-                    case 'null_value':
-                        if self.type == 'SYTM':
+                    case "null_value":
+                        if self.type == "SYTM":
                             if is_valid_datetime(value):
                                 if matches_datetime_format(value, BaseHeader.SYTM_FORMAT):
                                     self.null_string = check_datetime(value)
@@ -90,22 +103,22 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                             if is_valid_datetime(value):
                                 self.null_string = value
                             else:
-                                self.null_string = f"{float(check_string(value))}"                                                
-                    case 'print_field_order':
+                                self.null_string = f"{float(check_string(value))}"
+                    case "print_field_order":
                         self.print_field_order = int(float(value))
-                    case 'print_field_width':
+                    case "print_field_width":
                         self.print_field_width = int(float(value))
-                    case 'print_decimal_places':
+                    case "print_decimal_places":
                         self.print_decimal_places = int(float(value))
-                    case 'angle_of_section':
+                    case "angle_of_section":
                         self.angle_of_section = float(value)
-                    case 'magnetic_variation':
+                    case "magnetic_variation":
                         self.magnetic_variation = float(value)
-                    case 'depth':
+                    case "depth":
                         value = check_string(value)
                         self.depth = float(value)
-                    case 'minimum_value':
-                        if self.type == 'SYTM':
+                    case "minimum_value":
+                        if self.type == "SYTM":
                             if is_valid_datetime(value):
                                 if matches_datetime_format(value, BaseHeader.SYTM_FORMAT):
                                     self.minimum_value = check_datetime(value)
@@ -113,17 +126,19 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                                     self.minimum_value = coerce_datetime(value)
                             else:
                                 self.minimum_value = BaseHeader.SYTM_NULL_VALUE
-                        elif self.type == 'INTE':
+                        elif self.type == "INTE":
                             if self.is_float_and_int(value):
                                 self.minimum_value = int(float(value))
                             else:
-                                raise ValueError(f"{self.__class__.__name__}: Invalid integer value: {value}")
-                        elif self.type in ('SING', 'DOUB'):
+                                raise ValueError(
+                                    f"{self.__class__.__name__}: Invalid integer value: {value}"
+                                )
+                        elif self.type in ("SING", "DOUB"):
                             self.minimum_value = float(value)
                         else:
                             self.minimum_value = BaseHeader.NULL_VALUE
-                    case 'maximum_value':
-                        if self.type == 'SYTM':
+                    case "maximum_value":
+                        if self.type == "SYTM":
                             if is_valid_datetime(value):
                                 if matches_datetime_format(value, BaseHeader.SYTM_FORMAT):
                                     self.maximum_value = check_datetime(value)
@@ -131,18 +146,20 @@ class ParameterHeader(ValidatedBase, BaseHeader):
                                     self.maximum_value = coerce_datetime(value)
                             else:
                                 self.maximum_value = BaseHeader.SYTM_NULL_VALUE
-                        elif self.type == 'INTE':
+                        elif self.type == "INTE":
                             if self.is_float_and_int(value):
                                 self.maximum_value = int(float(value))
                             else:
-                                raise ValueError(f"{self.__class__.__name__}: Invalid integer value: {value}")
-                        elif self.type in ('SING', 'DOUB'):
+                                raise ValueError(
+                                    f"{self.__class__.__name__}: Invalid integer value: {value}"
+                                )
+                        elif self.type in ("SING", "DOUB"):
                             self.maximum_value = float(value)
                         else:
                             self.maximum_value = BaseHeader.NULL_VALUE
-                    case 'number_valid':
+                    case "number_valid":
                         self.number_valid = int(float(value))
-                    case 'number_null':
+                    case "number_null":
                         self.number_null = int(float(value))
         return self
 
@@ -153,7 +170,7 @@ class ParameterHeader(ValidatedBase, BaseHeader):
             f"  TYPE = '{self.type}'",
             f"  NAME = '{self.name}'",
             f"  UNITS = '{self.units}'",
-            f"  CODE = '{self.code}'"
+            f"  CODE = '{self.code}'",
         ]
         if self.wmo_code:
             lines.append(f"  WMO_CODE = '{self.wmo_code}'")
@@ -196,44 +213,45 @@ class ParameterHeader(ValidatedBase, BaseHeader):
             lines.append(f"  NUMBER_NULL = {self.number_null}")
         return "\n".join(lines)
 
+
 def main():
 
     param2 = ParameterHeader(
-        type='SYTM',
-        name='SYTM',
-        units='UTC',
-        code='SYTM_01',
-        wmo_code='SYTM',
-        null_string=f'{BaseHeader.SYTM_NULL_VALUE}',
+        type="SYTM",
+        name="SYTM",
+        units="UTC",
+        code="SYTM_01",
+        wmo_code="SYTM",
+        null_string=f"{BaseHeader.SYTM_NULL_VALUE}",
         print_field_width=23,
         print_decimal_places=0,
         angle_of_section=0.0,
         magnetic_variation=0.0,
         depth=0.0,
-        minimum_value='03-MAY-2025 00:47:41.73',
-        maximum_value='03-MAY-2025 01:54:07.73',
+        minimum_value="03-MAY-2025 00:47:41.73",
+        maximum_value="03-MAY-2025 01:54:07.73",
         number_valid=1064,
-        number_null=643
+        number_null=643,
     )
     print(param2.print_object())
 
     param1 = ParameterHeader()
-    param1.type="DOUB"
-    param1.name='Pressure'
-    param1.units='Decibars'
-    param1.code='PRES_01'
-    param1.wmo_code='PRES'
-    param1.null_string=f'{BaseHeader.NULL_VALUE}'
-    param1.print_field_width=10
-    param1.print_decimal_places=3
-    param1.angle_of_section=0.0
-    param1.magnetic_variation=0.0
+    param1.type = "DOUB"
+    param1.name = "Pressure"
+    param1.units = "Decibars"
+    param1.code = "PRES_01"
+    param1.wmo_code = "PRES"
+    param1.null_string = f"{BaseHeader.NULL_VALUE}"
+    param1.print_field_width = 10
+    param1.print_decimal_places = 3
+    param1.angle_of_section = 0.0
+    param1.magnetic_variation = 0.0
     # param1.depth = check_string('0.50000000D+02')
-    param1.depth=0.50000000e+02
-    param1.minimum_value=2.177
-    param1.maximum_value=176.5
-    param1.number_valid=1064
-    param1.number_null=643
+    param1.depth = 0.50000000e02
+    param1.minimum_value = 2.177
+    param1.maximum_value = 176.5
+    param1.number_valid = 1064
+    param1.number_null = 643
     print(param1.print_object())
 
 

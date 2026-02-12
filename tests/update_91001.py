@@ -1,8 +1,9 @@
 import glob
 import os
+
+from odf_toolbox import odfutils
 from odf_toolbox.basehdr import BaseHeader
 from odf_toolbox.odfhdr import OdfHeader
-from odf_toolbox import odfutils
 
 """
 UPDATE_91001: function to update ODF files for cruise 91001
@@ -56,36 +57,35 @@ with the correct metadata.
 """
 
 # Change to the drive's root folder
-os.chdir('\\')
+os.chdir("\\")
 drive = os.getcwd()
 
-pathlist = ['DEV', 'GitHub', 'odf_toolbox', 'tests']
+pathlist = ["DEV", "GitHub", "odf_toolbox", "tests"]
 
 # Generate the top folder path
 top_folder = os.path.join(drive, *pathlist)
 
-path_to_orig = os.path.join(top_folder, 'ODF')
-path_to_revised = os.path.join(top_folder, 'Step_1_Update_Metadata')
+path_to_orig = os.path.join(top_folder, "ODF")
+path_to_revised = os.path.join(top_folder, "Step_1_Update_Metadata")
 
 # Change to folder containing files to be modified
 os.chdir(path_to_orig)
 
 # Find all ODF files in the current directory.
-files = glob.glob('CTD_91001*')
+files = glob.glob("CTD_91001*")
 
 # Query the user for his/her name so he/she may be identified in the
 # history header as the responsible data quality control person.
 # user = input('Please enter the name of the analyst performing this data processing: ')
-user = 'Jeff Jackson'
+user = "Jeff Jackson"
 
 # Loop through the list of ODF files and process both the DN and UP files.
 # Iterate through the list of input files.
 for file_name in files:
-
     print()
-    print('#######################################################################')
-    print('Processing ' + file_name)
-    print('#######################################################################')
+    print("#######################################################################")
+    print("Processing " + file_name)
+    print("#######################################################################")
     print()
 
     odf = OdfHeader()
@@ -97,39 +97,53 @@ for file_name in files:
 
     # Add a new History Header to record the modifications that are made.
     odf.add_history()
-    odf.add_to_log(f'{user} made the following modifications to this file:')
+    odf.add_to_log(f"{user} made the following modifications to this file:")
 
     param_list = odf.data.parameter_list
-    new_param_list = ['PRES_01', 'TEMP_01', 'CRAT_01', 'PSAL_01', 'NETR_01', 'FLOR_01', 'OTMP_01', 'OPPR_01', 'DOXY_01']
-    
+    new_param_list = [
+        "PRES_01",
+        "TEMP_01",
+        "CRAT_01",
+        "PSAL_01",
+        "NETR_01",
+        "FLOR_01",
+        "OTMP_01",
+        "OPPR_01",
+        "DOXY_01",
+    ]
+
     odf = odf.fix_parameter_codes(new_param_list)
 
     # min_depth = gsw.z_from_p(min(A.Data.PRES), A.Event_Header.Initial_Latitude)
     # max_depth = gsw.z_from_p(max(A.Data.PRES), A.Event_Header.Initial_Latitude)
 
     # Update Cruise_Header
-    odf.cruise_header.organization= 'DFO BIO'
-    odf.cruise_header.chief_scientist = 'GLEN HARRISON'
-    odf.cruise_header.platform = 'HUDSON'
-    odf.cruise_header.start_date = '19-SEP-2014 00:00:00.00'
-    odf.cruise_header.end_date = '08-OCT-2014 00:00:00.00'
-    odf.cruise_header.cruise_name = 'SCOTIAN SHELF AND SLOPE'
-    odf.cruise_header.cruise_description = 'ATLANTIC ZONE MONITORING PROGRAM (AZMP)'
+    odf.cruise_header.organization = "DFO BIO"
+    odf.cruise_header.chief_scientist = "GLEN HARRISON"
+    odf.cruise_header.platform = "HUDSON"
+    odf.cruise_header.start_date = "19-SEP-2014 00:00:00.00"
+    odf.cruise_header.end_date = "08-OCT-2014 00:00:00.00"
+    odf.cruise_header.cruise_name = "SCOTIAN SHELF AND SLOPE"
+    odf.cruise_header.cruise_description = "ATLANTIC ZONE MONITORING PROGRAM (AZMP)"
 
     # Update Event_Header
-    odf.event_header.set_number = '999'
-    odf.event_header.set_event_comment('Location Antarctica')
+    odf.event_header.set_number = "999"
+    odf.event_header.set_event_comment("Location Antarctica")
     odf.event_header.creation_date = odfutils.check_datetime(odf.event_header.creation_date)
-    odf.event_header.orig_creation_date = odfutils.check_datetime(odf.event_header.orig_creation_date)
+    odf.event_header.orig_creation_date = odfutils.check_datetime(
+        odf.event_header.orig_creation_date
+    )
     odf.event_header.start_date_time = odfutils.check_datetime(odf.event_header.start_date_time)
     odf.event_header.end_date_time = odfutils.check_datetime(odf.event_header.end_date_time)
 
-    odf.instrument_header.model = 'SBE 911'
+    odf.instrument_header.model = "SBE 911"
 
     # Update the Polynomial_Cal_Headers
-    odf.log_message('The PARAMETER_CODE field was not present in the POLYNOMIAL_CAL_HEADERS so it was added to replace the PARAMETER_NAME field that was present.')
+    odf.log_message(
+        "The PARAMETER_CODE field was not present in the POLYNOMIAL_CAL_HEADERS so it was added to replace the PARAMETER_NAME field that was present."
+    )
 
-    # odf.update_parameter('SYTM_01', 'units', 'GMT')   
+    # odf.update_parameter('SYTM_01', 'units', 'GMT')
     # odf.update_parameter('SYTM_01', 'print_field_width', 45)
 
     # Make sure that the event numbers are 3-digit strings.
@@ -171,14 +185,14 @@ for file_name in files:
 
     # Update the Record_Header and other headers to revise the metadata after modifications have been performed.
     odf.update_odf()
-    
-    odf_file_text = odf.print_object(file_version = 2.0)
+
+    odf_file_text = odf.print_object(file_version=2.0)
     # print(odf_file_text)
 
     os.chdir(path_to_revised)
 
     # Output a new version of the ODF file using the proper file name.
-    out_file = odf.generate_file_spec() + '.ODF'
+    out_file = odf.generate_file_spec() + ".ODF"
     print(os.getcwd() + "\\" + out_file)
     file1 = open(out_file, "w")
     file1.write(odf_file_text)

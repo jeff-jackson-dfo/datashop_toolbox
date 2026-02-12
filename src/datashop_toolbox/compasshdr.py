@@ -1,19 +1,20 @@
-from typing import List
-from pydantic import Field, field_validator, ConfigDict
+from pydantic import ConfigDict, Field, field_validator
+
+import datashop_toolbox.validated_base as odfutils
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase
-import datashop_toolbox.validated_base as odfutils
+
 
 class CompassCalHeader(ValidatedBase, BaseHeader):
-    """ A class to represent a Compass Cal Header in an ODF object. """
+    """A class to represent a Compass Cal Header in an ODF object."""
 
     model_config = ConfigDict(validate_assignment=True)
 
     parameter_code: str = ""
     calibration_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
     application_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
-    directions: List[float] = Field(default_factory=list)
-    corrections: List[float] = Field(default_factory=list)
+    directions: list[float] = Field(default_factory=list)
+    corrections: list[float] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
@@ -73,29 +74,33 @@ class CompassCalHeader(ValidatedBase, BaseHeader):
     def populate_object(self, compass_cal_fields: list) -> "CompassCalHeader":
         assert isinstance(compass_cal_fields, list), "compass_cal_fields must be a list."
         for header_line in compass_cal_fields:
-            tokens = header_line.split('=', maxsplit=1)
+            tokens = header_line.split("=", maxsplit=1)
             compass_dict = odfutils.list_to_dict(tokens)
             for key, value in compass_dict.items():
                 key = key.strip().upper()
                 value = value.strip()
                 match key:
-                    case 'PARAMETER_NAME' | 'PARAMETER_CODE':
+                    case "PARAMETER_NAME" | "PARAMETER_CODE":
                         self.parameter_code = value
-                    case 'CALIBRATION_DATE':
+                    case "CALIBRATION_DATE":
                         try:
                             if BaseHeader.matches_sytm_format(value):
                                 self.calibration_date = value
                         except ValueError:
-                            raise ValueError(f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}")
-                    case 'APPLICATION_DATE':
+                            raise ValueError(
+                                f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}"
+                            )
+                    case "APPLICATION_DATE":
                         try:
                             if BaseHeader.matches_sytm_format(value):
                                 self.application_date = value
                         except ValueError:
-                            raise ValueError(f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}")
-                    case 'DIRECTIONS':
+                            raise ValueError(
+                                f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}"
+                            )
+                    case "DIRECTIONS":
                         self.directions = [float(x) for x in value.split()]
-                    case 'CORRECTIONS':
+                    case "CORRECTIONS":
                         self.corrections = [float(x) for x in value.split()]
         return self
 
@@ -106,9 +111,10 @@ class CompassCalHeader(ValidatedBase, BaseHeader):
             f"  CALIBRATION_DATE = '{self.calibration_date}'",
             f"  APPLICATION_DATE = '{self.application_date}'",
             "  DIRECTIONS = " + " ".join(f"{d:.8e}" for d in self.directions),
-            "  CORRECTIONS = " + " ".join(f"{c:.8e}" for c in self.corrections)
+            "  CORRECTIONS = " + " ".join(f"{c:.8e}" for c in self.corrections),
         ]
         return "\n".join(lines)
+
 
 def main():
     print()
@@ -120,11 +126,12 @@ def main():
         "CALIBRATION_DATE = 25-mar-2021 00:00:00.00",
         "APPLICATION_DATE = 31-jan-2022 00:00:00.00",
         "DIRECTIONS = 0.0 90.0 180.0 270.0",
-        "CORRECTIONS = 70.0 0.0 0.0 0.0"
+        "CORRECTIONS = 70.0 0.0 0.0 0.0",
     ]
     compass_cal_header.populate_object(compass_cal_fields)
     print(compass_cal_header.print_object())
     print()
+
 
 if __name__ == "__main__":
     main()

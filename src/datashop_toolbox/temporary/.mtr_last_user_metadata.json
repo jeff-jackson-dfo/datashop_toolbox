@@ -1,0 +1,14 @@
+{
+    "input_choice": true,
+    "processor_name": "Prodyut Roy",
+    "institution": "FSRS",
+    "instrument": "Minilog",
+    "default_user_meta": {
+        "organization": "FSRS",
+        "chief_scientist": "SHANNON SCOTT-TIBBETTS",
+        "cruise_description": "FISHERMEN  AND SCIENTISTS RESEARCH SOCIETY",
+        "platform_name": "FSRS CRUISE DATA (NO ICES CODE)",
+        "country_code": "1899",
+        "cruise_number": ""
+    }
+}

@@ -1,32 +1,34 @@
-import os
 import glob
+import os
+
 from dotenv import load_dotenv
 
 from datashop_toolbox.odfhdr import OdfHeader
-from odf_oracle.database_connection_pool import get_database_pool
-from odf_oracle.cruise_event_to_oracle import cruise_event_to_oracle
-from odf_oracle.event_comments_to_oracle import event_comments_to_oracle
-from odf_oracle.meteo_to_oracle import meteo_to_oracle
-from odf_oracle.meteo_comments_to_oracle import meteo_comments_to_oracle
-from odf_oracle.instrument_to_oracle import instrument_to_oracle
-from odf_oracle.quality_to_oracle import quality_to_oracle
-from odf_oracle.quality_tests_to_oracle import quality_tests_to_oracle
-from odf_oracle.quality_comments_to_oracle import quality_comments_to_oracle
-from odf_oracle.history_to_oracle import history_to_oracle
 from odf_oracle.compass_cal_to_oracle import compass_cal_to_oracle
-from odf_oracle.polynomial_cal_to_oracle import polynomial_cal_to_oracle
-from odf_oracle.general_cal_to_oracle import general_cal_to_oracle
+from odf_oracle.cruise_event_to_oracle import cruise_event_to_oracle
 from odf_oracle.data_to_oracle import data_to_oracle
+from odf_oracle.database_connection_pool import get_database_pool
+from odf_oracle.event_comments_to_oracle import event_comments_to_oracle
+from odf_oracle.general_cal_to_oracle import general_cal_to_oracle
+from odf_oracle.history_to_oracle import history_to_oracle
+from odf_oracle.instrument_to_oracle import instrument_to_oracle
+from odf_oracle.meteo_comments_to_oracle import meteo_comments_to_oracle
+from odf_oracle.meteo_to_oracle import meteo_to_oracle
+from odf_oracle.polynomial_cal_to_oracle import polynomial_cal_to_oracle
+from odf_oracle.quality_comments_to_oracle import quality_comments_to_oracle
+from odf_oracle.quality_tests_to_oracle import quality_tests_to_oracle
+from odf_oracle.quality_to_oracle import quality_to_oracle
 
 
-def odf_to_oracle(wildcard: str, user: str, password: str, oracle_host: str,
-                  oracle_service_name: str, mypath: str) -> None:
+def odf_to_oracle(
+    wildcard: str, user: str, password: str, oracle_host: str, oracle_service_name: str, mypath: str
+) -> None:
     """
     Read ODF files and load them into the ODF_ARCHIVE Oracle database.
 
     Parameters
     ----------
-    wildcard: str 
+    wildcard: str
       used to identify specific ODF files in the supplied directory path.
     user: str
       The username for Oracle account.
@@ -49,72 +51,73 @@ def odf_to_oracle(wildcard: str, user: str, password: str, oracle_host: str,
     pool = get_database_pool()
     connection = pool.acquire()
 
-    print(f'\nAttempting to load the ODF files in the folder << {mypath} >> '\
-          'into ODF_ARCHIVE Oracle database')
-    
+    print(
+        f"\nAttempting to load the ODF files in the folder << {mypath} >> "
+        "into ODF_ARCHIVE Oracle database"
+    )
+
     os.chdir(mypath)
 
     # Find all ODF files in the current directory using the input wildcard.
-    os.listdir(path = mypath)
+    os.listdir(path=mypath)
     filelist = glob.glob(wildcard)
 
     if len(filelist) == 0:
-        print('No files found.')
+        print("No files found.")
 
     # Loop through the list of ODF files.
     for filename in filelist:
-    
-      print(f'\nWorking on loading ODF file << {filename} >>:')
+        print(f"\nWorking on loading ODF file << {filename} >>:")
 
-      odf = OdfHeader()
+        odf = OdfHeader()
 
-      # Read the ODF file
-      odf.read_odf(filename)
+        # Read the ODF file
+        odf.read_odf(filename)
 
-      # Change all null values to empty strings.
-      df = odf.null2empty(odf.data.data_frame)
-      odf.data.data_frame = df
-      
-      # # Load the Cruise_Header and Event_Header information into Oracle.
-      odf_file = cruise_event_to_oracle(odf, connection, filename)
+        # Change all null values to empty strings.
+        df = odf.null2empty(odf.data.data_frame)
+        odf.data.data_frame = df
 
-      # # Load the Event_Header.Event_Comments into Oracle.
-      event_comments_to_oracle(odf, connection, odf_file)
+        # # Load the Cruise_Header and Event_Header information into Oracle.
+        odf_file = cruise_event_to_oracle(odf, connection, filename)
 
-      # # Load the Meteo_Header information into Oracle.
-      meteo_to_oracle(odf, connection, odf_file)
+        # # Load the Event_Header.Event_Comments into Oracle.
+        event_comments_to_oracle(odf, connection, odf_file)
 
-      # # Load the Meteo_Header.Meteo_Comments into Oracle.
-      meteo_comments_to_oracle(odf, connection, odf_file)
+        # # Load the Meteo_Header information into Oracle.
+        meteo_to_oracle(odf, connection, odf_file)
 
-      # # Load the Quality_Header information into Oracle.
-      quality_to_oracle(odf, connection, odf_file)
+        # # Load the Meteo_Header.Meteo_Comments into Oracle.
+        meteo_comments_to_oracle(odf, connection, odf_file)
 
-      # # Load the Quality_Header.Quality_Tests into Oracle.
-      quality_tests_to_oracle(odf, connection, odf_file)
+        # # Load the Quality_Header information into Oracle.
+        quality_to_oracle(odf, connection, odf_file)
 
-      # # Load the Quality_Header.Quality_Comments into Oracle.
-      quality_comments_to_oracle(odf, connection, odf_file)
+        # # Load the Quality_Header.Quality_Tests into Oracle.
+        quality_tests_to_oracle(odf, connection, odf_file)
 
-      # # Load the Instrument_Header information into Oracle.
-      instrument_to_oracle(odf, connection, odf_file)
+        # # Load the Quality_Header.Quality_Comments into Oracle.
+        quality_comments_to_oracle(odf, connection, odf_file)
 
-      # # Load the General_Cal_Header information into Oracle.
-      general_cal_to_oracle(odf, connection, odf_file)
+        # # Load the Instrument_Header information into Oracle.
+        instrument_to_oracle(odf, connection, odf_file)
 
-      # # Load the Polynomial_Cal_Header information into Oracle.
-      polynomial_cal_to_oracle(odf, connection, odf_file)
+        # # Load the General_Cal_Header information into Oracle.
+        general_cal_to_oracle(odf, connection, odf_file)
 
-      # # Load the Compass_Cal_Header information into Oracle.
-      compass_cal_to_oracle(odf, connection, odf_file)
+        # # Load the Polynomial_Cal_Header information into Oracle.
+        polynomial_cal_to_oracle(odf, connection, odf_file)
 
-      # # Load the History_Header information into Oracle.
-      history_to_oracle(odf, connection, odf_file)
+        # # Load the Compass_Cal_Header information into Oracle.
+        compass_cal_to_oracle(odf, connection, odf_file)
 
-      # # Load the Data into Oracle.
-      data_to_oracle(odf, connection, odf_file)
+        # # Load the History_Header information into Oracle.
+        history_to_oracle(odf, connection, odf_file)
 
-      print(f'\n<< {filename} >> was successfully loaded into Oracle.\n')
+        # # Load the Data into Oracle.
+        data_to_oracle(odf, connection, odf_file)
+
+        print(f"\n<< {filename} >> was successfully loaded into Oracle.\n")
 
     pool.drop(connection)
     pool.close()
@@ -122,20 +125,23 @@ def odf_to_oracle(wildcard: str, user: str, password: str, oracle_host: str,
 
 def main():
 
-  load_dotenv(r'C:\Users\JacksonJ\OneDrive - DFO-MPO\Documents\.env')
-  username = str(os.environ.get("ODF_ARCHIVE_USERNAME"))
-  userpwd = str(os.environ.get("ODF_ARCHIVE_PASSWORD"))
-  oracle_host = str(os.environ.get("ORACLE_HOST"))
-  oracle_service_name = str(os.environ.get("ORACLE_SERVICE_NAME"))
-  
-  odf_to_oracle(wildcard = '*.ODF', 
-                user = username, 
-                password = userpwd, 
-                oracle_host = oracle_host,
-                oracle_service_name = oracle_service_name,
-                mypath = r'C:\\DFO-MPO\\DEV\\LOAD_TO_ODF_ARCHIVE\\')
-                # mypath = r'C:\\DFO-MPO\\DEV\\TEMP\\TEST\\')
-                # mypath = r'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\tests\\LOAD_TO_ORACLE\\')
+    load_dotenv(r"C:\Users\JacksonJ\OneDrive - DFO-MPO\Documents\.env")
+    username = str(os.environ.get("ODF_ARCHIVE_USERNAME"))
+    userpwd = str(os.environ.get("ODF_ARCHIVE_PASSWORD"))
+    oracle_host = str(os.environ.get("ORACLE_HOST"))
+    oracle_service_name = str(os.environ.get("ORACLE_SERVICE_NAME"))
+
+    odf_to_oracle(
+        wildcard="*.ODF",
+        user=username,
+        password=userpwd,
+        oracle_host=oracle_host,
+        oracle_service_name=oracle_service_name,
+        mypath=r"C:\\DFO-MPO\\DEV\\LOAD_TO_ODF_ARCHIVE\\",
+    )
+    # mypath = r'C:\\DFO-MPO\\DEV\\TEMP\\TEST\\')
+    # mypath = r'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\tests\\LOAD_TO_ORACLE\\')
+
 
 if __name__ == "__main__":
-  main()
+    main()

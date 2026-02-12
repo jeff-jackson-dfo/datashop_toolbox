@@ -1,16 +1,24 @@
 import io
+from typing import Self
+
 import pandas as pd
-from typing import List, Dict, Optional, Self
 from pydantic import Field, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_string, split_string_with_quotes, convert_dataframe
+from datashop_toolbox.validated_base import (
+    ValidatedBase,
+    check_string,
+    convert_dataframe,
+    split_string_with_quotes,
+)
+
 
 class DataRecords(ValidatedBase, BaseHeader):
-    """ Represents the data records stored within an ODF object. """
+    """Represents the data records stored within an ODF object."""
 
     data_frame: pd.DataFrame = Field(default_factory=pd.DataFrame)
-    parameter_list: List[str] = Field(default_factory=list)
-    print_formats: Dict[str, str] = Field(default_factory=dict)
+    parameter_list: list[str] = Field(default_factory=list)
+    print_formats: dict[str, str] = Field(default_factory=dict)
 
     class Config:
         arbitrary_types_allowed = True  # allow pandas DataFrame
@@ -34,12 +42,12 @@ class DataRecords(ValidatedBase, BaseHeader):
 
     @field_validator("parameter_list", mode="before")
     @classmethod
-    def validate_parameters(cls, v: List[str]) -> List[str]:
+    def validate_parameters(cls, v: list[str]) -> list[str]:
         return [check_string(p) for p in v]
 
     @field_validator("print_formats", mode="before")
     @classmethod
-    def validate_print_formats(cls, v: Dict[str, str]) -> Dict[str, str]:
+    def validate_print_formats(cls, v: dict[str, str]) -> dict[str, str]:
         if not isinstance(v, dict):
             raise TypeError(f"Expected dict, got {type(v)}")
         return {check_string(k): check_string(val) for k, val in v.items()}
@@ -51,15 +59,17 @@ class DataRecords(ValidatedBase, BaseHeader):
         return len(self.data_frame)
 
     def log_data_message(self, field: str, old_value, new_value) -> None:
-        message = f"In DataRecords field {field.upper()} was changed from '{old_value}' to '{new_value}'"
+        message = (
+            f"In DataRecords field {field.upper()} was changed from '{old_value}' to '{new_value}'"
+        )
         # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def populate_object(
         self,
-        parameter_list: List[str],
-        data_formats: Dict[str, str],
-        data_lines_list: List[str],
+        parameter_list: list[str],
+        data_formats: dict[str, str],
+        data_lines_list: list[str],
     ) -> Self:
         data_record_list = [split_string_with_quotes(s) for s in data_lines_list]
         df = pd.DataFrame(columns=parameter_list, data=data_record_list)
@@ -99,12 +109,16 @@ class DataRecords(ValidatedBase, BaseHeader):
             else:
                 formatters[key] = lambda x, w=width: f"{float(x):>{w}f}" if x is not None else ""
 
-        return self.data_frame.to_string(
-            columns = self.parameter_list,
-            index = False,
-            header = False,
-            formatters = formatters,
-        ) + "\n"
+        return (
+            self.data_frame.to_string(
+                columns=self.parameter_list,
+                index=False,
+                header=False,
+                formatters=formatters,
+            )
+            + "\n"
+        )
+
 
 def main():
 
@@ -127,9 +141,10 @@ def main():
     print(records.print_object_old_style())
 
     # Example log usage
-    records.log_data_message('TEMP_01', 8.2, 9.1)
+    records.log_data_message("TEMP_01", 8.2, 9.1)
     for log_entry in BaseHeader.shared_log_list:
         print(log_entry)
+
 
 if __name__ == "__main__":
     main()

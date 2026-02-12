@@ -1,10 +1,11 @@
-from typing import List
-from pydantic import Field, field_validator, ConfigDict
+from pydantic import ConfigDict, Field, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_string
+from datashop_toolbox.validated_base import ValidatedBase, check_string, list_to_dict
+
 
 class MeteoHeader(ValidatedBase, BaseHeader):
-    """ A class to represent a Meteo Header in an ODF object. """
+    """A class to represent a Meteo Header in an ODF object."""
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -15,7 +16,7 @@ class MeteoHeader(ValidatedBase, BaseHeader):
     sea_state: int = Field(default=int(BaseHeader.NULL_VALUE))
     cloud_cover: int = Field(default=int(BaseHeader.NULL_VALUE))
     ice_thickness: float = Field(default=BaseHeader.NULL_VALUE)
-    meteo_comments: List[str] = Field(default_factory=list)
+    meteo_comments: list[str] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
@@ -35,7 +36,9 @@ class MeteoHeader(ValidatedBase, BaseHeader):
 
     def log_meteo_message(self, field: str, old_value, new_value) -> None:
         assert isinstance(field, str), "Input argument 'field' must be a string."
-        message = f"In Meteo Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
+        message = (
+            f"In Meteo Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
+        )
         # self.logger.info(message)
         self.shared_log_list.append(message)
 
@@ -53,27 +56,27 @@ class MeteoHeader(ValidatedBase, BaseHeader):
     def populate_object(self, meteo_fields: list) -> "MeteoHeader":
         assert isinstance(meteo_fields, list), "Input argument 'meteo_fields' must be a list."
         for header_line in meteo_fields:
-            tokens = header_line.split('=', maxsplit=1)
+            tokens = header_line.split("=", maxsplit=1)
             meteo_dict = list_to_dict(tokens)
             for key, value in meteo_dict.items():
                 key = key.strip().upper()
                 value = value.strip()
                 match key:
-                    case 'AIR_TEMPERATURE':
+                    case "AIR_TEMPERATURE":
                         self.air_temperature = float(value)
-                    case 'ATMOSPHERIC_PRESSURE':
+                    case "ATMOSPHERIC_PRESSURE":
                         self.atmospheric_pressure = float(value)
-                    case 'WIND_SPEED':
+                    case "WIND_SPEED":
                         self.wind_speed = float(value)
-                    case 'WIND_DIRECTION':
+                    case "WIND_DIRECTION":
                         self.wind_direction = float(value)
-                    case 'SEA_STATE':
+                    case "SEA_STATE":
                         self.sea_state = int(float(value))
-                    case 'CLOUD_COVER':
+                    case "CLOUD_COVER":
                         self.cloud_cover = int(float(value))
-                    case 'ICE_THICKNESS':
+                    case "ICE_THICKNESS":
                         self.ice_thickness = float(value)
-                    case 'METEO_COMMENTS':
+                    case "METEO_COMMENTS":
                         self.add_meteo_comment(value)
         return self
 
@@ -86,7 +89,7 @@ class MeteoHeader(ValidatedBase, BaseHeader):
             f"  WIND_DIRECTION = {self.wind_direction if self.wind_direction == BaseHeader.NULL_VALUE else f'{self.wind_direction:.1f}'}",
             f"  SEA_STATE = {self.sea_state if self.sea_state == BaseHeader.NULL_VALUE else f'{self.sea_state:.0f}'}",
             f"  CLOUD_COVER = {self.cloud_cover if self.cloud_cover == BaseHeader.NULL_VALUE else f'{self.cloud_cover:.0f}'}",
-            f"  ICE_THICKNESS = {self.ice_thickness if self.ice_thickness == BaseHeader.NULL_VALUE else f'{self.ice_thickness:.3f}'}"
+            f"  ICE_THICKNESS = {self.ice_thickness if self.ice_thickness == BaseHeader.NULL_VALUE else f'{self.ice_thickness:.3f}'}",
         ]
         if self.meteo_comments:
             for meteo_comment in self.meteo_comments:
@@ -96,15 +99,17 @@ class MeteoHeader(ValidatedBase, BaseHeader):
         return "\n".join(lines)
 
     @staticmethod
-    def wind_speed_knots_to_ms(wsKnots: float) -> float:
-        assert isinstance(wsKnots, float), "Input argument 'wsKnots' must be a float."
-        if wsKnots < 0:
+    def wind_speed_knots_to_ms(wind_speed_knots: float) -> float:
+        assert isinstance(wind_speed_knots, float), "Input argument 'wind_speed_knots' must be a float."
+        if wind_speed_knots < 0:
             return BaseHeader.NULL_VALUE
-        return wsKnots / 1.94384
+        return wind_speed_knots / 1.94384
 
     @staticmethod
     def cloud_cover_percentage_to_wmo_code(cloud_cover_percentage: float) -> int:
-        assert isinstance(cloud_cover_percentage, float), "Input argument 'cloud_cover_percentage' must be a float."
+        assert isinstance(cloud_cover_percentage, float), (
+            "Input argument 'cloud_cover_percentage' must be a float."
+        )
         if cloud_cover_percentage < 0.0:
             return int(BaseHeader.NULL_VALUE)
         elif cloud_cover_percentage == 0.0:
@@ -130,7 +135,9 @@ class MeteoHeader(ValidatedBase, BaseHeader):
 
     @staticmethod
     def wave_height_meters_to_wmo_code(wave_height_meters: float) -> int:
-        assert isinstance(wave_height_meters, float), "Input argument 'wave_height_meters' must be a float."
+        assert isinstance(wave_height_meters, float), (
+            "Input argument 'wave_height_meters' must be a float."
+        )
         if wave_height_meters < 0.0:
             return int(BaseHeader.NULL_VALUE)
         elif wave_height_meters == 0.0:
@@ -154,8 +161,9 @@ class MeteoHeader(ValidatedBase, BaseHeader):
         else:
             return 9
 
+
 def main():
-    
+
     meteo_header = MeteoHeader()
     meteo_header.config = BaseHeader._default_config
     meteo_header.logger = BaseHeader._default_logger
@@ -168,15 +176,16 @@ def main():
     meteo_header.sea_state = meteo_header.wave_height_meters_to_wmo_code(3.0)
     meteo_header.cloud_cover = meteo_header.cloud_cover_percentage_to_wmo_code(0.5)
     meteo_header.ice_thickness = 0.5
-    meteo_header.set_meteo_comment('This is a test comment')
-    meteo_header.set_meteo_comment('This is another test comment')
+    meteo_header.set_meteo_comment("This is a test comment")
+    meteo_header.set_meteo_comment("This is another test comment")
     print(meteo_header.print_object())
     mc = meteo_header.meteo_comments[0]
-    meteo_header.log_meteo_message('meteo_comments, comment 1', mc, 'Replace comment one')
-    meteo_header.set_meteo_comment('Replace comment one', 1)
+    meteo_header.log_meteo_message("meteo_comments, comment 1", mc, "Replace comment one")
+    meteo_header.set_meteo_comment("Replace comment one", 1)
     print(meteo_header.print_object())
     for log_entry in BaseHeader.shared_log_list:
         print(log_entry)
+
 
 if __name__ == "__main__":
     main()

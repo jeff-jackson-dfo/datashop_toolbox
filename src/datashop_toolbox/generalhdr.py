@@ -1,10 +1,11 @@
-from typing import List
-from pydantic import Field, field_validator, ConfigDict
+from pydantic import ConfigDict, Field, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict, check_datetime
+from datashop_toolbox.validated_base import ValidatedBase, check_datetime, list_to_dict
+
 
 class GeneralCalHeader(ValidatedBase, BaseHeader):
-    """ A class to represent a General Cal Header in an ODF object. """
+    """A class to represent a General Cal Header in an ODF object."""
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -13,9 +14,9 @@ class GeneralCalHeader(ValidatedBase, BaseHeader):
     calibration_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
     application_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
     number_coefficients: int = 0
-    coefficients: List[float] = Field(default_factory=list)
+    coefficients: list[float] = Field(default_factory=list)
     calibration_equation: str = ""
-    calibration_comments: List[str] = Field(default_factory=list)
+    calibration_comments: list[str] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
@@ -88,9 +89,13 @@ class GeneralCalHeader(ValidatedBase, BaseHeader):
         # self.logger.info(message)
         self.shared_log_list.append(message)
 
-    def set_coefficient(self, general_coefficient: float, general_coefficient_number: int = 0) -> None:
+    def set_coefficient(
+        self, general_coefficient: float, general_coefficient_number: int = 0
+    ) -> None:
         assert isinstance(general_coefficient, float), "general_coefficient must be a float."
-        assert isinstance(general_coefficient_number, int), "general_coefficient_number must be an integer."
+        assert isinstance(general_coefficient_number, int), (
+            "general_coefficient_number must be an integer."
+        )
         assert general_coefficient_number >= 0, "general_coefficient_number must be >= 0."
         if general_coefficient_number == 0 or general_coefficient_number > len(self.coefficients):
             self.coefficients.append(general_coefficient)
@@ -112,30 +117,32 @@ class GeneralCalHeader(ValidatedBase, BaseHeader):
     def populate_object(self, general_cal_fields: list) -> "GeneralCalHeader":
         assert isinstance(general_cal_fields, list), "general_cal_fields must be a list."
         for header_line in general_cal_fields:
-            tokens = header_line.split('=', maxsplit=1)
+            tokens = header_line.split("=", maxsplit=1)
             general_dict = list_to_dict(tokens)
             for key, value in general_dict.items():
                 key = key.strip().upper()
                 value = value.strip()
                 match key:
-                    case 'PARAMETER_CODE':
+                    case "PARAMETER_CODE":
                         self.parameter_code = value
-                    case 'CALIBRATION_TYPE':
+                    case "CALIBRATION_TYPE":
                         self.calibration_type = value
-                    case 'CALIBRATION_DATE':
+                    case "CALIBRATION_DATE":
                         self.calibration_date = value
-                    case 'APPLICATION_DATE':
+                    case "APPLICATION_DATE":
                         self.application_date = value
-                    case 'NUMBER_OF_COEFFICIENTS':
+                    case "NUMBER_OF_COEFFICIENTS":
                         self.number_coefficients = int(float(value))
-                    case 'COEFFICIENTS':
+                    case "COEFFICIENTS":
                         coefficient_list = value.split()
-                        coefficient_floats = [float(coefficient) for coefficient in coefficient_list]
+                        coefficient_floats = [
+                            float(coefficient) for coefficient in coefficient_list
+                        ]
                         self.coefficients = coefficient_floats
                         self.number_coefficients = len(coefficient_floats)
-                    case 'CALIBRATION_EQUATION':
+                    case "CALIBRATION_EQUATION":
                         self.calibration_equation = value
-                    case 'CALIBRATION_COMMENTS':
+                    case "CALIBRATION_COMMENTS":
                         self.add_calibration_comment(value)
         return self
 
@@ -147,12 +154,13 @@ class GeneralCalHeader(ValidatedBase, BaseHeader):
             f"  CALIBRATION_DATE = '{self.calibration_date}'",
             f"  APPLICATION_DATE = '{self.application_date}'",
             f"  NUMBER_OF_COEFFICIENTS = {self.number_coefficients}",
-            "  COEFFICIENTS = " + " ".join("{:.8e}".format(coef) for coef in self.coefficients),
-            f"  CALIBRATION_EQUATION = '{self.calibration_equation}'"
+            "  COEFFICIENTS = " + " ".join(f"{coef:.8e}" for coef in self.coefficients),
+            f"  CALIBRATION_EQUATION = '{self.calibration_equation}'",
         ]
         for comment in self.calibration_comments:
             lines.append(f"  CALIBRATION_COMMENTS = '{comment}'")
         return "\n".join(lines)
+
 
 def main():
     print()
@@ -160,20 +168,23 @@ def main():
     general_header.config = BaseHeader._default_config
     general_header.logger = BaseHeader._default_logger
     print(general_header.print_object())
-    general_header.parameter_code = 'PSAR_01'
-    general_header.calibration_type = 'Linear'
-    general_header.calibration_date = '28-May-2020 00:00:00.00'
-    general_header.application_date = '14-Oct-2020 23:59:59.99'
+    general_header.parameter_code = "PSAR_01"
+    general_header.calibration_type = "Linear"
+    general_header.calibration_date = "28-May-2020 00:00:00.00"
+    general_header.application_date = "14-Oct-2020 23:59:59.99"
     general_header.number_coefficients = 2
     general_header.coefficients = [0.75, 1.05834]
-    general_header.calibration_equation = 'y = mx + b'
-    general_header.set_calibration_comment('This is a comment')
-    general_header.log_general_message('calibration_equation', general_header.calibration_equation, 'Y = X^2 + MX + B')
+    general_header.calibration_equation = "y = mx + b"
+    general_header.set_calibration_comment("This is a comment")
+    general_header.log_general_message(
+        "calibration_equation", general_header.calibration_equation, "Y = X^2 + MX + B"
+    )
     general_header.set_coefficient(3.5, 1)
     print(general_header.print_object())
     for log_entry in BaseHeader.shared_log_list:
         print(log_entry)
     print()
+
 
 if __name__ == "__main__":
     main()

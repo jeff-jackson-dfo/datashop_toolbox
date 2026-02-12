@@ -1,6 +1,7 @@
-from pydantic import Field, field_validator, ConfigDict
-from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
+from pydantic import ConfigDict, Field, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
+from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 
 class CruiseHeader(ValidatedBase, BaseHeader):
@@ -19,15 +20,12 @@ class CruiseHeader(ValidatedBase, BaseHeader):
     cruise_name: str = ""
     cruise_description: str = ""
 
-
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
-
 
     def set_logger_and_config(self, logger, config):
         self.logger = logger
         self.config = config
-
 
     # --- Validators to handle empty dates
     @field_validator("start_date", "end_date", mode="before")
@@ -38,7 +36,6 @@ class CruiseHeader(ValidatedBase, BaseHeader):
             return BaseHeader.SYTM_NULL_VALUE
         return v
 
-
     # --- Validators to strip whitespace ---
     @field_validator("*", mode="before")
     @classmethod
@@ -47,17 +44,17 @@ class CruiseHeader(ValidatedBase, BaseHeader):
             return v.strip("' ").strip()
         return v
 
-
     def log_cruise_message(self, field: str, old_value, new_value) -> None:
         """Log field changes."""
         field = field.upper()
         if field == "COUNTRY_INSTITUTE_CODE":
             message = f"In Cruise Header field {field} was changed from {old_value} to {new_value}"
         else:
-            message = f'In Cruise Header field {field} was changed from "{old_value}" to "{new_value}"'
+            message = (
+                f'In Cruise Header field {field} was changed from "{old_value}" to "{new_value}"'
+            )
         # self.logger.info(message)
         self.shared_log_list.append(message)
-
 
     def populate_object(self, cruise_fields: list[str]):
         """Populate fields from header lines like 'KEY = VALUE'."""
@@ -69,7 +66,6 @@ class CruiseHeader(ValidatedBase, BaseHeader):
                 if hasattr(self, key_lower):
                     setattr(self, key_lower, value.strip())
         return self
-
 
     def print_object(self, file_version: float = 2.0) -> str:
         """Render cruise header as text."""
@@ -89,10 +85,12 @@ class CruiseHeader(ValidatedBase, BaseHeader):
         if file_version == 3.0:
             lines.append(f"  AREA_OF_OPERATION = '{self.area_of_operation}'")
 
-        lines.extend([
-            f"  CRUISE_NAME = '{self.cruise_name}'",
-            f"  CRUISE_DESCRIPTION = '{self.cruise_description}'",
-        ])
+        lines.extend(
+            [
+                f"  CRUISE_NAME = '{self.cruise_name}'",
+                f"  CRUISE_DESCRIPTION = '{self.cruise_description}'",
+            ]
+        )
 
         return "\n".join(lines)
 

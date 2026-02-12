@@ -1,15 +1,16 @@
-from typing import List
-from pydantic import Field, field_validator, ConfigDict
+from pydantic import ConfigDict, Field, field_validator
+
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
+
 class HistoryHeader(ValidatedBase, BaseHeader):
-    """ A class to represent a History Header in an ODF object. """
+    """A class to represent a History Header in an ODF object."""
 
     model_config = ConfigDict(validate_assignment=True)
 
     creation_date: str = Field(default=BaseHeader.SYTM_NULL_VALUE)
-    processes: List[str] = Field(default_factory=list)
+    processes: list[str] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
         super().__init__(**data)  # Calls Pydantic's __init__
@@ -50,35 +51,33 @@ class HistoryHeader(ValidatedBase, BaseHeader):
         process = process.strip("' ")
         self.processes.append(process)
 
-    def find_process(self, search_string: str) -> List[int]:
+    def find_process(self, search_string: str) -> list[int]:
         return [i for i, process in enumerate(self.processes) if search_string in process]
 
     def populate_object(self, history_fields: list) -> "HistoryHeader":
         assert isinstance(history_fields, list), "Input argument 'history_fields' must be a list."
         for header_line in history_fields:
-            tokens = header_line.split('=', maxsplit=1)
+            tokens = header_line.split("=", maxsplit=1)
             history_dict = list_to_dict(tokens)
             for key, value in history_dict.items():
                 key = key.strip().upper()
                 value = value.strip("' ")
                 match key:
-                    case 'CREATION_DATE':
+                    case "CREATION_DATE":
                         self.creation_date = value
-                    case 'PROCESS':
+                    case "PROCESS":
                         self.add_process(value)
         return self
 
     def print_object(self) -> str:
-        lines = [
-            "HISTORY_HEADER",
-            f"  CREATION_DATE = '{self.creation_date}'"
-        ]
+        lines = ["HISTORY_HEADER", f"  CREATION_DATE = '{self.creation_date}'"]
         if self.processes:
             for process in self.processes:
                 lines.append(f"  PROCESS = '{process}'")
         else:
             lines.append("  PROCESS = ''")
         return "\n".join(lines)
+
 
 def main():
     print()
@@ -92,26 +91,26 @@ def main():
         "PROCESS = Second process",
         "PROCESS = Blank process",
         "PROCESS = Fourth process",
-        "PROCESS = Last process"
+        "PROCESS = Last process",
     ]
     history_header.populate_object(history_fields)
     print(history_header.print_object())
-    history_header.log_history_message('process', history_header.processes[1], 'Bad Cast')
-    history_header.set_process('Bad Cast', 2)
+    history_header.log_history_message("process", history_header.processes[1], "Bad Cast")
+    history_header.set_process("Bad Cast", 2)
     print(history_header.print_object())
 
-    history_header.set_process('CONSTANT, RESULT=CRAT_1, VALUE=0.0, TYPE=DOUB, FORMAT=10:6,')
-    history_header.set_process('NEVER_NULL=NO')
-    history_header.set_process('SELECT_FILE,')
-    history_header.set_process('FILE_SPEC=D3:[DATA.MARION]M*.ODF')
-    history_header.set_process('OPEN_ASCII_FILE')
-    history_header.set_process('READ_ASCII_HEADERS')
-    history_header.set_process('READ_ASCII_DATA,FILE_FORMAT=ODF')
-    history_header.set_process('EDIT_VARIABLE,VARIABLE=CRAT_1,FORMAT=10:6')
-    history_header.set_process('***EXPORT_ASCII,EVENT_FILTER=Y,FILE_FORMAT=ODF,EXTENSION=ODF,')
-    history_header.set_process('PATH=D3:[DATA.TEMP1]')
-    history_header.set_process('$')
-    history_header.set_process('END')
+    history_header.set_process("CONSTANT, RESULT=CRAT_1, VALUE=0.0, TYPE=DOUB, FORMAT=10:6,")
+    history_header.set_process("NEVER_NULL=NO")
+    history_header.set_process("SELECT_FILE,")
+    history_header.set_process("FILE_SPEC=D3:[DATA.MARION]M*.ODF")
+    history_header.set_process("OPEN_ASCII_FILE")
+    history_header.set_process("READ_ASCII_HEADERS")
+    history_header.set_process("READ_ASCII_DATA,FILE_FORMAT=ODF")
+    history_header.set_process("EDIT_VARIABLE,VARIABLE=CRAT_1,FORMAT=10:6")
+    history_header.set_process("***EXPORT_ASCII,EVENT_FILTER=Y,FILE_FORMAT=ODF,EXTENSION=ODF,")
+    history_header.set_process("PATH=D3:[DATA.TEMP1]")
+    history_header.set_process("$")
+    history_header.set_process("END")
 
     print(history_header.print_object())
 
@@ -119,5 +118,6 @@ def main():
         print(log_entry)
     print()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
