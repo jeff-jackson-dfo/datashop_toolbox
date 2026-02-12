@@ -206,10 +206,11 @@ def _create_sample_profiles(num_profiles=5):
 
 def main():
     """Quick manual test: run this file directly."""
-    QApplication.instance() or QApplication(sys.argv)
+    app = QApplication.instance() or QApplication(sys.argv)
     profiles = _create_sample_profiles(6)
     dlg = PlotDialog(profiles, title="RSK Profiles — Test")
     dlg.exec()
+    app.exit()
 
 
 if __name__ == "__main__":

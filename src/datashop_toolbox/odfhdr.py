@@ -570,7 +570,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
 def main():
 
-    test_creation = 0
+    test_creation = False
 
     if test_creation:
         BaseHeader.reset_logging
@@ -814,7 +814,7 @@ def main():
         # my_file = 'mtr_79999_46_61036_14400.odf'
         # my_file = 'MADCPS_BCD2004909_1544_1269-60_3600.ODF' # Fails due to bad null_value in SYTM parameter header and bad data in SYTM channel.
         my_file = "MCTD_CAR2023648_2264_11689_1800.ODF"
-        my_path = "C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\"
+        my_path = "C:\\DFO-MPO\\DEV\\GitHub\\datashop-toolbox\\"
 
         BaseHeader.reset_logging
         odf = OdfHeader()

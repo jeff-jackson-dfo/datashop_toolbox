@@ -37,7 +37,7 @@ class OdfMetadataForm(QWidget):
         # ---- 2) Init state and helpers ----
         base_dir = Path(__file__).resolve().parent
         # Default to a file next to this module called mission_header_templates.json
-        self._mission_templates_path = mission_templates_path or (base_dir / "mission_header_templates.json")
+        self._mission_templates_path = mission_templates_path or (base_dir / "templates" / "mission_header_templates.json")
         self._mission_templates: dict[str, dict] = {}
         
         # ---- 3) Wire up behaviour ----
@@ -50,16 +50,16 @@ class OdfMetadataForm(QWidget):
     # -----------------------------
     def _setup_validators(self):
         # Placeholders
-        self.ui.yearLineEdit.setPlaceholderText("####")
-        self.ui.initialLatitudeLineEdit.setPlaceholderText("####.######")
-        self.ui.initialLongitudeLineEdit.setPlaceholderText("####.######")
-        self.ui.endLatitudeLineEdit.setPlaceholderText("####.######")
-        self.ui.endLongitudeLineEdit.setPlaceholderText("####.######")
-        self.ui.minDepthLineEdit.setPlaceholderText("####.##")
-        self.ui.maxDepthLineEdit.setPlaceholderText("####.##")
-        self.ui.samplingIntervalLineEdit.setPlaceholderText("####.####")
-        self.ui.soundingLineEdit.setPlaceholderText("####.##")
-        self.ui.depthOffBottomLineEdit.setPlaceholderText("####.##")
+        self.ui.year_line_edit.setPlaceholderText("####")
+        self.ui.initial_latitude_line_edit.setPlaceholderText("####.######")
+        self.ui.initial_longitude_line_edit.setPlaceholderText("####.######")
+        self.ui.end_latitude_line_edit.setPlaceholderText("####.######")
+        self.ui.end_longitude_line_edit.setPlaceholderText("####.######")
+        self.ui.min_depth_line_edit.setPlaceholderText("####.##")
+        self.ui.max_depth_line_edit.setPlaceholderText("####.##")
+        self.ui.sampling_interval_line_edit.setPlaceholderText("####.####")
+        self.ui.sounding_line_edit.setPlaceholderText("####.##")
+        self.ui.depth_off_bottom_line_edit.setPlaceholderText("####.##")
 
         year_validator = QIntValidator(1900, 2050)
         latitude_validator = QDoubleValidator(-90.0, 90.0, 6)
@@ -72,17 +72,17 @@ class OdfMetadataForm(QWidget):
             v.setLocale(locale)
             v.setNotation(QDoubleValidator.StandardNotation)
         
-        # Apply to fields (note: endLatitude uses latitude validator)
-        self.ui.yearLineEdit.setValidator(year_validator)
-        self.ui.initialLatitudeLineEdit.setValidator(latitude_validator)
-        self.ui.initialLongitudeLineEdit.setValidator(longitude_validator)
-        self.ui.endLatitudeLineEdit.setValidator(latitude_validator)
-        self.ui.endLongitudeLineEdit.setValidator(longitude_validator)
-        self.ui.minDepthLineEdit.setValidator(depth_validator)
-        self.ui.maxDepthLineEdit.setValidator(depth_validator)
-        self.ui.samplingIntervalLineEdit.setValidator(sample_interval_validator)
-        self.ui.soundingLineEdit.setValidator(depth_validator)
-        self.ui.depthOffBottomLineEdit.setValidator(depth_validator)
+        # Apply to fields (note: end_latitude uses latitude validator)
+        self.ui.year_line_edit.setValidator(year_validator)
+        self.ui.initial_latitude_line_edit.setValidator(latitude_validator)
+        self.ui.initial_longitude_line_edit.setValidator(longitude_validator)
+        self.ui.end_latitude_line_edit.setValidator(latitude_validator)
+        self.ui.end_longitude_line_edit.setValidator(longitude_validator)
+        self.ui.min_depth_line_edit.setValidator(depth_validator)
+        self.ui.max_depth_line_edit.setValidator(depth_validator)
+        self.ui.sampling_interval_line_edit.setValidator(sample_interval_validator)
+        self.ui.sounding_line_edit.setValidator(depth_validator)
+        self.ui.depth_off_bottom_line_edit.setValidator(depth_validator)
 
     def _populate_mission_templates(self):
         """Load top-level keys from mission_header_templates.json into the combo."""
@@ -94,8 +94,8 @@ class OdfMetadataForm(QWidget):
                 QMessageBox.warning(self, "Templates", f"Failed to read templates:\n{e}")
         else:
             # Fill UI to indicate none, but keep working
-            self.ui.missionTemplateSelectorComboBox.clear()
-            self.ui.missionTemplateSelectorComboBox.addItem("No templates found")
+            self.ui.mission_template_selector_combo_box.clear()
+            self.ui.mission_template_selector_combo_box.addItem("No templates found")
             return
 
         keys = list(self._mission_templates.keys())
@@ -105,12 +105,12 @@ class OdfMetadataForm(QWidget):
         # Insert '---' on top as a "no selection"
         keys.insert(0, "---")
 
-        self.ui.missionTemplateSelectorComboBox.clear()
-        self.ui.missionTemplateSelectorComboBox.addItems(keys)
+        self.ui.mission_template_selector_combo_box.clear()
+        self.ui.mission_template_selector_combo_box.addItems(keys)
 
     def _populate_year(self):
         # Populate year with current year
-        self.ui.yearLineEdit.setText(str(datetime.now().year))
+        self.ui.year_line_edit.setText(str(datetime.now().year))
 
     def _show_warning_dialog(self):
         # Defer to ensure parent (dialog) is actually visible
@@ -141,50 +141,50 @@ class OdfMetadataForm(QWidget):
         self._populate_year()
 
     def _connect_signals(self):
-        self.ui.missionTemplateSelectorComboBox.currentTextChanged.connect(self._on_template_changed)
+        self.ui.mission_template_selector_combo_box.currentTextChanged.connect(self._on_template_changed)
         # Your UI provides dedicated OK/Cancel buttons on the form
-        self.ui.okPushButton.clicked.connect(self._on_ok_clicked)
-        self.ui.cancelPushButton.clicked.connect(self._on_cancel_clicked)
+        self.ui.ok_push_button.clicked.connect(self._on_ok_clicked)
+        self.ui.cancel_push_button.clicked.connect(self._on_cancel_clicked)
 
     # -----------------------------
     # Template loading
     # -----------------------------
     def _clear_cruise_header_fields(self):
         for w in (
-            self.ui.countryInstituteCodeLineEdit,
-            self.ui.cruiseNumberLineEdit,
-            self.ui.organizationLineEdit,
-            self.ui.chiefScientistLineEdit,
-            self.ui.startDateLineEdit,
-            self.ui.endDateLineEdit,
-            self.ui.platformLineEdit,
-            self.ui.cruiseNameLineEdit,
-            self.ui.cruiseDescriptionLineEdit,  # correct attribute name in UI  # noqa
+            self.ui.country_institute_code_line_edit,
+            self.ui.cruise_number_line_edit,
+            self.ui.organization_line_edit,
+            self.ui.chief_scientist_line_edit,
+            self.ui.start_date_line_edit,
+            self.ui.end_date_line_edit,
+            self.ui.platform_line_edit,
+            self.ui.cruise_name_line_edit,
+            self.ui.cruise_description_line_edit,  # correct attribute name in UI  # noqa
         ):
             w.clear()
 
     def _clear_event_header_fields(self):
         for w in (
-            self.ui.dataTypeLineEdit,
-            self.ui.eventNumberLineEdit,
-            self.ui.eventQualifier1LineEdit,
-            self.ui.eventQualifier2LineEdit,
-            self.ui.creationDateLineEdit,
-            self.ui.origCreationDateLineEdit,
-            self.ui.startDateTimeLineEdit,
-            self.ui.endDateTimeLineEdit,
-            self.ui.initialLatitudeLineEdit,
-            self.ui.initialLongitudeLineEdit,
-            self.ui.endLatitudeLineEdit,
-            self.ui.endLongitudeLineEdit,
-            self.ui.minDepthLineEdit,
-            self.ui.maxDepthLineEdit,
-            self.ui.samplingIntervalLineEdit,
-            self.ui.soundingLineEdit,
-            self.ui.depthOffBottomLineEdit,
-            self.ui.stationNameLineEdit,
-            self.ui.setNumberLineEdit,
-            self.ui.eventCommentsLineEdit,
+            self.ui.data_type_line_edit,
+            self.ui.event_number_line_edit,
+            self.ui.event_qualifier1_line_edit,
+            self.ui.event_qualifier2_line_edit,
+            self.ui.creation_date_line_edit,
+            self.ui.orig_creation_date_line_edit,
+            self.ui.start_date_time_line_edit,
+            self.ui.end_date_time_line_edit,
+            self.ui.initial_latitude_line_edit,
+            self.ui.initial_longitude_line_edit,
+            self.ui.end_latitude_line_edit,
+            self.ui.end_longitude_line_edit,
+            self.ui.min_depth_line_edit,
+            self.ui.max_depth_line_edit,
+            self.ui.sampling_interval_line_edit,
+            self.ui.sounding_line_edit,
+            self.ui.depth_off_bottom_line_edit,
+            self.ui.station_name_line_edit,
+            self.ui.set_number_line_edit,
+            self.ui.event_comments_line_edit,
         ):
             w.clear()
 
@@ -201,38 +201,38 @@ class OdfMetadataForm(QWidget):
         event_defaults = self._mission_templates.get("event_header", {})
 
         cruise_field_map = {
-            "country_institute_code": self.ui.countryInstituteCodeLineEdit,
-            "cruise_number":          self.ui.cruiseNumberLineEdit,
-            "organization":           self.ui.organizationLineEdit,
-            "chief_scientist":        self.ui.chiefScientistLineEdit,
-            "cruise_name":            self.ui.cruiseNameLineEdit,
-            "platform":               self.ui.platformLineEdit,
-            "start_date":             self.ui.startDateLineEdit,
-            "end_date":               self.ui.endDateLineEdit,
-            "cruise_description":     self.ui.cruiseDescriptionLineEdit,
+            "country_institute_code": self.ui.country_institute_code_line_edit,
+            "cruise_number":          self.ui.cruise_number_line_edit,
+            "organization":           self.ui.organization_line_edit,
+            "chief_scientist":        self.ui.chief_scientist_line_edit,
+            "cruise_name":            self.ui.cruise_name_line_edit,
+            "platform":               self.ui.platform_line_edit,
+            "start_date":             self.ui.start_date_line_edit,
+            "end_date":               self.ui.end_date_line_edit,
+            "cruise_description":     self.ui.cruise_description_line_edit,
         }
 
         event_field_map = {
-            "data_type":              self.ui.dataTypeLineEdit,
-            "event_number":           self.ui.eventNumberLineEdit,
-            "event_qualifier1":       self.ui.eventQualifier1LineEdit,
-            "event_qualifier2":       self.ui.eventQualifier2LineEdit,
-            "creation_date":          self.ui.creationDateLineEdit,
-            "orig_creation_date":     self.ui.origCreationDateLineEdit,
-            "start_date_time":        self.ui.startDateTimeLineEdit,
-            "end_date_time":          self.ui.endDateTimeLineEdit,
-            "initial_latitude":       self.ui.initialLatitudeLineEdit,
-            "initial_longitude":      self.ui.initialLongitudeLineEdit,
-            "end_latitude":           self.ui.endLatitudeLineEdit,
-            "end_longitude":          self.ui.endLongitudeLineEdit,
-            "min_depth":              self.ui.minDepthLineEdit,
-            "max_depth":              self.ui.maxDepthLineEdit,
-            "sampling_interval":      self.ui.samplingIntervalLineEdit,
-            "sounding":               self.ui.soundingLineEdit,
-            "depth_off_bottom":       self.ui.depthOffBottomLineEdit,
-            "station_name":           self.ui.stationNameLineEdit,
-            "set_number":             self.ui.setNumberLineEdit,
-            "event_comments":         self.ui.eventCommentsLineEdit,
+            "data_type":              self.ui.data_type_line_edit,
+            "event_number":           self.ui.event_number_line_edit,
+            "event_qualifier1":       self.ui.event_qualifier1_line_edit,
+            "event_qualifier2":       self.ui.event_qualifier2_line_edit,
+            "creation_date":          self.ui.creation_date_line_edit,
+            "orig_creation_date":     self.ui.orig_creation_date_line_edit,
+            "start_date_time":        self.ui.start_date_time_line_edit,
+            "end_date_time":          self.ui.end_date_time_line_edit,
+            "initial_latitude":       self.ui.initial_latitude_line_edit,
+            "initial_longitude":      self.ui.initial_longitude_line_edit,
+            "end_latitude":           self.ui.end_latitude_line_edit,
+            "end_longitude":          self.ui.end_longitude_line_edit,
+            "min_depth":              self.ui.min_depth_line_edit,
+            "max_depth":              self.ui.max_depth_line_edit,
+            "sampling_interval":      self.ui.sampling_interval_line_edit,
+            "sounding":               self.ui.sounding_line_edit,
+            "depth_off_bottom":       self.ui.depth_off_bottom_line_edit,
+            "station_name":           self.ui.station_name_line_edit,
+            "set_number":             self.ui.set_number_line_edit,
+            "event_comments":         self.ui.event_comments_line_edit,
         }
 
         # Block signals while populating
@@ -249,30 +249,30 @@ class OdfMetadataForm(QWidget):
                 w.blockSignals(False)
 
         # Update some fields based on year entered
-        year = self.ui.yearLineEdit.text()
-        cn = self.ui.cruiseNumberLineEdit.text()
+        year = self.ui.year_line_edit.text()
+        cn = self.ui.cruise_number_line_edit.text()
         if cn.startswith('BCD'):
             mission_code = cn[7:]
             new_cn = f'BCD{year}{mission_code}'
-            self.ui.cruiseNumberLineEdit.setText(new_cn)
+            self.ui.cruise_number_line_edit.setText(new_cn)
             start_date = f'01-JAN-{year} 00:00:00.00'
             end_date = f'31-DEC-{year} 00:00:00.00'
-            self.ui.startDateLineEdit.setText(start_date)
-            self.ui.endDateLineEdit.setText(end_date)
+            self.ui.start_date_line_edit.setText(start_date)
+            self.ui.end_date_line_edit.setText(end_date)
 
             # Update the station name if template is for a fixed station
             toks = name.split(" ")
             station_name = toks[2]
             if station_name == 'BBMP':
                 station_name = 'HL_00'
-            self.ui.stationNameLineEdit.setText(station_name)
+            self.ui.station_name_line_edit.setText(station_name)
 
     # -----------------------------
     # Data collection & actions
     # -----------------------------
     def _parse_datetime(self, widget, label: str):
         """
-        Parse a date/time from a QLineEdit using check_datetime.
+        Parse a date/time from a Q_line_edit using check_datetime.
         Raises a ValueError with a labeled, machine-parseable message on failure.
         """
         text = widget.text().strip()
@@ -285,7 +285,7 @@ class OdfMetadataForm(QWidget):
 
     def _parse_float(self, widget, label: str):
         """
-        Parse a float from a QLineEdit. Uses Python float() for semantic validation.
+        Parse a float from a Q_line_edit. Uses Python float() for semantic validation.
         QDoubleValidator only ensures format while editing; we still need a final parse.
         Raises a ValueError with a labeled, machine-parseable message on failure.
         """
@@ -305,64 +305,64 @@ class OdfMetadataForm(QWidget):
         odf = OdfHeader()
 
         # CRUISE_HEADER
-        odf.cruise_header.country_institute_code = self.ui.countryInstituteCodeLineEdit.text()
-        odf.cruise_header.cruise_number = self.ui.cruiseNumberLineEdit.text()
-        odf.cruise_header.organization = self.ui.organizationLineEdit.text()
-        odf.cruise_header.chief_scientist = self.ui.chiefScientistLineEdit.text()
-        odf.cruise_header.start_date = self.ui.startDateLineEdit.text()
-        odf.cruise_header.end_date = self.ui.endDateLineEdit.text()
-        odf.cruise_header.platform = self.ui.platformLineEdit.text()
-        odf.cruise_header.cruise_name = self.ui.cruiseNameLineEdit.text()
-        odf.cruise_header.cruise_description = self.ui.cruiseDescriptionLineEdit.text()
+        odf.cruise_header.country_institute_code = self.ui.country_institute_code_line_edit.text()
+        odf.cruise_header.cruise_number = self.ui.cruise_number_line_edit.text()
+        odf.cruise_header.organization = self.ui.organization_line_edit.text()
+        odf.cruise_header.chief_scientist = self.ui.chief_scientist_line_edit.text()
+        odf.cruise_header.start_date = self.ui.start_date_line_edit.text()
+        odf.cruise_header.end_date = self.ui.end_date_line_edit.text()
+        odf.cruise_header.platform = self.ui.platform_line_edit.text()
+        odf.cruise_header.cruise_name = self.ui.cruise_name_line_edit.text()
+        odf.cruise_header.cruise_description = self.ui.cruise_description_line_edit.text()
 
         # EVENT_HEADER
-        odf.event_header.data_type = self.ui.dataTypeLineEdit.text()
-        odf.event_header.event_number = self.ui.eventNumberLineEdit.text()
-        odf.event_header.event_qualifier1 = self.ui.eventQualifier1LineEdit.text()
-        odf.event_header.event_qualifier2 = self.ui.eventQualifier2LineEdit.text()
+        odf.event_header.data_type = self.ui.data_type_line_edit.text()
+        odf.event_header.event_number = self.ui.event_number_line_edit.text()
+        odf.event_header.event_qualifier1 = self.ui.event_qualifier1_line_edit.text()
+        odf.event_header.event_qualifier2 = self.ui.event_qualifier2_line_edit.text()
 
         # Dates — parsed (will raise [DATETIME] ValueError on error)
-        odf.event_header.creation_date = self._parse_datetime(self.ui.creationDateLineEdit, "Creation Date")
-        odf.event_header.orig_creation_date = self._parse_datetime(self.ui.origCreationDateLineEdit, "Original Creation Date")
-        odf.event_header.start_date_time = self._parse_datetime(self.ui.startDateTimeLineEdit, "Start Date/Time")
-        odf.event_header.end_date_time = self._parse_datetime(self.ui.endDateTimeLineEdit, "End Date/Time")
+        odf.event_header.creation_date = self._parse_datetime(self.ui.creation_date_line_edit, "Creation Date")
+        odf.event_header.orig_creation_date = self._parse_datetime(self.ui.orig_creation_date_line_edit, "Original Creation Date")
+        odf.event_header.start_date_time = self._parse_datetime(self.ui.start_date_time_line_edit, "Start Date/Time")
+        odf.event_header.end_date_time = self._parse_datetime(self.ui.end_date_time_line_edit, "End Date/Time")
 
-        # cdate = check_datetime(self.ui.creationDateLineEdit.text())
+        # cdate = check_datetime(self.ui.creation_date_line_edit.text())
         # odf.event_header.creation_date = cdate
-        # ocdate = check_datetime(self.ui.origCreationDateLineEdit.text())  # pull from the correct field
+        # ocdate = check_datetime(self.ui.orig_creation_date_line_edit.text())  # pull from the correct field
         # odf.event_header.orig_creation_date = ocdate
-        # odf.event_header.start_date_time = check_datetime(self.ui.startDateTimeLineEdit.text())
-        # odf.event_header.end_date_time = check_datetime(self.ui.endDateTimeLineEdit.text())
+        # odf.event_header.start_date_time = check_datetime(self.ui.start_date_time_line_edit.text())
+        # odf.event_header.end_date_time = check_datetime(self.ui.end_date_time_line_edit.text())
 
-        # odf.event_header.initial_latitude = self.ui.initialLatitudeLineEdit.text()
-        # odf.event_header.initial_longitude = self.ui.initialLongitudeLineEdit.text()
-        # odf.event_header.end_latitude = self.ui.endLatitudeLineEdit.text()
-        # odf.event_header.end_longitude = self.ui.endLongitudeLineEdit.text()
-        # odf.event_header.min_depth = self.ui.minDepthLineEdit.text()
-        # odf.event_header.max_depth = self.ui.maxDepthLineEdit.text()
-        # odf.event_header.sampling_interval = self.ui.samplingIntervalLineEdit.text()
-        # odf.event_header.sounding = self.ui.soundingLineEdit.text()
-        # odf.event_header.depth_off_bottom = self.ui.depthOffBottomLineEdit.text()
-        # odf.event_header.station_name = self.ui.stationNameLineEdit.text()
-        # odf.event_header.set_number = self.ui.setNumberLineEdit.text()
-        # odf.event_header.event_comments = [self.ui.eventCommentsLineEdit.text()]
+        # odf.event_header.initial_latitude = self.ui.initial_latitude_line_edit.text()
+        # odf.event_header.initial_longitude = self.ui.initial_longitude_line_edit.text()
+        # odf.event_header.end_latitude = self.ui.end_latitude_line_edit.text()
+        # odf.event_header.end_longitude = self.ui.end_longitude_line_edit.text()
+        # odf.event_header.min_depth = self.ui.min_depth_line_edit.text()
+        # odf.event_header.max_depth = self.ui.max_depth_line_edit.text()
+        # odf.event_header.sampling_interval = self.ui.sampling_interval_line_edit.text()
+        # odf.event_header.sounding = self.ui.sounding_line_edit.text()
+        # odf.event_header.depth_off_bottom = self.ui.depth_off_bottom_line_edit.text()
+        # odf.event_header.station_name = self.ui.station_name_line_edit.text()
+        # odf.event_header.set_number = self.ui.set_number_line_edit.text()
+        # odf.event_header.event_comments = [self.ui.event_comments_line_edit.text()]
 
         # Floats — parsed (will raise [FLOAT] ValueError on error)
         # If some are optional, adjust _parse_float to allow empty and return None
-        odf.event_header.initial_latitude = self._parse_float(self.ui.initialLatitudeLineEdit, "Initial Latitude")
-        odf.event_header.initial_longitude = self._parse_float(self.ui.initialLongitudeLineEdit, "Initial Longitude")
-        odf.event_header.end_latitude = self._parse_float(self.ui.endLatitudeLineEdit, "End Latitude")
-        odf.event_header.end_longitude = self._parse_float(self.ui.endLongitudeLineEdit, "End Longitude")
-        odf.event_header.min_depth = self._parse_float(self.ui.minDepthLineEdit, "Min Depth")
-        odf.event_header.max_depth = self._parse_float(self.ui.maxDepthLineEdit, "Max Depth")
-        odf.event_header.sampling_interval = self._parse_float(self.ui.samplingIntervalLineEdit, "Sampling Interval")
-        odf.event_header.sounding = self._parse_float(self.ui.soundingLineEdit, "Sounding")
-        odf.event_header.depth_off_bottom = self._parse_float(self.ui.depthOffBottomLineEdit, "Depth Off Bottom")
+        odf.event_header.initial_latitude = self._parse_float(self.ui.initial_latitude_line_edit, "Initial Latitude")
+        odf.event_header.initial_longitude = self._parse_float(self.ui.initial_longitude_line_edit, "Initial Longitude")
+        odf.event_header.end_latitude = self._parse_float(self.ui.end_latitude_line_edit, "End Latitude")
+        odf.event_header.end_longitude = self._parse_float(self.ui.end_longitude_line_edit, "End Longitude")
+        odf.event_header.min_depth = self._parse_float(self.ui.min_depth_line_edit, "Min Depth")
+        odf.event_header.max_depth = self._parse_float(self.ui.max_depth_line_edit, "Max Depth")
+        odf.event_header.sampling_interval = self._parse_float(self.ui.sampling_interval_line_edit, "Sampling Interval")
+        odf.event_header.sounding = self._parse_float(self.ui.sounding_line_edit, "Sounding")
+        odf.event_header.depth_off_bottom = self._parse_float(self.ui.depth_off_bottom_line_edit, "Depth Off Bottom")
 
         # Remaining strings
-        odf.event_header.station_name = self.ui.stationNameLineEdit.text()
-        odf.event_header.set_number = self.ui.setNumberLineEdit.text()
-        odf.event_header.event_comments = [self.ui.eventCommentsLineEdit.text()]
+        odf.event_header.station_name = self.ui.station_name_line_edit.text()
+        odf.event_header.set_number = self.ui.set_number_line_edit.text()
+        odf.event_header.event_comments = [self.ui.event_comments_line_edit.text()]
 
         return odf
 
@@ -395,19 +395,19 @@ class OdfMetadataForm(QWidget):
             # Smart focus: locate the field by label within the message
             # Map labels used in _parse_* to widgets
             label_to_widget = {
-                "Creation Date": self.ui.creationDateLineEdit,
-                "Original Creation Date": self.ui.origCreationDateLineEdit,
-                "Start Date/Time": self.ui.startDateTimeLineEdit,
-                "End Date/Time": self.ui.endDateTimeLineEdit,
-                "Initial Latitude": self.ui.initialLatitudeLineEdit,
-                "Initial Longitude": self.ui.initialLongitudeLineEdit,
-                "End Latitude": self.ui.endLatitudeLineEdit,
-                "End Longitude": self.ui.endLongitudeLineEdit,
-                "Min Depth": self.ui.minDepthLineEdit,
-                "Max Depth": self.ui.maxDepthLineEdit,
-                "Sampling Interval": self.ui.samplingIntervalLineEdit,
-                "Sounding": self.ui.soundingLineEdit,
-                "Depth Off Bottom": self.ui.depthOffBottomLineEdit,
+                "Creation Date": self.ui.creation_date_line_edit,
+                "Original Creation Date": self.ui.orig_creation_date_line_edit,
+                "Start Date/Time": self.ui.start_date_time_line_edit,
+                "End Date/Time": self.ui.end_date_time_line_edit,
+                "Initial Latitude": self.ui.initial_latitude_line_edit,
+                "Initial Longitude": self.ui.initial_longitude_line_edit,
+                "End Latitude": self.ui.end_latitude_line_edit,
+                "End Longitude": self.ui.end_longitude_line_edit,
+                "Min Depth": self.ui.min_depth_line_edit,
+                "Max Depth": self.ui.max_depth_line_edit,
+                "Sampling Interval": self.ui.sampling_interval_line_edit,
+                "Sounding": self.ui.sounding_line_edit,
+                "Depth Off Bottom": self.ui.depth_off_bottom_line_edit,
             }
             for label, w in label_to_widget.items():
                 if label in msg:

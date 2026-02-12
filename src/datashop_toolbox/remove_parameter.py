@@ -1,4 +1,4 @@
-from datashop_toolbox import OdfHeader
+from datashop_toolbox.odfhdr import OdfHeader
 
 
 def remove_parameter(odfobj: OdfHeader, code: str) -> OdfHeader:

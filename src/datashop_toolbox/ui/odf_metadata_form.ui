@@ -120,7 +120,7 @@
      </widget>
     </item>
     <item row="8" column="0" colspan="5">
-     <widget class="QLabel" name="cruise_desciption_label">
+     <widget class="QLabel" name="cruise_description_label">
       <property name="text">
        <string>CRUISE_DESCRIPTION:</string>
       </property>
@@ -196,7 +196,7 @@
      </widget>
     </item>
     <item row="8" column="5" colspan="2">
-     <widget class="QLineEdit" name="cruise_desciption_line_edit">
+     <widget class="QLineEdit" name="cruise_description_line_edit">
       <property name="font">
        <font>
         <pointsize>9</pointsize>
@@ -452,7 +452,7 @@
      </widget>
     </item>
     <item row="6" column="0" colspan="8">
-     <widget class="QLabel" name="start_datetime_label">
+     <widget class="QLabel" name="start_date_time_label">
       <property name="text">
        <string>START_DATE_TIME:</string>
       </property>
@@ -477,7 +477,7 @@
      </widget>
     </item>
     <item row="6" column="9" colspan="4">
-     <widget class="QLineEdit" name="start_datetime_line_edit">
+     <widget class="QLineEdit" name="start_date_time_line_edit">
       <property name="font">
        <font>
         <pointsize>9</pointsize>

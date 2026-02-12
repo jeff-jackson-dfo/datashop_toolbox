@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'odf_metadata_form.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -75,10 +75,10 @@ class Ui_odf_metadata_form(object):
 
         self.gridLayout_2.addWidget(self.platform_line_edit, 6, 2, 1, 5)
 
-        self.cruise_desciption_label = QLabel(self.cruise_header_group_box)
-        self.cruise_desciption_label.setObjectName(u"cruise_desciption_label")
+        self.cruise_description_label = QLabel(self.cruise_header_group_box)
+        self.cruise_description_label.setObjectName(u"cruise_description_label")
 
-        self.gridLayout_2.addWidget(self.cruise_desciption_label, 8, 0, 1, 5)
+        self.gridLayout_2.addWidget(self.cruise_description_label, 8, 0, 1, 5)
 
         self.end_date_line_edit = QLineEdit(self.cruise_header_group_box)
         self.end_date_line_edit.setObjectName(u"end_date_line_edit")
@@ -128,11 +128,11 @@ class Ui_odf_metadata_form(object):
 
         self.gridLayout_2.addWidget(self.start_date_line_edit, 4, 2, 1, 5)
 
-        self.cruise_desciption_line_edit = QLineEdit(self.cruise_header_group_box)
-        self.cruise_desciption_line_edit.setObjectName(u"cruise_desciption_line_edit")
-        self.cruise_desciption_line_edit.setFont(font)
+        self.cruise_description_line_edit = QLineEdit(self.cruise_header_group_box)
+        self.cruise_description_line_edit.setObjectName(u"cruise_description_line_edit")
+        self.cruise_description_line_edit.setFont(font)
 
-        self.gridLayout_2.addWidget(self.cruise_desciption_line_edit, 8, 5, 1, 2)
+        self.gridLayout_2.addWidget(self.cruise_description_line_edit, 8, 5, 1, 2)
 
         self.cruise_name_label = QLabel(self.cruise_header_group_box)
         self.cruise_name_label.setObjectName(u"cruise_name_label")
@@ -289,10 +289,10 @@ class Ui_odf_metadata_form(object):
 
         self.gridLayout_3.addWidget(self.orig_creation_date_line_edit, 5, 12, 1, 1)
 
-        self.start_datetime_label = QLabel(self.event_header_group_box)
-        self.start_datetime_label.setObjectName(u"start_datetime_label")
+        self.start_date_time_label = QLabel(self.event_header_group_box)
+        self.start_date_time_label.setObjectName(u"start_date_time_label")
 
-        self.gridLayout_3.addWidget(self.start_datetime_label, 6, 0, 1, 8)
+        self.gridLayout_3.addWidget(self.start_date_time_label, 6, 0, 1, 8)
 
         self.end_longitude_line_edit = QLineEdit(self.event_header_group_box)
         self.end_longitude_line_edit.setObjectName(u"end_longitude_line_edit")
@@ -306,11 +306,11 @@ class Ui_odf_metadata_form(object):
 
         self.gridLayout_3.addWidget(self.min_depth_line_edit, 12, 3, 1, 10)
 
-        self.start_datetime_line_edit = QLineEdit(self.event_header_group_box)
-        self.start_datetime_line_edit.setObjectName(u"start_datetime_line_edit")
-        self.start_datetime_line_edit.setFont(font)
+        self.start_date_time_line_edit = QLineEdit(self.event_header_group_box)
+        self.start_date_time_line_edit.setObjectName(u"start_date_time_line_edit")
+        self.start_date_time_line_edit.setFont(font)
 
-        self.gridLayout_3.addWidget(self.start_datetime_line_edit, 6, 9, 1, 4)
+        self.gridLayout_3.addWidget(self.start_date_time_line_edit, 6, 9, 1, 4)
 
         self.max_depth_line_edit = QLineEdit(self.event_header_group_box)
         self.max_depth_line_edit.setObjectName(u"max_depth_line_edit")
@@ -409,7 +409,7 @@ class Ui_odf_metadata_form(object):
         self.ok_push_button.setText(QCoreApplication.translate("odf_metadata_form", u"OK", None))
         self.mission_template_selector_label.setText(QCoreApplication.translate("odf_metadata_form", u"MISSION TEMPLATE SELECTOR", None))
         self.cruise_header_group_box.setTitle(QCoreApplication.translate("odf_metadata_form", u"CRUISE_HEADER", None))
-        self.cruise_desciption_label.setText(QCoreApplication.translate("odf_metadata_form", u"CRUISE_DESCRIPTION:", None))
+        self.cruise_description_label.setText(QCoreApplication.translate("odf_metadata_form", u"CRUISE_DESCRIPTION:", None))
         self.country_institute_code_label.setText(QCoreApplication.translate("odf_metadata_form", u"COUNTRY_INSTITUTE_CODE:", None))
         self.chief_scientist_label.setText(QCoreApplication.translate("odf_metadata_form", u"CHIEF_SCIENTIST:", None))
         self.organization_label.setText(QCoreApplication.translate("odf_metadata_form", u"ORGANIZATION:", None))
@@ -435,7 +435,7 @@ class Ui_odf_metadata_form(object):
         self.event_qualifier1_label.setText(QCoreApplication.translate("odf_metadata_form", u"EVENT_QUALIFIER1:", None))
         self.max_depth_label.setText(QCoreApplication.translate("odf_metadata_form", u"MAX_DEPTH:", None))
         self.end_longitude_label.setText(QCoreApplication.translate("odf_metadata_form", u"END_LONGITUDE:", None))
-        self.start_datetime_label.setText(QCoreApplication.translate("odf_metadata_form", u"START_DATE_TIME:", None))
+        self.start_date_time_label.setText(QCoreApplication.translate("odf_metadata_form", u"START_DATE_TIME:", None))
         self.depth_off_bottom_label.setText(QCoreApplication.translate("odf_metadata_form", u"DEPTH_OFF_BOTTOM:", None))
         self.end_date_time_label.setText(QCoreApplication.translate("odf_metadata_form", u"END_DATE_TIME:", None))
         self.creation_date_label.setText(QCoreApplication.translate("odf_metadata_form", u"CREATION_DATE:", None))

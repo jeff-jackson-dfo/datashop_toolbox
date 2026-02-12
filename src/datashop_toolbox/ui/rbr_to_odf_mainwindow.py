@@ -22,9 +22,9 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
 from rbr_profile_plot import PlotDialog
 
 # Important:
-# You need to run the following command to generate the ui_MainWindow.py file:
-#    pyside6-uic rbr_to_odf.ui -o ui_MainWindow.py
-from ui_rbr_to_odf import Ui_MainWindow
+# You need to run the following command to generate the Ui_main_window.py file:
+#    pyside6-uic rbr_to_odf.ui -o Ui_main_window.py
+from ui_rbr_to_odf import Ui_main_window
 
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.historyhdr import HistoryHeader
@@ -52,13 +52,13 @@ class MainWindow(QMainWindow):
         # =====================================================
         # PHASE 2 — BUILD UI
         # =====================================================
-        self.ui = Ui_MainWindow()
+        self.ui = Ui_main_window()
         self.ui.setupUi(self)
 
         # Change the styles of some widgets
         # self.ui.exitPushButton.setStyleSheet("color: red;")
-        # self.ui.rskListWidget.setStyleSheet("color: blue;")
-        # self.ui.folderLineEdit.setStyleSheet("color: brown;")
+        # self.ui.rsk_list_widget.setStyleSheet("color: blue;")
+        # self.ui.folder_line_edit.setStyleSheet("color: brown;")
 
         # Validators
         self._setup_validators()
@@ -76,8 +76,8 @@ class MainWindow(QMainWindow):
         self._restoring_state = False
 
     def _setup_validators(self):
-        self.ui.latitudeLineEdit.setPlaceholderText("###.######")
-        self.ui.longitudeLineEdit.setPlaceholderText("####.######")
+        self.ui.latitude_line_edit.setPlaceholderText("###.######")
+        self.ui.longitude_line_edit.setPlaceholderText("####.######")
 
         latitude_validator = QDoubleValidator(-90.0, 90.0, 6)
         longitude_validator = QDoubleValidator(-180.0, 180.0, 6)
@@ -89,17 +89,17 @@ class MainWindow(QMainWindow):
         latitude_validator.setNotation(QDoubleValidator.StandardNotation)
         longitude_validator.setNotation(QDoubleValidator.StandardNotation)
 
-        self.ui.latitudeLineEdit.setValidator(latitude_validator)
-        self.ui.longitudeLineEdit.setValidator(longitude_validator)
+        self.ui.latitude_line_edit.setValidator(latitude_validator)
+        self.ui.longitude_line_edit.setValidator(longitude_validator)
 
     def _connect_signals(self):
-        self.ui.selectFolderButton.clicked.connect(self._choose_rsk_folder)
-        self.ui.profilePlotsButton.clicked.connect(self._profile_plots)
-        self.ui.clearInfoPushButton.clicked.connect(self._clear_settings)
-        self.ui.editMetadataPushButton.clicked.connect(self._edit_metadata)
-        self.ui.exportOdfPushButton.clicked.connect(self._export_odf)
-        self.ui.exitPushButton.clicked.connect(QApplication.instance().quit)
-        self.ui.rskListWidget.currentItemChanged.connect(self._on_rsk_selected)
+        self.ui.select_folder_push_button.clicked.connect(self._choose_rsk_folder)
+        self.ui.profile_plots_push_button.clicked.connect(self._profile_plots)
+        self.ui.clear_info_push_button.clicked.connect(self._clear_settings)
+        self.ui.edit_metadata_push_button.clicked.connect(self._edit_metadata)
+        self.ui.export_odf_push_button.clicked.connect(self._export_odf)
+        self.ui.exit_push_button.clicked.connect(QApplication.instance().quit)
+        self.ui.rsk_list_widget.currentItemChanged.connect(self._on_rsk_selected)
 
     @property
     def rsk_file_path(self) -> str:
@@ -117,16 +117,16 @@ class MainWindow(QMainWindow):
 
     def _save_settings(self):
         data = {
-            "folder": self.ui.folderLineEdit.text(),
-            "latitude": self.ui.latitudeLineEdit.text(),
-            "longitude": self.ui.longitudeLineEdit.text(),
+            "folder": self.ui.folder_line_edit.text(),
+            "latitude": self.ui.latitude_line_edit.text(),
+            "longitude": self.ui.longitude_line_edit.text(),
             "selected_rsk": (
-                self.ui.rskListWidget.currentItem().text()
-                if self.ui.rskListWidget.currentItem()
+                self.ui.rsk_list_widget.currentItem().text()
+                if self.ui.rsk_list_widget.currentItem()
                 else None
             ),
             "selected_channels": [
-                item.text() for item in self.ui.channelListWidget.selectedItems()
+                item.text() for item in self.ui.channel_list_widget.selectedItems()
             ],
             "window": {"geometry": bytes(self.saveGeometry()).hex()},
         }
@@ -148,43 +148,43 @@ class MainWindow(QMainWindow):
             ic(f"Failed to load settings: {e}")
             return
 
-        self.ui.rskListWidget.blockSignals(True)
+        self.ui.rsk_list_widget.blockSignals(True)
 
         # Folder + file list
         folder = data.get("folder", "")
         if folder and Path(folder).exists():
             self._rsk_folder = folder
-            self.ui.folderLineEdit.setText(folder)
+            self.ui.folder_line_edit.setText(folder)
 
-            self.ui.rskListWidget.clear()
+            self.ui.rsk_list_widget.clear()
             rsk_files = sorted(
                 p.name for p in Path(folder).iterdir() if p.is_file() and p.suffix.lower() == ".rsk"
             )
-            self.ui.rskListWidget.addItems(rsk_files)
+            self.ui.rsk_list_widget.addItems(rsk_files)
 
         # Restore selection
         self._rsk_file = data.get("selected_rsk", "")
         if self._rsk_file:
-            matches = self.ui.rskListWidget.findItems(self._rsk_file, Qt.MatchExactly)
+            matches = self.ui.rsk_list_widget.findItems(self._rsk_file, Qt.MatchExactly)
             if matches:
-                self.ui.rskListWidget.setCurrentItem(matches[0])
+                self.ui.rsk_list_widget.setCurrentItem(matches[0])
 
-        self.ui.rskListWidget.blockSignals(False)
+        self.ui.rsk_list_widget.blockSignals(False)
 
         # Manual post-restore update
         if self._rsk_file:
             self._update_channel_list()
 
         # Lat / Lon
-        self.ui.latitudeLineEdit.setText(data.get("latitude", ""))
-        self.ui.longitudeLineEdit.setText(data.get("longitude", ""))
+        self.ui.latitude_line_edit.setText(data.get("latitude", ""))
+        self.ui.longitude_line_edit.setText(data.get("longitude", ""))
 
         # Window geometry
         geometry_hex = data.get("window", {}).get("geometry")
         if geometry_hex:
             self.restoreGeometry(bytes.fromhex(geometry_hex))
 
-    def closeEvent(self, event):
+    def close_event(self, event):
         self._save_settings()
         super().closeEvent(event)
 
@@ -195,28 +195,28 @@ class MainWindow(QMainWindow):
         )
         if folder_path:
             # Remove any previous items from the list widgets
-            self.ui.rskListWidget.clear()
-            self.ui.channelListWidget.clear()
+            self.ui.rsk_list_widget.clear()
+            self.ui.channel_list_widget.clear()
 
             # Display the selected folder path
-            self.ui.folderLineEdit.setText(folder_path)
+            self.ui.folder_line_edit.setText(folder_path)
             self._rsk_folder = folder_path
             rsk_files = sorted(
                 p for p in Path(folder_path).iterdir() if p.is_file() and p.suffix.lower() == ".rsk"
             )
             rsk_paths = [Path(p).name for p in rsk_files]
-            self.ui.rskListWidget.addItems(rsk_paths)
+            self.ui.rsk_list_widget.addItems(rsk_paths)
 
-    # Update the channelListWidget when a RSK file is selected
+    # Update the channel_list_widget when a RSK file is selected
     def _update_channel_list(self):
-        self.ui.channelListWidget.clear()
+        self.ui.channel_list_widget.clear()
 
         try:
             with RSK(self.rsk_file_path) as rsk:
                 rsk.readdata()
                 channels = rsk.channelNames
 
-            self.ui.channelListWidget.addItems(channels)
+            self.ui.channel_list_widget.addItems(channels)
 
             # Restore previously selected channels
             if self._config_path.exists():
@@ -224,13 +224,13 @@ class MainWindow(QMainWindow):
                     data = json.load(f)
 
                 selected = set(data.get("selected_channels", []))
-                for i in range(self.ui.channelListWidget.count()):
-                    item = self.ui.channelListWidget.item(i)
+                for i in range(self.ui.channel_list_widget.count()):
+                    item = self.ui.channel_list_widget.item(i)
                     if item.text() in selected:
                         item.setSelected(True)
 
         except Exception as e:
-            self.ui.channelListWidget.addItem(f"Error reading RSK: {e}")
+            self.ui.channel_list_widget.addItem(f"Error reading RSK: {e}")
 
     def _profile_plots(self):
         fig_list = []
@@ -238,10 +238,10 @@ class MainWindow(QMainWindow):
 
         # Optional lat/lon used for derived quantities
         station_latitude = (
-            float(self.ui.latitudeLineEdit.text()) if self.ui.latitudeLineEdit.text() else None
+            float(self.ui.latitude_line_edit.text()) if self.ui.latitude_line_edit.text() else None
         )
         station_longitude = (
-            float(self.ui.longitudeLineEdit.text()) if self.ui.longitudeLineEdit.text() else None
+            float(self.ui.longitude_line_edit.text()) if self.ui.longitude_line_edit.text() else None
         )
 
         # Build figures
@@ -279,7 +279,7 @@ class MainWindow(QMainWindow):
             rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
             profiles = rsk.getprofilesindices()
 
-            for p, profileIndices in enumerate(profiles):
+            for p, profile_indices in enumerate(profiles):
                 fig, axes = rsk.plotprofiles(
                     channels=channels_to_plot,
                     profiles=(p, p),
@@ -296,11 +296,11 @@ class MainWindow(QMainWindow):
 
     def _clear_settings(self):
         # Clear all widgets
-        self.ui.folderLineEdit.clear()
-        self.ui.rskListWidget.clear()
-        self.ui.channelListWidget.clear()
-        self.ui.latitudeLineEdit.clear()
-        self.ui.longitudeLineEdit.clear()
+        self.ui.folder_line_edit.clear()
+        self.ui.rsk_list_widget.clear()
+        self.ui.channel_list_widget.clear()
+        self.ui.latitude_line_edit.clear()
+        self.ui.longitude_line_edit.clear()
 
     def _edit_metadata(self):
         ic("Editing ODF metadata ...")
@@ -448,7 +448,7 @@ class MainWindow(QMainWindow):
         )
         if odf_folder_path:
             # Display the selected folder path
-            self.ui.odfFolderLineEdit.setText(odf_folder_path)
+            self.ui.odf_folder_line_edit.setText(odf_folder_path)
 
         return odf_folder_path
 
@@ -460,7 +460,7 @@ class MainWindow(QMainWindow):
             rsk.readdata()
 
             # Keep a copy of the raw data before processing
-            raw = rsk.copy()
+            # raw = rsk.copy()
 
             # Update the INSTRUMENT_HEADER
             self._odf.instrument_header.instrument_type = "RBR"

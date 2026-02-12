@@ -1,7 +1,7 @@
 import enum
 import logging
 from datetime import datetime
-from typing import ClassVar, Final
+from typing import ClassVar
 
 from pydantic import BaseModel, Field
 
@@ -39,9 +39,9 @@ class BaseHeader:
 
     shared_log_list: ClassVar[list[str]] = []
 
-    SYTM_FORMAT: Final[str] = "%d-%b-%Y %H:%M:%S.%f"
-    NULL_VALUE: Final[float] = -999.0
-    SYTM_NULL_VALUE: Final[str] = "17-NOV-1858 00:00:00.000000"
+    SYTM_FORMAT: ClassVar[str] = "%d-%b-%Y %H:%M:%S.%f"
+    NULL_VALUE: ClassVar[float] = -999.0
+    SYTM_NULL_VALUE: ClassVar[str] = "17-NOV-1858 00:00:00.000000"
 
     _default_config: ClassVar[LoggerConfig] = LoggerConfig()
     _default_logger: ClassVar[logging.Logger] = _default_config.configure_logger()
