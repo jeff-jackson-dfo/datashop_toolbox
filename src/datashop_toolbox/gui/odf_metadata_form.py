@@ -6,13 +6,13 @@ from PySide6.QtCore import QLocale, QTimer, Signal, Slot
 from PySide6.QtGui import QDoubleValidator, QIntValidator
 from PySide6.QtWidgets import QMessageBox, QWidget
 
-# You need to run the following command to generate the ui_odf_metadata_form.py file:
-#     pyside6-uic odf_metadata_form.ui -o ui_odf_metadata_form.py
-from ui_odf_metadata_form import Ui_odf_metadata_form
-
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.odfhdr import OdfHeader
 from datashop_toolbox.validated_base import check_datetime
+
+# You need to run the following command to generate the ui_odf_metadata_form.py file:
+#     pyside6-uic odf_metadata_form.ui -o ui_odf_metadata_form.py
+from .ui_odf_metadata_form import Ui_odf_metadata_form
 
 
 class OdfMetadataForm(QWidget):

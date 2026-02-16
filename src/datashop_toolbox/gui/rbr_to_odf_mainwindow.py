@@ -10,27 +10,27 @@ import pandas as pd
 
 # Import external libraries
 from icecream import ic
-
-# Import custom children dialogs
-from odf_metadata_dialog import OdfMetadataDialog
 from pyrsktools import RSK
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QDoubleValidator
 
 # Import PySide6 libraries
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
-from rbr_profile_plot import PlotDialog
-
-# Important:
-# You need to run the following command to generate the Ui_main_window.py file:
-#    pyside6-uic rbr_to_odf.ui -o Ui_main_window.py
-from ui_rbr_to_odf import Ui_main_window
 
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.lookup_parameter import lookup_parameter
 from datashop_toolbox.odfhdr import OdfHeader
 from datashop_toolbox.parameterhdr import ParameterHeader
+
+# Import custom children dialogs
+from .odf_metadata_dialog import OdfMetadataDialog
+from .rbr_profile_plot import PlotDialog
+
+# Important:
+# You need to run the following command to generate the Ui_main_window.py file:
+#    pyside6-uic rbr_to_odf.ui -o Ui_main_window.py
+from .ui_rbr_to_odf import Ui_main_window
 
 
 class MainWindow(QMainWindow):

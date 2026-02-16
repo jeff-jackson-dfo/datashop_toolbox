@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datashop-toolbox"
-version = "1.0.1"
+version = "1.0.3.7"
 description = "Python toolbox for oceanographic data processing"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -20,6 +20,7 @@ dependencies = [
     "pyqtgraph>=0.14.0",
     "pyrsktools>=1.1.1",
     "pyside6>=6.10.2",
+    "pytz>=2025.2",
     "termcolor>=3.1.0",
 ]
 

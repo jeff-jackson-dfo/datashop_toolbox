@@ -14,7 +14,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from ui_rsk_plot_dialog import Ui_plot_dialog
+
+from .ui_rsk_plot_dialog import Ui_plot_dialog
 
 
 class PlotDialog(QDialog):

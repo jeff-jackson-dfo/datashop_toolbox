@@ -100,7 +100,7 @@ class NetCdfHeader(OdfHeader):
             param_code = f"{param}_{pnum:02d}"
 
             # Get the parameter information from the lookup table.
-            parameter_info = lookup_parameter(param)
+            parameter_info = lookup_parameter(database='sqlite', parameter=param)
             if param == "SYTM":
                 parameter_header.set_type("SYTM", read_operation=True)
                 parameter_header.set_null_value("17-NOV-1858 00:00:00.00", read_operation=True)

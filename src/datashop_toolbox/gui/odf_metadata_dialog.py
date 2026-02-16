@@ -1,9 +1,10 @@
 # odf_header_dialog.py
 import sys
 
-from odf_metadata_form import OdfMetadataForm
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QDialog
+
+from .odf_metadata_form import OdfMetadataForm
 
 
 class OdfMetadataDialog(QDialog):
