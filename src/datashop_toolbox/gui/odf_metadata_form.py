@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from importlib.resources import files
 from pathlib import Path
 
 from PySide6.QtCore import QLocale, QTimer, Signal, Slot
@@ -35,9 +36,10 @@ class OdfMetadataForm(QWidget):
         self.ui.setupUi(self)
 
         # ---- 2) Init state and helpers ----
-        base_dir = Path(__file__).resolve().parent
-        # Default to a file next to this module called mission_header_templates.json
-        self._mission_templates_path = mission_templates_path or (base_dir / "templates" / "mission_header_templates.json")
+
+        # Get a Path-like object to a file inside the package
+        template_file = files("datashop_toolbox") / "gui" / "templates" / "mission_header_templates.json"
+        self._mission_templates_path = mission_templates_path or template_file
         self._mission_templates: dict[str, dict] = {}
         
         # ---- 3) Wire up behaviour ----

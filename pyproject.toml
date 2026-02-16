@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datashop-toolbox"
-version = "1.0.3.8"
+version = "1.0.4.7"
 description = "Python toolbox for oceanographic data processing"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -45,7 +45,7 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-"datashop_toolbox" = ["database/parameters.db", "gui/**/*.ui"]
+"datashop_toolbox" = ["database/parameters.db", "gui/**/*.ui", "gui/templates/*.json"]
 
 # --- Ruff configuration ---
 [tool.ruff]
