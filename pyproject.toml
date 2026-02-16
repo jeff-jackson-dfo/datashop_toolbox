@@ -4,25 +4,37 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datashop-toolbox"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python toolbox for oceanographic data processing"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    # --- Runtime dependencies (end-user required) ---
     "dotenv>=0.9.9",
-    "icecream>=2.1.7",
     "jinja2>=3.1.6",
     "numpy>=2.3.3",
     "openpyxl>=3.1.5",
     "oracledb>=3.3.0",
     "pandas>=2.3.2",
-    "pandas-stubs>=2.3.2.250926",
     "pydantic>=2.11.7",
     "pyqtgraph>=0.14.0",
     "pyrsktools>=1.1.1",
     "pyside6>=6.10.2",
-    "ruff>=0.15.0",
     "termcolor>=3.1.0",
+]
+
+# --- Dependency groups (PEP 735 / uv standard) ---
+[dependency-groups]
+
+# Static typing / IDE / type checking
+typing = [
+    "pandas-stubs>=2.3.2.250926",
+]
+
+# Development tooling
+dev = [
+    "icecream>=2.1.7",
+    "ruff>=0.15.0",
 ]
 
 [tool.setuptools]
@@ -32,25 +44,20 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-"datashop_toolbox" = ["database/parameters.db", "ui/**/*.ui"]
+"datashop_toolbox" = ["database/parameters.db", "gui/**/*.ui"]
 
+# --- Ruff configuration ---
 [tool.ruff]
-# Target Python 3.13 features
 target-version = "py313"
 line-length = 100
 
 [tool.ruff.lint]
-# E: pycodestyle, F: Pyflakes, I: isort (import sorting)
-# UP: pyupgrade (modernizes syntax), N: naming conventions
-# NPY: NumPy-specific rules, PTH: Pathlib (modern file handling)
 select = ["E", "F", "I", "UP", "N", "NPY", "PTH"]
-ignore = ["E501"] # Ignore line-length (let the formatter handle it)
+ignore = ["E501"]
 
 [tool.ruff.lint.isort]
-# Groups your local package imports separately from third-party ones
 known-first-party = ["datashop_toolbox"]
 
 [tool.ruff.format]
-# Standard professional style
 quote-style = "double"
 indent-style = "space"

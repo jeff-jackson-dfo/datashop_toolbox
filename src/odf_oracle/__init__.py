@@ -1,4 +1,3 @@
-# This file is part of the 'odf_oracle' package
 from odf_oracle.compass_cal_to_oracle import compass_cal_to_oracle
 from odf_oracle.cruise_event_to_oracle import cruise_event_to_oracle
 from odf_oracle.data_to_oracle import data_to_oracle
@@ -38,5 +37,3 @@ __all__ = [
     "quality_tests_to_oracle",
     "sytm_to_timestamp",
 ]
-
-print("odf_oracle package imported successfully!")

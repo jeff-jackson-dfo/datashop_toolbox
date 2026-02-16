@@ -21,9 +21,6 @@ from datashop_toolbox.records import DataRecords
 from datashop_toolbox.thermograph import ThermographHeader
 from datashop_toolbox.validated_base import ValidatedBase
 
-# from datashop_toolbox import remove_parameter
-# from datashop_toolbox.multinet import MultinetHeader
-
 __all__ = [
     "BaseHeader",
     "CompassCalHeader",
@@ -45,8 +42,4 @@ __all__ = [
     "log_window",
     "ai_thermograph_data",
     "concatenate_qat_files",
-    #    'remove_parameter', 'MtrHeader'
 ]
-
-# This file is part of the 'datashop_toolbox' package
-print("datashop_toolbox package imported successfully!")
