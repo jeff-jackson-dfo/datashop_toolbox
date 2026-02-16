@@ -530,9 +530,11 @@ class MainWindow(QMainWindow):
             out_file = f"{file_spec}.ODF"
             self._odf.write_odf(odf_export_folder + "/" + out_file, version=2.0)
 
-
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
+
+if __name__ == "__main__":
+    main()

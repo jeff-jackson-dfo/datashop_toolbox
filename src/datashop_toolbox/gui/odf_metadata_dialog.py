@@ -55,8 +55,7 @@ class OdfMetadataDialog(QDialog):
         """Return the ODF object captured on OK (or None if cancelled)."""
         return self._odf
 
-
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     dlg = OdfMetadataDialog()
     if dlg.exec():
@@ -64,3 +63,6 @@ if __name__ == "__main__":
     else:
         print("Dialog cancelled")
     sys.exit(app.exec())
+
+if __name__ == "__main__":
+    main()
