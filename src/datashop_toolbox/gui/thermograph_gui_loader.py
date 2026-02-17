@@ -35,7 +35,7 @@ class ThermographMainWindow(QMainWindow):
     # --- Slots ---
     def on_name_entered(self):
         self.processor_name = self.ui.name_line_edit.text()
-        msg = colored(f"(1 of 3) Data processor: {self.processor_name}", 'blue')
+        msg = colored(f"(1 of 3) Data processor: {self.processor_name}", 'light_blue')
         print(msg)
 
     def on_institution_changed(self, text: str):
@@ -49,7 +49,7 @@ class ThermographMainWindow(QMainWindow):
         if file_path:
             self.metadata_file = file_path
             self.ui.metadata_line_edit.setText(file_path)
-            msg = colored(f"(2 of 3) Metadata file: {file_path}", 'blue')
+            msg = colored(f"(2 of 3) Metadata file: {file_path}", 'light_blue')
             print(msg)
 
     def choose_data_folder(self):
@@ -57,7 +57,7 @@ class ThermographMainWindow(QMainWindow):
         if folder_path:
             self.data_folder = folder_path
             self.ui.data_folder_line_edit.setText(folder_path)
-            msg = colored(f"(3 of 3) Data folder: {folder_path}", 'blue')
+            msg = colored(f"(3 of 3) Data folder: {folder_path}", 'light_blue')
             print(msg)
 
     def accept_clicked(self):

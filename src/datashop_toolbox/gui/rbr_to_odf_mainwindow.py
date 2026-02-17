@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
             with self._config_path.open("w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
-            colored(f"Failed to save settings: {e}", 'orange')
+            colored(f"Failed to save settings: {e}", 'light_red', attrs=['underline'])
 
     def _load_settings(self):
         if not self._config_path.exists():
@@ -136,7 +136,7 @@ class MainWindow(QMainWindow):
             with self._config_path.open("r", encoding="utf-8") as f:
                 data = json.load(f)
         except Exception as e:
-            colored(f"Failed to load settings: {e}", 'orange')
+            colored(f"Failed to load settings: {e}", 'light_red', attrs=['underline'])
             return
 
         self.ui.rsk_list_widget.blockSignals(True)
@@ -294,7 +294,7 @@ class MainWindow(QMainWindow):
         self.ui.longitude_line_edit.clear()
 
     def _edit_metadata(self):
-        msg = colored("Editing ODF metadata ...", 'green')
+        msg = colored("Editing ODF metadata ...", 'cyan', attrs=['bold'])
         print(msg)
         dlg = OdfMetadataDialog(self)  # parent = MainWindow
 
@@ -302,14 +302,14 @@ class MainWindow(QMainWindow):
             self._odf = dlg.odf()
             if self._odf is not None:
                 # Use it: save, serialize, pass to pipeline, etc.
-                msg = colored("ODF object received by MainWindow", 'blue')
+                msg = colored("ODF object received by MainWindow", 'cyan', attrs=['bold'])
                 print(msg)
             else:
-                msg = colored("Export cancelled", 'blue')
+                msg = colored("Export cancelled", 'light_red', attrs=['underline'])
                 print(msg)
         else:
             # Dialog cancelled
-            msg = colored("ODF export cancelled", 'blue')
+            msg = colored("ODF export cancelled", 'light_red', attrs=['underline'])
             print(msg)
 
     @staticmethod
@@ -444,7 +444,7 @@ class MainWindow(QMainWindow):
         return odf_folder_path
 
     def _export_odf(self):
-        msg = colored("Preparing to export to ODF ...", 'green')
+        msg = colored("Preparing to export to ODF ...", 'light_green')
         print(msg)
         parameter_dict = None
         # Export either full dataset or only user-saved profiles (if any were chosen)
@@ -483,7 +483,7 @@ class MainWindow(QMainWindow):
                 # Subset dataframe; warn if empty
                 filtered = df[mask]
                 if filtered.empty:
-                    msg = colored("Warning: Saved profiles yielded no rows; exporting full dataset instead.", 'orange')
+                    msg = colored("Warning: Saved profiles yielded no rows; exporting full dataset instead.", 'light_red', attrs=['underline'])
                     print(msg)
                 else:
                     df = filtered
