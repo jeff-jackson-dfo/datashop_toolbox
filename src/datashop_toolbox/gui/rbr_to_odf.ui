@@ -479,6 +479,20 @@
   </widget>
   <widget class="QStatusBar" name="status_bar"/>
  </widget>
+ <tabstops>
+  <tabstop>select_folder_push_button</tabstop>
+  <tabstop>folder_line_edit</tabstop>
+  <tabstop>rsk_list_widget</tabstop>
+  <tabstop>channel_list_widget</tabstop>
+  <tabstop>latitude_line_edit</tabstop>
+  <tabstop>longitude_line_edit</tabstop>
+  <tabstop>profile_plots_push_button</tabstop>
+  <tabstop>clear_info_push_button</tabstop>
+  <tabstop>edit_metadata_push_button</tabstop>
+  <tabstop>export_odf_push_button</tabstop>
+  <tabstop>odf_folder_line_edit</tabstop>
+  <tabstop>exit_push_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

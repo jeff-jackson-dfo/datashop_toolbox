@@ -635,6 +635,41 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>mission_template_selector_combo_box</tabstop>
+  <tabstop>year_line_edit</tabstop>
+  <tabstop>country_institute_code_line_edit</tabstop>
+  <tabstop>cruise_number_line_edit</tabstop>
+  <tabstop>organization_line_edit</tabstop>
+  <tabstop>chief_scientist_line_edit</tabstop>
+  <tabstop>start_date_line_edit</tabstop>
+  <tabstop>end_date_line_edit</tabstop>
+  <tabstop>platform_line_edit</tabstop>
+  <tabstop>cruise_name_line_edit</tabstop>
+  <tabstop>cruise_description_line_edit</tabstop>
+  <tabstop>data_type_line_edit</tabstop>
+  <tabstop>event_number_line_edit</tabstop>
+  <tabstop>event_qualifier1_line_edit</tabstop>
+  <tabstop>event_qualifier2_line_edit</tabstop>
+  <tabstop>creation_date_line_edit</tabstop>
+  <tabstop>orig_creation_date_line_edit</tabstop>
+  <tabstop>start_date_time_line_edit</tabstop>
+  <tabstop>end_date_time_line_edit</tabstop>
+  <tabstop>initial_latitude_line_edit</tabstop>
+  <tabstop>initial_longitude_line_edit</tabstop>
+  <tabstop>end_latitude_line_edit</tabstop>
+  <tabstop>end_longitude_line_edit</tabstop>
+  <tabstop>min_depth_line_edit</tabstop>
+  <tabstop>max_depth_line_edit</tabstop>
+  <tabstop>sampling_interval_line_edit</tabstop>
+  <tabstop>sounding_line_edit</tabstop>
+  <tabstop>depth_off_bottom_line_edit</tabstop>
+  <tabstop>station_name_line_edit</tabstop>
+  <tabstop>set_number_line_edit</tabstop>
+  <tabstop>event_comments_line_edit</tabstop>
+  <tabstop>ok_push_button</tabstop>
+  <tabstop>cancel_push_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
