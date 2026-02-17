@@ -23,19 +23,6 @@ class OdfMetadataDialog(QDialog):
 
         self.form.setMinimumHeight(1200)  # Viewport ~800px; pick any value > viewport
 
-        # --- Debug: confirm the buttons exist and are visible/layouted
-        # btn_ok = getattr(self.form.ui, "ok_push_button", None)
-        # btn_cancel = getattr(self.form.ui, "cancel_push_button", None)
-        # for name, w in (("OK", btn_ok), ("Cancel", btn_cancel)):
-        #     if w is None:
-        #         print(f"{name} button object not found on form.ui")
-        #     else:
-        #         print(
-        #             f"{name}: visible={w.isVisible()} hidden={w.isHidden()} "
-        #             f"enabled={w.isEnabled()} geometry={w.geometry()} "
-        #             f"in_layout={w.parentWidget().__class__.__name__ if w.parentWidget() else 'None'}"
-        #         )
-
         self._odf = None
 
         # Bridge form signals to dialog result

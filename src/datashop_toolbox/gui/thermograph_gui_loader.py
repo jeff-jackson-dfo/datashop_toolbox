@@ -2,6 +2,7 @@
 import sys
 
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
+from termcolor import colored
 
 # Use the generated Python from Qt Designer instead of loading the .ui at runtime
 from .ui_thermograph_main_window import Ui_thermograph_main_window
@@ -34,7 +35,8 @@ class ThermographMainWindow(QMainWindow):
     # --- Slots ---
     def on_name_entered(self):
         self.processor_name = self.ui.name_line_edit.text()
-        print(f"(1 of 3) Data processor: {self.processor_name}")
+        msg = colored(f"(1 of 3) Data processor: {self.processor_name}", 'blue')
+        print(msg)
 
     def on_institution_changed(self, text: str):
         self.institution = text
@@ -47,14 +49,16 @@ class ThermographMainWindow(QMainWindow):
         if file_path:
             self.metadata_file = file_path
             self.ui.metadata_line_edit.setText(file_path)
-            print(f"(2 of 3) Metadata file: {file_path}")
+            msg = colored(f"(2 of 3) Metadata file: {file_path}", 'blue')
+            print(msg)
 
     def choose_data_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Select the Data folder")
         if folder_path:
             self.data_folder = folder_path
             self.ui.data_folder_line_edit.setText(folder_path)
-            print(f"(3 of 3) Data folder: {folder_path}")
+            msg = colored(f"(3 of 3) Data folder: {folder_path}", 'blue')
+            print(msg)
 
     def accept_clicked(self):
         self.result = "accept"

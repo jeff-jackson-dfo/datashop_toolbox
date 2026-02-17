@@ -5,17 +5,14 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# Import external libraries
 import numpy as np
 import pandas as pd
-
-# Import external libraries
-from icecream import ic
 from pyrsktools import RSK
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QDoubleValidator
-
-# Import PySide6 libraries
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
+from termcolor import colored
 
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.historyhdr import HistoryHeader
@@ -54,11 +51,6 @@ class MainWindow(QMainWindow):
         # =====================================================
         self.ui = Ui_main_window()
         self.ui.setupUi(self)
-
-        # Change the styles of some widgets
-        # self.ui.exitPushButton.setStyleSheet("color: red;")
-        # self.ui.rsk_list_widget.setStyleSheet("color: blue;")
-        # self.ui.folder_line_edit.setStyleSheet("color: brown;")
 
         # Validators
         self._setup_validators()
@@ -106,7 +98,6 @@ class MainWindow(QMainWindow):
         if not self._rsk_folder or not self._rsk_file:
             return ""
         path = str(Path(self._rsk_folder) / self._rsk_file)
-        # ic(path)
         return path
 
     def _on_rsk_selected(self, current, previous):
@@ -135,7 +126,7 @@ class MainWindow(QMainWindow):
             with self._config_path.open("w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
-            ic(f"Failed to save settings: {e}")
+            colored(f"Failed to save settings: {e}", 'orange')
 
     def _load_settings(self):
         if not self._config_path.exists():
@@ -145,7 +136,7 @@ class MainWindow(QMainWindow):
             with self._config_path.open("r", encoding="utf-8") as f:
                 data = json.load(f)
         except Exception as e:
-            ic(f"Failed to load settings: {e}")
+            colored(f"Failed to load settings: {e}", 'orange')
             return
 
         self.ui.rsk_list_widget.blockSignals(True)
@@ -303,20 +294,23 @@ class MainWindow(QMainWindow):
         self.ui.longitude_line_edit.clear()
 
     def _edit_metadata(self):
-        ic("Editing ODF metadata ...")
+        msg = colored("Editing ODF metadata ...", 'green')
+        print(msg)
         dlg = OdfMetadataDialog(self)  # parent = MainWindow
 
         if dlg.exec():
             self._odf = dlg.odf()
             if self._odf is not None:
                 # Use it: save, serialize, pass to pipeline, etc.
-                print("ODF received in MainWindow:")
-                # print(self._odf.print_object())
+                msg = colored("ODF object received by MainWindow", 'blue')
+                print(msg)
             else:
-                print("Export cancelled")
+                msg = colored("Export cancelled", 'blue')
+                print(msg)
         else:
             # Dialog cancelled
-            print("ODF export cancelled")
+            msg = colored("ODF export cancelled", 'blue')
+            print(msg)
 
     @staticmethod
     def _split_string_get_end_number(s):
@@ -424,11 +418,8 @@ class MainWindow(QMainWindow):
             parameter_header.number_null = number_null
             parameter_list.append(param_code)
 
-            # print(parameter_header.print_object())
-
             # Add the new parameter header to the list.
             parameter_headers.append(parameter_header)
-            # print(parameter_header.print_object())
 
         # Update the data object.
         parameter_dict["parameter_headers"] = parameter_headers
@@ -453,14 +444,12 @@ class MainWindow(QMainWindow):
         return odf_folder_path
 
     def _export_odf(self):
-        ic("Preparing to export to ODF ...")
+        msg = colored("Preparing to export to ODF ...", 'green')
+        print(msg)
         parameter_dict = None
         # Export either full dataset or only user-saved profiles (if any were chosen)
         with RSK(self.rsk_file_path) as rsk:
             rsk.readdata()
-
-            # Keep a copy of the raw data before processing
-            # raw = rsk.copy()
 
             # Update the INSTRUMENT_HEADER
             self._odf.instrument_header.instrument_type = "RBR"
@@ -494,7 +483,8 @@ class MainWindow(QMainWindow):
                 # Subset dataframe; warn if empty
                 filtered = df[mask]
                 if filtered.empty:
-                    ic("Warning: Saved profiles yielded no rows; exporting full dataset instead.")
+                    msg = colored("Warning: Saved profiles yielded no rows; exporting full dataset instead.", 'orange')
+                    print(msg)
                 else:
                     df = filtered
 
