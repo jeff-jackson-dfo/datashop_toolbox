@@ -129,7 +129,7 @@ class OdfMetadataForm(QWidget):
 
         QTimer.singleShot(0, _run)
 
-    def showEvent(self, event) -> None:
+    def showEvent(self, event) -> None:  # noqa: N802
         """Overrides the show event to run code after the dialog is visible."""
         super().showEvent(event)  # Call base class handler
         # Populate year now
@@ -328,26 +328,6 @@ class OdfMetadataForm(QWidget):
         odf.event_header.orig_creation_date = self._parse_datetime(self.ui.orig_creation_date_line_edit, "Original Creation Date")
         odf.event_header.start_date_time = self._parse_datetime(self.ui.start_date_time_line_edit, "Start Date/Time")
         odf.event_header.end_date_time = self._parse_datetime(self.ui.end_date_time_line_edit, "End Date/Time")
-
-        # cdate = check_datetime(self.ui.creation_date_line_edit.text())
-        # odf.event_header.creation_date = cdate
-        # ocdate = check_datetime(self.ui.orig_creation_date_line_edit.text())  # pull from the correct field
-        # odf.event_header.orig_creation_date = ocdate
-        # odf.event_header.start_date_time = check_datetime(self.ui.start_date_time_line_edit.text())
-        # odf.event_header.end_date_time = check_datetime(self.ui.end_date_time_line_edit.text())
-
-        # odf.event_header.initial_latitude = self.ui.initial_latitude_line_edit.text()
-        # odf.event_header.initial_longitude = self.ui.initial_longitude_line_edit.text()
-        # odf.event_header.end_latitude = self.ui.end_latitude_line_edit.text()
-        # odf.event_header.end_longitude = self.ui.end_longitude_line_edit.text()
-        # odf.event_header.min_depth = self.ui.min_depth_line_edit.text()
-        # odf.event_header.max_depth = self.ui.max_depth_line_edit.text()
-        # odf.event_header.sampling_interval = self.ui.sampling_interval_line_edit.text()
-        # odf.event_header.sounding = self.ui.sounding_line_edit.text()
-        # odf.event_header.depth_off_bottom = self.ui.depth_off_bottom_line_edit.text()
-        # odf.event_header.station_name = self.ui.station_name_line_edit.text()
-        # odf.event_header.set_number = self.ui.set_number_line_edit.text()
-        # odf.event_header.event_comments = [self.ui.event_comments_line_edit.text()]
 
         # Floats — parsed (will raise [FLOAT] ValueError on error)
         # If some are optional, adjust _parse_float to allow empty and return None
