@@ -129,13 +129,13 @@ class OdfMetadataForm(QWidget):
 
         QTimer.singleShot(0, _run)
 
-    # def showEvent(self, event):
-    #     """Overrides the show event to run code after the dialog is visible."""
-    #     super().showEvent(event)  # Call base class handler
-    #     # Populate year now
-    #     self._on_dialog_visible()
-    #     # Show warning AFTER the parent dialog is exposed
-    #     self._show_warning_dialog()
+    def showEvent(self, event) -> None:
+        """Overrides the show event to run code after the dialog is visible."""
+        super().showEvent(event)  # Call base class handler
+        # Populate year now
+        self._on_dialog_visible()
+        # Show warning AFTER the parent dialog is exposed
+        self._show_warning_dialog()
 
     def _on_dialog_visible(self):
         """Function that runs when the dialog appears."""
