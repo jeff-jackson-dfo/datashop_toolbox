@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'odf_metadata_form.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.2
+## Created by: Qt User Interface Compiler version 6.10.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -398,6 +398,38 @@ class Ui_odf_metadata_form(object):
         font3.setBold(False)
         self.year_line_edit.setFont(font3)
         self.year_line_edit.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        QWidget.setTabOrder(self.mission_template_selector_combo_box, self.year_line_edit)
+        QWidget.setTabOrder(self.year_line_edit, self.country_institute_code_line_edit)
+        QWidget.setTabOrder(self.country_institute_code_line_edit, self.cruise_number_line_edit)
+        QWidget.setTabOrder(self.cruise_number_line_edit, self.organization_line_edit)
+        QWidget.setTabOrder(self.organization_line_edit, self.chief_scientist_line_edit)
+        QWidget.setTabOrder(self.chief_scientist_line_edit, self.start_date_line_edit)
+        QWidget.setTabOrder(self.start_date_line_edit, self.end_date_line_edit)
+        QWidget.setTabOrder(self.end_date_line_edit, self.platform_line_edit)
+        QWidget.setTabOrder(self.platform_line_edit, self.cruise_name_line_edit)
+        QWidget.setTabOrder(self.cruise_name_line_edit, self.cruise_description_line_edit)
+        QWidget.setTabOrder(self.cruise_description_line_edit, self.data_type_line_edit)
+        QWidget.setTabOrder(self.data_type_line_edit, self.event_number_line_edit)
+        QWidget.setTabOrder(self.event_number_line_edit, self.event_qualifier1_line_edit)
+        QWidget.setTabOrder(self.event_qualifier1_line_edit, self.event_qualifier2_line_edit)
+        QWidget.setTabOrder(self.event_qualifier2_line_edit, self.creation_date_line_edit)
+        QWidget.setTabOrder(self.creation_date_line_edit, self.orig_creation_date_line_edit)
+        QWidget.setTabOrder(self.orig_creation_date_line_edit, self.start_date_time_line_edit)
+        QWidget.setTabOrder(self.start_date_time_line_edit, self.end_date_time_line_edit)
+        QWidget.setTabOrder(self.end_date_time_line_edit, self.initial_latitude_line_edit)
+        QWidget.setTabOrder(self.initial_latitude_line_edit, self.initial_longitude_line_edit)
+        QWidget.setTabOrder(self.initial_longitude_line_edit, self.end_latitude_line_edit)
+        QWidget.setTabOrder(self.end_latitude_line_edit, self.end_longitude_line_edit)
+        QWidget.setTabOrder(self.end_longitude_line_edit, self.min_depth_line_edit)
+        QWidget.setTabOrder(self.min_depth_line_edit, self.max_depth_line_edit)
+        QWidget.setTabOrder(self.max_depth_line_edit, self.sampling_interval_line_edit)
+        QWidget.setTabOrder(self.sampling_interval_line_edit, self.sounding_line_edit)
+        QWidget.setTabOrder(self.sounding_line_edit, self.depth_off_bottom_line_edit)
+        QWidget.setTabOrder(self.depth_off_bottom_line_edit, self.station_name_line_edit)
+        QWidget.setTabOrder(self.station_name_line_edit, self.set_number_line_edit)
+        QWidget.setTabOrder(self.set_number_line_edit, self.event_comments_line_edit)
+        QWidget.setTabOrder(self.event_comments_line_edit, self.ok_push_button)
+        QWidget.setTabOrder(self.ok_push_button, self.cancel_push_button)
 
         self.retranslateUi(odf_metadata_form)
 

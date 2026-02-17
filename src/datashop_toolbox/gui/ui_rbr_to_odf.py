@@ -266,6 +266,17 @@ class Ui_main_window(object):
         self.status_bar = QStatusBar(main_window)
         self.status_bar.setObjectName(u"status_bar")
         main_window.setStatusBar(self.status_bar)
+        QWidget.setTabOrder(self.select_folder_push_button, self.folder_line_edit)
+        QWidget.setTabOrder(self.folder_line_edit, self.rsk_list_widget)
+        QWidget.setTabOrder(self.rsk_list_widget, self.channel_list_widget)
+        QWidget.setTabOrder(self.channel_list_widget, self.latitude_line_edit)
+        QWidget.setTabOrder(self.latitude_line_edit, self.longitude_line_edit)
+        QWidget.setTabOrder(self.longitude_line_edit, self.profile_plots_push_button)
+        QWidget.setTabOrder(self.profile_plots_push_button, self.clear_info_push_button)
+        QWidget.setTabOrder(self.clear_info_push_button, self.edit_metadata_push_button)
+        QWidget.setTabOrder(self.edit_metadata_push_button, self.export_odf_push_button)
+        QWidget.setTabOrder(self.export_odf_push_button, self.odf_folder_line_edit)
+        QWidget.setTabOrder(self.odf_folder_line_edit, self.exit_push_button)
 
         self.retranslateUi(main_window)
 
