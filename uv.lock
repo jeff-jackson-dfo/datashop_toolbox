@@ -215,7 +215,7 @@ wheels = [
 
 [[package]]
 name = "datashop-toolbox"
-version = "1.0.5.1"
+version = "1.0.5.5"
 source = { editable = "." }
 dependencies = [
     { name = "dotenv" },

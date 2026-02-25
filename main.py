@@ -1,15 +1,16 @@
-import sys
+# import sys
 
-from PySide6.QtWidgets import QApplication
+# from PySide6.QtWidgets import QApplication
 
-from datashop_toolbox.gui.main_window import MainWindow
+# from datashop_toolbox.gui.main_window import MainWindow
 
 
 def main() -> None:
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    # app = QApplication(sys.argv)
+    # window = MainWindow()
+    # window.show()
+    # sys.exit(app.exec())
+    print('Stub module that will one day be used to start the Datashop Toolbox GUI')
 
 
 if __name__ == "__main__":

@@ -228,12 +228,12 @@ class MainWindow(QMainWindow):
         channels_to_plot = []
 
         # Optional lat/lon used for derived quantities
-        station_latitude = (
-            float(self.ui.latitude_line_edit.text()) if self.ui.latitude_line_edit.text() else None
-        )
-        station_longitude = (
-            float(self.ui.longitude_line_edit.text()) if self.ui.longitude_line_edit.text() else None
-        )
+        # station_latitude = (
+        #     float(self.ui.latitude_line_edit.text()) if self.ui.latitude_line_edit.text() else None
+        # )
+        # station_longitude = (
+        #     float(self.ui.longitude_line_edit.text()) if self.ui.longitude_line_edit.text() else None
+        # )
 
         # Build figures
         with RSK(self.rsk_file_path) as rsk:
@@ -254,10 +254,7 @@ class MainWindow(QMainWindow):
 
             if "salinity" in rsk.channelNames:
                 channels_to_plot.append("salinity")
-
-            # density anomaly if we have lat/lon
-            if station_latitude is not None and station_longitude is not None:
-                rsk.derivesigma(latitude=station_latitude, longitude=station_longitude)
+                rsk.derivesigma()
                 channels_to_plot.append("density_anomaly")
 
             # Dissolved O2 channel if present
@@ -285,6 +282,7 @@ class MainWindow(QMainWindow):
             )
             self._plot_profiles_dialog.exec()
 
+       
     def _clear_settings(self):
         # Clear all widgets
         self.ui.folder_line_edit.clear()
@@ -292,6 +290,7 @@ class MainWindow(QMainWindow):
         self.ui.channel_list_widget.clear()
         self.ui.latitude_line_edit.clear()
         self.ui.longitude_line_edit.clear()
+
 
     def _edit_metadata(self):
         msg = colored("Editing ODF metadata ...", 'cyan')
@@ -312,6 +311,7 @@ class MainWindow(QMainWindow):
             msg = colored("ODF export cancelled", 'red')
             print(msg)
 
+
     @staticmethod
     def _split_string_get_end_number(s):
         digits = ""
@@ -325,6 +325,7 @@ class MainWindow(QMainWindow):
             return [s]
 
         return [s[: -len(digits)], digits]
+
 
     def _populate_parameter_headers(self, df: pd.DataFrame) -> dict:
         """Populate the parameter headers and the data object."""
@@ -376,6 +377,9 @@ class MainWindow(QMainWindow):
                 parameter_header.type = "DOUB"
             elif column == "salinity":
                 param_name = "PSAL"
+                parameter_header.type = "DOUB"
+            elif column == "density_anomaly":
+                param_name = "SIGP"
                 parameter_header.type = "DOUB"
             elif column == "speed_of_sound":
                 param_name = "SVEL"
@@ -451,6 +455,9 @@ class MainWindow(QMainWindow):
         with RSK(self.rsk_file_path) as rsk:
             rsk.readdata()
 
+            if "salinity" in rsk.channelNames:
+                rsk.derivesigma()
+
             # Update the INSTRUMENT_HEADER
             self._odf.instrument_header.instrument_type = "RBR"
             self._odf.instrument_header.model = rsk.instrument.model
@@ -467,6 +474,8 @@ class MainWindow(QMainWindow):
 
             # Build DataFrame from full record first
             df = pd.DataFrame(rsk.data)
+
+            self._saved_profile_indices = self._plot_profiles_dialog.get_saved_profiles()
 
             # If the user has saved specific profiles, filter to those indices only
             if getattr(self, "_saved_profile_indices", None):
