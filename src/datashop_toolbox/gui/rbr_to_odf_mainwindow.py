@@ -451,98 +451,109 @@ class MainWindow(QMainWindow):
     def _export_odf(self):
         msg = colored("Preparing to export to ODF ...", 'yellow')
         print(msg)
-        parameter_dict = None
-        # Export either full dataset or only user-saved profiles (if any were chosen)
+
+        # Choose output folder once
+        odf_export_folder = self._choose_export_odf_folder()
+        if not odf_export_folder:
+            print(colored("Export cancelled (no folder selected).", 'red'))
+            return
+
         with RSK(self.rsk_file_path) as rsk:
             rsk.readdata()
 
+            # Derived channels needed once
             if "salinity" in rsk.channelNames:
                 rsk.derivesigma()
 
-            # Update the INSTRUMENT_HEADER
+            # Compute profiles once; we will query by direction below
+            rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
+
+            # Update the INSTRUMENT_HEADER once (static metadata)
             self._odf.instrument_header.instrument_type = "RBR"
             self._odf.instrument_header.model = rsk.instrument.model
             self._odf.instrument_header.serial_number = str(rsk.instrument.serialID)
 
-            # Update the creation date
+            # Creation dates once per export session
             current_dt = datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
             self._odf.event_header.creation_date = current_dt
             self._odf.event_header.orig_creation_date = current_dt
 
-            # Update the sampling interval if it is null
+            # Sampling interval if missing
             if self._odf.event_header.sampling_interval < 0:
                 self._odf.event_header.sampling_interval = rsk.scheduleInfo.samplingperiod()
 
-            # Build DataFrame from full record first
-            df = pd.DataFrame(rsk.data)
+            # Gather user-saved profile indices once (if any)
+            saved = []
+            if self._plot_profiles_dialog is not None:
+                saved = self._plot_profiles_dialog.get_saved_profiles() or []
+            self._saved_profile_indices = saved
 
-            self._saved_profile_indices = self._plot_profiles_dialog.get_saved_profiles()
+            for cast_direction in ["down", "up"]:
+                # Reset from full record each iteration
+                full_df = pd.DataFrame(rsk.data)
 
-            cast_directions = ["down", "up"]
+                # Set event qualifier and suffix for filename
+                if cast_direction == "down":
+                    self._odf.event_header.event_qualifier2 = "DN"
+                    dir_suffix = "DN"
+                else:
+                    self._odf.event_header.event_qualifier2 = "UP"
+                    dir_suffix = "UP"
 
-            for cast_direction in cast_directions:
+                # Subset to selected profiles for THIS direction (if any were saved)
+                df = full_df
+                if self._saved_profile_indices:
+                    profiles = rsk.getprofilesindices(direction=cast_direction)  # list of arrays
+                    if not profiles:
+                        print(colored(f"No {cast_direction} profiles found; skipping.", 'red'))
+                        continue
 
-                match cast_direction:
-                    case 'down':
-                        self._odf.event_header.event_qualifier2 = "DN"
-                    case 'up':
-                        self._odf.event_header.event_qualifier2 = "UP"                    
-
-                # If the user has saved specific profiles, filter to those indices only
-                if getattr(self, "_saved_profile_indices", None):
-                    # Ensure profiles are computed before fetching their indices
-                    rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
-                    profiles = rsk.getprofilesindices(direction=cast_direction)  # list of arrays of integer indices for downcasts or upcasts
-
-                    # Build a boolean mask for the union of selected profile indices
-                    mask = np.zeros(len(df), dtype=bool)
+                    # Build a boolean mask against the FULL record
+                    mask = np.zeros(len(full_df), dtype=bool)
                     for p in self._saved_profile_indices:
-                        ic(min(p), max(p))
                         if 0 <= p < len(profiles):
                             mask[profiles[p]] = True
+                        else:
+                            print(colored(f"Saved profile index {p} out of range for {cast_direction}.", 'red'))
 
-                            ic(mask.sum(), len(df), len(profiles[p]))
-
-                    # Subset dataframe; warn if empty
-                    filtered = df[mask]
+                    filtered = full_df[mask]
                     if filtered.empty:
-                        msg = colored("Warning: Saved profiles yielded no rows; exporting full dataset instead.", 'red')
-                        print(msg)
-                    else:
-                        df = filtered
+                        print(colored(
+                            f"Warning: saved profiles yielded no rows for {cast_direction}; skipping this cast.",
+                            'red'
+                        ))
+                        continue
+                    df = filtered
 
-                    print(filtered.head())
-
-                # Populate parameter headers & data object
+                # Populate parameter headers & data object for THIS cast
                 parameter_dict = self._populate_parameter_headers(df)
-                if parameter_dict:
-                    self._odf.parameter_headers = parameter_dict["parameter_headers"]
-                    self._odf.data.parameter_list = parameter_dict["parameter_list"]
-                    self._odf.data.print_formats = parameter_dict["print_formats"]
-                    self._odf.data.data_frame = parameter_dict["data_frame"]
+                if not parameter_dict:
+                    print(colored(f"Parameter population failed for {cast_direction}; skipping.", 'red'))
+                    continue
 
-                # Add a HISTORY_HEADER
-                history_headers = list()
+                self._odf.parameter_headers = parameter_dict["parameter_headers"]
+                self._odf.data.parameter_list = parameter_dict["parameter_list"]
+                self._odf.data.print_formats = parameter_dict["print_formats"]
+                self._odf.data.data_frame = parameter_dict["data_frame"]
+
+                # HISTORY_HEADER (append one for this cast)
+                history_headers = []
                 history_header = HistoryHeader()
-                history_header.creation_date = (
-                    datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-                )
+                history_header.creation_date = datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
                 username = getpass.getuser()
-                history_header.log_history_message
                 history_header.add_process(f"RBR RSK file converted to ODF file by {username}")
                 history_headers.append(history_header)
                 self._odf.history_headers = history_headers
 
+                # Refresh ODF text buffer and write
                 self._odf.update_odf()
 
-                # Write the ODF file to disk.
-                msg = colored("Exporting ODF file ...", 'green')
-                print(msg)
-                odf_export_folder = self._choose_export_odf_folder()
+                # Ensure filenames differ by direction, regardless of generate_file_spec() behavior
                 file_spec = self._odf.generate_file_spec()
-                self._odf.file_specification = file_spec
-                out_file = f"{file_spec}.ODF"
-                self._odf.write_odf(odf_export_folder + "/" + out_file, version=2.0)
+                out_file = f"{file_spec}_{dir_suffix}.ODF"
+
+                print(colored(f"Exporting {cast_direction} ODF: {out_file}", 'green'))
+                self._odf.write_odf(str(Path(odf_export_folder) / out_file), version=2.0)
 
 def main():
     app = QApplication(sys.argv)
