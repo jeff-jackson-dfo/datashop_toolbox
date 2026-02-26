@@ -550,7 +550,8 @@ class MainWindow(QMainWindow):
 
                 # Ensure filenames differ by direction, regardless of generate_file_spec() behavior
                 file_spec = self._odf.generate_file_spec()
-                out_file = f"{file_spec}_{dir_suffix}.ODF"
+                self._odf.file_specification = file_spec
+                out_file = f"{file_spec}.ODF"
 
                 print(colored(f"Exporting {cast_direction} ODF: {out_file}", 'green'))
                 self._odf.write_odf(str(Path(odf_export_folder) / out_file), version=2.0)
