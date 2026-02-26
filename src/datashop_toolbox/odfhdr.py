@@ -318,6 +318,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
         return self
 
     def update_odf(self) -> None:
+        
+        # Update the record header counts if required.
         number_of_calibrations = len(self.polynomial_cal_headers) + len(self.general_cal_headers)
         if self.record_header.num_calibration != number_of_calibrations:
             self.record_header.num_calibration = number_of_calibrations
@@ -329,6 +331,18 @@ class OdfHeader(ValidatedBase, BaseHeader):
             self.record_header.num_param = len(self.parameter_headers)
         if self.record_header.num_cycle != len(self.data):
             self.record_header.num_cycle = len(self.data)
+
+        # Update event header information if required.
+        if self.event_header.min_depth is BaseHeader.NULL_VALUE and "DEPH_01" in self.data.parameter_list:
+            self.event_header.min_depth = self.data.data_frame["DEPH_01"].min()
+            self.event_header.max_depth = self.data.data_frame["DEPH_01"].max()
+        elif self.event_header.min_depth is BaseHeader.NULL_VALUE and "PRES_01" in self.data.parameter_list:
+            self.event_header.min_depth = self.data.data_frame["PRES_01"].min()
+            self.event_header.max_depth = self.data.data_frame["PRES_01"].max()
+        if self.event_header.depth_off_bottom is BaseHeader.NULL_VALUE:
+            if self.event_header.sounding is not BaseHeader.NULL_VALUE:
+                self.event_header.depth_off_bottom = self.event_header.sounding - self.event_header.max_depth
+
         # Update the parameter headers if required.
         for ph in self.parameter_headers:
             param_data = self.data.data_frame[ph.code]
@@ -338,6 +352,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
             else:
                 ph.minimum_value = min(param_data)
                 ph.maximum_value = max(param_data)
+
+
 
     def write_odf(self, odf_file_path: str, version: float = 2.0) -> None:
         assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
