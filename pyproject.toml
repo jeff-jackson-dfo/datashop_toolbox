@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datashop-toolbox"
-version = "1.0.5.6"
+version = "1.0.6.0"
 description = "Python toolbox for oceanographic data processing"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -20,6 +20,7 @@ dependencies = [
     "pyqtgraph>=0.14.0",
     "pyrsktools>=1.1.1",
     "pyside6>=6.10.2",
+    "python-dateutil>=2.9.0.post0",
     "pytz>=2025.2",
     "termcolor>=3.1.0",
 ]
@@ -49,16 +50,30 @@ where = ["src"]
 
 # --- Ruff configuration ---
 [tool.ruff]
-target-version = "py313"
-line-length = 100
+line-length = 120
+target-version = "py311"
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP", "N", "NPY", "PTH"]
-ignore = ["E501"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["datashop_toolbox"]
-
+# Enable Ruff formatter (optional; only if you want Ruff to be the formatter)
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+# Choose rulesets to enable; E,F are core; I for import sorting; B for bugbear; UP for pyupgrade
+select = ["E", "F", "I", "B", "UP"]
+ignore = [
+  # example: "E203", "E266"
+]
+
+# Per-file ignores (example)
+[tool.ruff.lint.per-file-ignores]
+"tests/**.py" = ["S101"]   # allow asserts in tests
+
+# Exclusions (example)
+[tool.ruff.lint.source]
+exclude = [
+  ".venv",
+  "build",
+  "dist"
+]

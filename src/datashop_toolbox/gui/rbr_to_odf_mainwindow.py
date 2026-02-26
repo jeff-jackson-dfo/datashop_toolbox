@@ -3,6 +3,7 @@ import getpass
 import json
 import sys
 from datetime import datetime
+from icecream import ic
 from pathlib import Path
 
 # Import external libraries
@@ -477,58 +478,71 @@ class MainWindow(QMainWindow):
 
             self._saved_profile_indices = self._plot_profiles_dialog.get_saved_profiles()
 
-            # If the user has saved specific profiles, filter to those indices only
-            if getattr(self, "_saved_profile_indices", None):
-                # Ensure profiles are computed before fetching their indices
-                rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
-                profiles = rsk.getprofilesindices()  # list of arrays of integer indices
+            cast_directions = ["down", "up"]
 
-                # Build a boolean mask for the union of selected profile indices
-                mask = np.zeros(len(df), dtype=bool)
-                for p in self._saved_profile_indices:
-                    if 0 <= p < len(profiles):
-                        mask[profiles[p]] = True
+            for cast_direction in cast_directions:
 
-                # Subset dataframe; warn if empty
-                filtered = df[mask]
-                if filtered.empty:
-                    msg = colored("Warning: Saved profiles yielded no rows; exporting full dataset instead.", 'red')
-                    print(msg)
-                else:
-                    df = filtered
+                match cast_direction:
+                    case 'down':
+                        self._odf.event_header.event_qualifier2 = "DN"
+                    case 'up':
+                        self._odf.event_header.event_qualifier2 = "UP"                    
 
-                print(filtered.head())
+                # If the user has saved specific profiles, filter to those indices only
+                if getattr(self, "_saved_profile_indices", None):
+                    # Ensure profiles are computed before fetching their indices
+                    rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
+                    profiles = rsk.getprofilesindices(direction=cast_direction)  # list of arrays of integer indices for downcasts or upcasts
 
-            # Populate parameter headers & data object
-            parameter_dict = self._populate_parameter_headers(df)
-            if parameter_dict:
-                self._odf.parameter_headers = parameter_dict["parameter_headers"]
-                self._odf.data.parameter_list = parameter_dict["parameter_list"]
-                self._odf.data.print_formats = parameter_dict["print_formats"]
-                self._odf.data.data_frame = parameter_dict["data_frame"]
+                    # Build a boolean mask for the union of selected profile indices
+                    mask = np.zeros(len(df), dtype=bool)
+                    for p in self._saved_profile_indices:
+                        ic(min(p), max(p))
+                        if 0 <= p < len(profiles):
+                            mask[profiles[p]] = True
 
-            # Add a HISTORY_HEADER
-            history_headers = list()
-            history_header = HistoryHeader()
-            history_header.creation_date = (
-                datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-            )
-            username = getpass.getuser()
-            history_header.log_history_message
-            history_header.add_process(f"RBR RSK file converted to ODF file by {username}")
-            history_headers.append(history_header)
-            self._odf.history_headers = history_headers
+                            ic(mask.sum(), len(df), len(profiles[p]))
 
-            self._odf.update_odf()
+                    # Subset dataframe; warn if empty
+                    filtered = df[mask]
+                    if filtered.empty:
+                        msg = colored("Warning: Saved profiles yielded no rows; exporting full dataset instead.", 'red')
+                        print(msg)
+                    else:
+                        df = filtered
 
-            # Write the ODF file to disk.
-            msg = colored("Exporting ODF file ...", 'green')
-            print(msg)
-            odf_export_folder = self._choose_export_odf_folder()
-            file_spec = self._odf.generate_file_spec()
-            self._odf.file_specification = file_spec
-            out_file = f"{file_spec}.ODF"
-            self._odf.write_odf(odf_export_folder + "/" + out_file, version=2.0)
+                    print(filtered.head())
+
+                # Populate parameter headers & data object
+                parameter_dict = self._populate_parameter_headers(df)
+                if parameter_dict:
+                    self._odf.parameter_headers = parameter_dict["parameter_headers"]
+                    self._odf.data.parameter_list = parameter_dict["parameter_list"]
+                    self._odf.data.print_formats = parameter_dict["print_formats"]
+                    self._odf.data.data_frame = parameter_dict["data_frame"]
+
+                # Add a HISTORY_HEADER
+                history_headers = list()
+                history_header = HistoryHeader()
+                history_header.creation_date = (
+                    datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+                )
+                username = getpass.getuser()
+                history_header.log_history_message
+                history_header.add_process(f"RBR RSK file converted to ODF file by {username}")
+                history_headers.append(history_header)
+                self._odf.history_headers = history_headers
+
+                self._odf.update_odf()
+
+                # Write the ODF file to disk.
+                msg = colored("Exporting ODF file ...", 'green')
+                print(msg)
+                odf_export_folder = self._choose_export_odf_folder()
+                file_spec = self._odf.generate_file_spec()
+                self._odf.file_specification = file_spec
+                out_file = f"{file_spec}.ODF"
+                self._odf.write_odf(odf_export_folder + "/" + out_file, version=2.0)
 
 def main():
     app = QApplication(sys.argv)
