@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         self._odf = OdfHeader()
         self._odf_folder: str = ""
         self._config_path = Path.home() / ".rsk_profile_gui.json"
-        self._saved_profile_indices = []  # indices selected in the Plot dialog (0-based)
+        self._saved_profile_indices: list[int] = []  # indices selected in the Plot dialog (0-based)
         self._plot_profiles_dialog = None  # Save the last dialog ref if you want to overlay later
 
         # =====================================================
@@ -228,14 +228,6 @@ class MainWindow(QMainWindow):
         fig_list = []
         channels_to_plot = []
 
-        # Optional lat/lon used for derived quantities
-        # station_latitude = (
-        #     float(self.ui.latitude_line_edit.text()) if self.ui.latitude_line_edit.text() else None
-        # )
-        # station_longitude = (
-        #     float(self.ui.longitude_line_edit.text()) if self.ui.longitude_line_edit.text() else None
-        # )
-
         # Build figures
         with RSK(self.rsk_file_path) as rsk:
             rsk.readdata()
@@ -391,6 +383,9 @@ class MainWindow(QMainWindow):
             elif column == "dissolved_o2_saturation":
                 param_name = "OSAT"
                 parameter_header.type = "DOUB"
+            elif column == "scans_per_bin":
+                param_name = "SNCN"
+                parameter_header.type = "INTE"
             elif column == "specific_conductivity":
                 continue
             if parameter_header.type == "DOUB":
@@ -465,6 +460,16 @@ class MainWindow(QMainWindow):
             if "salinity" in rsk.channelNames:
                 rsk.derivesigma()
 
+            # Required shift of C relative to T for each profile
+            lag = rsk.calculateCTlag(seapressureRange = (1,100), direction = "down")
+            # Advance temperature
+            lag = -np.array(lag)
+            # Select best lag for consistency among profiles
+            lag = np.median(lag).round().astype(int)
+            rsk.alignchannel(channel = "temperature", lag = lag, direction = "down")
+
+            rsk.smooth(channels = ["salinity", "density_anomaly"], windowLength = 5)
+
             # Compute profiles once; we will query by direction below
             rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
 
@@ -487,74 +492,74 @@ class MainWindow(QMainWindow):
             if self._plot_profiles_dialog is not None:
                 saved = self._plot_profiles_dialog.get_saved_profiles() or []
             self._saved_profile_indices = saved
+            print(colored(f"Saved profile indices for export: {self._saved_profile_indices}", 'cyan'))
 
             for cast_direction in ["down", "up"]:
-                # Reset from full record each iteration
-                full_df = pd.DataFrame(rsk.data)
 
                 # Set event qualifier and suffix for filename
                 if cast_direction == "down":
                     self._odf.event_header.event_qualifier2 = "DN"
-                    dir_suffix = "DN"
                 else:
                     self._odf.event_header.event_qualifier2 = "UP"
-                    dir_suffix = "UP"
+
+                # Reset from full record each iteration
+                full_df = pd.DataFrame(rsk.data)
 
                 # Subset to selected profiles for THIS direction (if any were saved)
-                df = full_df
                 if self._saved_profile_indices:
                     profiles = rsk.getprofilesindices(direction=cast_direction)  # list of arrays
                     if not profiles:
                         print(colored(f"No {cast_direction} profiles found; skipping.", 'red'))
                         continue
+                    
+                    # Filter profiles to only those selected in the Plot dialog
+                    profiles = [idx for i, idx in enumerate(profiles) if i in self._saved_profile_indices]
 
-                    # Build a boolean mask against the FULL record
-                    mask = np.zeros(len(full_df), dtype=bool)
-                    for p in self._saved_profile_indices:
-                        if 0 <= p < len(profiles):
-                            mask[profiles[p]] = True
-                        else:
-                            print(colored(f"Saved profile index {p} out of range for {cast_direction}.", 'red'))
+                for p in profiles:
 
-                    filtered = full_df[mask]
-                    if filtered.empty:
-                        print(colored(
-                            f"Warning: saved profiles yielded no rows for {cast_direction}; skipping this cast.",
-                            'red'
-                        ))
+                    bin_count = rsk.binaverage(
+                        binBy = "sea_pressure",
+                        binSize = 0.5,
+                        boundary = 0.25,
+                        direction = cast_direction
+                    )
+                    rsk.addchannel(data=bin_count, channel="scans_per_bin", units=None)
+
+                    df = pd.DataFrame(rsk.data)
+
+                    # Subset to THIS profile for THIS direction
+                    profile_df = df[df["profile_index"] == profiles[p]]
+
+                    # Populate parameter headers & data object for THIS cast and direction
+                    parameter_dict = self._populate_parameter_headers(profile_df)
+                    if not parameter_dict:
+                        print(colored(f"Parameter population failed for {cast_direction}; skipping.", 'red'))
                         continue
-                    df = filtered
 
-                # Populate parameter headers & data object for THIS cast
-                parameter_dict = self._populate_parameter_headers(df)
-                if not parameter_dict:
-                    print(colored(f"Parameter population failed for {cast_direction}; skipping.", 'red'))
-                    continue
+                    self._odf.parameter_headers = parameter_dict["parameter_headers"]
+                    self._odf.data.parameter_list = parameter_dict["parameter_list"]
+                    self._odf.data.print_formats = parameter_dict["print_formats"]
+                    self._odf.data.data_frame = parameter_dict["data_frame"]
 
-                self._odf.parameter_headers = parameter_dict["parameter_headers"]
-                self._odf.data.parameter_list = parameter_dict["parameter_list"]
-                self._odf.data.print_formats = parameter_dict["print_formats"]
-                self._odf.data.data_frame = parameter_dict["data_frame"]
+                    # HISTORY_HEADER (append one for this cast)
+                    history_headers = []
+                    history_header = HistoryHeader()
+                    history_header.creation_date = datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+                    username = getpass.getuser()
+                    history_header.add_process(f"RBR RSK file converted to ODF file by {username}")
+                    history_headers.append(history_header)
+                    self._odf.history_headers = history_headers
 
-                # HISTORY_HEADER (append one for this cast)
-                history_headers = []
-                history_header = HistoryHeader()
-                history_header.creation_date = datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-                username = getpass.getuser()
-                history_header.add_process(f"RBR RSK file converted to ODF file by {username}")
-                history_headers.append(history_header)
-                self._odf.history_headers = history_headers
+                    # Refresh ODF text buffer and write
+                    self._odf.update_odf()
 
-                # Refresh ODF text buffer and write
-                self._odf.update_odf()
+                    # Ensure filenames differ by direction, regardless of generate_file_spec() behavior
+                    file_spec = self._odf.generate_file_spec()
+                    self._odf.file_specification = file_spec
+                    out_file = f"{file_spec}.ODF"
 
-                # Ensure filenames differ by direction, regardless of generate_file_spec() behavior
-                file_spec = self._odf.generate_file_spec()
-                self._odf.file_specification = file_spec
-                out_file = f"{file_spec}.ODF"
-
-                print(colored(f"Exporting {cast_direction} ODF: {out_file}", 'green'))
-                self._odf.write_odf(str(Path(odf_export_folder) / out_file), version=2.0)
+                    print(colored(f"Exporting {cast_direction} ODF: {out_file}", 'green'))
+                    self._odf.write_odf(str(Path(odf_export_folder) / out_file), version=2.0)
 
 def main():
     app = QApplication(sys.argv)

@@ -211,6 +211,7 @@ def main():
     profiles = _create_sample_profiles(6)
     dlg = PlotDialog(profiles, title="RSK Profiles — Test")
     dlg.exec()
+    print("Saved profile indices:", dlg.get_saved_profiles())
     app.exit()
 
 
