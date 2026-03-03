@@ -105,7 +105,7 @@ class DataRecords(ValidatedBase, BaseHeader):
                 fmt = "{:>" + str(width) + "}"
                 formatters[key] = lambda x, f=fmt: f"{f.format(x)}"
             elif key.startswith("CNTR") or key.startswith("SNCN"):
-                formatters[key] = lambda x, w=width: f"{int(x): >{w}}" if x is not None else ""
+                formatters[key] = lambda x, w=int(width): f"{int(x):>{w}d}" if x is not None else ""
             else:
                 formatters[key] = lambda x, w=width: f"{float(x): >{w}f}" if x is not None else ""
 
