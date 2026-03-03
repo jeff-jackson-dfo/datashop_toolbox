@@ -406,7 +406,6 @@ class MainWindow(QMainWindow):
                 parameter_header.maximum_value = max_temp
                 parameter_header.null_string = str(BaseHeader.NULL_VALUE)
 
-            # parameter_info = lookup_parameter('oracle', param_name)
             parameter_info = lookup_parameter("sqlite", param_name)
             parameter_header.name = parameter_info.get("description")
             parameter_header.units = parameter_info.get("units")
