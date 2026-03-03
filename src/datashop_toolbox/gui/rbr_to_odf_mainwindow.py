@@ -15,6 +15,10 @@ from PySide6.QtGui import QDoubleValidator
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
 from termcolor import colored
 
+import seabirdscientific.conversion as conv
+import seabirdscientific.processing as proc
+import seabirdscientific.utils as utils
+
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.lookup_parameter import lookup_parameter
@@ -353,6 +357,12 @@ class MainWindow(QMainWindow):
                 parameter_header.maximum_value = max_date
                 parameter_header.null_string = BaseHeader.SYTM_NULL_VALUE
                 df[column] = [f"'{s}'" for s in sytm_strings]
+            elif column == "sample":
+                param_name = "CNTR"
+                parameter_header.type = "INTE"
+            elif column == "nbin":
+                param_name = "SNCN"
+                parameter_header.type = "INTE"
             elif column == "pressure":
                 param_name = "TOTP"
                 parameter_header.type = "DOUB"
@@ -378,7 +388,7 @@ class MainWindow(QMainWindow):
                 param_name = "SVEL"
                 parameter_header.type = "DOUB"
             elif column == "dissolved_o2_concentration":
-                param_name = "DOXY"
+                param_name = "DOXC"
                 parameter_header.type = "DOUB"
             elif column == "dissolved_o2_saturation":
                 param_name = "OSAT"
@@ -388,7 +398,7 @@ class MainWindow(QMainWindow):
                 parameter_header.type = "INTE"
             elif column == "specific_conductivity":
                 continue
-            if parameter_header.type == "DOUB":
+            if parameter_header.type == "DOUB" or parameter_header.type == "INTE":
                 param_code = f"{param_name}_{parameter_number + 1:02d}"
                 min_temp = df[column].min()
                 max_temp = df[column].max()
@@ -421,6 +431,8 @@ class MainWindow(QMainWindow):
             # Add the new parameter header to the list.
             parameter_headers.append(parameter_header)
 
+            print(parameter_header.print_object())
+
         # Update the data object.
         parameter_dict["parameter_headers"] = parameter_headers
         parameter_dict["parameter_list"] = parameter_list
@@ -443,6 +455,10 @@ class MainWindow(QMainWindow):
 
         return odf_folder_path
 
+    @staticmethod
+    def round_to_nearest_half(number):
+        return round(number * 2) / 2
+
     def _export_odf(self):
         msg = colored("Preparing to export to ODF ...", 'yellow')
         print(msg)
@@ -454,7 +470,12 @@ class MainWindow(QMainWindow):
             return
 
         with RSK(self.rsk_file_path) as rsk:
+
             rsk.readdata()
+            raw = rsk.data.copy()  # Keep a copy of the raw data if needed for reference
+
+            # Compute profiles once; we will query by direction below
+            rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
 
             # Derived channels needed once
             if "salinity" in rsk.channelNames:
@@ -470,8 +491,16 @@ class MainWindow(QMainWindow):
 
             rsk.smooth(channels = ["salinity", "density_anomaly"], windowLength = 5)
 
-            # Compute profiles once; we will query by direction below
-            rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
+            # bin_count = rsk.binaverage(
+            #     binBy = "sea_pressure",
+            #     binSize = 0.5,
+            #     boundary = 0.25,
+            #     direction = 'down'
+            # )
+            # rsk.addchannel(data=bin_count, channel="scans_per_bin", units=None)
+
+            scan_number = list(range(1, len(rsk.data["pressure"]) + 1))
+            rsk.addchannel(data=scan_number, channel="sample", units=None)
 
             # Update the INSTRUMENT_HEADER once (static metadata)
             self._odf.instrument_header.instrument_type = "RBR"
@@ -499,14 +528,14 @@ class MainWindow(QMainWindow):
                 # Set event qualifier and suffix for filename
                 if cast_direction == "down":
                     self._odf.event_header.event_qualifier2 = "DN"
+                    cast_type = 'DOWNCAST'
                 else:
                     self._odf.event_header.event_qualifier2 = "UP"
-
-                # Reset from full record each iteration
-                full_df = pd.DataFrame(rsk.data)
+                    cast_type = 'UPCAST'
 
                 # Subset to selected profiles for THIS direction (if any were saved)
                 if self._saved_profile_indices:
+
                     profiles = rsk.getprofilesindices(direction=cast_direction)  # list of arrays
                     if not profiles:
                         print(colored(f"No {cast_direction} profiles found; skipping.", 'red'))
@@ -515,51 +544,59 @@ class MainWindow(QMainWindow):
                     # Filter profiles to only those selected in the Plot dialog
                     profiles = [idx for i, idx in enumerate(profiles) if i in self._saved_profile_indices]
 
-                for p in profiles:
+                    print(colored(f"Exporting {len(profiles)} {cast_direction} profile based on user selection.", 'green'))
 
-                    bin_count = rsk.binaverage(
-                        binBy = "sea_pressure",
-                        binSize = 0.5,
-                        boundary = 0.25,
-                        direction = cast_direction
-                    )
-                    rsk.addchannel(data=bin_count, channel="scans_per_bin", units=None)
+                    for p, profile_idx in enumerate(profiles):
 
-                    df = pd.DataFrame(rsk.data)
+                        print(f"Profile {p} indices being exported for {cast_direction}: {profile_idx}")
 
-                    # Subset to THIS profile for THIS direction
-                    profile_df = df[df["profile_index"] == profiles[p]]
+                        df = pd.DataFrame(rsk.data)
 
-                    # Populate parameter headers & data object for THIS cast and direction
-                    parameter_dict = self._populate_parameter_headers(profile_df)
-                    if not parameter_dict:
-                        print(colored(f"Parameter population failed for {cast_direction}; skipping.", 'red'))
-                        continue
+                        # Subset to THIS profile for THIS direction
+                        profile_df = df.iloc[profile_idx]
 
-                    self._odf.parameter_headers = parameter_dict["parameter_headers"]
-                    self._odf.data.parameter_list = parameter_dict["parameter_list"]
-                    self._odf.data.print_formats = parameter_dict["print_formats"]
-                    self._odf.data.data_frame = parameter_dict["data_frame"]
+                        print(profile_df.head())
 
-                    # HISTORY_HEADER (append one for this cast)
-                    history_headers = []
-                    history_header = HistoryHeader()
-                    history_header.creation_date = datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-                    username = getpass.getuser()
-                    history_header.add_process(f"RBR RSK file converted to ODF file by {username}")
-                    history_headers.append(history_header)
-                    self._odf.history_headers = history_headers
+                        xr_profile_df = profile_df.to_xarray()
 
-                    # Refresh ODF text buffer and write
-                    self._odf.update_odf()
+                        # Use bin_average from seabirdscientific.processing to bin the data for this profile
+                        profile_xarray = proc.bin_average(xr_profile_df, bin_variable="sea_pressure", bin_size=0.5, include_scan_count=True, cast_type=cast_type)
+                        binned_profile_df = profile_xarray.to_dataframe()
 
-                    # Ensure filenames differ by direction, regardless of generate_file_spec() behavior
-                    file_spec = self._odf.generate_file_spec()
-                    self._odf.file_specification = file_spec
-                    out_file = f"{file_spec}.ODF"
+                        binned_profile_df['sea_pressure'] = self.round_to_nearest_half(binned_profile_df['sea_pressure'])
 
-                    print(colored(f"Exporting {cast_direction} ODF: {out_file}", 'green'))
-                    self._odf.write_odf(str(Path(odf_export_folder) / out_file), version=2.0)
+                        print(binned_profile_df.head())
+
+                        # Populate parameter headers & data object for THIS cast and direction
+                        parameter_dict = self._populate_parameter_headers(binned_profile_df)
+                        if not parameter_dict:
+                            print(colored(f"Parameter population failed for {cast_direction}; skipping.", 'red'))
+                            continue
+
+                        self._odf.parameter_headers = parameter_dict["parameter_headers"]
+                        self._odf.data.parameter_list = parameter_dict["parameter_list"]
+                        self._odf.data.print_formats = parameter_dict["print_formats"]
+                        self._odf.data.data_frame = parameter_dict["data_frame"]
+
+                        # HISTORY_HEADER (append one for this cast)
+                        history_headers = []
+                        history_header = HistoryHeader()
+                        history_header.creation_date = datetime.now().strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
+                        username = getpass.getuser()
+                        history_header.add_process(f"RBR RSK file converted to ODF file by {username}")
+                        history_headers.append(history_header)
+                        self._odf.history_headers = history_headers
+
+                        # Refresh ODF text buffer and write
+                        self._odf.update_odf()
+
+                        # Ensure filenames differ by direction, regardless of generate_file_spec() behavior
+                        file_spec = self._odf.generate_file_spec()
+                        self._odf.file_specification = file_spec
+                        out_file = f"{file_spec}.ODF"
+
+                        print(colored(f"Exporting {cast_direction} ODF: {out_file}", 'green'))
+                        self._odf.write_odf(str(Path(odf_export_folder) / out_file), version=2.0)
 
 def main():
     app = QApplication(sys.argv)

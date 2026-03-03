@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datashop-toolbox"
-version = "1.0.6.6"
+version = "1.0.6.8"
 description = "Python toolbox for oceanographic data processing"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -22,6 +22,7 @@ dependencies = [
     "pyside6>=6.10.2",
     "python-dateutil>=2.9.0.post0",
     "pytz>=2025.2",
+    "seabirdscientific",
     "termcolor>=3.1.0",
 ]
 
@@ -77,3 +78,6 @@ exclude = [
   "build",
   "dist"
 ]
+
+[tool.uv.sources]
+seabirdscientific = { path = "../seabirdscientific/dist/seabirdscientific-3.0.0a1-py3-none-any.whl" }

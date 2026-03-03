@@ -196,15 +196,23 @@ class ParameterHeader(ValidatedBase, BaseHeader):
             lines.append(f"  MAXIMUM_VALUE = '{check_datetime(self.maximum_value)}'")
         else:
             if self.minimum_value is not None:
-                fmt = f"{{:.{self.print_decimal_places}f}}"
-                formatted_value = fmt.format(self.minimum_value)
-                lines.append(f"  MINIMUM_VALUE = {formatted_value}")
+                if self.type == "INTE":
+                    formatted_value = int(self.minimum_value)
+                    lines.append(f"  MINIMUM_VALUE = {formatted_value}")
+                elif self.type in ("SING", "DOUB"):
+                    fmt = f"{{:.{self.print_decimal_places}f}}"
+                    formatted_value = fmt.format(self.minimum_value)
+                    lines.append(f"  MINIMUM_VALUE = {formatted_value}")
             else:
                 lines.append(str(BaseHeader.NULL_VALUE))
             if self.maximum_value is not None:
-                fmt = f"{{:.{self.print_decimal_places}f}}"
-                formatted_value = fmt.format(self.maximum_value)
-                lines.append(f"  MAXIMUM_VALUE = {formatted_value}")
+                if self.type == "INTE":
+                    formatted_value = int(self.maximum_value)
+                    lines.append(f"  MAXIMUM_VALUE = {formatted_value}")
+                elif self.type in ("SING", "DOUB"):
+                    fmt = f"{{:.{self.print_decimal_places}f}}"
+                    formatted_value = fmt.format(self.maximum_value)
+                    lines.append(f"  MAXIMUM_VALUE = {formatted_value}")
             else:
                 lines.append(str(BaseHeader.NULL_VALUE))
         if self.number_valid is not None:
