@@ -431,8 +431,6 @@ class MainWindow(QMainWindow):
             # Add the new parameter header to the list.
             parameter_headers.append(parameter_header)
 
-            print(parameter_header.print_object())
-
         # Update the data object.
         parameter_dict["parameter_headers"] = parameter_headers
         parameter_dict["parameter_list"] = parameter_list
@@ -548,14 +546,14 @@ class MainWindow(QMainWindow):
 
                     for p, profile_idx in enumerate(profiles):
 
-                        print(f"Profile {p} indices being exported for {cast_direction}: {profile_idx}")
+                        # print(f"Profile {p} indices being exported for {cast_direction}: {profile_idx}")
 
                         df = pd.DataFrame(rsk.data)
 
                         # Subset to THIS profile for THIS direction
                         profile_df = df.iloc[profile_idx]
 
-                        print(profile_df.head())
+                        # print(profile_df.head())
 
                         xr_profile_df = profile_df.to_xarray()
 
@@ -565,7 +563,7 @@ class MainWindow(QMainWindow):
 
                         binned_profile_df['sea_pressure'] = self.round_to_nearest_half(binned_profile_df['sea_pressure'])
 
-                        print(binned_profile_df.head())
+                        # print(binned_profile_df.head())
 
                         # Populate parameter headers & data object for THIS cast and direction
                         parameter_dict = self._populate_parameter_headers(binned_profile_df)
