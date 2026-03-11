@@ -5,6 +5,8 @@ import sys
 from datetime import datetime
 from icecream import ic
 from pathlib import Path
+from dataclasses import dataclass, fields
+from enum import Enum
 
 # Import external libraries
 import numpy as np
@@ -24,6 +26,7 @@ from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.lookup_parameter import lookup_parameter
 from datashop_toolbox.odfhdr import OdfHeader
 from datashop_toolbox.parameterhdr import ParameterHeader
+from datashop_toolbox.read_seaodf_ini import read_seaodf_ini
 
 # Import custom children dialogs
 from .odf_metadata_dialog import OdfMetadataDialog
@@ -34,8 +37,30 @@ from .rbr_profile_plot import PlotDialog
 #    pyside6-uic rbr_to_odf.ui -o Ui_main_window.py
 from .ui_rbr_to_odf import Ui_main_window
 
+@dataclass
+class BtlHeader():
+    """Bottle header information to export BTL file."""
+    ship: str
+    cruise: str
+    latitude: float
+    longitude: float
+    sounding: float
+    event_number: int
+    cast: int
+    station_name: str
+    event_comments: str
+    instrument_serial_number: str
+
+    def __str__(self) -> str:
+        lines = [f"* ** {f.name.title()}: {getattr(self, f.name)}" for f in fields(self)]
+        return "\n".join(lines)
+
 
 class MainWindow(QMainWindow):
+    class Position_Type(Enum):
+        LAT = 'latitude'
+        LON = 'longitude'
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -50,6 +75,18 @@ class MainWindow(QMainWindow):
         self._config_path = Path.home() / ".rsk_profile_gui.json"
         self._saved_profile_indices: list[int] = []  # indices selected in the Plot dialog (0-based)
         self._plot_profiles_dialog = None  # Save the last dialog ref if you want to overlay later
+        self._btl = BtlHeader(
+            ship="Unknown",
+            cruise="Unknown",
+            latitude=-999.0,
+            longitude=-999.0,
+            sounding=-999.0,
+            event_number=0,
+            cast=0,
+            station_name="Unknown",
+            event_comments="",
+            instrument_serial_number="Unknown"
+        )
 
         # =====================================================
         # PHASE 2 — BUILD UI
@@ -95,6 +132,7 @@ class MainWindow(QMainWindow):
         self.ui.clear_info_push_button.clicked.connect(self._clear_settings)
         self.ui.edit_metadata_push_button.clicked.connect(self._edit_metadata)
         self.ui.export_odf_push_button.clicked.connect(self._export_odf)
+        self.ui.export_btl_push_button.clicked.connect(self._export_btl)
         self.ui.exit_push_button.clicked.connect(QApplication.instance().quit)
         self.ui.rsk_list_widget.currentItemChanged.connect(self._on_rsk_selected)
 
@@ -452,9 +490,11 @@ class MainWindow(QMainWindow):
 
         return odf_folder_path
 
+
     @staticmethod
     def round_to_nearest_half(number):
         return round(number * 2) / 2
+
 
     def _export_odf(self):
         msg = colored("Preparing to export to ODF ...", 'yellow')
@@ -594,6 +634,188 @@ class MainWindow(QMainWindow):
 
                         print(colored(f"Exporting {cast_direction} ODF: {out_file}", 'green'))
                         self._odf.write_odf(str(Path(odf_export_folder) / out_file), version=2.0)
+            
+
+    def _format_positional_value(self, position: float, position_type: str) -> str:
+        degrees = int(position)
+        minutes = abs(position - degrees) * 60
+        degrees = abs(degrees)
+        minutes = abs(minutes)
+        if position_type == self.Position_Type.LAT.name:
+            if position < 0:
+                return f"S {degrees:02d} {minutes:.4f}"
+            else:
+                return f"N {degrees:02d} {minutes:.4f}"
+        elif position_type == self.Position_Type.LON.name:
+             if position < 0:
+                return f"W {degrees:03d} {minutes:.4f}"
+             else:
+                return f"E {degrees:03d} {minutes:.4f}"
+
+
+    # def _pad_left(text: str, width: int) -> str:
+    #     return f"{text:<{width}}"
+
+    # def _pad_right(text: str, width: int) -> str:
+    #     return f"{text:>{width}}"
+
+    def _export_btl(self):
+
+        # Export .btl file
+        msg = colored("Preparing to export to BTL ...", 'yellow')
+        print(msg)
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select the bottle id and depth file",
+            "",
+            "Text Files (*.txt);"
+        )
+        if file_path:
+            print(f"Selected bottle id and depth file: {file_path}")
+        else:
+            print("No bottle id and depth file selected.")
+
+        bottle_df = pd.read_csv(file_path, header=None, names=["bottle_id", "depth"], skiprows=1)
+        print(bottle_df)
+
+        with RSK(self.rsk_file_path) as rsk:
+            rsk.readdata()
+            instrument_serial_number = str(rsk.instrument.serialID)
+
+            rsk_df = pd.DataFrame(rsk.data)
+            print(rsk_df.head())
+
+        btl = BtlHeader(
+            ship = self._odf.cruise_header.platform,
+            cruise = self._odf.cruise_header.cruise_number,
+            latitude = self._format_positional_value(self._odf.event_header.initial_latitude, "LAT"),
+            longitude = self._format_positional_value(self._odf.event_header.initial_longitude, "LON"),
+            sounding = self._odf.event_header.sounding,
+            event_number = self._odf.event_header.event_number,
+            cast = self._odf.event_header.event_qualifier1,
+            station_name = self._odf.event_header.station_name,
+            event_comments = '',
+            instrument_serial_number = instrument_serial_number
+        )
+
+        print(rsk_df.columns)
+        
+        print_widths = dict(
+            Bottle=10,
+            Bottle_SN=11,
+            Date_Time=12,
+            parameter=16
+        )
+
+        seaodf_ini = read_seaodf_ini()
+        print(seaodf_ini.head())
+        
+        # Filter dataframe to only the rows needed for BTL export
+        df = rsk_df.copy()  # Avoid modifying the original DataFrame
+        df = df[df["sea_pressure"].isin(bottle_df["depth"])]
+        df["bottle_id"] = df["pressure"].map(
+            lambda p: bottle_df.loc[bottle_df["depth"] == p, "bottle_id"].values[0]
+        )
+
+        df["sea_pressure"] = df["sea_pressure"].map(lambda p: self.round_to_nearest_half(p))
+        bottle_df[0]
+
+        # dt_format = '%Y-%m-%d %H:%M:%S.%f'
+        # date_format = '%b %d %Y'
+        # time_format = '%H:%M:%S'
+        # dt = datetime.strptime(df.iloc[0]['timestamp'], dt_format)
+        # df["date"] = df["pressure"].map(
+        #     lambda p: bottle_df.loc[bottle_df["depth"] == p, "bottle_id"].values[0]
+        # )
+        # df["date"] = df["timestamp"].dt.strftime(BaseHeader.SYTM_FORMAT).str[:-4].str.upper()
+
+        print(df.head())
+
+        # dt = datetime.strptime(df.iloc[0]['timestamp'], dt_format)
+        # dd = datetime.strptime(df.iloc[0]['timestamp'], date_format)
+        # tt = datetime.strptime(df.iloc[0]['timestamp'], time_format)
+
+        # 1) Ensure sea_pressure is numeric and finite
+        df['sea_pressure'] = pd.to_numeric(df['sea_pressure'], errors='coerce')
+
+        # 2) Clean bottle depths
+        bottles = bottle_df[['bottle_id', 'depth']].dropna().copy()
+        bottles['depth'] = pd.to_numeric(bottles['depth'], errors='coerce')
+        bottles = bottles.dropna(subset=['depth'])
+
+        # 3) Matching tolerance (±2 dbar ≈ ±2 m)
+        tol = 2.0
+
+        # 4) Vectorized matching against valid `sea_pressure` only
+        press = df['sea_pressure'].to_numpy()             # shape: (n,)
+        valid_press_mask = np.isfinite(press)
+        press_valid = press[valid_press_mask]
+        valid_indices = np.nonzero(valid_press_mask)[0]   # original df indices that are valid
+
+        depths = bottles['depth'].to_numpy()              # shape: (m,)
+
+        # Boolean matrix (m x n_valid): True if |p - depth| <= tol
+        within = (np.abs(press_valid[None, :] - depths[:, None]) <= tol)
+
+        # 5) Build list of matching df indices per bottle
+        matching_index_lists = [
+            valid_indices[np.nonzero(within[i])[0]].tolist()
+            for i in range(within.shape[0])
+        ]
+
+        bottles['matching_indices'] = matching_index_lists
+        bottles['n_matches'] = bottles['matching_indices'].apply(len)
+
+        # 6) Compute stats over matched sea_pressure for each bottle depth
+        def _mean_std_for_indices(idx_list, arr):
+            if not idx_list:
+                return np.nan, np.nan
+            vals = arr[idx_list]
+            vals = vals[np.isfinite(vals)]
+            if vals.size == 0:
+                return np.nan, np.nan
+            return float(vals.mean()), float(vals.std(ddof=1)) if vals.size > 1 else (float(vals.mean()), np.nan)
+
+        means_stds = [
+            _mean_std_for_indices(idx, press)  # NOTE: use original press (same indices as df)
+            for idx in bottles['matching_indices']
+        ]
+
+        bottles['sea_pressure_mean'] = [ms[0] for ms in means_stds]
+        bottles['sea_pressure_std']  = [ms[1] for ms in means_stds]
+
+        # Optional: explode to long form (one row per matched index) if you want to inspect/link back to df rows
+        matches_exploded = (
+            bottles[['bottle_id', 'depth', 'matching_indices']]
+            .explode('matching_indices', ignore_index=True)
+            .rename(columns={'matching_indices': 'df_index'})
+        )
+
+        # Optional: a tidy per-depth results table
+        results = bottles[['bottle_id', 'depth', 'n_matches', 'sea_pressure_mean', 'sea_pressure_std']].copy()
+        # Example display:
+        # print(results)
+
+        # Optional: dictionary for quick lookups of indices
+        bottle_to_indices = dict(zip(bottles['bottle_id'], bottles['matching_indices']))
+
+        # --- Examples ---
+        # 1) All stats:
+        # results
+        #
+        # 2) Indices for a particular bottle:
+        # bottle_to_indices.get(486846, [])
+        #
+        # 3) Subset of df rows for a bottle's matches:
+        # df.loc[bottle_to_indices[486846]]
+
+
+        btl_file = self._rsk_file.split(".")[0] + '.btl'
+        print(btl_file)
+        with open(btl_file, 'w') as f:
+            print(btl, file=f)
+
 
 def main():
     app = QApplication(sys.argv)

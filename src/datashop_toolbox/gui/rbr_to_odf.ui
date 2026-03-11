@@ -14,7 +14,36 @@
    <string>RSK to ODF Conversion Application</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <spacer name="vertical_spacer_12">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="1" column="0" colspan="3">
+     <widget class="QLabel" name="title_label">
+      <property name="font">
+       <font>
+        <pointsize>20</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Conversion of RBR Ruskin (.rsk) file(s) to ODF file(s)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
     <item row="2" column="0">
      <spacer name="vertical_spacer_10">
       <property name="orientation">
@@ -27,6 +56,85 @@
        </size>
       </property>
      </spacer>
+    </item>
+    <item row="4" column="0">
+     <spacer name="vertical_spacer_9">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="5" column="0">
+     <layout class="QVBoxLayout" name="vertical_layout_3">
+      <item>
+       <widget class="QLabel" name="rsk_list_label">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>RSK Files Found in Selected Folder</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="rsk_list_widget">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="5" column="1">
+     <layout class="QVBoxLayout" name="vertical_layout_4">
+      <item>
+       <widget class="QLabel" name="channel_list_label">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Channels found in loaded RSK File</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="channel_list_widget">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item row="5" column="2">
      <layout class="QVBoxLayout" name="vertical_layout_2">
@@ -237,6 +345,19 @@
          </spacer>
         </item>
         <item>
+         <widget class="QPushButton" name="export_btl_push_button">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>EXPORT TO BTL</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="vertical_spacer_6">
           <property name="orientation">
            <enum>Qt::Orientation::Vertical</enum>
@@ -266,44 +387,8 @@
       </item>
      </layout>
     </item>
-    <item row="3" column="0" colspan="3">
-     <layout class="QHBoxLayout" name="horizontal_layout_3">
-      <item>
-       <widget class="QPushButton" name="select_folder_push_button">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Select Folder with .RSK files</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="folder_line_edit">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Full folder path to .rsk files to be converted ...</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="0">
-     <spacer name="vertical_spacer_9">
+    <item row="6" column="0">
+     <spacer name="vertical_spacer_11">
       <property name="orientation">
        <enum>Qt::Orientation::Vertical</enum>
       </property>
@@ -314,39 +399,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item row="5" column="1">
-     <layout class="QVBoxLayout" name="vertical_layout_4">
-      <item>
-       <widget class="QLabel" name="channel_list_label">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Channels found in loaded RSK File</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QListWidget" name="channel_list_widget">
-        <property name="font">
-         <font>
-          <pointsize>9</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="sortingEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </item>
     <item row="7" column="0" colspan="3">
      <layout class="QGridLayout" name="grid_layout">
@@ -390,80 +442,44 @@
       </item>
      </layout>
     </item>
-    <item row="6" column="0">
-     <spacer name="vertical_spacer_11">
-      <property name="orientation">
-       <enum>Qt::Orientation::Vertical</enum>
+    <item row="3" column="0" colspan="3">
+     <layout class="QHBoxLayout" name="horizontal_layout_3">
+      <property name="sizeConstraint">
+       <enum>QLayout::SizeConstraint::SetNoConstraint</enum>
       </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="1" column="0" colspan="3">
-     <widget class="QLabel" name="title_label">
-      <property name="font">
-       <font>
-        <pointsize>20</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Conversion of RBR Ruskin (.rsk) file(s) to ODF file(s)</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <layout class="QVBoxLayout" name="vertical_layout_3">
       <item>
-       <widget class="QLabel" name="rsk_list_label">
+       <widget class="QPushButton" name="select_folder_push_button">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <pointsize>10</pointsize>
           <bold>true</bold>
          </font>
         </property>
         <property name="text">
-         <string>RSK Files Found in Selected Folder</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
+         <string>Select Folder with .RSK files</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="rsk_list_widget">
+       <widget class="QLineEdit" name="folder_line_edit">
         <property name="font">
          <font>
-          <pointsize>9</pointsize>
+          <pointsize>10</pointsize>
           <bold>true</bold>
          </font>
         </property>
-        <property name="sortingEnabled">
+        <property name="text">
+         <string>Full folder path to .rsk files to be converted ...</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <property name="readOnly">
          <bool>true</bool>
         </property>
        </widget>
       </item>
      </layout>
-    </item>
-    <item row="0" column="0">
-     <spacer name="vertical_spacer_12">
-      <property name="orientation">
-       <enum>Qt::Orientation::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
     </item>
    </layout>
   </widget>
@@ -480,7 +496,6 @@
   <widget class="QStatusBar" name="status_bar"/>
  </widget>
  <tabstops>
-  <tabstop>select_folder_push_button</tabstop>
   <tabstop>folder_line_edit</tabstop>
   <tabstop>rsk_list_widget</tabstop>
   <tabstop>channel_list_widget</tabstop>
@@ -489,7 +504,9 @@
   <tabstop>profile_plots_push_button</tabstop>
   <tabstop>clear_info_push_button</tabstop>
   <tabstop>edit_metadata_push_button</tabstop>
+  <tabstop>select_folder_push_button</tabstop>
   <tabstop>export_odf_push_button</tabstop>
+  <tabstop>export_btl_push_button</tabstop>
   <tabstop>odf_folder_line_edit</tabstop>
   <tabstop>exit_push_button</tabstop>
  </tabstops>

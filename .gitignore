@@ -14,3 +14,5 @@ wheels/
 *.xmlcon
 *.xlsx
 *.txt
+*.rsk
+*.btl
