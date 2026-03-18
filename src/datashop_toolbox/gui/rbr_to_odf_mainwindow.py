@@ -29,13 +29,13 @@ from datashop_toolbox.parameterhdr import ParameterHeader
 from datashop_toolbox.read_seaodf_ini import read_seaodf_ini
 
 # Import custom children dialogs
-from .odf_metadata_dialog import OdfMetadataDialog
-from .rbr_profile_plot import PlotDialog
+from odf_metadata_dialog import OdfMetadataDialog
+from rbr_profile_plot import PlotDialog
 
 # Important:
 # You need to run the following command to generate the Ui_main_window.py file:
 #    pyside6-uic rbr_to_odf.ui -o Ui_main_window.py
-from .ui_rbr_to_odf import Ui_main_window
+from ui_rbr_to_odf import Ui_main_window
 
 @dataclass
 class BtlHeader():
@@ -653,12 +653,6 @@ class MainWindow(QMainWindow):
                 return f"E {degrees:03d} {minutes:.4f}"
 
 
-    # def _pad_left(text: str, width: int) -> str:
-    #     return f"{text:<{width}}"
-
-    # def _pad_right(text: str, width: int) -> str:
-    #     return f"{text:>{width}}"
-
     def _export_btl(self):
 
         # Export .btl file
@@ -676,8 +670,8 @@ class MainWindow(QMainWindow):
         else:
             print("No bottle id and depth file selected.")
 
-        bottle_df = pd.read_csv(file_path, header=None, names=["bottle_id", "depth"], skiprows=1)
-        print(bottle_df)
+        bottle_depths_df = pd.read_csv(file_path, header=None, names=["bottle_id", "depth"], skiprows=1)
+        # print(bottle_depths_df)
 
         with RSK(self.rsk_file_path) as rsk:
             rsk.readdata()
@@ -699,122 +693,114 @@ class MainWindow(QMainWindow):
             instrument_serial_number = instrument_serial_number
         )
 
-        print(rsk_df.columns)
+        # print(rsk_df.columns)
         
         print_widths = dict(
             Bottle=10,
             Bottle_SN=11,
             Date_Time=12,
-            parameter=16
+            Parameter=16
         )
 
-        seaodf_ini = read_seaodf_ini()
-        print(seaodf_ini.head())
-        
         # Filter dataframe to only the rows needed for BTL export
-        df = rsk_df.copy()  # Avoid modifying the original DataFrame
-        df = df[df["sea_pressure"].isin(bottle_df["depth"])]
-        df["bottle_id"] = df["pressure"].map(
-            lambda p: bottle_df.loc[bottle_df["depth"] == p, "bottle_id"].values[0]
-        )
+        data = rsk_df.copy()  # Avoid modifying the original DataFrame
 
-        df["sea_pressure"] = df["sea_pressure"].map(lambda p: self.round_to_nearest_half(p))
-        bottle_df[0]
+        # Read seaodf.ini once for use in BTL file export
+        seaodf_ini = read_seaodf_ini()
+        odf_codes = seaodf_ini['odf_code'].to_list()
+        odf_descriptions = seaodf_ini['description'].to_list()
 
-        # dt_format = '%Y-%m-%d %H:%M:%S.%f'
-        # date_format = '%b %d %Y'
-        # time_format = '%H:%M:%S'
-        # dt = datetime.strptime(df.iloc[0]['timestamp'], dt_format)
-        # df["date"] = df["pressure"].map(
-        #     lambda p: bottle_df.loc[bottle_df["depth"] == p, "bottle_id"].values[0]
-        # )
-        # df["date"] = df["timestamp"].dt.strftime(BaseHeader.SYTM_FORMAT).str[:-4].str.upper()
+        # Remove the parameter specific_conductivity if it exists, since it's not needed for BTL export and can cause confusion with conductivity
+        if "specific_conductivity" in data.columns:
+            data = data.drop("specific_conductivity", axis=1)
 
-        print(df.head())
+        param_dict = self._populate_parameter_headers(data.copy())
+        params = param_dict["parameter_list"]
+        # Update some parameters to match the expected ODF codes in seaodf.ini for easier lookup of print formats
+        for i, param in enumerate(params):
+            if param.startswith("SVEL"):
+                params[i] = "SVELCM_01"
+            elif param.startswith("DOXC"):
+                params[i] = "DOXY_01"
+            elif param.startswith("OSAT"):
+                params[i] = "OSATW_01"
 
-        # dt = datetime.strptime(df.iloc[0]['timestamp'], dt_format)
-        # dd = datetime.strptime(df.iloc[0]['timestamp'], date_format)
-        # tt = datetime.strptime(df.iloc[0]['timestamp'], time_format)
-
-        # 1) Ensure sea_pressure is numeric and finite
-        df['sea_pressure'] = pd.to_numeric(df['sea_pressure'], errors='coerce')
-
-        # 2) Clean bottle depths
-        bottles = bottle_df[['bottle_id', 'depth']].dropna().copy()
-        bottles['depth'] = pd.to_numeric(bottles['depth'], errors='coerce')
-        bottles = bottles.dropna(subset=['depth'])
-
-        # 3) Matching tolerance (±2 dbar ≈ ±2 m)
-        tol = 2.0
-
-        # 4) Vectorized matching against valid `sea_pressure` only
-        press = df['sea_pressure'].to_numpy()             # shape: (n,)
-        valid_press_mask = np.isfinite(press)
-        press_valid = press[valid_press_mask]
-        valid_indices = np.nonzero(valid_press_mask)[0]   # original df indices that are valid
-
-        depths = bottles['depth'].to_numpy()              # shape: (m,)
-
-        # Boolean matrix (m x n_valid): True if |p - depth| <= tol
-        within = (np.abs(press_valid[None, :] - depths[:, None]) <= tol)
-
-        # 5) Build list of matching df indices per bottle
-        matching_index_lists = [
-            valid_indices[np.nonzero(within[i])[0]].tolist()
-            for i in range(within.shape[0])
-        ]
-
-        bottles['matching_indices'] = matching_index_lists
-        bottles['n_matches'] = bottles['matching_indices'].apply(len)
-
-        # 6) Compute stats over matched sea_pressure for each bottle depth
-        def _mean_std_for_indices(idx_list, arr):
-            if not idx_list:
-                return np.nan, np.nan
-            vals = arr[idx_list]
-            vals = vals[np.isfinite(vals)]
-            if vals.size == 0:
-                return np.nan, np.nan
-            return float(vals.mean()), float(vals.std(ddof=1)) if vals.size > 1 else (float(vals.mean()), np.nan)
-
-        means_stds = [
-            _mean_std_for_indices(idx, press)  # NOTE: use original press (same indices as df)
-            for idx in bottles['matching_indices']
-        ]
-
-        bottles['sea_pressure_mean'] = [ms[0] for ms in means_stds]
-        bottles['sea_pressure_std']  = [ms[1] for ms in means_stds]
-
-        # Optional: explode to long form (one row per matched index) if you want to inspect/link back to df rows
-        matches_exploded = (
-            bottles[['bottle_id', 'depth', 'matching_indices']]
-            .explode('matching_indices', ignore_index=True)
-            .rename(columns={'matching_indices': 'df_index'})
-        )
-
-        # Optional: a tidy per-depth results table
-        results = bottles[['bottle_id', 'depth', 'n_matches', 'sea_pressure_mean', 'sea_pressure_std']].copy()
-        # Example display:
-        # print(results)
-
-        # Optional: dictionary for quick lookups of indices
-        bottle_to_indices = dict(zip(bottles['bottle_id'], bottles['matching_indices']))
-
-        # --- Examples ---
-        # 1) All stats:
-        # results
-        #
-        # 2) Indices for a particular bottle:
-        # bottle_to_indices.get(486846, [])
-        #
-        # 3) Subset of df rows for a bottle's matches:
-        # df.loc[bottle_to_indices[486846]]
-
+        dt_format = '%Y-%m-%d %H:%M:%S'
+        date_format = '%b %d %Y'
+        time_format = '%H:%M:%S'
 
         btl_file = self._rsk_file.split(".")[0] + '.btl'
-        print(btl_file)
+
+        if "dissolved_o2_concentration" in data.columns:       
+            data['dissolved_o2_concentration'] = data['dissolved_o2_concentration'] / 44.66  # Convert from µmol/kg to ml/l
+
         with open(btl_file, 'w') as f:
+            
+            # Output the bottle header information at the top of the file
+            print(btl)
             print(btl, file=f)
+
+            avg_header = ''
+            std_header = ''
+
+            # Print header lines
+            avg_header = f"{'Bottle':>{print_widths['Bottle']}}{'Bottle':>{print_widths['Bottle_SN']}}{'Date':>{print_widths['Date_Time']}}"
+            std_header = f"{'Position':>{print_widths['Bottle']}}{'S/N':>{print_widths['Bottle_SN']}}{'Time':>{print_widths['Date_Time']}}"
+            for c, column in enumerate(data.columns.to_list()):
+                param_code = params[c]
+                if param_code.startswith("PRES"):
+                    y = odf_descriptions.index('Pressure, Digiquartz [db]')
+                elif param_code.startswith("SYTM"):
+                    continue # Skip SYTM since the date and time values are handled differently.
+                elif param_code.startswith("TE90"):
+                    y = odf_descriptions.index('Temperature, [ITS-90, deg C]')
+                else:
+                    y = odf_codes.index(param_code) if param_code in odf_codes else None
+                if y is not None:
+                    col_to_print = seaodf_ini.iloc[y]['sbe_code'].capitalize()  # Get the SBE code and capitalize it to match Sea-Bird output
+                    avg_header += f"{col_to_print:>{print_widths['Parameter']}}"
+            print(avg_header)
+            print(std_header)
+            print(avg_header, file=f)
+            print(std_header, file=f)
+
+            # Start outputting the means and standard deviations for each parameter at each bottle depth
+            for pos, d in enumerate(bottle_depths_df["depth"].to_list(), start=1):
+                dd = d - 1
+                du = d + 1
+                x = data[data["sea_pressure"].between(dd, du)]
+                stats = x.agg(['mean', 'std'])
+
+                avg_line = ''
+                std_line = ''
+
+                # Print the bottle number and ID for this depth
+                avg_line += f"{pos:>{print_widths['Bottle']}}"
+                bottle_id = str(bottle_depths_df.iloc[0]['bottle_id'])
+                avg_line += f"{bottle_id:>{print_widths['Bottle_SN']}}"
+
+                # Extract the date and time strings for the current depth
+                bottle_dt = datetime.strptime(str(stats['timestamp']['mean']), dt_format)
+                dstr = bottle_dt.strftime(date_format)
+                tstr = bottle_dt.strftime(time_format)
+
+                data_subset = data.iloc[:, 1:]
+                data_columns = data_subset.columns.to_list()
+
+                # Ouput the average (mean) line for the current depth
+                avg_line += f"{dstr:>{print_widths['Date_Time']}}"
+                for column in data_columns:
+                    avg_line += f"{stats[column]['mean']:>{print_widths['Parameter']}}"
+
+                # Ouput the standard deviation (std) line for the current depth
+                std_line += f"{tstr:>{print_widths['Date_Time']}}"
+                for column in data_columns:
+                    std_line += f"{stats[column]['std']:>{print_widths['Parameter']}}"
+
+                print(avg_line)
+                print(std_line)
+                print(avg_line, file=f)
+                print(std_line, file=f)
 
 
 def main():

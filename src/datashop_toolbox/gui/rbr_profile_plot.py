@@ -8,14 +8,14 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
-    QDialog,
+    QDialog,    
     QSizePolicy,
     QStyle,
     QVBoxLayout,
     QWidget,
 )
 
-from .ui_rsk_plot_dialog import Ui_plot_dialog
+from ui_rsk_plot_dialog import Ui_plot_dialog
 
 
 class PlotDialog(QDialog):

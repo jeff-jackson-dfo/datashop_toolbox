@@ -13,7 +13,7 @@ from datashop_toolbox.validated_base import check_datetime
 
 # You need to run the following command to generate the ui_odf_metadata_form.py file:
 #     pyside6-uic odf_metadata_form.ui -o ui_odf_metadata_form.py
-from .ui_odf_metadata_form import Ui_odf_metadata_form
+from ui_odf_metadata_form import Ui_odf_metadata_form
 
 
 class OdfMetadataForm(QWidget):
