@@ -26,7 +26,7 @@ from datashop_toolbox.historyhdr import HistoryHeader
 from datashop_toolbox.lookup_parameter import lookup_parameter
 from datashop_toolbox.odfhdr import OdfHeader
 from datashop_toolbox.parameterhdr import ParameterHeader
-from datashop_toolbox.read_seaodf_ini import read_seaodf_ini
+from datashop_toolbox.read_seaodf_parameters import read_seaodf_parameters
 
 # Import custom children dialogs
 from odf_metadata_dialog import OdfMetadataDialog
@@ -678,7 +678,6 @@ class MainWindow(QMainWindow):
             instrument_serial_number = str(rsk.instrument.serialID)
 
             rsk_df = pd.DataFrame(rsk.data)
-            print(rsk_df.head())
 
         btl = BtlHeader(
             ship = self._odf.cruise_header.platform,
@@ -706,26 +705,26 @@ class MainWindow(QMainWindow):
         data = rsk_df.copy()  # Avoid modifying the original DataFrame
 
         # Read seaodf.ini once for use in BTL file export
-        seaodf_ini = read_seaodf_ini()
-        odf_codes = seaodf_ini['odf_code'].to_list()
-        odf_descriptions = seaodf_ini['description'].to_list()
+        seaodf = read_seaodf_parameters()
+        odf_names = seaodf['odf_name'].to_list()
+        odf_data_types = seaodf['data_type'].to_list()
+        odf_precisions = seaodf['precision'].to_list()
 
-        # Remove the parameter specific_conductivity if it exists, since it's not needed for BTL export and can cause confusion with conductivity
+        # Remove the parameter "specific_conductivity" if it exists, since it is not needed for the BTL export
         if "specific_conductivity" in data.columns:
             data = data.drop("specific_conductivity", axis=1)
+        # Remove the parameter "pressure" if it exists, since it represents total atmospheric pressure and is not required for the BTL export
+        if "pressure" in data.columns:
+            data = data.drop("pressure", axis=1)
+
+        print(data.head())
 
         param_dict = self._populate_parameter_headers(data.copy())
         params = param_dict["parameter_list"]
-        # Update some parameters to match the expected ODF codes in seaodf.ini for easier lookup of print formats
-        for i, param in enumerate(params):
-            if param.startswith("SVEL"):
-                params[i] = "SVELCM_01"
-            elif param.startswith("DOXC"):
-                params[i] = "DOXY_01"
-            elif param.startswith("OSAT"):
-                params[i] = "OSATW_01"
+        # print(param_dict)
 
         dt_format = '%Y-%m-%d %H:%M:%S'
+        dt_float_format = '%Y-%m-%d %H:%M:%S.%f'
         date_format = '%b %d %Y'
         time_format = '%H:%M:%S'
 
@@ -746,18 +745,26 @@ class MainWindow(QMainWindow):
             # Print header lines
             avg_header = f"{'Bottle':>{print_widths['Bottle']}}{'Bottle':>{print_widths['Bottle_SN']}}{'Date':>{print_widths['Date_Time']}}"
             std_header = f"{'Position':>{print_widths['Bottle']}}{'S/N':>{print_widths['Bottle_SN']}}{'Time':>{print_widths['Date_Time']}}"
+
+            param_codes = list()
             for c, column in enumerate(data.columns.to_list()):
-                param_code = params[c]
-                if param_code.startswith("PRES"):
-                    y = odf_descriptions.index('Pressure, Digiquartz [db]')
-                elif param_code.startswith("SYTM"):
-                    continue # Skip SYTM since the date and time values are handled differently.
-                elif param_code.startswith("TE90"):
-                    y = odf_descriptions.index('Temperature, [ITS-90, deg C]')
-                else:
-                    y = odf_codes.index(param_code) if param_code in odf_codes else None
+                toks = params[c].split("_")
+                param_code = toks[0]
+                if param_code == 'SYTM':
+                    continue
+                param_codes.append(param_code)
+                param_num = int(toks[1]) - 1  # Extract the parameter number (e.g., 01 from TE90_01)
+                y = odf_names.index(param_code) if param_code in odf_names else None
                 if y is not None:
-                    col_to_print = seaodf_ini.iloc[y]['sbe_code'].capitalize()  # Get the SBE code and capitalize it to match Sea-Bird output
+                    col_to_print = seaodf.iloc[y]['sbe_code']
+                    if col_to_print == 'T090C':
+                        col_to_print = f"T{param_num}90C"
+                    if col_to_print == 'C0S/m':
+                        col_to_print = f"C{param_num}S/m"
+                    if col_to_print == 'Sal00':
+                        col_to_print = f"Sal{param_num}{param_num}"
+                    if col_to_print == 'DOXC' or col_to_print == 'DOXY':
+                        col_to_print = f"Sbeox{param_num}ML/L"
                     avg_header += f"{col_to_print:>{print_widths['Parameter']}}"
             print(avg_header)
             print(std_header)
@@ -770,6 +777,7 @@ class MainWindow(QMainWindow):
                 du = d + 1
                 x = data[data["sea_pressure"].between(dd, du)]
                 stats = x.agg(['mean', 'std'])
+                print(stats.columns)
 
                 avg_line = ''
                 std_line = ''
@@ -779,23 +787,53 @@ class MainWindow(QMainWindow):
                 bottle_id = str(bottle_depths_df.iloc[0]['bottle_id'])
                 avg_line += f"{bottle_id:>{print_widths['Bottle_SN']}}"
 
+                std_line += f"{'':>{print_widths['Bottle']}}"
+                std_line += f"{'':>{print_widths['Bottle_SN']}}"
+
                 # Extract the date and time strings for the current depth
-                bottle_dt = datetime.strptime(str(stats['timestamp']['mean']), dt_format)
+                ts = str(stats['timestamp']['mean']).split(" ")
+                tb = ts[1].split(":")
+                seconds = float(tb[2])
+                if seconds.is_integer():
+                    bottle_dt = datetime.strptime(str(stats['timestamp']['mean']), dt_format)
+                else:
+                    bottle_dt = datetime.strptime(str(stats['timestamp']['mean']), dt_float_format)
                 dstr = bottle_dt.strftime(date_format)
                 tstr = bottle_dt.strftime(time_format)
 
-                data_subset = data.iloc[:, 1:]
-                data_columns = data_subset.columns.to_list()
-
                 # Ouput the average (mean) line for the current depth
                 avg_line += f"{dstr:>{print_widths['Date_Time']}}"
-                for column in data_columns:
-                    avg_line += f"{stats[column]['mean']:>{print_widths['Parameter']}}"
+                data_columns = data.columns.to_list()
+                param_codes = param_dict['parameter_list']
+                for z, column in enumerate(data_columns):
+                    param_code = param_codes[z][:4]
+                    if param_code == 'SYTM':
+                        continue
+                    y = odf_names.index(param_code)
+                    decimal_places = odf_precisions[y]
+                    data_type = odf_data_types[y]
+                    if data_type == "INTE":
+                        avg_line += f"{stats[column]['mean']:>{print_widths['Parameter']}d}"
+                    elif data_type == "DOUB":
+                        avg_line += f"{stats[column]['mean']:>{print_widths['Parameter']}.{decimal_places}f}"
+                    else:
+                        avg_line += f"{stats[column]['mean']:>{print_widths['Parameter']}}"
 
                 # Ouput the standard deviation (std) line for the current depth
                 std_line += f"{tstr:>{print_widths['Date_Time']}}"
-                for column in data_columns:
-                    std_line += f"{stats[column]['std']:>{print_widths['Parameter']}}"
+                stats = stats.iloc[:,1:]
+                for z, column in enumerate(data_columns):
+                    param_code = param_codes[z][:4]
+                    if param_code == 'SYTM':
+                        continue
+                    y = odf_names.index(param_code)
+                    decimal_places = odf_precisions[y]
+                    if data_type == "INTE":
+                        std_line += f"{stats[column]['std']:>{print_widths['Parameter']}d}"
+                    elif data_type == "DOUB":
+                        std_line += f"{stats[column]['std']:>{print_widths['Parameter']}.{decimal_places}f}"
+                    else:
+                        std_line += f"{stats[column]['std']:>{print_widths['Parameter']}}"
 
                 print(avg_line)
                 print(std_line)

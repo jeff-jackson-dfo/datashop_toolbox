@@ -1,55 +1,30 @@
-﻿sbe_code,odf_code,odf_name,data_type,format_type,width,precision,units,description
-AltM,ALT,ALTB,DOUB,F,0,0,m,Altimeter (Altitude Above Bottom)
-C0S/m,CNDC,CNDC,DOUB,F,11,6,S/m,Electrical Conductivity
-CStarAt0,ATBE,ATBE,DOUB,F,0,0,1/m,Beam Attenuation WET Labs C-Star
-CStarTr0,TRAN,TRAN,DOUB,F,0,0,%,Beam Transmission WET Labs C-Star
-DepSM,DEPH,DEPH,DOUB,F,0,0,m, Depth (salt water) using  lat = 45.00
-Flag,FFFF,FFFF,DOUB,I,6,1,,Flag
-FlC,FC,FLOR,DOUB,F,12,5,ug/l,Fluorometer (Chelsea Aqua 3 Chl Con)
-FlCM,FCMINI,FLOR,DOUB,F,12,5,ug/l,Fluorometer (Chelsea minitracka)
-FlCUVA,FCUVA,FLOR,DOUB,F,12,5,ug/l,Fluorometer (Chelsea UV Aquatracka)
-FlECO-AFL,FECO,FLOR,DOUB,F,0,0,mg/m^3, Fluorometer (WET Labs ECO-AFL/FL)
-FlS,FS,FLOR,DOUB,F,12,5,ug/l,Fluorometer (Seatech)
-FlSP,FSP,FLOR,DOUB,F,0,0,ug/l,Fluorometer (Seapoint)
-FlSPuv0,FSPUV,FLOR,DOUB,F,0,0,,Fluorometer (Seapoint Ultraviolet)
-FlWETSeaOWLchl0,TURX,TURB,DOUB,F,0,0,NTU, Ares Turbidity
-FlWETSeaOWLfdom0,LEDV,VOLT,DOUB,F,0,0,V, Ares Turbidity (light output voltage)
-Latitude,LATD,LATD,DOUB,F,13,5,deg,Latitude in Decimal Degrees
-Longitude,LOND,LOND,DOUB,F,14,5,deg,Longitude in Decimal Degrees
-nbin,SNCNTR,SNCN,INTE,I,11,0,,Scans Per Bin
-Obs,OBS,TURB,DOUB,F,0,0,NTU,  OBS Backscatterance (D & A)
-Obs3+,OBS3PLUS,TURB,DOUB,F,0,0,NTU,OBS D & A 3plus
-OxC,OCUR,OCUR,DOUB,F,11,5,V,Primary Beckman Oxygen Current
-OxsatML/L,OSATW,OSAT,DOUB,F,0,0,ml/l, Derived Oxygen Saturation (Weiss)
-OxsC,OCUR,OCUR,DOUB,F,11,5,V,Secondary Beckman Oxygen Current
-OxsolML/L,OSATGG,OSAT,DOUB,F,0,0,ml/l, Derived Oxygen Saturation (Garcia & Gordon)
-OxsTC,OTMP,OTMP,DOUB,F,11,5,deg C,Seconary Beckman oxygen temperature
-OxTC,OTMP,OTMP,DOUB,F,11,5,deg C,Primary Beckman oxygen temperature
-Par,PSAR,PSAR,DOUB,F,11,5,umol photons/m^2/sec, primary PAR/Irradiance
-ParLog,PARLOG,PSAR,DOUB,F,0,0,umol photons/m^2/sec, PAR/Logarithmic
-ParSatLog,PARLOG,PSAR,DOUB,F,0,0,umol photons/m^2/sec, PAR/Logarithmic
-Ph,PHPH,PHPH,DOUB,F,11,4,, pH
-Potemp068C,POTM,POTM,DOUB,F,11,4,deg C,Potential Temperature IPTS-68 Scale
-Potemp090C,POTM,POTM,DOUB,F,11,4,deg C,Potential Temperature ITS-90 Scale
-PrDM,PRES,PRES,DOUB,F,11,3,db,Pressure from Digiquartz
-PrSM,PRES,PRES,DOUB,F,10,3,db,Pressure from Strain Gauge
-Sal00,PSAL,PSAL,DOUB,F,11,4,PSU,Practical Salinity
-Sbeox0ML/L,DOXY,DOXY,DOUB,F,0,0,ml/l,Derived SBE43 Dissolved Oxygen
-Sbeox0V,OXYV,OXYV,DOUB,F,0,0,V,SBE43 Oxygen Raw Voltage
-Scan,CNTR_01,CNTR,INTE,I,11,0,,Scan Count
-SeaTurbMtr0,SEATM_01,TURB,DOUB,F,0,0,FTU,OBS Seapoint Turbidity
-Sigma-é00,SIGP,SIGP,DOUB,F,11,4,kg/m^3,Density (sigma-theta)
-Spar,SPAR_01,SPAR,DOUB,F,0,0,umol photons/m^2/sec, SPAR
-SparSatLin,SPARLIN_01,SPAR,DOUB,F,0,0,umol photons/m^2/sec, SPAR/Linear
-SparSatLog,SPARLOG_01,SPAR,DOUB,F,0,0,umol photons/m^2/sec, SPAR/Logarithmic
-SvCM1,SVELCM_02,SVEL,DOUB,F,0,0,m/s,Derived Sound Velocity (Chen-Millero)
-SvDM1,SVELDM_02,SVEL,DOUB,F,0,0,m/s,Derived Sound Velocity (Delgrosso)
-T068C,TEMP,TEMP,DOUB,F,11,4,deg C,Temperature IPTS-68 scale
-T090C,TE90,TE90,DOUB,F,11,4,deg C,Temperature ITS-90 scale
-TimeS,SYTM,SYTM,SYTM,F,27,0,seconds,Elapsed Time
-TurbWETbb0,TURW,TURB,DOUB,F,0,0,m^-1/sr,Turbidity  WET Labs ECO BB
-TurbWETntu0,TUR4,TURB,DOUB,F,0,0,NTU,Turbidity  WET Labs ECO
-Tv268C,TEMP,TEMP,DOUB,F,11,4,deg C,Temperature SBE19 Seacat Plus IPTS-68 scale
-Tv290C,TE90,TE90,DOUB,F,11,4,deg C,Temperature SBE19 Seacat Plus ITS-90 scale
-WetCDOM,WETCDOM_01,FLOR,DOUB,F,0,0,mg/m^3,Fluorometer (WET Labs CDOM)
-WetStar,FWETLABS_01,FLOR,DOUB,F,11,4,mg/m^3,Fluorometer (WET Labs WETstar)
+sbe_code,odf_name,odf_code,data_type,precision,units,description
+AltM,ALTB,ALTB,DOUB,2,m,Altimeter (Altitude Above Bottom)
+C0S/m,CNDC,CNDC,DOUB,6,S/m,Electrical Conductivity
+DepSM,DEPH,DEPH,DOUB,3,m,Depth (salt water) using  lat = 45.00
+Flag,FFFF,FFFF,INTE,0,,Flag
+Latitude,LATD,LATD,DOUB,5,deg,Latitude in Decimal Degrees
+Longitude,LOND,LOND,DOUB,5,deg,Longitude in Decimal Degrees
+nbin,SNCN,SNCN,INTE,0,,Scans Per Bin
+OxsatML/L,OSAT,OSAT,DOUB,4,ml/l,Derived Oxygen Saturation (Weiss)
+OxsC,OCUR,OCUR,DOUB,5,V,Secondary Beckman Oxygen Current
+Par,PSAR,PSAR,DOUB,5,umol photons/m^2/sec,primary PAR/Irradiance
+ParLog,PSAR,PSAR,DOUB,0,umol photons/m^2/sec,PAR/Logarithmic
+ParSatLog,PSAR,PSAR,DOUB,0,umol photons/m^2/sec,PAR/Logarithmic
+Ph,PHPH,PHPH,DOUB,4,,pH
+Potemp068C,POTM,POTM,DOUB,4,deg C,Potential Temperature IPTS-68 Scale
+Potemp090C,POTM,POTM,DOUB,4,deg C,Potential Temperature ITS-90 Scale
+PrDM,PRES,PRES,DOUB,3,db,Pressure from Digiquartz
+Sal00,PSAL,PSAL,DOUB,4,PSU,Practical Salinity
+Sbeox0ML/L,DOXC,DOXY,DOUB,4,ml/l,Derived SBE43 Dissolved Oxygen Concentration in mmol/m**3 converted to ml/l
+Sbeox0ML/L,DOXY,DOXY,DOUB,4,ml/l,Derived SBE43 Dissolved Oxygen Concentration
+Scan,CNTR,CNTR,INTE,0,,Scan Count
+SeaTurbMtr0,SEATM,TURB,DOUB,0,FTU,OBS Seapoint Turbidity
+Sigma-é00,SIGP,SIGP,DOUB,4,kg/m^3,Density (sigma-theta)
+Spar,SPAR,SPAR,DOUB,0,umol photons/m^2/sec,SPAR
+SparSatLin,SPARLIN,SPAR,DOUB,0,umol photons/m^2/sec,SPAR/Linear
+SparSatLog,SPARLOG,SPAR,DOUB,0,umol photons/m^2/sec,SPAR/Logarithmic
+SvCM,SVEL,SVEL,DOUB,2,m/s,Derived Sound Velocity (Chen-Millero)
+T068C,TEMP,TEMP,DOUB,4,deg C,Temperature IPTS-68 scale
+T090C,TE90,TE90,DOUB,4,deg C,Temperature ITS-90 scale
+TimeS,SYTM,SYTM,DOUB,3,seconds,Elapsed Time
