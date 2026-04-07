@@ -186,7 +186,7 @@ def run_qc_thermograph_data(
         metadata_file_path: str,
         review_mode: bool,
         batch_name: str,
-        wildcard: str = "*.ODF"
+        wildcard: str
     ) -> dict:
     
     mtr_logger.info(f"Starting QC Thermograph Data task by {qc_operator} on {input_path}")
@@ -285,7 +285,10 @@ def qc_thermograph_data(
         mtr_logger.exception(f"Cannot change directory: {e}")
         return batch_result_container
 
+    print(f"wildcard = {wildcard}")
     mtr_files = list(Path.cwd().glob(wildcard))
+    print(f"mtr_files = {mtr_files}")
+
     if not mtr_files:
         mtr_logger.warning("No ODF files found in selected folder.")
         os.chdir(cwd)
