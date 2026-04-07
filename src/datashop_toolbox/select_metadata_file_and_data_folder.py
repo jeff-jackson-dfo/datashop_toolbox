@@ -490,6 +490,7 @@ class SubWindowOne(QMainWindow):
         self.remember_input_dict = {}
         self.remember_input_choice = False
         self.generate_batch = ""
+        self.wildcard_string = ""
 
         # --- QC Checker Name ---
         if self.review_mode:
@@ -754,6 +755,7 @@ class SubWindowOne(QMainWindow):
             print("❌ QC output folder missing.")
             return
 
+        self.wildcard_string = self.wildcard_line_edit.text()
         self.result = "accept"
         reviewer_name = self.line_edit.text().strip()
         if self.remember_meta_checkbox.isChecked():

@@ -1370,7 +1370,7 @@ def main_select_inputs(review_mode: bool):
         input_path = select_inputs.input_data_folder
         output_path = select_inputs.output_data_folder
         batch_name = select_inputs.generate_batch
-        wildcard = select_inputs.wildcard
+        wildcard = select_inputs.wildcard_string
 
         if not operator or not input_path or not output_path:
             print("❌ Missing required fields.")
