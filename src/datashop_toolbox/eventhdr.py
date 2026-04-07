@@ -1,4 +1,5 @@
-from pydantic import ConfigDict, Field, field_validator
+import numpy as np
+from pydantic import ConfigDict, Field, ValidationInfo, field_validator
 
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
@@ -57,16 +58,17 @@ class EventHeader(ValidatedBase, BaseHeader):
         mode="before",
     )
     @classmethod
-    def validate_floats(cls, v, info):
+    def validate_floats(cls, v, info: ValidationInfo):        
+        # Coerce numpy scalars to native Python float
+        if isinstance(v, np.generic):
+            v = v.item()
         if isinstance(v, float):
             return v
         if isinstance(v, str):
             try:
                 return float(v)
-            except ValueError:
-                raise ValueError(
-                    f"{info.field_name} string value '{v}' cannot be converted to float"
-                )
+            except ValueError as err:
+                raise ValueError(f"{info.field_name} string value '{v}' cannot be converted to float") from err
         raise TypeError(
             f"{info.field_name} must be a float or string representing a float, got {type(v)}"
         )

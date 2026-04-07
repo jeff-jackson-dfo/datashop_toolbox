@@ -1,0 +1,39 @@
+
+{
+  "header": "(?P<intro>(?:\\*.*\\n)+?)\\s*(?P<descriptors>(?:\\#.*\\n)+\\#\\s*file_type\\s*=\\s*ascii\\r?\\n)",
+
+  "sep": "\\*END\\*\\r?\\n",
+
+  "data": "(?P<data>(?:\\s*-?\\d+(?:\\.\\d+)?(?:[eE][\\+\\-]?\\d+)?\\s*)+\\n)+",
+
+  "intro": {
+    "ship": "\\*\\s*\\*\\*\\s*Ship:\\s*(?P<value>.*?)\\r?\\n",
+    "cruise": "\\*\\s*\\*\\*\\s*Cruise:\\s*(?P<value>.*?)\\r?\\n",
+    "area_of_operation": "\\*\\s*\\*\\*\\s*Area_of_Operation:\\s*(?P<value>.*?)\\r?\\n",
+    "organization": "\\*\\s*\\*\\*\\s*Organization:\\s*(?P<value>.*?)\\r?\\n",
+    "chief_scientist": "\\*\\s*\\*\\*\\s*Chief_Scientist:\\s*(?P<value>.*?)\\r?\\n",
+    "start_date": "\\*\\s*\\*\\*\\s*Start_Date:\\s*(?P<value>.*?)\\r?\\n",
+    "end_date": "\\*\\s*\\*\\*\\s*End_Date:\\s*(?P<value>.*?)\\r?\\n",
+    "station": "\\*\\s*\\*\\*\\s*Station:\\s*(?P<value>.*?)\\r?\\n",
+    "instrument_sn": "\\*\\s*\\*\\*\\s*Instrument_Serial_Number:\\s*(?P<value>.*?)\\r?\\n",
+
+    "LATITUDE": "\\*\\s*\\*\\*\\s*Latitude:\\s*(?P<value>[NnSs]\\s+\\d{1,2}\\s+\\d+(?:\\.\\d+)?)",
+    "LONGITUDE": "\\*\\s*\\*\\*\\s*Longitude:\\s*(?P<value>[WwEe]\\s+\\d{1,3}\\s+\\d+(?:\\.\\d+)?)"
+  },
+
+  "LATITUDE": "(?P<hemisphere>[NnSs])\\s+(?P<degree>\\d{1,2})\\s+(?P<minute>\\d+(?:\\.\\d+)?)",
+
+  "LONGITUDE": "(?P<hemisphere>[WwEe])\\s+(?P<degree>\\d{1,3})\\s+(?P<minute>\\d+(?:\\.\\d+)?)",
+
+  "descriptors": {
+    "nquan": "\\#\\s*nquan\\s*=\\s*(?P<value>\\d+)\\r?\\n",
+    "nvalues": "\\#\\s*nvalues\\s*=\\s*(?P<value>\\d+)\\r?\\n",
+    "start_time": "\\#\\s*start_time\\s*=\\s*(?P<value>.*?)\\r?\\n",
+    "bad_flag": "\\#\\s*bad_flag\\s*=\\s*(?P<value>.*?)\\r?\\n",
+    "file_type": "\\#\\s*file_type\\s*=\\s*(?P<value>.*?)\\r?\\n"
+  },
+
+  "fieldname": "\\#\\s*name\\s+(?P<id>\\d+)\\s*=\\s*(?P<name>[^:]+)(?:\\:\\s*(?P<longname>.*?))?\\r?\\n",
+
+  "fieldspan": "\\#\\s*span\\s+(?P<id>\\d+)\\s*=\\s*(?P<valuemin>.*?),\\s*(?P<valuemax>.*?)\\r?\\n"
+}

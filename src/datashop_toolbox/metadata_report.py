@@ -133,7 +133,7 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
             worksheet.column_dimensions[column].width = adjusted_width
 
     # Center text horizontally and vertically
-    for col, cname in enumerate(worksheet.columns):
+    for col, _cname in enumerate(worksheet.columns):
         column_letter = get_column_letter(col + 1)
         for cell in worksheet[column_letter + ":" + column_letter]:
             cell.alignment = Alignment(horizontal="center")

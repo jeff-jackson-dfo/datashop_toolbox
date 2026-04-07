@@ -1,8 +1,10 @@
+# --- standard library ---
 import logging
 import os
 import posixpath
 import queue
 import re
+import shutil
 import sys
 import time
 import traceback
@@ -10,13 +12,19 @@ from datetime import datetime
 from logging.handlers import QueueHandler, QueueListener
 from pathlib import Path
 
+# --- Qt (use ONLY PySide6) ---
 from PySide6.QtCore import QThread, QTimer, Signal
 from PySide6.QtWidgets import QApplication, QInputDialog
 
+# --- datashop toolbox ---
 from datashop_toolbox import select_metadata_file_and_data_folder
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.historyhdr import HistoryHeader
-from datashop_toolbox.log_window import LogWindow, LogWindowProcessMTR, Worker
+from datashop_toolbox.log_window import (
+    LogWindow,
+    LogWindowProcessMTR,
+    Worker,
+)
 from datashop_toolbox.qualityhdr import QualityHeader
 from datashop_toolbox.thermograph import ThermographHeader
 from datashop_toolbox.validated_base import get_current_date_time
@@ -48,27 +56,48 @@ def process_mtr_files_for_worker(
     log(f"Input data folder path: {input_data_folder_path}")
     log(f"Output data folder path: {output_data_folder_path}")
 
+    # cwd = Path.cwd()
+
     # Change directory
     try:
         os.chdir(input_data_folder_path)
         log(f"Changed working dir to the input directory: {input_data_folder_path}")
     except Exception as e:
-        raise RuntimeError(f"Cannot change directory: {e}")
+        raise RuntimeError(f"Cannot change directory: {e}") from e
+
+    if not isinstance(user_input_metadata, dict):
+        log(f"user_input_metadata must be a dict, got {type(user_input_metadata).__name__}")
+        raise TypeError("user_input_metadata must be a dict")
 
     # Look for CSV files
-    all_files = Path.glob("*.csv")
+    all_files = list(Path('.').glob("*.csv"))
     if not all_files:
         log(f"No CSV files found in: {input_data_folder_path}")
-        return
+        raise FileNotFoundError(f"No CSV files found in: {input_data_folder_path}")
 
     # Prepare output folder
-    odf_path = Path(output_data_folder_path / "Step_1_Create_ODF")
-    Path.makedir(odf_path, parent=True)
-    log(f"Created a output data folder name: Step_1_Create_ODF and path for .odf files: {odf_path}")
+    base_name_output = "Step_1_Create_ODF"
+    out_folder_path = Path(output_data_folder_path).resolve()
+    out_odf_path = Path(out_folder_path / base_name_output)
+    odf_path = Path(out_odf_path).resolve() 
+    try:
+        shutil.rmtree(odf_path)
+        odf_path.mkdir(parents=True, exist_ok=False)
+        print(f"Overwriting existing data folder name: \
+                Step_1_Create_ODF and path for .odf files: {odf_path}"
+        )
+    except Exception as e:
+        print(e)
+        odf_path.mkdir(parents=True, exist_ok=True)
+        print(f"Created a new output data folder name: \
+                Step_1_Create_ODF and path for .odf files: {odf_path}"
+        )
 
     # Loop through the CSV files to generate an ODF file for each.
     # for file_name in all_files:
     for idx, file_name in enumerate(all_files, start=1):
+        file_name = file_name.name
+        log("Please wait...reading input .CSV file for Processing...")
         log("")
         log("#######################################################################")
         log(f"=== Start processing MTR file {idx} of {len(all_files)}: {file_name} ===")
@@ -128,7 +157,7 @@ def process_mtr_files_for_worker(
         log(f"✅ [{idx}/{len(all_files)}] Batch end : {batch_id} ✅ \n")
 
 
-def main_automated_start_qc():
+def run_automated_start_qc():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
@@ -224,7 +253,7 @@ def main_automated_start_qc():
 
             if not metadata_file_path or not input_data_folder_path or not output_data_folder_path:
                 log_window.write(
-                    "❌ Missing metadata or input/output folder. Improper selections made. Please try again. or exiting program....."
+                    "❌ Missing metadata, input or output folder. Please try again, or exit program....."
                 )
                 return
 
@@ -384,8 +413,6 @@ def process_thermograph_data(
     print(f"Input data folder path: {input_data_folder_path}")
     print(f"Output data folder path: {output_data_folder_path}")
 
-    # cwd = os.getcwd()
-
     try:
         os.chdir(input_data_folder_path)
         print(f"Changed working dir to the input directory: {input_data_folder_path}")
@@ -400,26 +427,40 @@ def process_thermograph_data(
         return batch_result_container
 
     # Look for CSV files
-    all_files = Path.glob("*.csv")
+    all_files = list(Path('.').glob("*.csv"))
     if not all_files:
         print(f"No CSV files found in: {input_data_folder_path}")
         batch_result_container["finished"] = False
         return batch_result_container
 
     # Prepare output folder
-    odf_path = Path(output_data_folder_path / "Step_1_Create_ODF")
-    Path.makedir(odf_path, parent=True)
-    print(
-        f"Created a output data folder name: \
-            Step_1_Create_ODF and path for .odf files: {odf_path}"
-    )
+    base_name_output = "Step_1_Create_ODF"
+    out_folder_path = Path(output_data_folder_path).resolve()
+    out_odf_path = Path(out_folder_path / base_name_output)
+    odf_path = Path(out_odf_path).resolve() 
+    try:
+        shutil.rmtree(odf_path)
+        odf_path.mkdir(parents=True, exist_ok=False)
+        print(f"Overwriting existing data folder name: \
+                Step_1_Create_ODF and path for .odf files: {odf_path}"
+        )
+    except FileNotFoundError as e:
+        print(e)
+        odf_path.mkdir(parents=True, exist_ok=True)
+        print(f"Created a new output data folder name: \
+                Step_1_Create_ODF and path for .odf files: {odf_path}"
+        )
 
     # Loop through the CSV files to generate an ODF file for each.
-    # for file_name in all_files:
     for idx, file_name in enumerate(all_files, start=1):
+        if exit_requested:
+            print("Exit requested — stopping QC loop.")
+            break
+        file_name = file_name.name
+        print("Please wait...reading input .CSV file for Processing...")
         print("")
         print("#######################################################################")
-        print(f"=== Start processing MTR file {idx} of {len(all_files)}: {file_name} ===")
+        print(f"=== Start processing for MTR file {idx} of {len(all_files)}: {file_name} ===")
         print("#######################################################################")
         print("")
 
@@ -740,7 +781,7 @@ def exit_program(app, log_ui):
     app.quit()
 
 
-def main_manual_start_qc():
+def run_manual_start_qc():
     app = QApplication.instance()
     if app is None:
         app = QApplication(sys.argv)
@@ -764,6 +805,14 @@ def main_manual_start_qc():
 
 
 def logger_setup():
+    # --- create logs folder in project root ---
+    log_dir = Path.cwd() / "logs"
+    log_dir.mkdir(exist_ok=True)
+
+    # --- create timestamped log file ---
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = log_dir / f"datashop_MTR_Processing_log_{timestamp}.txt"
+
     # exit_requested = False
     logger = logging.getLogger("process_mtr_logger")
     logger.setLevel(logging.INFO)
@@ -776,7 +825,7 @@ def logger_setup():
     console_handler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
     logger.addHandler(console_handler)
 
-    file_handler = logging.FileHandler("datashop_MTR_Processing_log.txt", encoding="utf-8")
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
     file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
     logger.addHandler(file_handler)
 
@@ -812,6 +861,14 @@ def on_mtr_processing_finished(log_ui, success):
     log_ui.worker = None
 
 
+
+def main():
+    #run_manual_start_qc()
+    run_automated_start_qc()
+
+
+
+
 if __name__ == "__main__":
-    main_manual_start_qc()
-    # main_automated_start_qc()
+    main()
+    

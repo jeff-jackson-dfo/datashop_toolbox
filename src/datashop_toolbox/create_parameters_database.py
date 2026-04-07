@@ -39,7 +39,8 @@ with sqlite3.connect("C:/Dev/GitHub/datashop_toolbox/database/parameters.db") as
         next(csv_reader)  # Skip the header row
 
         # Insert each row into the Customers table
-        insert_records = "INSERT INTO ODF_PARAMETERS (code, description, units, print_field_width, print_decimal_places) VALUES (?, ?, ?, ?, ?)"
+        insert_records = "INSERT INTO ODF_PARAMETERS " \
+                         "(code, description, units, print_field_width, print_decimal_places) VALUES (?, ?, ?, ?, ?)"
 
         # Importing the contents of the file  into our ODF_PARAMETERS table
         cursor.executemany(insert_records, csv_reader)

@@ -157,6 +157,8 @@ def main():
     quality_header.add_qcff_info()
     print(quality_header.print_object())
 
+    print(BaseHeader.shared_log_list)
+
 
 if __name__ == "__main__":
     main()

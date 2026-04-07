@@ -524,7 +524,7 @@ class SubWindowOne(QMainWindow):
         # --- Input folder selection ---
         if self.review_mode:
             self.input_label = QLabel(
-                "Select the Step_2_Assign_QFlag folder or other folder path containing .ODF files (With Previous Flagged):"
+                "Select the Step_2_Assign_QFlag folder or other folder path containing .ODF files (With Previous Flagged):"  # noqa: E501
             )
         else:
             self.input_label = QLabel(
@@ -553,6 +553,12 @@ class SubWindowOne(QMainWindow):
         self.generate_batch_text = QLineEdit(" ")
         self.generate_batch_text.setReadOnly(True)
         self.generate_batch_text.setFixedWidth(200)
+
+        # --- Wildcard Input ---
+        self.wildcard_label = QLabel("File identifier wildcard (e.g. *.ODF):")
+        self.wildcard_line_edit = QLineEdit("*.ODF")
+        self.wildcard_line_edit.setReadOnly(False)
+        self.wildcard_line_edit.setFixedWidth(200)
 
         # --- OK / Cancel buttons ---
         buttons = QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
@@ -600,10 +606,19 @@ class SubWindowOne(QMainWindow):
         row2b.addWidget(self.output_path_text)
         main_layout.addLayout(row2b)
 
-        # Gen batch row
-        row3 = QVBoxLayout()
-        row3.addWidget(self.generate_batch_label)
-        row3.addWidget(self.generate_batch_text)
+        # Add batch related widgets
+        row3a = QVBoxLayout()
+        row3a.addWidget(self.generate_batch_label)
+        row3a.addWidget(self.generate_batch_text)
+
+        # Add wildcard related widgets
+        row3b = QVBoxLayout()
+        row3b.addWidget(self.wildcard_label)
+        row3b.addWidget(self.wildcard_line_edit)
+
+        row3 = QHBoxLayout()
+        row3.addLayout(row3a)
+        row3.addLayout(row3b)
         main_layout.addLayout(row3)
 
         # Buttons centered
@@ -643,7 +658,7 @@ class SubWindowOne(QMainWindow):
         return None
 
     def build_batch_name(self, meta_path: str) -> str:
-        filename = Path(Path.name(meta_path)).stem
+        filename = Path(meta_path).stem
         lfa_match = re.search(r"LFA\s*[_\-]?\s*(\d+[A-Z]?)", filename, re.IGNORECASE)
 
         if lfa_match:

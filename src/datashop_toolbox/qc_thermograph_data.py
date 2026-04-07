@@ -7,6 +7,7 @@ import sys
 import time
 from collections import Counter
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import matplotlib.colors as mcolors
 import matplotlib.dates as mdates
@@ -15,32 +16,38 @@ import numpy as np
 import pandas as pd
 import pytz
 from matplotlib.patches import Rectangle
-from matplotlib.path import Path
-from matplotlib.widgets import Button, CheckButtons, RadioButtons
+from matplotlib.path import Path as MplPath
+from matplotlib.widgets import Button, CheckButtons, LassoSelector, RadioButtons
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from datashop_toolbox import select_metadata_file_and_data_folder
 from datashop_toolbox.log_window import LogWindowThermographQC, SafeConsoleFilter
 from datashop_toolbox.thermograph import ThermographHeader
 
+# --- create logs folder in project root ---
+log_dir = Path.cwd() / "logs"
+log_dir.mkdir(exist_ok=True)
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_file = log_dir / f"datashop_MTR_QC_log_{timestamp}.txt"
+
 ATLANTIC_TZ = pytz.timezone("Canada/Atlantic")
 UTC = pytz.UTC
 exit_requested = False
-global logger
-logger = logging.getLogger("thermograph_qc_logger")
-logger.setLevel(logging.INFO)
-logger.propagate = False
+# global mtr_logger
+mtr_logger = logging.getLogger("thermograph_qc_logger")
+mtr_logger.setLevel(logging.INFO)
+mtr_logger.propagate = False
 console_handler = logging.StreamHandler()
 console_handler.addFilter(SafeConsoleFilter())
 console_handler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
-logger.addHandler(console_handler)
-file_handler = logging.FileHandler("datashop_MTR_QC_log.txt", encoding="utf-8")
+mtr_logger.addHandler(console_handler)
+file_handler = logging.FileHandler(log_file, encoding="utf-8")
 file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
-logger.addHandler(file_handler)
-logger.info("Logger file initialized.")
+mtr_logger.addHandler(file_handler)
+mtr_logger.info("Logger file initialized.")
 
 FLAG_LABELS = {
-    0: "Not been QC'd",
+    0: "No QC",
     1: "Correct",
     2: "Inconsistent",
     3: "Doubtful",
@@ -143,13 +150,15 @@ def validate_bio_metadata(meta: pd.DataFrame) -> bool:
 
     # ---- ID or gauge must exist ----
     if not ({"ID", "gauge"} & cols):
-        logger.warning("Metadata invalid: neither 'ID' nor 'gauge' column found.")
+        mtr_logger.warning("Metadata invalid: neither 'ID' nor 'gauge' column found.")
         return False
 
     # ---- deploy & recover must exist ----
     required_time_cols = {"deploy", "recover"}
     if not required_time_cols.issubset(cols):
-        logger.warning("Metadata invalid: 'deploy' and/or 'recover' column missing.")
+        mtr_logger.warning(
+            "Metadata invalid: 'deploy' and/or 'recover' column missing."
+        )
         return False
 
     # ---- any acceptable timezone column must exist ----
@@ -164,66 +173,84 @@ def validate_bio_metadata(meta: pd.DataFrame) -> bool:
     }
 
     if not (tz_candidates & cols):
-        logger.warning("Metadata invalid: no recognized time-zone column found.")
+        mtr_logger.warning("Metadata invalid: no recognized time-zone column found.")
         return False
 
     return True
 
 
 def run_qc_thermograph_data(
-    input_path, output_path, qc_operator, metadata_file_path, review_mode: bool, batch_name
-) -> dict:
-    logger.info(f"Starting QC Thermograph Data task by {qc_operator} on {input_path}")
-    wildcard = "*.ODF"
+        input_path: str,
+        output_path: str,
+        qc_operator: str,
+        metadata_file_path: str,
+        review_mode: bool,
+        batch_name: str,
+        wildcard: str = "*.ODF"
+    ) -> dict:
+    
+    mtr_logger.info(f"Starting QC Thermograph Data task by {qc_operator} on {input_path}")
     task_completion = qc_thermograph_data(
-        input_path, wildcard, output_path, qc_operator, metadata_file_path, review_mode, batch_name
+        input_path,
+        wildcard,
+        output_path,
+        qc_operator,
+        metadata_file_path,
+        review_mode,
+        batch_name,
     )
     print(task_completion)
     if task_completion["finished"]:
-        logger.info("QC Thermograph Data task completed successfully.")
-        logger.info("Finished batch successfully (returned to GUI).")
-        logger.info("Please Start QC for new batch.")
+        mtr_logger.info("QC Thermograph Data task completed successfully.")
+        mtr_logger.info("Finished batch successfully (returned to GUI).")
+        mtr_logger.info("Please Start QC for new batch.")
     else:
         print("QC Thermograph Data task did not complete.")
-        logger.warning("QC Thermograph Data task did not complete.......")
-        logger.warning("Please check the logs for more details.")
+        mtr_logger.warning("QC Thermograph Data task did not complete.......")
+        mtr_logger.warning("Please check the logs for more details.")
     return task_completion
 
 
-def prepare_output_folder(in_folder_path: str, out_folder_path: str, qc_operator: str) -> str:
+def prepare_output_folder(
+    in_folder_path: str, out_folder_path: str, qc_operator: str
+) -> str:
     base_name_input = "Step_1_Create_ODF"
-    in_folder_path = Path(in_folder_path).resolve()
+    in_folder_path = str(Path(in_folder_path).resolve())
 
     base_name_output = "Step_2_Assign_QFlag"
-    out_folder_path = Path(out_folder_path).resolve()
-    out_odf_path = Path(out_folder_path / base_name_output)
+    out_folder_path = str(Path(out_folder_path).resolve())
+    out_odf_path = Path(out_folder_path) / base_name_output
     out_odf_path = Path(out_odf_path).resolve()
 
     if base_name_input.lower() in in_folder_path.lower():
         if (not Path.exists(out_odf_path)) and (out_odf_path != in_folder_path):
-            logger.info(
+            mtr_logger.info(
                 "Initial QC Mode: No existing output folder found. Creating new folder, name : Step_2_Assign_QFlag"
             )
-            Path.mkdir(out_odf_path, parent=True)
-            logger.info(f"Created output folder: {out_odf_path}")
+            out_odf_path.mkdir(parents=True, exist_ok=False)
+            mtr_logger.info(f"Created output folder: {out_odf_path}")
         else:
-            logger.info(
+            mtr_logger.info(
                 "Initial QC Mode: Overwriting existing output folder, name : Step_2_Assign_QFlag"
             )
-            shutil.rmtree(out_odf_path)
-            Path.mkdir(out_odf_path, parent=True)
-            logger.warning(f"Overwriting existing folder: {out_odf_path}")
+            try:
+                shutil.rmtree(out_odf_path)
+                out_odf_path.mkdir(parents=True, exist_ok=False)
+                mtr_logger.warning(f"Overwriting existing folder: {out_odf_path}")
+            except Exception as e:
+                print(e)
+                out_odf_path.mkdir(parents=True, exist_ok=True)
     else:
-        logger.info(
+        mtr_logger.info(
             "Review QC Mode: Creating new reviewed output folder, name: Step_3_Review_QFlag_with timestamp."
         )
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        new_name = f"Step_3_Review_QFlag_{qc_operator.strip().title()}_{timestamp}"
-        out_odf_path = Path(out_folder_path / new_name)
-        Path.mkdir(out_odf_path, parent=True)
-        logger.info(f"Created new reviewed output folder: {out_odf_path}")
+        now_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        new_name = f"Step_3_Review_QFlag_{qc_operator.strip().title()}_{now_timestamp}"
+        out_odf_path = Path(f"{out_folder_path}/{new_name}")
+        out_odf_path.mkdir(parents=True, exist_ok=False)
+        mtr_logger.info(f"Created new reviewed output folder: {out_odf_path}")
 
-    return out_odf_path
+    return str(out_odf_path)
 
 
 def qc_thermograph_data(
@@ -233,7 +260,7 @@ def qc_thermograph_data(
     qc_operator: str,
     metadata_file_path: str,
     review_mode: bool,
-    batch_name: str,
+    batch_name: str
 ) -> dict:
     """
     Processes ODF files in `in_folder_path` matching `wildcard`, writes to out_folder_path/Step_2_Quality_Flagging.
@@ -253,31 +280,35 @@ def qc_thermograph_data(
 
     try:
         os.chdir(in_folder_path)
-        logger.info(f"Changed working dir to the input directory: {in_folder_path}")
+        mtr_logger.info(f"Changed working dir to the input directory: {in_folder_path}")
     except Exception as e:
-        logger.exception(f"Cannot change directory: {e}")
+        mtr_logger.exception(f"Cannot change directory: {e}")
         return batch_result_container
 
-    mtr_files = Path.glob(wildcard)
+    mtr_files = list(Path.cwd().glob(wildcard))
     if not mtr_files:
-        logger.warning("No ODF files found in selected folder.")
+        mtr_logger.warning("No ODF files found in selected folder.")
         os.chdir(cwd)
         return batch_result_container
 
     # Prepare output folder
     out_odf_path = prepare_output_folder(in_folder_path, out_folder_path, qc_operator)
-    logger.info("Created a output data folder name, Step_2_Quality_Flagging ")
-    logger.info(f"Path for Step_2_Quality_Flagging: {out_odf_path}")
+    mtr_logger.info("Created a output data folder name, Step_2_Quality_Flagging ")
+    mtr_logger.info(f"Path for Step_2_Quality_Flagging: {out_odf_path}")
 
     os.chdir(cwd)
 
+    # Declared outside the loop so inner functions defined each iteration
+    # close over stable (non-loop) names — required to satisfy ruff B023.
+    state: dict = {}
+
     for idx, mtr_file in enumerate(mtr_files, start=1):
         if exit_requested:
-            logger.warning("Exit requested — stopping QC loop.")
+            mtr_logger.warning("Exit requested — stopping QC loop.")
             break
-
-        logger.info(f"Reading file {idx} of {len(mtr_files)}: {mtr_file}")
-        logger.info("Please wait...reading ODF file for QC visualization...")
+        mtr_file_name = mtr_file.name
+        mtr_logger.info(f"Reading file {idx} of {len(mtr_files)}: {mtr_file}")
+        mtr_logger.info("Please wait...reading ODF file for QC visualization...")
 
         full_path = str(pathlib.Path(in_folder_path, mtr_file))
 
@@ -285,7 +316,7 @@ def qc_thermograph_data(
             mtr = ThermographHeader()
             mtr.read_odf(full_path)
         except Exception as e:
-            logger.exception(f"Failed to read ODF {full_path}: {e}")
+            mtr_logger.exception(f"Failed to read ODF {full_path}: {e}")
             continue
 
         # Extract data frame
@@ -306,22 +337,26 @@ def qc_thermograph_data(
 
         try:
             dt = pd.to_datetime(sytm, format="%d-%b-%Y %H:%M:%S.%f")
-        except Exception:
+        except Exception as e:
+            print(e)
             dt = pd.to_datetime(sytm, infer_datetime_format=True, errors="coerce")
 
         # Create a DataFrame with Temperature as the variable and DateTime as the index.
         df = pd.DataFrame({"Temperature": temp, "qualityflag": qflag}, index=dt)
+        state["df"] = df  # expose to closures via state to avoid B023
         number_of_rows = len(df)
 
         # Extract metadata from ODF headers
         file_name = mtr._file_specification
         file_name = f"{file_name}.ODF"
-        if file_name != mtr_file:
-            logger.warning(f"Filename mismatch: Header '{file_name}' vs Actual '{mtr_file}'")
+        if file_name != mtr_file_name:
+            mtr_logger.warning(
+                f"Filename mismatch: Header '{file_name}' vs Actual '{mtr_file_name}'"
+            )
             batch_result_container["finished"] = False
             return batch_result_container
         else:
-            logger.info(f"Filename verified: {mtr_file}")
+            mtr_logger.info(f"Filename verified: {mtr_file_name}")
 
         organization = mtr.cruise_header.organization
         start_datetime = mtr.event_header.start_date_time
@@ -329,15 +364,15 @@ def qc_thermograph_data(
         event_num = mtr.event_header.event_number
         if event_num in (None, "", "NA", "NaN"):
             event_num = None
-            logger.warning(f"Event number is invalid for {mtr_file}.")
+            mtr_logger.warning(f"Event number is invalid for {mtr_file}.")
         if event_num is None:
             # Matches _011_ in filename
             match = re.search(r"_(\d{1,4})_", file_name)
             if match:
                 event_num = match.group(1)
-                logger.info(f"Event number extracted from filename: {event_num}")
+                mtr_logger.info(f"Event number extracted from filename: {event_num}")
             else:
-                logger.warning(
+                mtr_logger.warning(
                     f"Could not determine event number from header or filename: {file_name}"
                 )
         gauge_serial_number = mtr.instrument_header.serial_number
@@ -345,20 +380,24 @@ def qc_thermograph_data(
         list_organization = ["DFO BIO", "FSRS"]
 
         if organization not in list_organization:
-            logger.warning(f"Organization '{organization}' not recognized for {mtr_file}.")
+            mtr_logger.warning(
+                f"Organization '{organization}' not recognized for {mtr_file}."
+            )
             break
 
         # Add metadata from metadata file if provided
         meta = None
         if organization == list_organization[1]:  # FSRS
-            if not metadata_file_path or not Path.is_file(metadata_file_path):
+            if not metadata_file_path or not Path(metadata_file_path).is_file():
                 QMessageBox.critical(
                     None,
                     "Missing Metadata File",
                     "❌ FSRS processing requires a valid metadata file.\n\n"
                     "Please select a valid metadata file before continuing.",
                 )
-                logger.error("FSRS selected but metadata_file_path is missing or invalid.")
+                mtr_logger.error(
+                    "FSRS selected but metadata_file_path is missing or invalid."
+                )
                 batch_result_container["finished"] = False
                 return batch_result_container
 
@@ -372,24 +411,28 @@ def qc_thermograph_data(
                 meta["datetime"] = meta.apply(
                     lambda row: parse_datetime(row["date"], row["time"]), axis=1
                 )
-                logger.info(f"Metadata successfully loaded for FSRS: {metadata_file_path}")
+                mtr_logger.info(
+                    f"Metadata successfully loaded for FSRS: {metadata_file_path}"
+                )
             except Exception as e:
                 QMessageBox.critical(
                     None,
                     "Metadata Read Error",
                     f"❌ Failed to read metadata file:\n\n{metadata_file_path}\n\n{e}",
                 )
-                logger.exception(f"Failed to read metadata from {metadata_file_path}")
+                mtr_logger.exception(
+                    f"Failed to read metadata from {metadata_file_path}"
+                )
                 batch_result_container["finished"] = False
                 return batch_result_container
 
         if organization == list_organization[0]:  # DFO BIO
-            if metadata_file_path and Path.is_file(metadata_file_path):
+            if metadata_file_path and Path(metadata_file_path).is_file():
                 try:
                     meta_tmp = mtr.read_metadata(metadata_file_path, organization)
                     if not validate_bio_metadata(meta_tmp):
                         meta = None
-                        logger.warning(
+                        mtr_logger.warning(
                             "Metadata file loaded but failed validation; "
                             "proceeding without metadata."
                         )
@@ -398,28 +441,29 @@ def qc_thermograph_data(
                         tz_col = next(
                             c
                             for c in meta.columns
-                            if c.lower().replace(" ", "") in {"instrumenttimezone", "timezone"}
+                            if c.lower().replace(" ", "")
+                            in {"instrumenttimezone", "timezone"}
                         )
 
                         meta["deploy_utc"] = meta.apply(
-                            lambda r: parse_to_utc(r["deploy"], r[tz_col]), axis=1
+                            lambda r, _tz=tz_col: parse_to_utc(r["deploy"], r[_tz]), axis=1
                         )
 
                         meta["recover_utc"] = meta.apply(
-                            lambda r: parse_to_utc(r["recover"], r[tz_col]), axis=1
+                            lambda r, _tz=tz_col: parse_to_utc(r["recover"], r[_tz]), axis=1
                         )
-                        logger.info(
+                        mtr_logger.info(
                             f"Metadata loaded and validated (DFO BIO): {metadata_file_path}"
                         )
                 except Exception as e:
-                    logger.warning(
+                    mtr_logger.warning(
                         f"Metadata file provided but could not be read: {metadata_file_path}. "
                         f"Proceeding without metadata. Error: {e}"
                     )
                     meta = None
             else:
                 meta = None
-                logger.info(
+                mtr_logger.info(
                     "No metadata file provided; proceeding without metadata assuming organization is DFO BIO."
                 )
 
@@ -430,7 +474,10 @@ def qc_thermograph_data(
         if organization == list_organization[1]:  # FSRS
             meta_subset = meta[meta["gauge"] == int(gauge_serial_number)]
             if not meta_subset.empty:
-                if "datetime" in meta_subset.columns and not meta_subset["datetime"].isna().all():
+                if (
+                    "datetime" in meta_subset.columns
+                    and not meta_subset["datetime"].isna().all()
+                ):
                     meta_subset = meta_subset.copy()
                     meta_subset["datetime"] = pd.to_datetime(
                         meta_subset["datetime"], errors="coerce"
@@ -440,32 +487,45 @@ def qc_thermograph_data(
                         idx_start = meta_subset["datetime"].idxmin()
                         start_dt = meta_subset.loc[idx_start, "datetime"]
                         start_soak = meta_subset.loc[idx_start, "soak_days"]
-                        start_datetime_qc = start_dt - pd.to_timedelta(start_soak, unit="D")
+                        start_datetime_qc = start_dt - pd.to_timedelta(
+                            start_soak, unit="D"
+                        )
 
                         idx_end = meta_subset["datetime"].idxmax()
                         end_dt = meta_subset.loc[idx_end, "datetime"]
                         # end_soak = meta_subset.loc[idx_end, "soak_days"]
-                        end_datetime_qc = end_dt  # + pd.to_timedelta(end_soak, unit="D")
+                        end_datetime_qc = (
+                            end_dt  # + pd.to_timedelta(end_soak, unit="D")
+                        )
 
                     else:
                         start_datetime_qc = start_datetime
                         end_datetime_qc = end_datetime
 
                 # ---- Case 2: only date column exists ----
-                elif "date" in meta_subset.columns and not meta_subset["date"].isna().all():
+                elif (
+                    "date" in meta_subset.columns
+                    and not meta_subset["date"].isna().all()
+                ):
                     meta_subset = meta_subset.copy()
-                    meta_subset["date"] = pd.to_datetime(meta_subset["date"], errors="coerce")
+                    meta_subset["date"] = pd.to_datetime(
+                        meta_subset["date"], errors="coerce"
+                    )
                     meta_subset = meta_subset.dropna(subset=["date", "soak_days"])
                     if not meta_subset.empty:
                         idx_start = meta_subset["date"].idxmin()
                         start_dt = meta_subset.loc[idx_start, "date"]
                         start_soak = meta_subset.loc[idx_start, "soak_days"]
-                        start_datetime_qc = start_dt - pd.to_timedelta(start_soak, unit="D")
+                        start_datetime_qc = start_dt - pd.to_timedelta(
+                            start_soak, unit="D"
+                        )
 
                         idx_end = meta_subset["date"].idxmax()
                         end_dt = meta_subset.loc[idx_end, "date"]
                         # end_soak = meta_subset.loc[idx_end, "soak_days"]
-                        end_datetime_qc = end_dt  # + pd.to_timedelta(end_soak, unit="D")
+                        end_datetime_qc = (
+                            end_dt  # + pd.to_timedelta(end_soak, unit="D")
+                        )
 
                     else:
                         start_datetime_qc = start_datetime
@@ -496,7 +556,9 @@ def qc_thermograph_data(
                     "time": t,
                     "type": "rate",
                     "severity": abs(temp_rate.loc[t]),  # °C/min
-                    "temp_drop": abs(temp_diff.loc[t]) if not pd.isna(temp_diff.loc[t]) else 0.0,
+                    "temp_drop": (
+                        abs(temp_diff.loc[t]) if not pd.isna(temp_diff.loc[t]) else 0.0
+                    ),
                 }
                 for t in deployment_rate_idx
             ]
@@ -512,9 +574,13 @@ def qc_thermograph_data(
             ]
 
             # --- Pick strongest from each ---
-            best_rate = max(deployment_candidates_rate, key=lambda x: x["severity"], default=None)
+            best_rate = max(
+                deployment_candidates_rate, key=lambda x: x["severity"], default=None
+            )
 
-            best_jump = max(deployment_candidates_jump, key=lambda x: x["severity"], default=None)
+            best_jump = max(
+                deployment_candidates_jump, key=lambda x: x["severity"], default=None
+            )
 
             # --- Decision logic ---
             if best_rate and best_jump:
@@ -550,7 +616,11 @@ def qc_thermograph_data(
                     "time": t,
                     "type": "rate",
                     "severity": abs(df.loc[t, "temp_rate"]),  # °C/min
-                    "temp_rise": abs(df.loc[t, "temp_diff"]) if pd.notna(df.loc[t, "temp_diff"]) else 0.0,
+                    "temp_rise": (
+                        abs(df.loc[t, "temp_diff"])
+                        if pd.notna(df.loc[t, "temp_diff"])
+                        else 0.0
+                    ),
                 }
                 for t in recovery_rate_idx
             ]
@@ -566,9 +636,13 @@ def qc_thermograph_data(
             ]
 
             # --- Pick strongest from each ---
-            best_rate = max(recovery_candidates_rate, key=lambda x: x["severity"], default=None)
+            best_rate = max(
+                recovery_candidates_rate, key=lambda x: x["severity"], default=None
+            )
 
-            best_jump = max(recovery_candidates_jump, key=lambda x: x["severity"], default=None)
+            best_jump = max(
+                recovery_candidates_jump, key=lambda x: x["severity"], default=None
+            )
 
             # --- Decision logic ---
             if best_rate and best_jump:
@@ -612,10 +686,13 @@ def qc_thermograph_data(
                             event_num_int = int(event_num)
                         except (TypeError, ValueError):
                             event_num_int = None
-                        if event_num_int is not None and event_num_int in meta_subset.index:
+                        if (
+                            event_num_int is not None
+                            and event_num_int in meta_subset.index
+                        ):
                             meta_subset = meta_subset.loc[[event_num_int]]
                         else:
-                            logger.warning(
+                            mtr_logger.warning(
                                 f"Multiple metadata entries found for gauge {gauge_serial_number} "
                                 "but event number is missing or invalid; using all entries for this gauge."
                             )
@@ -625,7 +702,7 @@ def qc_thermograph_data(
                     meta_subset = pd.DataFrame()
 
                 if meta_subset.empty:
-                    logger.warning(
+                    mtr_logger.warning(
                         f"No metadata found for gauge {gauge_serial_number}; "
                         "falling back to in-water times."
                     )
@@ -644,7 +721,9 @@ def qc_thermograph_data(
                         )
                         start_in_meta = meta_subset["deploy_utc"].min()
                         if start_in_meta.tzinfo is not None:
-                            start_in_meta = start_in_meta.tz_convert("UTC").tz_localize(None)
+                            start_in_meta = start_in_meta.tz_convert("UTC").tz_localize(
+                                None
+                            )
 
                         start_datetime = pd.to_datetime(start_datetime, errors="coerce")
                         if (start_in_meta - start_datetime) > tolerance_start_t:
@@ -652,10 +731,12 @@ def qc_thermograph_data(
                         else:
                             start_datetime_qc = start_in_meta
                     else:
-                        logger.warning(
+                        mtr_logger.warning(
                             "deploy_utc missing or empty in metadata; using in-water start."
                         )
-                        start_datetime_qc = pd.to_datetime(start_in_water, errors="coerce")
+                        start_datetime_qc = pd.to_datetime(
+                            start_in_water, errors="coerce"
+                        )
 
                     if (
                         "recover_utc" in meta_subset.columns
@@ -666,19 +747,21 @@ def qc_thermograph_data(
                         )
                         end_in_meta = meta_subset["recover_utc"].max()
                         if end_in_meta.tzinfo is not None:
-                            end_in_meta = end_in_meta.tz_convert("UTC").tz_localize(None)
+                            end_in_meta = end_in_meta.tz_convert("UTC").tz_localize(
+                                None
+                            )
                         end_datetime = pd.to_datetime(end_datetime, errors="coerce")
                         if (end_datetime - end_in_meta) > tolerance_end_t:
                             end_datetime_qc = end_in_water
                         else:
                             end_datetime_qc = end_in_meta
                     else:
-                        logger.warning(
+                        mtr_logger.warning(
                             "recover_utc missing or empty in metadata; using in-water end."
                         )
                         end_datetime_qc = pd.to_datetime(end_in_water, errors="coerce")
 
-        logger.info(
+        mtr_logger.info(
             f"Determined QC window for {mtr_file}: {start_datetime_qc} to {end_datetime_qc}"
         )
         qc_start_num = mdates.date2num(pd.to_datetime(start_datetime_qc))
@@ -694,7 +777,7 @@ def qc_thermograph_data(
             qc_mode_ = " QC Mode - Invalid\n(Mode Selection Mismatch)"
             qc_mode_code_ = 1
             block_next_ = 1
-            logger.warning(
+            mtr_logger.warning(
                 "QC Mode Mismatch: Review QC Mode selected but no previous QC flags found."
             )
             QMessageBox.warning(
@@ -715,7 +798,7 @@ def qc_thermograph_data(
             qc_mode_ = " QC Mode - Invalid\n(Mode Selection Mismatch)"
             qc_mode_code_ = 1
             block_next_ = 1
-            logger.warning(
+            mtr_logger.warning(
                 "QC Mode Mismatch: Review QC Mode selected but no previous QC flags found."
             )
             QMessageBox.warning(
@@ -728,25 +811,33 @@ def qc_thermograph_data(
                 "This file will not proceed.",
             )
 
-        logger.info(f"QC Mode for this file {mtr_file}: {qc_mode_}")
+        mtr_logger.info(f"QC Mode for this file {mtr_file}: {qc_mode_}")
 
         # Convert datetime to numeric for lasso selection
         xnums = mdates.date2num(df.index.to_pydatetime())
-        xy = np.column_stack([mdates.date2num(df.index.to_pydatetime()), df["Temperature"]])
+        xy = np.column_stack(
+            [mdates.date2num(df.index.to_pydatetime()), df["Temperature"]]
+        )
         before_qc_mask = df.index < start_datetime_qc
         after_qc_mask = df.index > end_datetime_qc
         if qc_mode_code_ == 0:
             df.loc[df.index < start_datetime_qc, "qualityflag"] = 4
             df.loc[df.index > end_datetime_qc, "qualityflag"] = 4
-            in_water_mask = (df.index >= start_datetime_qc) & (df.index <= end_datetime_qc)
+            in_water_mask = (df.index >= start_datetime_qc) & (
+                df.index <= end_datetime_qc
+            )
             df.loc[in_water_mask & ~df["qualityflag"].isin([4]), "qualityflag"] = 1
         colors_initial = [FLAG_COLORS.get(int(f), "#808080") for f in df["qualityflag"]]
 
-        # Store multiple selection groups
-        selection_groups = []
-        applied = False
-        user_exited = False
-        current_flag = 4
+        # Reset per-iteration state in-place — keeps the same object reference
+        # that the inner functions already close over (ruff B023 safe).
+        state.clear()
+        state.update({
+            "selection_groups": [],
+            "applied": False,
+            "user_exited": False,
+            "current_flag": 4,
+        })
         figsize = (14, 7)
 
         plt.style.use("ggplot")
@@ -776,7 +867,7 @@ def qc_thermograph_data(
                 label.set_color("green")
             else:
                 label.set_color("orange")
-            label.set_family("arial")
+            label.set_fontfamily("arial")
 
         info_ax = fig.add_axes([0.79, 0.85, 0.1, 0.35])  # [left, bottom, width, height]
         info_ax.set_axis_off()  # hide the axes
@@ -818,20 +909,37 @@ def qc_thermograph_data(
         ax_export_df = fig.add_axes([0.21, 0.01, 0.13, 0.07])
         ax_continue = fig.add_axes([0.86, 0.01, 0.13, 0.07])
 
-        scatter = ax.scatter(xnums, df["Temperature"], s=10, c=colors_initial, picker=5, zorder=1)
-        ax.set_title(f"[{idx}/{len(mtr_files)}] {organization} Time Series Data- {mtr_file}")
+        scatter = ax.scatter(
+            xnums, df["Temperature"], s=10, c=colors_initial, picker=5, zorder=1
+        )
+        state["scatter"] = scatter  # expose to closures via state to avoid B023
+        ax.set_title(
+            f"[{idx}/{len(mtr_files)}] {organization} Time Series Data- {mtr_file}"
+        )
         ax.set_xlabel("Date Time")
         ax.set_ylabel("Temperature")
         ax.grid(True)
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
 
-        ax.axvspan(qc_start_num, qc_end_num, color="lightblue", alpha=0.25, label="QC Window")
-
-        ax.axvline(
-            qc_start_num, color="blue", linestyle="--", linewidth=2, label="Deployment: Start"
+        ax.axvspan(
+            qc_start_num, qc_end_num, color="lightblue", alpha=0.25, label="QC Window"
         )
 
-        ax.axvline(qc_end_num, color="blue", linestyle="--", linewidth=2, label="Recovered: End")
+        ax.axvline(
+            qc_start_num,
+            color="blue",
+            linestyle="--",
+            linewidth=2,
+            label="Deployment: Start",
+        )
+
+        ax.axvline(
+            qc_end_num,
+            color="blue",
+            linestyle="--",
+            linewidth=2,
+            label="Recovered: End",
+        )
 
         ymin, ymax = ax.get_ylim()
 
@@ -881,7 +989,7 @@ def qc_thermograph_data(
 
         radio_labels = [f"{k}: {FLAG_LABELS[k]}" for k in FLAG_LABELS]
         radio = RadioButtons(
-            radio_ax, radio_labels, active=list(FLAG_LABELS.keys()).index(current_flag)
+            radio_ax, radio_labels, active=list(FLAG_LABELS.keys()).index(state["current_flag"])
         )
 
         for i, text in enumerate(radio.labels):
@@ -890,7 +998,11 @@ def qc_thermograph_data(
             x, y = text.get_position()
             # Small color square beside text
             rect = Rectangle(
-                (0.01, y - 0.017), 0.07, 0.05, color=FLAG_COLORS[flag], transform=radio_ax.transAxes
+                (0.01, y - 0.017),
+                0.07,
+                0.05,
+                color=FLAG_COLORS[flag],
+                transform=radio_ax.transAxes,
             )
             radio_ax.add_patch(rect)
             text.set_family("serif")
@@ -899,142 +1011,152 @@ def qc_thermograph_data(
             text.set_linespacing(1)
 
         def set_current_flag_from_label(label):
-            nonlocal current_flag
-            current_flag = int(label.split(":")[0])
-            logger.info(f"Current flag set to {current_flag}")
+            state["current_flag"] = int(label.split(":")[0])
+            mtr_logger.info(f"Current flag set to {state['current_flag']}")
 
-        def click_continue(event):
-            nonlocal applied
-            applied = True
-            logger.info("Figure: Continue clicked.")
-            plt.close(fig)  # close figure and continue
+        def click_continue(event, _fig=fig):
+            state["applied"] = True
+            mtr_logger.info("Figure: Continue clicked.")
+            plt.close(_fig)  # close figure and continue
 
-        def click_exit(event):
-            nonlocal user_exited
+        def click_exit(event, _fig=fig):
             global exit_requested
-            user_exited = True
+            state["user_exited"] = True
             exit_requested = True
-            logger.info("Figure: Exit clicked (exit_requested set True).")
-            plt.close(fig)  # close figure and stop
+            mtr_logger.info("Figure: Exit clicked (exit_requested set True).")
+            plt.close(_fig)  # close figure and stop
 
-        def onselect(verts):
-            path = Path(verts)
-            selected_indices = np.nonzero(path.contains_points(xy))[0].astype(int)
+        def onselect(verts, _fig=fig, _xy=xy, _df=df, _scatter=scatter):
+            path = MplPath(verts)
+            selected_indices = np.nonzero(path.contains_points(_xy))[0].astype(int)
             if selected_indices.size == 0:
                 return
-            logger.info(
-                f"Selected {len(selected_indices)} point(s) via LASSO using current flag: {current_flag}"
+            mtr_logger.info(
+                f"Selected {len(selected_indices)} point(s) via LASSO using current flag: {state['current_flag']}"
             )
-            df.iloc[selected_indices, df.columns.get_loc("qualityflag")] = current_flag
+            _df.iloc[selected_indices, _df.columns.get_loc("qualityflag")] = state["current_flag"]
             try:
-                facecolors = scatter.get_facecolors()
-                new_rgba = np.array(mcolors.to_rgba(FLAG_COLORS[current_flag]))
+                facecolors = _scatter.get_facecolors()
+                new_rgba = np.array(mcolors.to_rgba(FLAG_COLORS[state["current_flag"]]))
                 facecolors[selected_indices] = new_rgba
-                scatter.set_facecolors(facecolors)
+                _scatter.set_facecolors(facecolors)
             except Exception:
-                colors = [FLAG_COLORS[int(f)] for f in df["qualityflag"]]
-                scatter.set_color(colors)
+                colors = [FLAG_COLORS[int(f)] for f in _df["qualityflag"]]
+                _scatter.set_color(colors)
 
-            selected_dt = df.index[selected_indices]
-            selected_temp = df["Temperature"].iloc[selected_indices].to_numpy()
+            selected_dt = _df.index[selected_indices]
+            selected_temp = _df["Temperature"].iloc[selected_indices].to_numpy()
             # Store selected points
             selected_df = pd.DataFrame(
                 {
                     "DateTime": selected_dt,
                     "Temperature": selected_temp,
                     "idx": selected_indices,
-                    "Flag": current_flag,
+                    "Flag": state["current_flag"],
                 }
             )
-            selection_groups.append(selected_df)
-            fig.canvas.draw_idle()
+            state["selection_groups"].append(selected_df)
+            _fig.canvas.draw_idle()
 
-        def click_deselect_all(event):
-            nonlocal selection_groups, df, scatter
-            selection_groups.clear()
-            logger.info("Figure: Undo Selection clicked (all selections cleared).")
-            df["qualityflag"] = qflag.copy()
+        def click_deselect_all(event, _fig=fig, _ax=ax, _xnums=xnums, _qflag=qflag,
+                               _number_of_rows=number_of_rows, _idx=idx,
+                               _mtr_files=mtr_files, _mtr_file=mtr_file):
+            state["selection_groups"].clear()
+            mtr_logger.info("Figure: Undo Selection clicked (all selections cleared).")
+            state["df"]["qualityflag"] = _qflag.copy()
             try:
-                facecolors = scatter.get_facecolors()
-                if facecolors.shape[0] != number_of_rows:
+                facecolors = state["scatter"].get_facecolors()
+                if facecolors.shape[0] != _number_of_rows:
                     colors = np.array(
-                        [mcolors.to_rgba(FLAG_COLORS[int(f)]) for f in df["qualityflag"]]
+                        [
+                            mcolors.to_rgba(FLAG_COLORS[int(f)])
+                            for f in state["df"]["qualityflag"]
+                        ]
                     )
-                    ax.cla()
-                    scatter = ax.scatter(
-                        xnums, df["Temperature"], s=12, c=colors, picker=5, zorder=2
+                    _ax.cla()
+                    state["scatter"] = _ax.scatter(
+                        _xnums, state["df"]["Temperature"], s=12, c=colors, picker=5, zorder=2
                     )
-                    ax.set_title(f"[{idx}/{len(mtr_files)}] Time Series Data- {mtr_file}")
-                    ax.set_xlabel("Date Time")
-                    ax.set_ylabel("Temperature")
-                    ax.grid(True)
+                    _ax.set_title(
+                        f"[{_idx}/{len(_mtr_files)}] Time Series Data- {_mtr_file}"
+                    )
+                    _ax.set_xlabel("Date Time")
+                    _ax.set_ylabel("Temperature")
+                    _ax.grid(True)
                 else:
                     new_rgba = np.array(
-                        [mcolors.to_rgba(FLAG_COLORS[int(f)]) for f in df["qualityflag"]]
+                        [
+                            mcolors.to_rgba(FLAG_COLORS[int(f)])
+                            for f in state["df"]["qualityflag"]
+                        ]
                     )
                     facecolors[:, :] = new_rgba
-                    scatter.set_facecolors(facecolors)
+                    state["scatter"].set_facecolors(facecolors)
             except Exception:
-                colors = [FLAG_COLORS[int(f)] for f in df["qualityflag"]]
-                scatter.set_color(colors)
-            fig.canvas.draw_idle()
+                colors = [FLAG_COLORS[int(f)] for f in state["df"]["qualityflag"]]
+                state["scatter"].set_color(colors)
+            _fig.canvas.draw_idle()
             logging.getLogger("qc_tool").info(
                 "Undo All Selections: restored original flags/colors."
             )
 
-        def on_pick(event):
+        def on_pick(event, _fig=fig, _scatter=scatter, _df=df):
             # click-to-select: event.ind are positional indices
-            if event.artist != scatter:
+            if event.artist != _scatter:
                 return
             inds = np.unique(event.ind).astype(int)
             if inds.size == 0:
                 return
-            logger.info(
-                f"Selected {len(inds)} point(s) via LASSO using current flag: {current_flag}"
+            mtr_logger.info(
+                f"Selected {len(inds)} point(s) via LASSO using current flag: {state['current_flag']}"
             )
             # apply current flag to df (positional)
-            df.iloc[inds, df.columns.get_loc("qualityflag")] = current_flag
+            _df.iloc[inds, _df.columns.get_loc("qualityflag")] = state["current_flag"]
             # update only those facecolors
             try:
-                facecolors = scatter.get_facecolors()
-                new_rgba = np.array(mcolors.to_rgba(FLAG_COLORS[current_flag]))
+                facecolors = _scatter.get_facecolors()
+                new_rgba = np.array(mcolors.to_rgba(FLAG_COLORS[state["current_flag"]]))
                 facecolors[inds] = new_rgba
-                scatter.set_facecolors(facecolors)
+                _scatter.set_facecolors(facecolors)
             except Exception:
-                colors = [FLAG_COLORS[int(f)] for f in df["qualityflag"]]
-                scatter.set_color(colors)
+                colors = [FLAG_COLORS[int(f)] for f in _df["qualityflag"]]
+                _scatter.set_color(colors)
             # record selection group
-            sel_dt = df.index[inds]
-            sel_temp = df["Temperature"].iloc[inds].to_numpy()
+            sel_dt = _df.index[inds]
+            sel_temp = _df["Temperature"].iloc[inds].to_numpy()
             sel_df = pd.DataFrame(
-                {"DateTime": sel_dt, "Temperature": sel_temp, "idx": inds, "Flag": current_flag}
+                {
+                    "DateTime": sel_dt,
+                    "Temperature": sel_temp,
+                    "idx": inds,
+                    "Flag": state["current_flag"],
+                }
             )
-            selection_groups.append(sel_df)
-            fig.canvas.draw_idle()
+            state["selection_groups"].append(sel_df)
+            _fig.canvas.draw_idle()
 
-        def export_dataframe(event):
-            nonlocal applied
-            applied = True
+        def export_dataframe(event, _mtr_file=mtr_file, _df=df):
+            state["applied"] = True
             export_path, _ = QFileDialog.getSaveFileName(
                 None,
                 "Export DataFrame to CSV",
-                f"{Path(Path.name(mtr_file)).stem}_QC_Export.csv",
+                f"{Path(Path.name(_mtr_file)).stem}_QC_Export.csv",
                 "CSV Files (*.csv);;All Files (*)",
             )
             if export_path:
                 try:
-                    df_export = df.copy()
+                    df_export = _df.copy()
                     df_export.reset_index(inplace=True)
                     df_export.rename(columns={"index": "SEQ_INDEX"}, inplace=True)
                     df_export.to_csv(export_path, index=False)
-                    logger.info(f"DataFrame exported successfully to {export_path}")
+                    mtr_logger.info(f"DataFrame exported successfully to {export_path}")
                     QMessageBox.information(
                         None,
                         "Export Successful",
                         f"✅ DataFrame exported successfully to:\n{export_path}",
                     )
                 except Exception as e:
-                    logger.error(f"Failed to export DataFrame: {e}")
+                    mtr_logger.error(f"Failed to export DataFrame: {e}")
                     QMessageBox.critical(
                         None, "Export Failed", f"❌ Failed to export DataFrame:\n{e}"
                     )
@@ -1054,12 +1176,12 @@ def qc_thermograph_data(
         btn_export_df.on_clicked(export_dataframe)
 
         # Initialize Lasso Selector
-        # lasso = LassoSelector(ax, onselect)
-        # cid = fig.canvas.mpl_connect("pick_event", on_pick)
+        _lasso = LassoSelector(ax, onselect)
+        _cid = fig.canvas.mpl_connect("pick_event", on_pick)
 
         ## Plt show non-blocking
         plt.show(block=False)
-        logger.info(
+        mtr_logger.info(
             "QC Point Selection Tips:\n"
             "- Use the Lasso tool (click and drag) to select multiple data points.\n"
             "- Single points can also be selected using a mouse click.\n"
@@ -1084,20 +1206,22 @@ def qc_thermograph_data(
             time.sleep(0.001)
 
         # After closing the plot and collecting all selection groups
-        if applied:
+        if state["applied"]:
             if len(orig_df) != len(df):
                 raise ValueError(
                     f"Size mismatch: orig_df has {len(orig_df)} rows, but df has {len(df)} rows."
                 )
 
-            if selection_groups:
+            if state["selection_groups"]:
                 combined_indices = np.unique(
-                    np.concatenate([g["idx"].to_numpy() for g in selection_groups])
+                    np.concatenate([g["idx"].to_numpy() for g in state["selection_groups"]])
                 ).astype(int)
             else:
                 combined_indices = np.array([], dtype=int)
 
-            logger.info(f"Total of {len(combined_indices)} unique points selected for flagging.")
+            mtr_logger.info(
+                f"Total of {len(combined_indices)} unique points selected for flagging."
+            )
 
             if len(combined_indices) == 0:
                 if qc_mode_code_ == 0:
@@ -1105,11 +1229,15 @@ def qc_thermograph_data(
                     orig_df["QTE90_01"] = 1
                     orig_df.loc[before_qc_mask, "QTE90_01"] = 4
                     orig_df.loc[after_qc_mask, "QTE90_01"] = 4
-                    logger.info("No points were selected for this file.")
-                    logger.info("Initial QC: applied default flags with QC window boundaries.")
+                    mtr_logger.info("No points were selected for this file.")
+                    mtr_logger.info(
+                        "Initial QC: applied default flags with QC window boundaries."
+                    )
                 elif qc_mode_code_ == 1:
                     # Review-QC Mode: no points selected → no changes made
-                    logger.info("No points were selected for this file; no changes made.")
+                    mtr_logger.info(
+                        "No points were selected for this file; no changes made."
+                    )
                     pass
 
             if len(combined_indices) > 0:
@@ -1117,33 +1245,39 @@ def qc_thermograph_data(
                     orig_df["QTE90_01"] = 1
                     orig_df.loc[before_qc_mask, "QTE90_01"] = 4
                     orig_df.loc[after_qc_mask, "QTE90_01"] = 4
-                    orig_df.iloc[combined_indices, orig_df.columns.get_loc("QTE90_01")] = df.iloc[
-                        combined_indices
-                    ]["qualityflag"].to_numpy()
-                    logger.info(
+                    orig_df.iloc[
+                        combined_indices, orig_df.columns.get_loc("QTE90_01")
+                    ] = df.iloc[combined_indices]["qualityflag"].to_numpy()
+                    mtr_logger.info(
                         f"Applied {len(combined_indices)} user-selected QC flags with window enforcement."
                     )
                 elif qc_mode_code_ == 1:
                     orig_df.loc[before_qc_mask, "QTE90_01"] = 4
                     orig_df.loc[after_qc_mask, "QTE90_01"] = 4
-                    orig_df.iloc[combined_indices, orig_df.columns.get_loc("QTE90_01")] = df.iloc[
-                        combined_indices
-                    ]["qualityflag"].to_numpy()
-                    logger.info("Review QC: updated selected points and enforced QC window.")
+                    orig_df.iloc[
+                        combined_indices, orig_df.columns.get_loc("QTE90_01")
+                    ] = df.iloc[combined_indices]["qualityflag"].to_numpy()
+                    mtr_logger.info(
+                        "Review QC: updated selected points and enforced QC window."
+                    )
 
         orig_df_after_qc = orig_df.copy()
         after_qc_flags = orig_df_after_qc["QTE90_01"].to_numpy().astype(int)
         before_qc_flags = orig_df_stored["QTE90_01"].to_numpy().astype(int)
         changed_mask = before_qc_flags != after_qc_flags
-        changed_rows = orig_df_stored.loc[changed_mask, ["SYTM_01", "TE90_01", "QTE90_01"]]
-        transitions = Counter(zip(before_qc_flags, after_qc_flags))
+        changed_rows = orig_df_stored.loc[
+            changed_mask, ["SYTM_01", "TE90_01", "QTE90_01"]
+        ]
+        transitions = Counter(zip(before_qc_flags, after_qc_flags, strict=False))
         for (before, after), count in transitions.items():
             if before != after:
-                logger.info(f"Flag Code: {before} to Flag Code: {after}: {count}")
+                mtr_logger.info(f"Flag Code: {before} to Flag Code: {after}: {count}")
         if changed_rows.empty:
-            logger.info(f"No quality flag changes were made for {mtr_file}")
+            mtr_logger.info(f"No quality flag changes were made for {mtr_file}")
         else:
-            logger.info(f"Total QC flags changed for {mtr_file}: {len(changed_rows)}")
+            mtr_logger.info(
+                f"Total QC flags changed for {mtr_file}: {len(changed_rows)}"
+            )
 
         try:
             mtr.data.data_frame = orig_df
@@ -1161,37 +1295,43 @@ def qc_thermograph_data(
             event_num = getattr(mtr.event_header, "event_number", None)
 
             if "__" in file_spec or event_num is None:
-                # Extract 0–4 digit number between underscores in the filename
+                # Extract a 0 to 4-digit number between underscores in the filename
                 fname = file_name  # remove .ODF
                 match = re.search(r"_(\d{1,4})_", fname)
                 if match:
-                    event_num = match.group(1).zfill(3)  # pad with leading zeros if needed
+                    event_num = match.group(1).zfill(
+                        3
+                    )  # pad with leading zeros if needed
                     # Insert event number into file_spec if missing
                     file_spec_parts = file_spec.split("__")
                     if len(file_spec_parts) == 2:
-                        file_spec = f"{file_spec_parts[0]}_{event_num}_{file_spec_parts[1]}"
+                        file_spec = (
+                            f"{file_spec_parts[0]}_{event_num}_{file_spec_parts[1]}"
+                        )
                     else:
                         # fallback: just append event_num if double underscore not found
                         file_spec = f"{file_spec.replace('.ODF', '')}_{event_num}.ODF"
                 else:
-                    raise ValueError(f"Could not determine event number from filename: {mtr_file}")
+                    raise ValueError(
+                        f"Could not determine event number from filename: {mtr_file}"
+                    )
 
             mtr.file_specification = file_spec
-            logger.info(f"Writing file {idx} of {len(mtr_files)}: {mtr_file}")
-            logger.info("Please wait...writing QC ODF file...")
+            mtr_logger.info(f"Writing file {idx} of {len(mtr_files)}: {mtr_file}")
+            mtr_logger.info("Please wait...writing QC ODF file...")
             out_file = pathlib.Path(out_odf_path) / f"{file_spec}.ODF"
             mtr.write_odf(str(out_file), version=2.0)
-            logger.info(f"QC completed for [{idx}/{len(mtr_files)}]: {mtr_file}")
-            logger.info(f"Saved [{idx}/{len(mtr_files)}]: {out_file}")
+            mtr_logger.info(f"QC completed for [{idx}/{len(mtr_files)}]: {mtr_file}")
+            mtr_logger.info(f"Saved [{idx}/{len(mtr_files)}]: {out_file}")
         except Exception as e:
-            logger.exception(f"Failed writing QC ODF for {mtr_file}: {e}")
+            mtr_logger.exception(f"Failed writing QC ODF for {mtr_file}: {e}")
 
     # Completed loop
     if not exit_requested and (idx == len(mtr_files)):
-        logger.info(f"QC process completed for all {len(mtr_files)} files.")
+        mtr_logger.info(f"QC process completed for all {len(mtr_files)} files.")
         batch_result_container["finished"] = True
     elif exit_requested:
-        logger.info(
+        mtr_logger.info(
             f"QC process was interrupted before completion ({idx} of {len(mtr_files)} files)"
         )
         batch_result_container["finished"] = False
@@ -1209,7 +1349,9 @@ def main_select_inputs(review_mode: bool):
         app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
-    select_inputs = select_metadata_file_and_data_folder.SubWindowOne(review_mode=review_mode)
+    select_inputs = select_metadata_file_and_data_folder.SubWindowOne(
+        review_mode=review_mode
+    )
     select_inputs.show()
 
     result_container = {
@@ -1219,6 +1361,7 @@ def main_select_inputs(review_mode: bool):
         "operator": None,
         "metadata": None,
         "batch": None,
+        "wildcard": None
     }
 
     def on_accept():
@@ -1227,6 +1370,7 @@ def main_select_inputs(review_mode: bool):
         input_path = select_inputs.input_data_folder
         output_path = select_inputs.output_data_folder
         batch_name = select_inputs.generate_batch
+        wildcard = select_inputs.wildcard
 
         if not operator or not input_path or not output_path:
             print("❌ Missing required fields.")
@@ -1238,6 +1382,7 @@ def main_select_inputs(review_mode: bool):
         result_container["output"] = output_path
         result_container["finished"] = True
         result_container["batch"] = batch_name
+        result_container["wildcard"] = wildcard
         select_inputs.close()
 
     def on_reject():
@@ -1262,6 +1407,7 @@ def main_select_inputs(review_mode: bool):
             result_container["operator"],
             result_container["metadata"],
             result_container["batch"],
+            result_container["wildcard"]
         )
     else:
         return None, None, None, None, None
@@ -1272,10 +1418,11 @@ def exit_program(app):
     Clean exit.
     """
     global exit_requested
+    global mtr_logger
     exit_requested = True
-    logger.info("Exit Program clicked — setting exit_requested and quitting.")
-    # Allow logger to flush
-    handlers = logger.handlers[:]
+    mtr_logger.info("Exit Program clicked — setting exit_requested and quitting.")
+    # Allow mtr_logger to flush
+    handlers = mtr_logger.handlers[:]
     for h in handlers:
         try:
             h.flush()
@@ -1291,31 +1438,30 @@ def start_qc_process(log_ui: LogWindowThermographQC, review_mode: bool):
     """
     global exit_requested
     exit_requested = False
-    logger.info("Start QC button clicked.")
+    mtr_logger.info("Start QC button clicked.")
 
     review_mode = log_ui.radio_opt.isChecked()
     if review_mode:
-        logger.info("Review QC Mode selected.")
+        mtr_logger.info("Review QC Mode selected.")
     else:
-        logger.info("Initial QC Mode selected.")
+        mtr_logger.info("Initial QC Mode selected.")
 
-    input_path, output_path, operator, metadata_file_path, batch_name = main_select_inputs(
-        review_mode
+    input_path, output_path, operator, metadata_file_path, batch_name, wildcard = (
+        main_select_inputs(review_mode)
     )
     if not input_path or not output_path or not operator:
-        logger.info("QC start aborted: missing input, output, or operator.")
+        mtr_logger.info("QC start aborted: missing input, output, or operator.")
         return
-    logger.info(
+    mtr_logger.info(
         "QC Inputs Selected:\n"
         f"  • QC Operator : {operator.strip().title()}\n"
         f"  • Input Path  : {input_path}\n"
         f"  • Output Path : {output_path}\n"
         f"  • Metadata    : {metadata_file_path}\n"
-        f"  • BatchName    : {batch_name}\n"
+        f"  • BatchName   : {batch_name}\n"
+        f"  • Wildcard    : {wildcard}\n"
     )
-    run_qc_thermograph_data(
-        input_path, output_path, operator, metadata_file_path, review_mode, batch_name
-    )
+    run_qc_thermograph_data(input_path, output_path, operator, metadata_file_path, review_mode, batch_name)
 
 
 def main():
@@ -1326,10 +1472,12 @@ def main():
 
     log_window = LogWindowThermographQC()
     log_window.show()
-    logger.addHandler(log_window.qtext_handler)
-    logger.info("Log window initialized.")
+    mtr_logger.addHandler(log_window.qtext_handler)
+    mtr_logger.info("Log window initialized.")
     log_window.radio_opt.toggled.connect(
-        lambda checked: logger.info(f"Radio button is {'checked' if checked else 'unchecked'}")
+        lambda checked: mtr_logger.info(
+            f"The 'Enable As QC Reviewer Mode' radio button is {'checked' if checked else 'unchecked'}"
+        )
     )
 
     # Connect buttons
@@ -1338,7 +1486,7 @@ def main():
         lambda: start_qc_process(log_window, log_window.radio_opt.isChecked())
     )
     log_window.btn_exit.clicked.connect(lambda: exit_program(app))
-    logger.info("Application started. Use Start QC to begin.")
+    mtr_logger.info("Application started. Use Start QC to begin.")
 
     # Start the Qt event loop
     sys.exit(app.exec())

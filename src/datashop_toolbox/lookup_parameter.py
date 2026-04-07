@@ -34,7 +34,7 @@ def lookup_parameter(database: str, parameter: str) -> ParamInfo:
                     result = row
 
                 column_names = [desc[0].lower() for desc in cursor.description]
-                pinfo = dict(zip(column_names, result))
+                pinfo = dict(zip(column_names, result, strict=False))
                 parameter_info["description"] = pinfo.get("description", "Unknown")
                 parameter_info["units"] = pinfo.get("units", "Unknown")
                 parameter_info["print_field_width"] = pinfo.get("print_field_width", 0)
@@ -58,7 +58,7 @@ def lookup_parameter(database: str, parameter: str) -> ParamInfo:
                         result = row
 
                     column_names = [desc[0].lower() for desc in cursor.description]
-                    pinfo = dict(zip(column_names, result))
+                    pinfo = dict(zip(column_names, result, strict=False))
                     parameter_info["description"] = pinfo.get("description", "Unknown")
                     parameter_info["units"] = pinfo.get("units", "Unknown")
                     parameter_info["print_field_width"] = pinfo.get("print_field_width", 0)

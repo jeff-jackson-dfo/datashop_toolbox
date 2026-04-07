@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import NoReturn
 
-import netcdf4 as nc
+import netCDF4 as nc
 import pandas as pd
 
 from datashop_toolbox.historyhdr import HistoryHeader
@@ -41,7 +41,7 @@ class NetCdfHeader(OdfHeader):
         parameter_list = list()
         print_formats = dict()
         number_of_rows = df.count().iloc[0]
-        for idx, column in enumerate(df):
+        for _idx, column in enumerate(df):
             parameter_header = ParameterHeader()
             number_null = int(df[column].isnull().sum())
             number_valid = int(number_of_rows - number_null)

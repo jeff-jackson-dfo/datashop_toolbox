@@ -86,18 +86,18 @@ class CompassCalHeader(ValidatedBase, BaseHeader):
                         try:
                             if BaseHeader.matches_sytm_format(value):
                                 self.calibration_date = value
-                        except ValueError:
+                        except ValueError as ve:
                             raise ValueError(
                                 f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}"
-                            )
+                            ) from ve
                     case "APPLICATION_DATE":
                         try:
                             if BaseHeader.matches_sytm_format(value):
                                 self.application_date = value
-                        except ValueError:
+                        except ValueError as ve:
                             raise ValueError(
                                 f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}"
-                            )
+                            ) from ve
                     case "DIRECTIONS":
                         self.directions = [float(x) for x in value.split()]
                     case "CORRECTIONS":

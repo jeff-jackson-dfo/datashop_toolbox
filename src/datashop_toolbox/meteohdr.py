@@ -83,13 +83,20 @@ class MeteoHeader(ValidatedBase, BaseHeader):
     def print_object(self) -> str:
         lines = [
             "METEO_HEADER",
-            f"  AIR_TEMPERATURE = {self.air_temperature if self.air_temperature == BaseHeader.NULL_VALUE else f'{self.air_temperature:.1f}'}",
-            f"  ATMOSPHERIC_PRESSURE = {self.atmospheric_pressure if self.atmospheric_pressure == BaseHeader.NULL_VALUE else f'{self.atmospheric_pressure:.1f}'}",
-            f"  WIND_SPEED = {self.wind_speed if self.wind_speed == BaseHeader.NULL_VALUE else f'{self.wind_speed:.1f}'}",
-            f"  WIND_DIRECTION = {self.wind_direction if self.wind_direction == BaseHeader.NULL_VALUE else f'{self.wind_direction:.1f}'}",
-            f"  SEA_STATE = {self.sea_state if self.sea_state == BaseHeader.NULL_VALUE else f'{self.sea_state:.0f}'}",
-            f"  CLOUD_COVER = {self.cloud_cover if self.cloud_cover == BaseHeader.NULL_VALUE else f'{self.cloud_cover:.0f}'}",
-            f"  ICE_THICKNESS = {self.ice_thickness if self.ice_thickness == BaseHeader.NULL_VALUE else f'{self.ice_thickness:.3f}'}",
+            f"  AIR_TEMPERATURE = " \
+            f"{self.air_temperature if self.air_temperature == BaseHeader.NULL_VALUE else f'{self.air_temperature:.1f}'}",  # noqa: E501
+            f"  ATMOSPHERIC_PRESSURE = " \
+            f"{self.atmospheric_pressure if self.atmospheric_pressure == BaseHeader.NULL_VALUE else f'{self.atmospheric_pressure:.1f}'}",  # noqa: E501
+            f"  WIND_SPEED = " \
+            f"{self.wind_speed if self.wind_speed == BaseHeader.NULL_VALUE else f'{self.wind_speed:.1f}'}",
+            f"  WIND_DIRECTION = " \
+            f"{self.wind_direction if self.wind_direction == BaseHeader.NULL_VALUE else f'{self.wind_direction:.1f}'}",
+            f"  SEA_STATE = " \
+            f"{self.sea_state if self.sea_state == BaseHeader.NULL_VALUE else f'{self.sea_state:.0f}'}",
+            f"  CLOUD_COVER = " \
+            f"{self.cloud_cover if self.cloud_cover == BaseHeader.NULL_VALUE else f'{self.cloud_cover:.0f}'}",
+            f"  ICE_THICKNESS = " \
+            f"{self.ice_thickness if self.ice_thickness == BaseHeader.NULL_VALUE else f'{self.ice_thickness:.3f}'}",
         ]
         if self.meteo_comments:
             for meteo_comment in self.meteo_comments:

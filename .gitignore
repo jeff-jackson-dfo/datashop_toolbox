@@ -1,18 +1,34 @@
 # Python-generated files
 __pycache__/
-*.py[oc]
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+!logs/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files
+*.btl
+*.cnv
+*.odf
+*.txt
+*.rsk
+*.xlsx
+*.xmlcon
+
+# Ignore compiled package folder
+src/datashop_toolbox.egg-info/
 build/
 dist/
 wheels/
 *.egg-info
-
-# Virtual environments
-.venv
-
-# Data files
-*.odf
-*.xmlcon
-*.xlsx
-*.txt
-*.rsk
-*.btl

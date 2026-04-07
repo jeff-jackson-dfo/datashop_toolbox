@@ -730,6 +730,8 @@ class MainWindow(QMainWindow):
 
         btl_file = self._rsk_file.split(".")[0] + '.btl'
 
+        if "conductivity" in data.columns:       
+            data['conductivity'] = data['conductivity'] / 10  # Convert from mS/cm to S/m
         if "dissolved_o2_concentration" in data.columns:       
             data['dissolved_o2_concentration'] = data['dissolved_o2_concentration'] / 44.66  # Convert from µmol/kg to ml/l
 

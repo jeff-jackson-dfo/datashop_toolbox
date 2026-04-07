@@ -1,0 +1,18 @@
+{
+    "revision": "0.21",
+    "variables": {
+        "sea_water_temperature": {
+            "global_range": {"minval": -2.5, "maxval": 45},
+            "gradient": {"threshold": 9.0},
+            "spike": {"threshold": 6.0},
+            "rate_of_change": {"threshold": 10},
+            "woa_normbias": {"threshold": 10}
+        },
+        "sea_water_salinity": {
+            "global_range": {"minval": 2.0, "maxval": 41.0},
+            "gradient": {"threshold": 1.5},
+            "spike": {"threshold": 0.9},
+            "rate_of_change": {"threshold": 6}
+        }
+    }
+}

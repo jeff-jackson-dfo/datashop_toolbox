@@ -417,7 +417,7 @@ class MultinetHeader(OdfHeader):
         if headers is not None and data is not None:
             df = pd.DataFrame(data)
             column_names = []
-            for i, column in enumerate(columns):
+            for _i, column in enumerate(columns):
                 column_names.append(column)
             df.columns = multinet.fix_column_names(column_names)
             multinet.populate_odf_headers(headers)

@@ -150,7 +150,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output += add_commas(self.cruise_header.print_object())
             odf_output += add_commas(self.event_header.print_object())
 
-            for name, header in optional_headers:
+            for _name, header in optional_headers:
                 if header is not None:
                     odf_output += add_header_output(header)
 
@@ -179,7 +179,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output += self.cruise_header.print_object() + "\n"
             odf_output += self.event_header.print_object() + "\n"
 
-            for name, header in optional_headers:
+            for _name, header in optional_headers:
                 if header is not None:
                     odf_output += add_header_output(header, use_commas=False)
 
@@ -230,7 +230,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
             data_lines_with_indices = find_lines_with_text(file_lines, substrings_to_find)
         # data_lines = List[str]
         data_line_start = -1
-        for index, line in data_lines_with_indices:
+        for index, _line in data_lines_with_indices:
             data_line_start = index + 1
 
         # Separate the header and data lines
@@ -317,6 +317,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
             self.data.populate_object(parameter_list, parameter_formats, data_lines)
         return self
 
+
     def update_odf(self) -> None:
         
         # Update the record header counts if required.
@@ -352,7 +353,6 @@ class OdfHeader(ValidatedBase, BaseHeader):
             else:
                 ph.minimum_value = min(param_data)
                 ph.maximum_value = max(param_data)
-
 
 
     def write_odf(self, odf_file_path: str, version: float = 2.0) -> None:
@@ -391,6 +391,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
         # Access the log records stored in the custom handler
         for log_entry in self.shared_log_list:
             self.add_to_history(log_entry)
+        self.shared_log_list.clear()
 
     def add_to_log(self, message: str) -> None:
         assert isinstance(message, str), "Input argumnet 'message' must be a string."
@@ -485,11 +486,11 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
     #     for i, pch in enumerate(self.polynomial_cal_headers):
 
-    #         # Find the Polynomial_Cal_Header Code in old_codes and replace it with the corresponding code from new_codes.
+    #         # Find the Polynomial_Cal_Header Code in old_codes and replace it with the corresponding code from new_codes.  # noqa: E501
     #         poly_code = pch.parameter_code
     #         try:
     #             # This poly_code may have actually been a parameter_name instead of a parameter_code.
-    #             # Check the parameter names and if there is a match then assign the parameter code as the polynomial code.
+    #             # Check the parameter names and if there is a match then assign the parameter code as the polynomial code.  # noqa: E501
     #             pnames = self.get_parameter_names()
     #             pnames = [x.replace('"', '') for x in pnames]
     #             if poly_code in pnames:
@@ -589,8 +590,10 @@ def main():
     test_creation = False
 
     if test_creation:
-        BaseHeader.reset_logging
+
         odf = OdfHeader()
+        odf.reset_log_list()
+        print(odf.shared_log_list)
 
         # Add a new History Header to record the modifications that are made.
         # odf.add_history()
@@ -737,7 +740,7 @@ def main():
         records.set_logger_and_config(odf.logger, odf.config)
         df = pd.DataFrame(
             {
-                "PRES_01": [1, 4, 7],
+                "PRES_01": [1.0, 4.0, 7.0],
                 "TEMP_01": [8.2, 5.6, 2.45],
                 "PSAL_01": [31.5, 32.0, 32.88],
             }
@@ -759,7 +762,9 @@ def main():
 
         # Prior to loading data into an Oracle database, the null values need to be replaced with None values.
         new_df = odf.null2empty(odf.data.data_frame)
-        odf.data.data_frame = new_df
+        odf.data.data_frame = new_df.copy()
+        
+        print(odf.data.data_frame.head())
 
         # Remove the CRAT_01 parameter.
         # from datashop_toolbox.remove_parameter import remove_parameter
@@ -807,10 +812,14 @@ def main():
 
         print(odf.print_object())
 
-        for log_entry in BaseHeader.shared_log_list:
+        print(BaseHeader.shared_log_list)
+
+        for log_entry in odf.shared_log_list:
             print(log_entry)
 
+    # Reading an actual ODF file and performing some manipulations on it.
     else:
+
         # Test file(s) to read in.
         # my_file = 'CTD_91001_1_1_DN.ODF'
         # my_file = 'CTD_BCD2024669_001_01_DN.ODF'
@@ -828,12 +837,13 @@ def main():
         # my_file = 'mcm_82917_20555a_20555_1200.odf'
         # my_file = 'mcm_95007_1197_4430830_900.odf'
         # my_file = 'mtr_79999_46_61036_14400.odf'
-        # my_file = 'MADCPS_BCD2004909_1544_1269-60_3600.ODF' # Fails due to bad null_value in SYTM parameter header and bad data in SYTM channel.
+        # my_file = 'MADCPS_BCD2004909_1544_1269-60_3600.ODF' # Fails due to bad null_value in SYTM parameter header and bad data in SYTM channel.  # noqa: E501
         my_file = "MCTD_CAR2023648_2264_11689_1800.ODF"
         my_path = "C:\\DFO-MPO\\DEV\\GitHub\\datashop-toolbox\\"
 
-        BaseHeader.reset_logging
         odf = OdfHeader()
+        odf.reset_log_list()
+        print(odf.shared_log_list)
 
         odf.read_odf(my_path + "tests\\ODF\\" + my_file)
 
@@ -853,6 +863,8 @@ def main():
         odf.quality_header.set_quality_test("Test 1")
         odf.quality_header.set_quality_test("Test 2")
         odf.quality_header.quality_comments = ["Comment 1", "Comment 2"]
+
+        print(odf.shared_log_list)
 
         odf.update_odf()
 

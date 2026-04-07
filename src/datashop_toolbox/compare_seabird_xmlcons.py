@@ -78,7 +78,8 @@ def main():
     os.chdir("\\")
     drive = Path.cwd()
 
-    # pathlist = ['DEV', 'Data', '2025', 'LAT2025146', 'CTD', 'DATASHOP_PROCESSING', 'Step_2_Apply_Calibrations', 'ctddata']
+    # pathlist = ['DEV', 'Data', '2025', 'LAT2025146', 'CTD', \
+    # 'DATASHOP_PROCESSING', 'Step_2_Apply_Calibrations', 'ctddata']
     pathlist = ["DEV", "GitHub", "datashop_toolbox", "tests"]
 
     # Generate the top folder path
@@ -96,7 +97,7 @@ def main():
     # df_sensors = pd.DataFrame(columns=['Event', 'Sensor', 'Index', 'SensorID', 'SerialNumber', 'CalibrationDate'])
 
     # Loop through the list of XMLCON files.
-    for x, file_name in enumerate(files):
+    for _x, file_name in enumerate(files):
         # if x == 0:
         my_df = parse_xmlcon(file_name)
         df_sensors = pd.concat([df_sensors, my_df], ignore_index=True)

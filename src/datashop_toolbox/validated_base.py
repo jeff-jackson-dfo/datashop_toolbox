@@ -57,11 +57,11 @@ class ValidatedBase(BaseModel):
             try:
                 dt = datetime.strptime(v, BaseHeader.SYTM_FORMAT)
                 return dt.strftime(BaseHeader.SYTM_FORMAT)[:-4].upper()
-            except ValueError:
+            except ValueError as err:
                 raise ValueError(
                     f"Invalid date format for {info.field_name}: {v}. "
                     f"Expected {BaseHeader.SYTM_FORMAT}"
-                )
+                ) from err
         return v
 
 
@@ -97,8 +97,8 @@ def check_datetime(value: str | None) -> str:
     try:
         dt = datetime.strptime(value, BaseHeader.SYTM_FORMAT)
         return datetime.strftime(dt, BaseHeader.SYTM_FORMAT)[:-4].upper()
-    except ValueError:
-        raise ValueError(f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}")
+    except ValueError as err:
+        raise ValueError(f"Invalid date format: {value}. Expected {BaseHeader.SYTM_FORMAT}") from err
 
 
 def is_valid_datetime(date_str: str) -> bool:
