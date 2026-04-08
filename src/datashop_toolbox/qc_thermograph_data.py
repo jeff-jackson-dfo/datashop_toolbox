@@ -1464,7 +1464,7 @@ def start_qc_process(log_ui: LogWindowThermographQC, review_mode: bool):
         f"  • BatchName   : {batch_name}\n"
         f"  • Wildcard    : {wildcard}\n"
     )
-    run_qc_thermograph_data(input_path, output_path, operator, metadata_file_path, review_mode, batch_name)
+    run_qc_thermograph_data(input_path, output_path, operator, metadata_file_path, review_mode, batch_name, wildcard)
 
 
 def main():
