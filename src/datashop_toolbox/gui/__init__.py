@@ -2,6 +2,7 @@
 
 from .odf_metadata_dialog import OdfMetadataDialog
 from .odf_metadata_form import OdfMetadataForm
+from .qc_window import QCWindow
 from .rbr_profile_plot import PlotDialog
 from .rbr_to_odf_mainwindow import MainWindow
 from .thermograph_gui_loader import ThermographMainWindow
@@ -20,5 +21,6 @@ __all__ = [
     "OdfMetadataDialog", 
     "OdfMetadataForm", 
     "PlotDialog", 
+    "QCWindow",
     "ThermographMainWindow"
 ]

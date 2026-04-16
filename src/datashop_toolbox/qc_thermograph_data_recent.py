@@ -11,14 +11,26 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pyqtgraph as pg
 import pytz
+from PySide6.QtCore import QPointF, Qt
+from PySide6.QtGui import QColor, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import (
     QApplication,
+    QButtonGroup,
+    QComboBox,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
     QMessageBox,
+    QPushButton,
+    QRadioButton,
+    QVBoxLayout,
+    QWidget,
 )
 
 from datashop_toolbox import select_metadata_file_and_data_folder
-from datashop_toolbox.gui.qc_window import QCWindow
 from datashop_toolbox.log_window import LogWindowThermographQC, SafeConsoleFilter
 from datashop_toolbox.thermograph import ThermographHeader
 
@@ -359,7 +371,12 @@ def qc_thermograph_data(
                 # Create it initialised to 0
                 orig_df[flag_col] = np.zeros(len(orig_df), dtype=int)
                 mtr_logger.info(f"Created missing flag column {flag_col} for parameter {col}")
-            display = "Temperature" if col == "TE90_01" else col
+            if col == "TE90_01":
+                display = "Temperature" 
+            elif col == 'PRES_01':
+                display = 'Pressure'
+            elif col == 'DEPH_01':
+                display = 'Depth'
             param_map[display] = (col, flag_col)
 
         # Primary temperature pair (always first)
@@ -378,6 +395,8 @@ def qc_thermograph_data(
             if display == "Temperature":
                 df["qualityflag_Temperature"] = orig_df[flag_col].to_numpy().astype(int)
             else:
+                if display == "Pressure":
+                    orig_df[data_col] = (orig_df[data_col] - 101.325) * 0.1
                 df[display] = pd.to_numeric(orig_df[data_col], errors="coerce").to_numpy()
                 df[f"qualityflag_{display}"] = orig_df[flag_col].to_numpy().astype(int)
 
@@ -885,12 +904,486 @@ def qc_thermograph_data(
             "selection_groups": [],
             "applied": False,
             "user_exited": False,
-            "exit_requested": False,
             "current_flag": 4,
-            "param_map": param_map,
+            "param_map": param_map,       # display→(data_col, flag_col)
             "active_display": "Temperature",
         })
-        # ── Instantiate QC window (class defined in qc_window.py) ────────────
+        # ── Build pyqtgraph QC window ──────────────────────────────────────────
+
+        class LassoItem(pg.GraphicsObject):
+            """Overlay that collects a freehand lasso polygon while the user
+            holds the left mouse button, then fires ``sigSelected(indices)``."""
+
+            sigSelected = pg.QtCore.Signal(object)  # emits ndarray of int indices
+
+            def __init__(self, plot_item, xs, ys):
+                super().__init__()
+                self._plot = plot_item
+                self._vb = plot_item.getViewBox()
+                self._xs = xs   # unix timestamps (data coords)
+                self._ys = ys   # temperatures (data coords)
+                self._verts_data = []   # lasso path in data coordinates
+                self._drawing = False
+                self._pen = QPen(QColor("red"), 0)   # width=0 → cosmetic (1px regardless of zoom)
+                self._pen.setStyle(Qt.DashLine)
+                plot_item.addItem(self)
+
+            # required by GraphicsObject — return the full view rect so we
+            # are always asked to paint and never culled by the scene.
+            def boundingRect(self):
+                return self._vb.viewRect()
+
+            def paint(self, p, *args):
+                if len(self._verts_data) < 2:
+                    return
+                p.setPen(self._pen)
+                path = QPainterPath()
+                path.moveTo(QPointF(self._verts_data[0][0], self._verts_data[0][1]))
+                for x, y in self._verts_data[1:]:
+                    path.lineTo(QPointF(x, y))
+                p.drawPath(path)
+
+            def _screen_to_data(self, pos):
+                """Convert a mouse event position (view-box pixels) to data coordinates."""
+                pt = self._vb.mapSceneToView(pos)
+                return pt.x(), pt.y()
+
+            def mousePressEvent(self, ev):
+                if ev.button() == Qt.LeftButton:
+                    self._verts_data = [self._screen_to_data(ev.scenePos())]
+                    self._drawing = True
+                    self.update()
+                    ev.accept()
+                else:
+                    ev.ignore()
+
+            def mouseMoveEvent(self, ev):
+                if self._drawing:
+                    self._verts_data.append(self._screen_to_data(ev.scenePos()))
+                    self.update()
+                    ev.accept()
+                else:
+                    ev.ignore()
+
+            def mouseReleaseEvent(self, ev):
+                if ev.button() == Qt.LeftButton and self._drawing:
+                    self._drawing = False
+                    self._verts_data.append(self._verts_data[0])  # close polygon
+                    self.update()
+                    self._finish()
+                    ev.accept()
+                else:
+                    ev.ignore()
+
+            def _finish(self):
+                if len(self._verts_data) < 3:
+                    self._verts_data = []
+                    self.update()
+                    return
+                poly = QPolygonF([QPointF(x, y) for x, y in self._verts_data])
+                selected = [
+                    i for i, (x, y) in enumerate(zip(self._xs, self._ys, strict=True))
+                    if poly.containsPoint(QPointF(x, y), Qt.OddEvenFill)
+                ]
+                # Clear the drawn lasso
+                self._verts_data = []
+                self.update()
+                if selected:
+                    self.sigSelected.emit(np.array(selected, dtype=int))
+
+        class QCWindow(QWidget):
+            """Main interactive QC window built on pyqtgraph."""
+
+            closed = pg.QtCore.Signal()
+
+            def __init__(self, _xnums, _df, _qflag, _colors_initial,
+                         _qc_start_ts, _qc_end_ts,
+                         _start_datetime_qc, _end_datetime_qc,
+                         _instrument, _batch_name, _qc_mode_, _qc_mode_code_,
+                         _block_next_, _idx, _mtr_files, _mtr_file,
+                         _organization, _state, _extra_params):
+                super().__init__()
+                self._xnums = _xnums
+                self._df = _df
+                self._qflag = _qflag
+                self._state = _state
+                self._mtr_file = _mtr_file
+                self._block_next_ = _block_next_
+                # _extra_params: {display_name: (data_col, flag_col)} for non-Temperature params
+                self._extra_params = _extra_params
+                self._param_map = _state.get("param_map", {"Temperature": ("TE90_01", "QTE90_01")})
+                self._y_col = "Temperature"
+                self._flag_col = "qualityflag_Temperature"  # active per-param flag column
+
+                self.setWindowTitle(
+                    f"[{_idx}/{len(_mtr_files)}] {_organization} "
+                    f"Time Series QC — {_mtr_file}"
+                )
+                self.resize(1400, 700)
+
+                # ── top-level layout ──────────────────────────────────────
+                root = QHBoxLayout(self)
+
+                # ── left: plot ────────────────────────────────────────────
+                pg.setConfigOption("background", "w")
+                pg.setConfigOption("foreground", "k")
+                self._pw = pg.PlotWidget()
+                self._pw.setLabel("bottom", "Date / Time")
+                self._pw.setLabel("left", "Temperature")
+                self._pw.showGrid(x=True, y=True, alpha=0.3)
+                self._pw.setTitle(
+                    f"[{_idx}/{len(_mtr_files)}] {_organization} "
+                    f"Time Series Data — {_mtr_file}"
+                )
+
+                # Enable mouse pan (right-drag or middle-drag) and wheel zoom
+                self._pw.setMouseEnabled(x=True, y=True)
+                self._pw.getPlotItem().setMenuEnabled(True)
+
+                # Date-time axis
+                axis = pg.DateAxisItem(orientation="bottom")
+                self._pw.setAxisItems({"bottom": axis})
+
+                # QC window shading — excluded from auto-range so it doesn't
+                # stretch the view to cover the entire epoch range.
+                lr = pg.LinearRegionItem(
+                    [_qc_start_ts, _qc_end_ts],
+                    brush=pg.mkBrush(QColor(173, 216, 230, 60)),
+                    movable=False,
+                )
+                lr.setZValue(-10)
+                self._pw.addItem(lr)
+
+                # Vertical deployment / recovery lines — also excluded from auto-range
+                vline_start = pg.InfiniteLine(
+                    pos=_qc_start_ts, angle=90,
+                    pen=pg.mkPen("b", width=2, style=Qt.DashLine),
+                    label="Deployment: Start",
+                    labelOpts={"color": "purple", "rotateAxis": (1, 0)},
+                )
+                vline_end = pg.InfiniteLine(
+                    pos=_qc_end_ts, angle=90,
+                    pen=pg.mkPen("b", width=2, style=Qt.DashLine),
+                    label="Recovered: End",
+                    labelOpts={"color": "purple", "rotateAxis": (1, 0)},
+                )
+                self._pw.addItem(vline_start)
+                self._pw.addItem(vline_end)
+
+                # Scatter plot
+                brushes = [pg.mkBrush(QColor(c)) for c in _colors_initial]
+                self._scatter = pg.ScatterPlotItem(
+                    x=_xnums,
+                    y=_df["Temperature"].to_numpy(),
+                    size=8,
+                    brush=brushes,
+                    pen=pg.mkPen(None),
+                )
+                self._pw.addItem(self._scatter)
+                self._state["scatter"] = self._scatter
+
+                # Fit view tightly to the scatter data, ignoring infinite lines / regions.
+                # Add a small margin so points aren't clipped at the edges.
+                x_margin = (_xnums.max() - _xnums.min()) * 0.03 or 86400  # fallback 1 day
+                temps = _df["Temperature"].to_numpy()
+                y_margin = (temps.max() - temps.min()) * 0.05 or 1.0
+                self._pw.setXRange(_xnums.min() - x_margin, _xnums.max() + x_margin, padding=0)
+                self._pw.setYRange(temps.min() - y_margin, temps.max() + y_margin, padding=0)
+                # Disable auto-range so InfiniteLine / LinearRegionItem don't re-expand the view
+                self._pw.getPlotItem().enableAutoRange(enable=False)
+
+                # Click-to-select
+                self._scatter.sigClicked.connect(self._on_points_clicked)
+
+                # Lasso
+                self._lasso = LassoItem(
+                    self._pw.getPlotItem(),
+                    _xnums,
+                    _df["Temperature"].to_numpy(),
+                )
+                self._lasso.sigSelected.connect(self._on_lasso_select)
+
+                # ── left column: combo + plot ─────────────────────────────
+                left_col = QVBoxLayout()
+                root.addLayout(left_col, stretch=5)
+
+                # Y-axis variable selector (only shown when extra params exist)
+                if _extra_params:
+                    y_sel_row = QHBoxLayout()
+                    y_lbl = QLabel("<b>Y-axis variable:</b>")
+                    y_lbl.setStyleSheet("font-size: 14px; font-weight: bold; color: navy;")
+                    self._y_combo = QComboBox()
+                    self._y_combo.setStyleSheet("font-size: 11px;")
+                    self._y_combo.addItem("Temperature")
+                    for display_name in _extra_params:
+                        self._y_combo.addItem(display_name)
+                    self._y_combo.currentTextChanged.connect(self._switch_y_axis)
+                    y_sel_row.addWidget(y_lbl)
+                    y_sel_row.addWidget(self._y_combo)
+                    y_sel_row.addStretch()
+                    left_col.addLayout(y_sel_row)
+
+                left_col.addWidget(self._pw)
+
+                # ── right panel ───────────────────────────────────────────
+                right = QVBoxLayout()
+                root.addLayout(right, stretch=1)
+
+                # QC Mode label
+                mode_color = "green" if _qc_mode_code_ == 0 else "magenta"
+                mode_lbl = QLabel(f"<b>QC Mode:</b><br>{_qc_mode_}")
+                mode_lbl.setStyleSheet(f"color: {mode_color}; font-size: 18px;")
+                mode_lbl.setWordWrap(True)
+                right.addWidget(mode_lbl)
+
+                # Info block
+                info_text = (
+                    f"<b>Deployed:</b> {_start_datetime_qc}<br>"
+                    f"<b>Recovered:</b> {_end_datetime_qc}<br>"
+                    f"<b>Instrument:</b> {_instrument}<br>"
+                    f"<b>Batch:</b> {_batch_name}"
+                )
+                info_lbl = QLabel(info_text)
+                info_lbl.setStyleSheet("color: navy; font-size: 16px;")
+                info_lbl.setWordWrap(True)
+                right.addWidget(info_lbl)
+
+                right.addSpacing(12)
+
+                # Radio buttons for flag selection
+                flag_box = QGroupBox("Assign Quality Codes for Selected Points:")
+                flag_box.setStyleSheet(
+                    "QGroupBox { font-weight: bold; color: navy; font-size: 18px; }"
+                )
+                flag_layout = QVBoxLayout(flag_box)
+                self._flag_group = QButtonGroup(self)
+                for k, label in FLAG_LABELS.items():
+                    rb = QRadioButton(f"{k}: {label}")
+                    color = FLAG_COLORS[k]
+                    rb.setStyleSheet(
+                        f"color: {color}; font-weight: bold; font-family: serif; font-size: 16px;"
+                    )
+                    rb.setProperty("flag_value", k)
+                    self._flag_group.addButton(rb, k)
+                    flag_layout.addWidget(rb)
+                    if k == _state["current_flag"]:
+                        rb.setChecked(True)
+                self._flag_group.idClicked.connect(self._on_flag_selected)
+                right.addWidget(flag_box)
+
+                right.addStretch()
+
+                # Store data ranges for Reset View
+                self._x_range = (_xnums.min() - x_margin, _xnums.max() + x_margin)
+                self._y_range = (temps.min() - y_margin, temps.max() + y_margin)
+
+                # Buttons
+                self._btn_reset_view = QPushButton("Reset View")
+                self._btn_reset_view.setStyleSheet(
+                    "background-color: #e8e8ff; font-size: 16px; font-weight: bold; padding: 6px;"
+                )
+                right.addWidget(self._btn_reset_view)
+
+                self._btn_undo = QPushButton("Undo All Selections")
+                self._btn_undo.setStyleSheet(
+                    "background-color: lightblue; font-size: 16px; font-weight: bold; padding: 6px;"
+                )
+                right.addWidget(self._btn_undo)
+
+                self._btn_export = QPushButton("Export DataFrame")
+                self._btn_export.setStyleSheet(
+                    "background-color: lightgrey; font-size: 16px; font-weight: bold; padding: 6px;"
+                )
+                right.addWidget(self._btn_export)
+
+                self._btn_continue = QPushButton("Continue Next >>")
+                self._btn_continue.setStyleSheet(
+                    "background-color: lightgreen; font-size: 16px; font-weight: bold; padding: 6px;"
+                )
+                if _block_next_ == 1:
+                    self._btn_continue.setEnabled(False)
+                right.addWidget(self._btn_continue)
+
+                self._btn_exit = QPushButton("Exit")
+                self._btn_exit.setStyleSheet(
+                    "background-color: salmon; font-size: 16px; font-weight: bold; padding: 6px;"
+                )
+                right.addWidget(self._btn_exit)
+
+                # Snapshot all per-param flag columns at init for undo
+                self._qflag_snapshots = {
+                    f"qualityflag_{d}": self._df[f"qualityflag_{d}"].to_numpy().copy()
+                    for d in self._param_map
+                }
+
+                # Connect buttons
+                self._btn_reset_view.clicked.connect(self._click_reset_view)
+                self._btn_undo.clicked.connect(self._click_deselect_all)
+                self._btn_export.clicked.connect(
+                    lambda: self._export_dataframe(_mtr_file)
+                )
+                self._btn_continue.clicked.connect(self._click_continue)
+                self._btn_exit.clicked.connect(self._click_exit)
+
+            # ── slots ─────────────────────────────────────────────────────
+
+            def _click_reset_view(self):
+                self._pw.setXRange(*self._x_range, padding=0)
+                self._pw.setYRange(*self._y_range, padding=0)
+
+            def _switch_y_axis(self, col_name):
+                """Replot using a different y-axis column and switch the active flag column."""
+                self._y_col = col_name
+                self._flag_col = f"qualityflag_{col_name}"
+                self._state["active_display"] = col_name
+
+                # Sync the qualityflag alias to the newly active param's flags
+                self._df["qualityflag"] = self._df[self._flag_col].copy()
+
+                ys = self._current_ys()
+                brushes = [
+                    pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+                    for f in self._df[self._flag_col]
+                ]
+                self._scatter.setData(
+                    x=self._xnums,
+                    y=ys,
+                    brush=brushes,
+                    pen=pg.mkPen(None),
+                    size=8,
+                )
+                self._lasso._ys = ys
+
+                # Refit y range
+                valid = ys[~np.isnan(ys.astype(float))]
+                if valid.size:
+                    y_margin = (valid.max() - valid.min()) * 0.05 or 1.0
+                    self._y_range = (valid.min() - y_margin, valid.max() + y_margin)
+                    self._pw.setYRange(*self._y_range, padding=0)
+                self._pw.setLabel("left", col_name)
+                mtr_logger.info(f"Y-axis switched to: {col_name} (flag col: {self._flag_col})")
+
+            def _current_ys(self):
+                """Return the y-values for whichever column is currently displayed."""
+                if self._y_col == "Temperature":
+                    return self._df["Temperature"].to_numpy()
+                return self._df[self._y_col].to_numpy() if self._y_col in self._df.columns \
+                    else self._df["Temperature"].to_numpy()
+
+            def _on_flag_selected(self, flag_id):
+                self._state["current_flag"] = flag_id
+                mtr_logger.info(f"Current flag set to {flag_id}")
+
+            def _apply_flags_to_points(self, indices):
+                flag = self._state["current_flag"]
+                # Write to the active per-param flag column
+                self._df.iloc[indices, self._df.columns.get_loc(self._flag_col)] = flag
+                # Keep alias in sync
+                self._df["qualityflag"] = self._df[self._flag_col].copy()
+                brushes = [
+                    pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+                    for f in self._df[self._flag_col]
+                ]
+                self._scatter.setBrush(brushes)
+                self._state["scatter"] = self._scatter
+
+            def _on_lasso_select(self, indices):
+                if indices.size == 0:
+                    return
+                mtr_logger.info(
+                    f"Selected {len(indices)} point(s) via LASSO using "
+                    f"current flag: {self._state['current_flag']} on {self._y_col}"
+                )
+                self._apply_flags_to_points(indices)
+                sel_dt = self._df.index[indices]
+                sel_vals = self._current_ys()[indices]
+                self._state["selection_groups"].append(pd.DataFrame({
+                    "DateTime": sel_dt,
+                    self._y_col: sel_vals,
+                    "idx": indices,
+                    "Flag": self._state["current_flag"],
+                }))
+
+            def _on_points_clicked(self, _plot, points):
+                indices = np.array([p.index() for p in points], dtype=int)
+                if indices.size == 0:
+                    return
+                mtr_logger.info(
+                    f"Selected {len(indices)} point(s) via click using "
+                    f"current flag: {self._state['current_flag']} on {self._y_col}"
+                )
+                self._apply_flags_to_points(indices)
+                sel_dt = self._df.index[indices]
+                sel_vals = self._current_ys()[indices]
+                self._state["selection_groups"].append(pd.DataFrame({
+                    "DateTime": sel_dt,
+                    self._y_col: sel_vals,
+                    "idx": indices,
+                    "Flag": self._state["current_flag"],
+                }))
+
+            def _click_deselect_all(self):
+                self._state["selection_groups"].clear()
+                mtr_logger.info("Figure: Undo Selection clicked (all selections cleared).")
+                # Restore every per-param flag column from the initial snapshot
+                for fc, snap in self._qflag_snapshots.items():
+                    self._df[fc] = snap.copy()
+                # Sync the alias to the currently active param
+                self._df["qualityflag"] = self._df[self._flag_col].copy()
+                brushes = [
+                    pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+                    for f in self._df[self._flag_col]
+                ]
+                self._scatter.setBrush(brushes)
+                self._lasso._ys = self._current_ys()
+                self._state["scatter"] = self._scatter
+                logging.getLogger("qc_tool").info(
+                    "Undo All Selections: restored original flags/colors."
+                )
+
+            def _click_continue(self):
+                self._state["applied"] = True
+                mtr_logger.info("Figure: Continue clicked.")
+                self.close()
+
+            def _click_exit(self):
+                global exit_requested
+                self._state["user_exited"] = True
+                exit_requested = True
+                mtr_logger.info("Figure: Exit clicked (exit_requested set True).")
+                self.close()
+
+            def _export_dataframe(self, _mtr_file):
+                self._state["applied"] = True
+                export_path, _ = QFileDialog.getSaveFileName(
+                    self,
+                    "Export DataFrame to CSV",
+                    f"{Path(Path.name(_mtr_file)).stem}_QC_Export.csv",
+                    "CSV Files (*.csv);;All Files (*)",
+                )
+                if export_path:
+                    try:
+                        df_export = self._df.copy()
+                        df_export.reset_index(inplace=True)
+                        df_export.rename(columns={"index": "SEQ_INDEX"}, inplace=True)
+                        df_export.to_csv(export_path, index=False)
+                        mtr_logger.info(f"DataFrame exported successfully to {export_path}")
+                        QMessageBox.information(
+                            self,
+                            "Export Successful",
+                            f"✅ DataFrame exported successfully to:\n{export_path}",
+                        )
+                    except Exception as e:
+                        mtr_logger.error(f"Failed to export DataFrame: {e}")
+                        QMessageBox.critical(
+                            self, "Export Failed", f"❌ Failed to export DataFrame:\n{e}"
+                        )
+
+            def closeEvent(self, ev):
+                self.closed.emit()
+                super().closeEvent(ev)
+
+        # ── Instantiate and show the window ───────────────────────────────
         qc_win = QCWindow(
             xnums, df, qflag, colors_initial,
             qc_start_ts, qc_end_ts,
@@ -934,14 +1427,10 @@ def qc_thermograph_data(
 
         # Wait until the window is closed, processing Qt events so the main GUI stays responsive
         app = QApplication.instance()
-        while qc_win.isVisible() and not state["exit_requested"]:
+        while qc_win.isVisible() and not exit_requested:
             if app:
                 app.processEvents()
             time.sleep(0.05)
-
-        # Propagate exit flag to module-level global (used by the outer loop)
-        if state["exit_requested"]:
-            exit_requested = True
 
         # After closing the plot and collecting all selection groups
         if state["applied"]:

@@ -4,7 +4,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QThread, Signal
+from PySide6.QtCore import QObject, Qt, QThread, Signal
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -52,6 +52,7 @@ class LogWindow(QWidget):
         self.export_button = QPushButton("Export Log")
         self.export_button.clicked.connect(self.export_log)
         self.layout().addWidget(self.export_button)
+        self._bring_to_front_and_maximize()
 
     def _append_text(self, text: str):
         # append text and auto-scroll
@@ -100,6 +101,23 @@ class LogWindow(QWidget):
         """Emit exit request to Main Application."""
         self.exit_requested.emit()
 
+    def _bring_to_front_and_maximize(self):
+            """
+            Brings the window to the front and maximizes it.
+            """
+            # Show the window if hidden
+            if not self.isVisible():
+                self.show()
+
+            # Maximize the window
+            self.showMaximized()
+
+            # Bring to front and focus
+            self.raise_()
+            self.activateWindow()
+
+            # On some OSes, you may need to force focus
+            self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
 
 class Worker(QThread):
     log = Signal(str)

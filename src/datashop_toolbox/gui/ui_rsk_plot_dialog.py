@@ -6,21 +6,28 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
-    QDialogButtonBox, QGraphicsView, QHBoxLayout, QSizePolicy,
-    QVBoxLayout, QWidget)
+from PySide6.QtCore import (
+    QCoreApplication,
+    QMetaObject,
+    Qt,
+)
+from PySide6.QtGui import (
+    QFont,
+)
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QDialogButtonBox,
+    QGraphicsView,
+    QHBoxLayout,
+    QSizePolicy,
+    QVBoxLayout,
+)
 
-class Ui_plot_dialog(object):
+
+class Ui_plot_dialog:
     def setupUi(self, plot_dialog):
         if not plot_dialog.objectName():
-            plot_dialog.setObjectName(u"plot_dialog")
+            plot_dialog.setObjectName("plot_dialog")
         plot_dialog.resize(1092, 732)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
@@ -28,16 +35,16 @@ class Ui_plot_dialog(object):
         sizePolicy.setHeightForWidth(plot_dialog.sizePolicy().hasHeightForWidth())
         plot_dialog.setSizePolicy(sizePolicy)
         self.verticalLayout_2 = QVBoxLayout(plot_dialog)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.profile_graphics_view = QGraphicsView(plot_dialog)
-        self.profile_graphics_view.setObjectName(u"profile_graphics_view")
+        self.profile_graphics_view.setObjectName("profile_graphics_view")
 
         self.verticalLayout_2.addWidget(self.profile_graphics_view)
 
         self.horizontal_layout = QHBoxLayout()
-        self.horizontal_layout.setObjectName(u"horizontal_layout")
+        self.horizontal_layout.setObjectName("horizontal_layout")
         self.save_profile_check_box = QCheckBox(plot_dialog)
-        self.save_profile_check_box.setObjectName(u"save_profile_check_box")
+        self.save_profile_check_box.setObjectName("save_profile_check_box")
         font = QFont()
         font.setPointSize(12)
         font.setBold(True)
@@ -46,7 +53,7 @@ class Ui_plot_dialog(object):
         self.horizontal_layout.addWidget(self.save_profile_check_box)
 
         self.dialog_button_box = QDialogButtonBox(plot_dialog)
-        self.dialog_button_box.setObjectName(u"dialog_button_box")
+        self.dialog_button_box.setObjectName("dialog_button_box")
         font1 = QFont()
         font1.setPointSize(11)
         font1.setBold(True)
@@ -68,7 +75,7 @@ class Ui_plot_dialog(object):
     # setupUi
 
     def retranslateUi(self, plot_dialog):
-        plot_dialog.setWindowTitle(QCoreApplication.translate("plot_dialog", u"PlotProfilesDialog", None))
-        self.save_profile_check_box.setText(QCoreApplication.translate("plot_dialog", u"SAVE PROFILE", None))
+        plot_dialog.setWindowTitle(QCoreApplication.translate("plot_dialog", "PlotProfilesDialog", None))
+        self.save_profile_check_box.setText(QCoreApplication.translate("plot_dialog", "SAVE PROFILE", None))
     # retranslateUi
 

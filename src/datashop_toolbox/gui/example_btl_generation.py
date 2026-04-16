@@ -1,6 +1,7 @@
-from enum import Enum
-from typing import Dict, List, Any, Mapping, Iterable, Optional
 import math
+from collections.abc import Iterable, Mapping
+from enum import Enum
+from typing import Any
 
 # Given widths
 print_widths = dict(
@@ -16,7 +17,7 @@ class columns(Enum):
     oxygen = "Sbeox0ML/L"
     salinity = "Sal00"
     potential_temperature = "Potemp090C"
-    sigma_theta = u"Sigma-é00"
+    sigma_theta = "Sigma-é00"
     scan = "Scan"
     pressure = "PrdM"
     conductivity = "C0S/m"
@@ -97,7 +98,7 @@ def print_btl_table(
         _pad_left("Bottle", w_sn),
         _pad_left("Date", w_dt),
     ]
-    h1.extend(_pad_left(lbl, w) for lbl, w in zip(param_labels, param_widths))
+    h1.extend(_pad_left(lbl, w) for lbl, w in zip(param_labels, param_widths, strict=True))
     print(" ".join(h1))
 
     # Line 2: Position | S/N | Time | (empty for parameters)
@@ -124,7 +125,7 @@ def print_btl_table(
             _pad_left(_fmt_value(bottle_sn), w_sn),
             _pad_left(_fmt_value(date), w_dt),
         ]
-        for lbl, w in zip(param_labels, param_widths):
+        for lbl, w in zip(param_labels, param_widths, strict=True):
             v = _fmt_value(avg.get(lbl, ""))
             # Right-align if it looks numeric, else left
             if v and all(c in "+-0123456789.eE" for c in v.strip()):
@@ -139,7 +140,7 @@ def print_btl_table(
             _pad_left("", w_sn),
             _pad_left(_fmt_value(time), w_dt),
         ]
-        for lbl, w in zip(param_labels, param_widths):
+        for lbl, w in zip(param_labels, param_widths, strict=True):
             v = _fmt_value(sdev.get(lbl, ""))
             if v and all(c in "+-0123456789.eE" for c in v.strip()):
                 sdev_cells.append(_pad_right(v, w))

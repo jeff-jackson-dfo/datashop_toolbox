@@ -13,7 +13,7 @@ from datashop_toolbox.validated_base import check_datetime
 
 # You need to run the following command to generate the ui_odf_metadata_form.py file:
 #     pyside6-uic odf_metadata_form.ui -o ui_odf_metadata_form.py
-from ui_odf_metadata_form import Ui_odf_metadata_form
+from .ui_odf_metadata_form import Ui_odf_metadata_form
 
 
 class OdfMetadataForm(QWidget):
@@ -325,7 +325,7 @@ class OdfMetadataForm(QWidget):
 
         # Dates — parsed (will raise [DATETIME] ValueError on error)
         odf.event_header.creation_date = self._parse_datetime(self.ui.creation_date_line_edit, "Creation Date")
-        odf.event_header.orig_creation_date = self._parse_datetime(self.ui.orig_creation_date_line_edit, "Original Creation Date")
+        odf.event_header.orig_creation_date = self._parse_datetime(self.ui.orig_creation_date_line_edit, "Original Creation Date")  # noqa: E501
         odf.event_header.start_date_time = self._parse_datetime(self.ui.start_date_time_line_edit, "Start Date/Time")
         odf.event_header.end_date_time = self._parse_datetime(self.ui.end_date_time_line_edit, "End Date/Time")
 

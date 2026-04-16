@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QCWindow</class>
+ <widget class="QWidget" name="QCWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1400</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Thermograph QC</string>
+  </property>
+  <!-- Root: horizontal split — left (plot area) | right (control panel) -->
+  <layout class="QHBoxLayout" name="root_layout">
+   <property name="spacing">
+    <number>6</number>
+   </property>
+   <property name="contentsMargins">
+    <number>6</number>
+    <number>6</number>
+    <number>6</number>
+    <number>6</number>
+   </property>
+
+   <!-- ═══ LEFT COLUMN: y-axis selector row + plot placeholder ═══ -->
+   <item>
+    <widget class="QWidget" name="left_widget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>5</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <layout class="QVBoxLayout" name="left_col_layout">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <property name="contentsMargins">
+       <number>0</number>
+       <number>0</number>
+       <number>0</number>
+       <number>0</number>
+      </property>
+
+      <!-- Y-axis selector row (hidden when only Temperature is available) -->
+      <item>
+       <widget class="QWidget" name="y_selector_widget">
+        <layout class="QHBoxLayout" name="y_selector_layout">
+         <property name="contentsMargins">
+          <number>0</number>
+          <number>0</number>
+          <number>0</number>
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lbl_y_axis">
+           <property name="text">
+            <string>&lt;b&gt;Y-axis variable:&lt;/b&gt;</string>
+           </property>
+           <property name="styleSheet">
+            <string>font-size: 11px; color: navy;</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="combo_y_axis">
+           <property name="styleSheet">
+            <string>font-size: 11px;</string>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumWidth">
+            <number>160</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="y_selector_spacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+
+      <!-- Plot widget placeholder — replaced at runtime with pg.PlotWidget -->
+      <item>
+       <widget class="QWidget" name="plot_container">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="plot_container_layout">
+         <property name="contentsMargins">
+          <number>0</number>
+          <number>0</number>
+          <number>0</number>
+          <number>0</number>
+         </property>
+        </layout>
+       </widget>
+      </item>
+
+     </layout>
+    </widget>
+   </item>
+
+   <!-- ═══ RIGHT PANEL: info + flags + buttons ═══ -->
+   <item>
+    <widget class="QWidget" name="right_widget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumWidth">
+      <number>220</number>
+     </property>
+     <property name="maximumWidth">
+      <number>300</number>
+     </property>
+     <layout class="QVBoxLayout" name="right_layout">
+      <property name="spacing">
+       <number>8</number>
+      </property>
+      <property name="contentsMargins">
+       <number>6</number>
+       <number>6</number>
+       <number>6</number>
+       <number>6</number>
+      </property>
+
+      <!-- QC Mode label -->
+      <item>
+       <widget class="QLabel" name="lbl_qc_mode">
+        <property name="text">
+         <string>&lt;b&gt;QC Mode:&lt;/b&gt;&lt;br&gt;—</string>
+        </property>
+        <property name="styleSheet">
+         <string>color: green; font-size: 13px;</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Deployment / instrument info -->
+      <item>
+       <widget class="QLabel" name="lbl_info">
+        <property name="text">
+         <string>—</string>
+        </property>
+        <property name="styleSheet">
+         <string>color: navy; font-size: 11px;</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Spacer between info and flag group -->
+      <item>
+       <spacer name="spacer_top">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>12</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+
+      <!-- Quality flag radio buttons group box -->
+      <item>
+       <widget class="QGroupBox" name="grp_flags">
+        <property name="title">
+         <string>Assign Quality Codes
+for Selected Points:</string>
+        </property>
+        <property name="styleSheet">
+         <string>QGroupBox { font-weight: bold; color: navy; font-size: 11px; }</string>
+        </property>
+        <layout class="QVBoxLayout" name="flags_layout">
+         <property name="spacing">
+          <number>4</number>
+         </property>
+         <!-- Radio buttons are added dynamically from FLAG_LABELS at runtime -->
+        </layout>
+       </widget>
+      </item>
+
+      <!-- Vertical spacer pushes buttons to the bottom -->
+      <item>
+       <spacer name="spacer_mid">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+
+      <!-- Reset View button -->
+      <item>
+       <widget class="QPushButton" name="btn_reset_view">
+        <property name="text">
+         <string>Reset View</string>
+        </property>
+        <property name="styleSheet">
+         <string>background-color: #e8e8ff; font-size: 10px; padding: 6px;</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Undo All Selections button -->
+      <item>
+       <widget class="QPushButton" name="btn_undo">
+        <property name="text">
+         <string>Undo All Selections</string>
+        </property>
+        <property name="styleSheet">
+         <string>background-color: lightblue; font-size: 10px; padding: 6px;</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Export DataFrame button -->
+      <item>
+       <widget class="QPushButton" name="btn_export">
+        <property name="text">
+         <string>Export DataFrame</string>
+        </property>
+        <property name="styleSheet">
+         <string>background-color: lightgrey; font-size: 10px; padding: 6px;</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Continue Next button -->
+      <item>
+       <widget class="QPushButton" name="btn_continue">
+        <property name="text">
+         <string>Continue Next &gt;&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string>background-color: lightgreen; font-size: 10px; padding: 6px;</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Exit button -->
+      <item>
+       <widget class="QPushButton" name="btn_exit">
+        <property name="text">
+         <string>Exit</string>
+        </property>
+        <property name="styleSheet">
+         <string>background-color: salmon; font-size: 10px; padding: 6px;</string>
+        </property>
+       </widget>
+      </item>
+
+     </layout>
+    </widget>
+   </item>
+
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

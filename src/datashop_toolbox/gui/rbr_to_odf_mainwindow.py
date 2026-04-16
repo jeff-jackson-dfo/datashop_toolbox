@@ -2,24 +2,20 @@
 import getpass
 import json
 import sys
-from datetime import datetime
-from icecream import ic
-from pathlib import Path
 from dataclasses import dataclass, fields
+from datetime import datetime
 from enum import Enum
+from pathlib import Path
 
 # Import external libraries
 import numpy as np
 import pandas as pd
+import seabirdscientific.processing as proc
 from pyrsktools import RSK
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QDoubleValidator
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
 from termcolor import colored
-
-import seabirdscientific.conversion as conv
-import seabirdscientific.processing as proc
-import seabirdscientific.utils as utils
 
 from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.historyhdr import HistoryHeader
@@ -29,16 +25,17 @@ from datashop_toolbox.parameterhdr import ParameterHeader
 from datashop_toolbox.read_seaodf_parameters import read_seaodf_parameters
 
 # Import custom children dialogs
-from odf_metadata_dialog import OdfMetadataDialog
-from rbr_profile_plot import PlotDialog
+from .odf_metadata_dialog import OdfMetadataDialog
+from .rbr_profile_plot import PlotDialog
 
 # Important:
 # You need to run the following command to generate the Ui_main_window.py file:
 #    pyside6-uic rbr_to_odf.ui -o Ui_main_window.py
-from ui_rbr_to_odf import Ui_main_window
+from .ui_rbr_to_odf import Ui_main_window
+
 
 @dataclass
-class BtlHeader():
+class BtlHeader:
     """Bottle header information to export BTL file."""
     ship: str
     cruise: str
@@ -302,7 +299,7 @@ class MainWindow(QMainWindow):
             rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
             profiles = rsk.getprofilesindices()
 
-            for p, profile_indices in enumerate(profiles):
+            for p, _profile_indices in enumerate(profiles):
                 fig, axes = rsk.plotprofiles(
                     channels=channels_to_plot,
                     profiles=(p, p),
@@ -509,7 +506,7 @@ class MainWindow(QMainWindow):
         with RSK(self.rsk_file_path) as rsk:
 
             rsk.readdata()
-            raw = rsk.data.copy()  # Keep a copy of the raw data if needed for reference
+            # raw = rsk.data.copy()  # Keep a copy of the raw data if needed for reference
 
             # Compute profiles once; we will query by direction below
             rsk.computeprofiles(pressureThreshold=3.0, conductivityThreshold=0.05)
@@ -581,9 +578,9 @@ class MainWindow(QMainWindow):
                     # Filter profiles to only those selected in the Plot dialog
                     profiles = [idx for i, idx in enumerate(profiles) if i in self._saved_profile_indices]
 
-                    print(colored(f"Exporting {len(profiles)} {cast_direction} profile based on user selection.", 'green'))
+                    print(colored(f"Exporting {len(profiles)} {cast_direction} profile based on user selection.", 'green'))  # noqa: E501
 
-                    for p, profile_idx in enumerate(profiles):
+                    for _p, profile_idx in enumerate(profiles):
 
                         # print(f"Profile {p} indices being exported for {cast_direction}: {profile_idx}")
 
@@ -597,10 +594,12 @@ class MainWindow(QMainWindow):
                         xr_profile_df = profile_df.to_xarray()
 
                         # Use bin_average from seabirdscientific.processing to bin the data for this profile
-                        profile_xarray = proc.bin_average(xr_profile_df, bin_variable="sea_pressure", bin_size=0.5, include_scan_count=True, cast_type=cast_type)
+                        profile_xarray = proc.bin_average(xr_profile_df, bin_variable="sea_pressure", bin_size=0.5, \
+                                                          include_scan_count=True, cast_type=cast_type)
                         binned_profile_df = profile_xarray.to_dataframe()
 
-                        binned_profile_df['sea_pressure'] = self.round_to_nearest_half(binned_profile_df['sea_pressure'])
+                        binned_profile_df['sea_pressure'] = \
+                            self.round_to_nearest_half(binned_profile_df['sea_pressure'])
 
                         # print(binned_profile_df.head())
 
@@ -713,7 +712,8 @@ class MainWindow(QMainWindow):
         # Remove the parameter "specific_conductivity" if it exists, since it is not needed for the BTL export
         if "specific_conductivity" in data.columns:
             data = data.drop("specific_conductivity", axis=1)
-        # Remove the parameter "pressure" if it exists, since it represents total atmospheric pressure and is not required for the BTL export
+        # Remove the parameter "pressure" if it exists, since it \
+        # represents total atmospheric pressure and is not required for the BTL export
         if "pressure" in data.columns:
             data = data.drop("pressure", axis=1)
 
@@ -732,8 +732,9 @@ class MainWindow(QMainWindow):
 
         if "conductivity" in data.columns:       
             data['conductivity'] = data['conductivity'] / 10  # Convert from mS/cm to S/m
-        if "dissolved_o2_concentration" in data.columns:       
-            data['dissolved_o2_concentration'] = data['dissolved_o2_concentration'] / 44.66  # Convert from µmol/kg to ml/l
+        if "dissolved_o2_concentration" in data.columns:
+            # Convert from µmol/kg to ml/l
+            data['dissolved_o2_concentration'] = data['dissolved_o2_concentration'] / 44.66  
 
         with open(btl_file, 'w') as f:
             
@@ -745,11 +746,11 @@ class MainWindow(QMainWindow):
             std_header = ''
 
             # Print header lines
-            avg_header = f"{'Bottle':>{print_widths['Bottle']}}{'Bottle':>{print_widths['Bottle_SN']}}{'Date':>{print_widths['Date_Time']}}"
-            std_header = f"{'Position':>{print_widths['Bottle']}}{'S/N':>{print_widths['Bottle_SN']}}{'Time':>{print_widths['Date_Time']}}"
+            avg_header = f"{'Bottle':>{print_widths['Bottle']}}{'Bottle':>{print_widths['Bottle_SN']}}{'Date':>{print_widths['Date_Time']}}"  # noqa: E501
+            std_header = f"{'Position':>{print_widths['Bottle']}}{'S/N':>{print_widths['Bottle_SN']}}{'Time':>{print_widths['Date_Time']}}"  # noqa: E501
 
             param_codes = list()
-            for c, column in enumerate(data.columns.to_list()):
+            for c, _column in enumerate(data.columns.to_list()):
                 toks = params[c].split("_")
                 param_code = toks[0]
                 if param_code == 'SYTM':
