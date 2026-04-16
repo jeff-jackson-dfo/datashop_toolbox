@@ -218,6 +218,52 @@ class LogWindowProcessMTR(QWidget):
         self.qtext_handler = QTextEditLogger(self.log_view)
 
 
+class LogWindowCTDQC(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("CTD QC — Log Window")
+        self.resize(900, 700)
+        layout = QVBoxLayout(self)
+
+        # Log display
+        self.log_view = QTextEdit(self)
+        self.log_view.setReadOnly(True)
+        layout.addWidget(self.log_view)
+
+        self.radio_opt = QRadioButton("Enable As QC Reviewer Mode")
+        layout.addWidget(self.radio_opt)
+
+        # Buttons
+        self.btn_start = QPushButton("Start Visual QC Process for CTD Data (ODF Files)")
+        self.btn_exit = QPushButton("Exit Program")
+
+        layout.addWidget(self.btn_start)
+        layout.addWidget(self.btn_exit)
+        self.qtext_handler = QTextEditLogger(self.log_view)
+
+
+class LogWindowProcessCTD(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("CTD Processing — Log Window")
+        self.resize(900, 700)
+        layout = QVBoxLayout(self)
+
+        # Log display
+        self.log_view = QTextEdit(self)
+        self.log_view.setReadOnly(True)
+        layout.addWidget(self.log_view)
+
+        # Buttons
+        self.btn_start = QPushButton("Start Visual Inspection of CTD ODF Files")
+        self.btn_exit = QPushButton("Exit Program")
+
+        layout.addWidget(self.btn_start)
+        layout.addWidget(self.btn_exit)
+        self.qtext_handler = QTextEditLogger(self.log_view)
+
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
