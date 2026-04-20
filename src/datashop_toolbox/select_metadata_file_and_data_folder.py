@@ -167,7 +167,6 @@ class MainWindow(QMainWindow):
         # Vertical layout for label + line edit
         v_layout1 = QVBoxLayout()
         v_layout1.addLayout(title_layout)
-        # v_layout1.addWidget(self.line_edit_title)
         v_layout1.addWidget(self.line_edit)
 
         # Vertical layout for institution label + combo box
@@ -473,12 +472,12 @@ class MainWindow(QMainWindow):
 class SubWindowOne(QMainWindow):
     def __init__(self, review_mode: bool):
         super().__init__()
-        self.meta_store_path = meta_dir / ".mtr_last_reviewer_metadata.json"
+        self.meta_store_path = meta_dir / ".last_reviewer_metadata.json"
         self.review_mode = review_mode
         if self.review_mode:
-            self.setWindowTitle("MTR QC Toolbox - ODF Quality Flagging (Review QC Mode)")
+            self.setWindowTitle("QC Toolbox - ODF Quality Flagging (Review QC Mode)")
         else:
-            self.setWindowTitle("MTR QC Toolbox - ODF Quality Flagging (Initial QC Mode)")
+            self.setWindowTitle("QC Toolbox - ODF Quality Flagging (Initial QC Mode)")
         self.resize(600, 350)
 
         self.line_edit_text = ""
