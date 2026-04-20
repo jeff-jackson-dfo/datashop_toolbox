@@ -49,6 +49,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+# from datashop_toolbox.gui.qc_window import QCWindow
 from datashop_toolbox.log_window import LogWindowCTDQC, SafeConsoleFilter
 from datashop_toolbox.odfhdr import OdfHeader  # CTD ODF reader
 
@@ -419,27 +420,12 @@ class CTDQCWindow(QWidget):
         )
         self.resize(1200, 750)
 
-        # ── Root layout: plot (left) | controls (right) ───────────────────
+        # ── Root layout: plot (left panel) | controls (right panel) ───────
         root = QHBoxLayout(self)
 
-        # ── Left: x-axis selector + plot ──────────────────────────────────
-        left_col = QVBoxLayout()
-        root.addLayout(left_col, stretch=5)
-
-        # X-axis selector
-        x_row = QHBoxLayout()
-        x_lbl = QLabel("<b>X-axis variable:</b>")
-        x_lbl.setStyleSheet("font-size: 11px; color: navy;")
-        self._x_combo = QComboBox()
-        self._x_combo.setStyleSheet("font-size: 11px;")
-        for display_name in x_param_map:
-            self._x_combo.addItem(display_name)
-        self._x_combo.setCurrentText(x_col_default)
-        self._x_combo.currentTextChanged.connect(self._switch_x_axis)
-        x_row.addWidget(x_lbl)
-        x_row.addWidget(self._x_combo)
-        x_row.addStretch()
-        left_col.addLayout(x_row)
+        # ── Left panel: profile plot ──────────────────────────────────
+        left_panel = QVBoxLayout()
+        root.addLayout(left_panel, stretch=5)
 
         # Build pyqtgraph plot
         pg.setConfigOption("background", "w")
@@ -486,18 +472,18 @@ class CTDQCWindow(QWidget):
         self._lasso.sigSelected.connect(self._on_lasso_select)
         self._scatter.sigClicked.connect(self._on_points_clicked)
 
-        left_col.addWidget(self._pw)
+        left_panel.addWidget(self._pw)
 
-        # ── Right panel ───────────────────────────────────────────────────
-        right = QVBoxLayout()
-        root.addLayout(right, stretch=1)
+        # ── Right panel - controls ────────────────────────────────────────
+        right_panel = QVBoxLayout()
+        root.addLayout(right_panel, stretch=1)
 
         # QC mode label
-        mode_color = "green" if qc_mode_code_ == 0 else "orange"
+        mode_color = "green" if qc_mode_code_ == 0 else "green"
         lbl_mode = QLabel(f"<b>QC Mode:</b><br>{qc_mode_}")
-        lbl_mode.setStyleSheet(f"color: {mode_color}; font-size: 13px;")
+        lbl_mode.setStyleSheet(f"color: {mode_color}; font-size: 16px;")
         lbl_mode.setWordWrap(True)
-        right.addWidget(lbl_mode)
+        right_panel.addWidget(lbl_mode)
 
         # File info
         lbl_info = QLabel(
@@ -506,36 +492,51 @@ class CTDQCWindow(QWidget):
             f"<b>Instrument:</b> {instrument}<br>"
             f"<b>Y-axis:</b> {pres_col}"
         )
-        lbl_info.setStyleSheet("color: navy; font-size: 11px;")
+        lbl_info.setStyleSheet("color: navy; font-size: 16px;")
         lbl_info.setWordWrap(True)
-        right.addWidget(lbl_info)
+        right_panel.addWidget(lbl_info)
 
-        right.addSpacing(12)
+        # X-axis selector
+        x_row = QHBoxLayout()
+        x_lbl = QLabel("<b>X-axis variable:</b>")
+        x_lbl.setStyleSheet("font-size: 16px; color: navy;")
+        self._x_combo = QComboBox()
+        self._x_combo.setStyleSheet("font-size: 16px; font-weight: bold;")
+        for display_name in x_param_map:
+            self._x_combo.addItem(display_name)
+        self._x_combo.setCurrentText(x_col_default)
+        self._x_combo.currentTextChanged.connect(self._switch_x_axis)
+        x_row.addWidget(x_lbl)
+        x_row.addWidget(self._x_combo)
+        x_row.addStretch()
+        right_panel.addLayout(x_row)
+
+        right_panel.addSpacing(12)
 
         # Flag radio buttons
-        grp = QGroupBox("Assign Quality Codes\nfor Selected Points:")
-        grp.setStyleSheet("QGroupBox { font-weight: bold; color: navy; font-size: 11px; }")
+        grp = QGroupBox("Assign QC for Selected Points:")
+        grp.setStyleSheet("QGroupBox { font-weight: bold; color: navy; font-size: 16px; }")
         grp_layout = QVBoxLayout(grp)
         self._flag_group = QButtonGroup(self)
         for k, label in FLAG_LABELS.items():
             rb = QRadioButton(f"{k}: {label}")
             rb.setStyleSheet(
                 f"color: {FLAG_COLORS[k]}; font-weight: bold; "
-                f"font-family: serif; font-size: 10px;"
+                f"font-family: serif; font-size: 16px;"
             )
             self._flag_group.addButton(rb, k)
             grp_layout.addWidget(rb)
             if k == state["current_flag"]:
                 rb.setChecked(True)
         self._flag_group.idClicked.connect(self._on_flag_selected)
-        right.addWidget(grp)
+        right_panel.addWidget(grp)
 
-        right.addStretch()
+        right_panel.addStretch()
 
         # Buttons
         def _btn(text, color):
             b = QPushButton(text)
-            b.setStyleSheet(f"background-color: {color}; font-size: 10px; padding: 6px;")
+            b.setStyleSheet(f"background-color: {color}; font-size: 16px; font-weight: bold; padding: 6px;")
             return b
 
         self._btn_reset = _btn("Reset View", "#e8e8ff")
@@ -549,7 +550,7 @@ class CTDQCWindow(QWidget):
 
         for b in (self._btn_reset, self._btn_undo, self._btn_export,
                   self._btn_continue, self._btn_exit):
-            right.addWidget(b)
+            right_panel.addWidget(b)
 
         self._btn_reset.clicked.connect(self._click_reset_view)
         self._btn_undo.clicked.connect(self._click_deselect_all)
@@ -859,7 +860,34 @@ def qc_ctd_data(
                 orig_df[flag_col] = np.zeros(len(orig_df), dtype=int)
                 ctd_logger.info(f"Created missing flag column {flag_col} for {col}")
             # Friendly display name
-            display = "Temperature" if col in _TEMP_CANDIDATES else col
+            if col in _TEMP_CANDIDATES:
+                display = "Temperature"
+            elif col.startswith('QCFF'):
+                continue
+            elif col.startswith('CNDC') or col.startswith('COND'):
+                display = 'Conductivity'
+            elif col.startswith('PSAL'):
+                display = 'Salinity'
+            elif col.startswith('DENS'):
+                display = 'Density'
+            elif col.startswith('SIGP'):
+                display = 'Potential Density'
+            elif col.startswith('SIGT'):
+                display = 'Density Anomaly'
+            elif col.startswith('POTM'):
+                display = 'Potential Temperature'
+            elif col.startswith('FLOR'):
+                display = 'Fluorescence'
+            elif col.startswith('CDOM'):
+                display = 'CDOM'
+            elif col.startswith('TURB'):
+                display = 'Turbidity'
+            elif col.startswith('CNTR'):
+                display = 'Scan Count'
+            elif col.startswith('SNCNTR'):
+                display = 'Count of averaged records in bin'
+            else:
+                display = col
             param_map[display] = (col, flag_col)
 
         if not param_map:

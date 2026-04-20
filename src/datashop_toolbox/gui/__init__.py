@@ -12,7 +12,7 @@ IMPORTANT DESIGN NOTES
 # ---- Lightweight dialogs (SAFE) ----
 from .odf_metadata_dialog import OdfMetadataDialog
 from .odf_metadata_form import OdfMetadataForm
-from .qc_window import QCWindow
+from .qc_window import Ui_QCWindow as QCWindow
 
 # ---- Qt Designer generated UI classes (SAFE) ----
 from .ui_odf_metadata_form import Ui_odf_metadata_form
@@ -25,7 +25,6 @@ __all__ = [
     # Dialogs
     "OdfMetadataDialog",
     "OdfMetadataForm",
-    "QCWindow",
 
     # Qt UI classes
     "Ui_main_window",
