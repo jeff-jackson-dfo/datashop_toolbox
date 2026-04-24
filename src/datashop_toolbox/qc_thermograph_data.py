@@ -1040,6 +1040,9 @@ def qc_thermograph_data(
                 self._pw.setMouseEnabled(x=True, y=True)
                 self._pw.getPlotItem().setMenuEnabled(True)
 
+                # Set to RectMode for left-click drag zooming
+                self._pw.getViewBox().setMouseMode(pg.ViewBox.RectMode) 
+
                 # Date-time axis
                 axis = pg.DateAxisItem(orientation="bottom")
                 self._pw.setAxisItems({"bottom": axis})

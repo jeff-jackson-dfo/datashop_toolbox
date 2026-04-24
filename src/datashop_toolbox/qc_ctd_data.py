@@ -49,7 +49,6 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-# from datashop_toolbox.gui.qc_window import QCWindow
 from datashop_toolbox.log_window import LogWindowCTDQC, SafeConsoleFilter
 from datashop_toolbox.odfhdr import OdfHeader  # CTD ODF reader
 
@@ -300,9 +299,24 @@ class LassoItem(pg.GraphicsObject):
         self._ys = ys
         self._verts: list[tuple[float, float]] = []
         self._drawing = False
+        self._enabled = True          # False while zoom/pan mode is active
         self._pen = QPen(QColor("red"), 0)
         self._pen.setStyle(Qt.DashLine)
         plot_item.addItem(self)
+
+    def pause(self):
+        """Disable lasso so ViewBox zoom/pan mouse events pass through."""
+        self._enabled = False
+        self._drawing = False
+        self._verts = []
+        self.update()
+        # Make this item invisible to mouse events so the ViewBox gets them
+        self.setAcceptedMouseButtons(Qt.NoButton)
+
+    def resume(self):
+        """Re-enable lasso selection mode."""
+        self._enabled = True
+        self.setAcceptedMouseButtons(Qt.LeftButton)
 
     def boundingRect(self):
         return self._vb.viewRect()
@@ -322,6 +336,9 @@ class LassoItem(pg.GraphicsObject):
         return pt.x(), pt.y()
 
     def mousePressEvent(self, ev):
+        if not self._enabled:
+            ev.ignore()
+            return
         if ev.button() == Qt.LeftButton:
             self._verts = [self._scene_to_data(ev.scenePos())]
             self._drawing = True
@@ -331,6 +348,9 @@ class LassoItem(pg.GraphicsObject):
             ev.ignore()
 
     def mouseMoveEvent(self, ev):
+        if not self._enabled:
+            ev.ignore()
+            return
         if self._drawing:
             self._verts.append(self._scene_to_data(ev.scenePos()))
             self.update()
@@ -339,6 +359,9 @@ class LassoItem(pg.GraphicsObject):
             ev.ignore()
 
     def mouseReleaseEvent(self, ev):
+        if not self._enabled:
+            ev.ignore()
+            return
         if ev.button() == Qt.LeftButton and self._drawing:
             self._drawing = False
             self._verts.append(self._verts[0])
@@ -444,6 +467,9 @@ class CTDQCWindow(QWidget):
         # Invert y-axis so pressure increases downward (surface at top)
         self._pw.getPlotItem().invertY(True)
 
+        # Convenient shorthand for the ViewBox
+        self._vb = self._pw.getViewBox()
+
         # Initial scatter: x = selected param, y = pressure
         pres = df[pres_col].to_numpy()
         xs_init = df[x_col_default].to_numpy()
@@ -539,24 +565,34 @@ class CTDQCWindow(QWidget):
             b.setStyleSheet(f"background-color: {color}; font-size: 16px; font-weight: bold; padding: 6px;")
             return b
 
-        self._btn_reset = _btn("Reset View", "#e8e8ff")
-        self._btn_undo = _btn("Undo All Selections", "lightblue")
-        self._btn_export = _btn("Export DataFrame", "lightgrey")
-        self._btn_continue = _btn("Continue Next >>", "lightgreen")
+        self._btn_lasso = _btn("⬤  Lasso", "#ffcc66")
+        self._btn_zoom_box = _btn("⬛  Zoom Box", "#9999ff")
+        self._btn_pan = _btn("✥  Pan", "#00ffcc")
+        self._btn_reset = _btn("⟲  Reset View", "#e8e8ff")
+        self._btn_undo = _btn("Undo All Selections", "#66ccff")
+        self._btn_export = _btn("Export DataFrame", "#ffb3e6")
+        self._btn_continue = _btn("Continue Next >>", "#ccff99")
         self._btn_exit = _btn("Exit", "salmon")
 
         if block_next_ == 1:
             self._btn_continue.setEnabled(False)
 
-        for b in (self._btn_reset, self._btn_undo, self._btn_export,
-                  self._btn_continue, self._btn_exit):
+        for b in (self._btn_lasso, self._btn_zoom_box, self._btn_pan, self._btn_reset,
+                  self._btn_undo, self._btn_export, self._btn_continue,
+                  self._btn_exit):
             right_panel.addWidget(b)
 
+        self._btn_lasso.clicked.connect(self._click_lasso)
+        self._btn_zoom_box.clicked.connect(self._click_zoom_box)
+        self._btn_pan.clicked.connect(self._click_pan)
         self._btn_reset.clicked.connect(self._click_reset_view)
         self._btn_undo.clicked.connect(self._click_deselect_all)
         self._btn_export.clicked.connect(lambda: self._export_dataframe(ctd_file))
         self._btn_continue.clicked.connect(self._click_continue)
         self._btn_exit.clicked.connect(self._click_exit)
+
+        # Start in lasso mode by default
+        self._click_lasso()
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -575,7 +611,55 @@ class CTDQCWindow(QWidget):
 
     # ── Slots ────────────────────────────────────────────────────────────────
 
+    # ── Interaction mode management ─────────────────────────────────────────────
+    _NAV_BTNS = None  # populated after buttons exist; see _set_button_active
+
+    def _set_button_active(self, active_btn):
+        """Highlight *active_btn* with a bold border; clear all others."""
+        nav_btns = {
+            self._btn_lasso:    "#ffcc66",
+            self._btn_zoom_box: "#9999ff",
+            self._btn_pan:      "#00ffcc",
+        }
+        for btn, color in nav_btns.items():
+            if btn is active_btn:
+                btn.setStyleSheet(
+                    f"background-color: {color}; font-size: 16px; font-weight: bold; "
+                    f"padding: 6px; border: 3px solid #222222;"
+                )
+            else:
+                btn.setStyleSheet(
+                    f"background-color: {color}; font-size: 16px; font-weight: bold; padding: 6px;"
+                )
+
+    def _click_lasso(self):
+        """Activate lasso selection mode (default)."""
+        self._lasso.resume()
+        # Return ViewBox to its neutral state so it does not steal mouse events
+        self._vb.setMouseMode(pg.ViewBox.PanMode)
+        self._vb.setMouseEnabled(x=False, y=False)
+        self._set_button_active(self._btn_lasso)
+        ctd_logger.info("Lasso mode activated.")
+
+    def _click_zoom_box(self):
+        """Activate zoom-box mode (lasso paused until Lasso button is clicked)."""
+        self._lasso.pause()
+        self._vb.setMouseEnabled(x=True, y=True)
+        self._vb.setMouseMode(pg.ViewBox.RectMode)
+        self._set_button_active(self._btn_zoom_box)
+        ctd_logger.info("Zoom Box mode activated — lasso paused.")
+
+    def _click_pan(self):
+        """Activate pan mode (lasso paused until Lasso button is clicked)."""
+        self._lasso.pause()
+        self._vb.setMouseEnabled(x=True, y=True)
+        self._vb.setMouseMode(pg.ViewBox.PanMode)
+        self._set_button_active(self._btn_pan)
+        ctd_logger.info("Pan mode activated — lasso paused.")
+
+    # ── Reset view ─────────────────────────────────────────────────────────────────
     def _click_reset_view(self):
+        # self._pw.autoRange()
         self._pw.setXRange(*self._x_range, padding=0)
         self._pw.setYRange(*self._y_range, padding=0)
 
