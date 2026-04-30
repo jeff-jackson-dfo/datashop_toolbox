@@ -307,7 +307,7 @@ class QCWindow(QWidget):
             self._xnums = xnums
             self._y_col = "Temperature"
             self._flag_col = "qualityflag_Temperature"
-        else:  # ctd
+        elif mode == "ctd":
             self._pres_col = pres_col
             self._pres_data = df[pres_col].to_numpy()
             self._x_col = x_col_default
@@ -326,7 +326,7 @@ class QCWindow(QWidget):
                 f"Time-Series QC — {current_file}"
             )
             self.resize(1400, 700)
-        else:
+        elif mode == "ctd":
             self.setWindowTitle(
                 f"[{idx}/{len(file_list)}] {organization} "
                 f"CTD Profile QC — {getattr(current_file, 'name', current_file)}"
@@ -399,7 +399,7 @@ class QCWindow(QWidget):
             # Lasso: X = timestamps, Y = Temperature
             self._lasso = LassoItem(self._pw.getPlotItem(), xnums, df["Temperature"].to_numpy())
 
-        else:  # ctd
+        elif mode == "ctd":
             self._pw.setLabel("bottom", x_col_default)
             self._pw.setLabel("left", pres_col)
             self._pw.setTitle(
@@ -454,7 +454,7 @@ class QCWindow(QWidget):
                 f"<b>Instrument:</b> {instrument}<br>"
                 f"<b>Batch:</b> {batch_name}"
             )
-        else:
+        elif mode == "ctd":
             info_html = (
                 f"<b>Station:</b> {station}<br>"
                 f"<b>Event:</b> {event_num}<br>"
@@ -486,7 +486,7 @@ class QCWindow(QWidget):
                 row.addWidget(self._axis_combo)
                 row.addStretch()
                 right_panel.addLayout(row)
-        else:
+        elif mode == "ctd":
             row = QHBoxLayout()
             lbl = QLabel("<b>X-axis variable:</b>")
             lbl.setStyleSheet("font-size: 16px; color: navy;")
@@ -666,7 +666,7 @@ class QCWindow(QWidget):
                 self._pw.setYRange(*self._y_range, padding=0)
             self._pw.setLabel("left", col_name)
 
-        else:  # ctd
+        elif self._mode == "ctd":
             self._x_col = col_name
             xs = self._current_xs()
             self._scatter.setData(
@@ -755,7 +755,7 @@ class QCWindow(QWidget):
         self._scatter.setBrush(brushes)
         if self._mode == "thermograph":
             self._lasso._ys = self._current_ys()
-        else:
+        elif self._mode == "ctd":
             self._lasso._xs = self._current_xs()
         self._state["scatter"] = self._scatter
 
@@ -1281,9 +1281,7 @@ def qc_thermograph_data(
 
         orig_df = mtr.data.data_frame
         orig_df_stored = orig_df.copy()
-        orig_df = orig_df.copy()
-        orig_df.reset_index(drop=True, inplace=True)
-        orig_df = pd.DataFrame(orig_df)
+        orig_df = pd.DataFrame(orig_df).reset_index(drop=True)
 
         temp = orig_df["TE90_01"].to_numpy()
         sytm = orig_df["SYTM_01"].str.lower().str.strip("'")
@@ -1316,9 +1314,9 @@ def qc_thermograph_data(
                 display = col
             param_map[display] = (col, flag_col)
 
-        _primary_data_col, _primary_flag_col = param_map.get(
-            "Temperature", ("TE90_01", "QTE90_01")
-        )
+        # _primary_data_col, _primary_flag_col = param_map.get(
+        #     "Temperature", ("TE90_01", "QTE90_01")
+        # )
         # qflag = orig_df[_primary_flag_col].to_numpy().astype(int)
 
         try:
@@ -1670,25 +1668,37 @@ def qc_thermograph_data(
             logger.info(f"Total of {len(combined_indices)} unique points flagged.")
             for display, (_data_col, flag_col) in param_map.items():
                 df_flag_col = f"qualityflag_{display}"
-                if len(combined_indices) == 0:
-                    if qc_mode_code_ == 0:
-                        orig_df[flag_col] = 1
-                        orig_df.loc[before_qc_mask, flag_col] = 4
-                        orig_df.loc[after_qc_mask, flag_col] = 4
-                else:
-                    if qc_mode_code_ == 0:
-                        orig_df[flag_col] = 1
-                        orig_df.loc[before_qc_mask, flag_col] = 4
-                        orig_df.loc[after_qc_mask, flag_col] = 4
-                        orig_df.iloc[combined_indices,
-                                     orig_df.columns.get_loc(flag_col)] = \
-                            df.iloc[combined_indices][df_flag_col].to_numpy()
-                    elif qc_mode_code_ == 1:
-                        orig_df.loc[before_qc_mask, flag_col] = 4
-                        orig_df.loc[after_qc_mask, flag_col] = 4
-                        orig_df.iloc[combined_indices,
-                                     orig_df.columns.get_loc(flag_col)] = \
-                            df.iloc[combined_indices][df_flag_col].to_numpy()
+                if qc_mode_code_ == 0:
+                    orig_df[flag_col] = 1
+                orig_df.loc[before_qc_mask, flag_col] = 4
+                orig_df.loc[after_qc_mask, flag_col] = 4
+                if len(combined_indices) > 0:
+                    orig_df.iloc[combined_indices,
+                                    orig_df.columns.get_loc(flag_col)] = \
+                        df.iloc[combined_indices][df_flag_col].to_numpy()
+
+            # Propagate pressure/depth flags to all other parameters.
+            # Where the pressure or depth flag is higher than a parameter's own
+            # flag, raise the parameter flag to match.
+            pres_display = next(
+                (d for d in ("Pressure", "Depth") if d in param_map), None
+            )
+            if pres_display is not None:
+                _pres_flag_col = param_map[pres_display][1]
+                pres_flags = orig_df[_pres_flag_col].to_numpy().astype(int)
+                for display, (_data_col, flag_col) in param_map.items():
+                    if display == pres_display:
+                        continue
+                    param_flags = orig_df[flag_col].to_numpy().astype(int)
+                    elevated = pres_flags > param_flags
+                    if elevated.any():
+                        orig_df.loc[elevated, flag_col] = pres_flags[elevated]
+                        logger.info(
+                            f"  [{display} / {flag_col}] {elevated.sum()} row(s) "
+                            f"elevated to match {pres_display} flag."
+                        )
+            else:
+                logger.debug("No Pressure or Depth parameter found; skipping flag propagation.")
 
         # Log flag changes
         orig_df_after_qc = orig_df.copy()
@@ -1810,9 +1820,7 @@ def qc_ctd_data(
 
         orig_df = ctd.data.data_frame
         orig_df_stored = orig_df.copy()
-        orig_df = orig_df.copy()
-        orig_df.reset_index(drop=True, inplace=True)
-        orig_df = pd.DataFrame(orig_df)
+        orig_df = pd.DataFrame(orig_df).reset_index(drop=True)
 
         # Filename verification
         file_name = f"{ctd.generate_file_spec()}.ODF"
@@ -1873,6 +1881,12 @@ def qc_ctd_data(
                 display = "Density Anomaly"
             elif col.startswith("POTM"):
                 display = "Potential Temperature"
+            elif col.startswith("DOXY"):
+                display = "Dissolved Oxygen"
+            elif col.startswith("OSAT"):
+                display = "Oxygen Saturation"
+            elif col.startswith("OXYV"):
+                display = "Oxygen Voltage"
             elif col.startswith("FLOR"):
                 display = "Fluorescence"
             elif col.startswith("CDOM"):
@@ -2024,15 +2038,10 @@ def qc_ctd_data(
                     df_fc = f"qualityflag_{display}"
                     if qc_mode_code_ == 0:
                         orig_df[flag_col] = 1
-                        if len(combined_indices) > 0:
-                            orig_df.iloc[combined_indices,
-                                         orig_df.columns.get_loc(flag_col)] = \
-                                df.iloc[combined_indices][df_fc].to_numpy()
-                    elif qc_mode_code_ == 1:
-                        if len(combined_indices) > 0:
-                            orig_df.iloc[combined_indices,
-                                         orig_df.columns.get_loc(flag_col)] = \
-                                df.iloc[combined_indices][df_fc].to_numpy()
+                    if len(combined_indices) > 0:
+                        orig_df.iloc[combined_indices,
+                                        orig_df.columns.get_loc(flag_col)] = \
+                            df.iloc[combined_indices][df_fc].to_numpy()
 
         # Log flag changes
         orig_df_after = orig_df.copy()
