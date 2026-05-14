@@ -49,6 +49,7 @@ import numpy as np
 import pandas as pd
 import pyqtgraph as pg
 import pytz
+from icecream import ic
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import (
@@ -123,6 +124,7 @@ FLAG_LABELS: dict[int, str] = {
     3: "Doubtful",
     4: "Erroneous",
     5: "Modified",
+    9: "Missing",
 }
 
 FLAG_COLORS: dict[int, str] = {
@@ -132,6 +134,7 @@ FLAG_COLORS: dict[int, str] = {
     3: "#8B008B",
     4: "#FF0000",
     5: "#00008B",
+    9: "#99ffff",
 }
 
 # Preferred column name candidates for CTD pressure/depth and temperature
@@ -346,6 +349,7 @@ class QCWindow(QWidget):
         self._vb = self._pw.getViewBox()
 
         if mode == "thermograph":
+
             self._pw.setLabel("bottom", "Date / Time")
             self._pw.setLabel("left", "Temperature")
             self._pw.setTitle(
@@ -400,6 +404,7 @@ class QCWindow(QWidget):
             self._lasso = LassoItem(self._pw.getPlotItem(), xnums, df["Temperature"].to_numpy())
 
         elif mode == "ctd":
+
             self._pw.setLabel("bottom", x_col_default)
             self._pw.setLabel("left", pres_col)
             self._pw.setTitle(
@@ -411,8 +416,11 @@ class QCWindow(QWidget):
             pres = self._pres_data
             xs_init = df[x_col_default].to_numpy()
             brushes = [pg.mkBrush(QColor(c)) for c in (colors_initial or [])]
-            self._scatter = pg.ScatterPlotItem(
-                x=xs_init, y=pres, size=8, brush=brushes, pen=pg.mkPen(None),
+            self._scatter = pg.PlotDataItem(
+                x=xs_init, y=pres,
+                symbol="o", symbolSize=8, symbolBrush=brushes,
+                symbolPen=pg.mkPen(None), pen=pg.mkPen("k", width=1),
+                connect="finite",
             )
             self._pw.addItem(self._scatter)
             self._state["scatter"] = self._scatter
@@ -427,8 +435,10 @@ class QCWindow(QWidget):
             # Lasso: X = param, Y = pressure
             self._lasso = LassoItem(self._pw.getPlotItem(), xs_init, pres)
 
-        # Wire up selection signals
-        self._scatter.sigClicked.connect(self._on_points_clicked)
+        # Wire up selection signals — PlotDataItem (CTD) exposes clicks via its
+        # internal ScatterPlotItem; ScatterPlotItem (thermograph) exposes them directly.
+        scatter_for_clicks = self._scatter.scatter if self._mode == "ctd" else self._scatter
+        scatter_for_clicks.sigClicked.connect(self._on_points_clicked)
         self._lasso.sigSelected.connect(self._on_lasso_select)
 
         # ── Left panel ─────────────────────────────────────────────────────
@@ -470,6 +480,7 @@ class QCWindow(QWidget):
 
         # ── Axis-variable selector (mode-specific) ─────────────────────────
         if mode == "thermograph":
+
             extra_params = {d: v for d, v in self._param_map.items()
                             if d != "Temperature"}
             if extra_params:
@@ -486,7 +497,9 @@ class QCWindow(QWidget):
                 row.addWidget(self._axis_combo)
                 row.addStretch()
                 right_panel.addLayout(row)
+
         elif mode == "ctd":
+
             row = QHBoxLayout()
             lbl = QLabel("<b>X-axis variable:</b>")
             lbl.setStyleSheet("font-size: 16px; color: navy;")
@@ -567,7 +580,11 @@ class QCWindow(QWidget):
     # Helpers
     # =======================================================================
     @staticmethod
-    def _compute_margins(xs, ys):
+    def _compute_margins(xs: np.ndarray, ys: np.ndarray):
+        xs_mask = ~np.isnan(xs)
+        xs = xs[xs_mask]
+        ys_mask = ~np.isnan(ys)
+        ys = ys[ys_mask]
         xm = (xs.max() - xs.min()) * 0.05 if xs.size > 1 else 1.0
         ym = (ys.max() - ys.min()) * 0.05 if ys.size > 1 else 1.0
         return xm or 0.5, ym or 0.5
@@ -583,7 +600,7 @@ class QCWindow(QWidget):
         """X-values for the current scatter (thermograph: timestamps; CTD: param)."""
         if self._mode == "thermograph":
             return self._xnums
-        col = self._x_col
+        col = self._x_col        
         return (
             self._df[col].to_numpy() if col in self._df.columns
             else self._df.iloc[:, 0].to_numpy()
@@ -653,6 +670,7 @@ class QCWindow(QWidget):
         ]
 
         if self._mode == "thermograph":
+            
             self._y_col = col_name
             ys = self._current_ys()
             self._scatter.setData(
@@ -667,15 +685,23 @@ class QCWindow(QWidget):
             self._pw.setLabel("left", col_name)
 
         elif self._mode == "ctd":
+
             self._x_col = col_name
             xs = self._current_xs()
+            # xs_mask = np.isfinite(xs)
+            # xs = xs[xs_mask]
+            # self._pres_data = self._pres_data[xs]
             self._scatter.setData(
-                x=xs, y=self._pres_data, brush=brushes, pen=pg.mkPen(None), size=8,
+                x=xs, y=self._pres_data,
+                symbolBrush=brushes, symbolPen=pg.mkPen(None), symbolSize=8,
+                pen=pg.mkPen("k", width=1),
             )
             self._lasso._xs = xs
             self._lasso._ys = self._pres_data
             x_margin, _ = self._compute_margins(xs, self._pres_data)
-            self._x_range = (xs.min() - x_margin, xs.max() + x_margin)
+            xs_mask = ~np.isnan(xs)
+            temp_xs = xs[xs_mask]
+            self._x_range = (temp_xs.min() - x_margin, temp_xs.max() + x_margin)
             self._pw.setXRange(*self._x_range, padding=0)
             self._pw.setLabel("bottom", col_name)
 
@@ -696,7 +722,10 @@ class QCWindow(QWidget):
             pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
             for f in self._df[self._flag_col]
         ]
-        self._scatter.setBrush(brushes)
+        if self._mode == "ctd":
+            self._scatter.scatter.setBrush(brushes)
+        else:
+            self._scatter.setBrush(brushes)
         self._state["scatter"] = self._scatter
 
     # =======================================================================
@@ -752,7 +781,10 @@ class QCWindow(QWidget):
             pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
             for f in self._df[self._flag_col]
         ]
-        self._scatter.setBrush(brushes)
+        if self._mode == "ctd":
+            self._scatter.scatter.setBrush(brushes)
+        else:
+            self._scatter.setBrush(brushes)
         if self._mode == "thermograph":
             self._lasso._ys = self._current_ys()
         elif self._mode == "ctd":
@@ -1226,6 +1258,10 @@ def _validate_bio_metadata(meta: pd.DataFrame) -> bool:
         return False
     return True
 
+# Replace all ODF null values in the dataframe with np.nan
+def _null_to_na(df: pd.DataFrame) -> pd.DataFrame:
+    return df.replace(-99.0, np.nan)
+    
 
 # ===========================================================================
 # Thermograph QC core loop
@@ -1280,6 +1316,16 @@ def qc_thermograph_data(
             continue
 
         orig_df = mtr.data.data_frame
+
+        # Deal with nulls and nans
+        orig_df = _null_to_na(orig_df)
+        for col in orig_df.columns:
+            # Create mask for finite values (not nan, not inf)
+            finite_mask = np.isfinite(orig_df[col])
+
+            # Apply mask
+            orig_df[col] = orig_df[col][finite_mask]
+
         orig_df_stored = orig_df.copy()
         orig_df = pd.DataFrame(orig_df).reset_index(drop=True)
 
@@ -1313,11 +1359,6 @@ def qc_thermograph_data(
             else:
                 display = col
             param_map[display] = (col, flag_col)
-
-        # _primary_data_col, _primary_flag_col = param_map.get(
-        #     "Temperature", ("TE90_01", "QTE90_01")
-        # )
-        # qflag = orig_df[_primary_flag_col].to_numpy().astype(int)
 
         try:
             dt = pd.to_datetime(sytm, format="%d-%b-%Y %H:%M:%S.%f")
@@ -1819,6 +1860,7 @@ def qc_ctd_data(
             continue
 
         orig_df = ctd.data.data_frame
+        orig_df = _null_to_na(orig_df)
         orig_df_stored = orig_df.copy()
         orig_df = pd.DataFrame(orig_df).reset_index(drop=True)
 
@@ -1889,10 +1931,12 @@ def qc_ctd_data(
                 display = "Oxygen Voltage"
             elif col.startswith("FLOR"):
                 display = "Fluorescence"
+                print(col)
             elif col.startswith("CDOM"):
                 display = "CDOM"
             elif col.startswith("TURB"):
                 display = "Turbidity"
+                print(col)
             elif col.startswith("CNTR"):
                 display = "Scan Count"
             elif col.startswith("SNCNTR"):
@@ -1913,7 +1957,10 @@ def qc_ctd_data(
         df = pd.DataFrame({pres_col: pres_arr})
         for display, (data_col, flag_col) in param_map.items():
             df[display] = pd.to_numeric(orig_df[data_col], errors="coerce").to_numpy()
+            ic(df[display])
             df[f"qualityflag_{display}"] = orig_df[flag_col].to_numpy().astype(int)
+
+        print(df.head())
 
         x_col_default = "Temperature" if "Temperature" in param_map else next(iter(param_map))
         df["qualityflag"] = df[f"qualityflag_{x_col_default}"].copy()
@@ -2046,7 +2093,7 @@ def qc_ctd_data(
         # Log flag changes
         orig_df_after = orig_df.copy()
         total_changed = 0
-        for display, (_data_col, flag_col) in param_map.items():
+        for display, (data_col, flag_col) in param_map.items():
             if flag_col not in orig_df_stored.columns:
                 continue
             after = orig_df_after[flag_col].to_numpy().astype(int)
@@ -2055,13 +2102,13 @@ def qc_ctd_data(
             n = mask.sum()
             total_changed += n
             if n > 0:
-                logger.info(f"  [{display} / {flag_col}] {n} flag(s) changed:")
+                logger.info(f"  [{display} / {data_col} / {flag_col}] {n} flag(s) changed:")
                 for (b, a), cnt in Counter(
                     zip(before[mask], after[mask], strict=True)
                 ).items():
                     logger.info(f"    Flag {b} → {a}: {cnt}")
             else:
-                logger.info(f"  [{display} / {flag_col}] No changes.")
+                logger.info(f"  [{display} / {data_col} / {flag_col}] No changes.")
         if total_changed == 0:
             logger.info(f"No quality flag changes for {ctd_file}")
         else:
