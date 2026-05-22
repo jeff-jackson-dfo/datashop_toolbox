@@ -129,12 +129,12 @@ FLAG_LABELS: dict[int, str] = {
 
 FLAG_COLORS: dict[int, str] = {
     0: "#808080",
-    1: "#02590F",
-    2: "#B59410",
-    3: "#8B008B",
+    1: "#158726",
+    2: "#AFB10D",
+    3: "#E28112",
     4: "#FF0000",
     5: "#00008B",
-    9: "#99ffff",
+    9: "#8B008B",
 }
 
 # Preferred column name candidates for CTD pressure/depth and temperature
@@ -452,7 +452,7 @@ class QCWindow(QWidget):
 
         # QC mode label
         lbl_mode = QLabel(f"<b>QC Mode:</b><br>{qc_mode_}")
-        lbl_mode.setStyleSheet("color: green; font-size: 16px;")
+        lbl_mode.setStyleSheet("color: green;")
         lbl_mode.setWordWrap(True)
         right_panel.addWidget(lbl_mode)
 
@@ -472,7 +472,7 @@ class QCWindow(QWidget):
                 f"<b>Y-axis:</b> {pres_col}"
             )
         lbl_info = QLabel(info_html)
-        lbl_info.setStyleSheet("color: navy; font-size: 16px;")
+        lbl_info.setStyleSheet("color: navy;")
         lbl_info.setWordWrap(True)
         right_panel.addWidget(lbl_info)
 
@@ -486,9 +486,8 @@ class QCWindow(QWidget):
             if extra_params:
                 row = QHBoxLayout()
                 lbl = QLabel("<b>Y-axis variable:</b>")
-                lbl.setStyleSheet("font-size: 14px; font-weight: bold; color: navy;")
+                lbl.setStyleSheet("font-weight: bold; color: navy;")
                 self._axis_combo = QComboBox()
-                self._axis_combo.setStyleSheet("font-size: 16px;")
                 self._axis_combo.addItem("Temperature")
                 for name in extra_params:
                     self._axis_combo.addItem(name)
@@ -502,9 +501,9 @@ class QCWindow(QWidget):
 
             row = QHBoxLayout()
             lbl = QLabel("<b>X-axis variable:</b>")
-            lbl.setStyleSheet("font-size: 16px; color: navy;")
+            lbl.setStyleSheet("color: navy;")
             self._axis_combo = QComboBox()
-            self._axis_combo.setStyleSheet("font-size: 16px; font-weight: bold;")
+            self._axis_combo.setStyleSheet("font-weight: bold;")
             for name in self._param_map:
                 self._axis_combo.addItem(name)
             self._axis_combo.setCurrentText(x_col_default)
@@ -518,14 +517,14 @@ class QCWindow(QWidget):
 
         # ── Flag radio buttons ─────────────────────────────────────────────
         grp = QGroupBox("Assign Quality Codes for Selected Points:")
-        grp.setStyleSheet("QGroupBox { font-weight: bold; color: navy; font-size: 16px; }")
+        grp.setStyleSheet("QGroupBox { font-weight: bold; color: navy; }")
         grp_layout = QVBoxLayout(grp)
         self._flag_group = QButtonGroup(self)
         for k, label in FLAG_LABELS.items():
             rb = QRadioButton(f"{k}: {label}")
             rb.setStyleSheet(
                 f"color: {FLAG_COLORS[k]}; font-weight: bold; "
-                f"font-family: serif; font-size: 16px;"
+                f"font-family: serif;"
             )
             rb.setProperty("flag_value", k)
             self._flag_group.addButton(rb, k)
@@ -541,7 +540,7 @@ class QCWindow(QWidget):
         def _btn(text, color):
             b = QPushButton(text)
             b.setStyleSheet(
-                f"background-color: {color}; font-size: 16px; "
+                f"background-color: {color}; "
                 f"font-weight: bold; padding: 6px;"
             )
             return b
@@ -627,10 +626,10 @@ class QCWindow(QWidget):
         }
         for btn, color in nav.items():
             style = (
-                f"background-color: {color}; font-size: 16px; font-weight: bold; "
+                f"background-color: {color}; font-weight: bold; "
                 f"padding: 6px; border: 3px solid #222222;"
                 if btn is active_btn else
-                f"background-color: {color}; font-size: 16px; font-weight: bold; padding: 6px;"
+                f"background-color: {color}; font-weight: bold; padding: 6px;"
             )
             btn.setStyleSheet(style)
 
@@ -1081,7 +1080,7 @@ class LogWindow(QWidget):
 
         # ── Data-type selector ────────────────────────────────────────────
         dtype_box = QGroupBox("Data Type")
-        dtype_box.setStyleSheet("QGroupBox { font-weight: bold; font-size: 14px; }")
+        dtype_box.setStyleSheet("QGroupBox { font-weight: bold; }")
         dtype_layout = QHBoxLayout(dtype_box)
         self._rb_thermograph = QRadioButton("Thermograph / MTR (time-series)")
         self._rb_ctd = QRadioButton("CTD (profile)")
@@ -1092,7 +1091,7 @@ class LogWindow(QWidget):
 
         # ── QC mode selector ──────────────────────────────────────────────
         mode_box = QGroupBox("QC Mode")
-        mode_box.setStyleSheet("QGroupBox { font-weight: bold; font-size: 14px; }")
+        mode_box.setStyleSheet("QGroupBox { font-weight: bold; }")
         mode_layout = QHBoxLayout(mode_box)
         self.radio_opt = QRadioButton("Enable As QC Reviewer Mode")
         self.radio_initial = QRadioButton("Initial QC Mode")
@@ -1104,19 +1103,19 @@ class LogWindow(QWidget):
         # ── Log area ──────────────────────────────────────────────────────
         self._log_edit = QTextEdit()
         self._log_edit.setReadOnly(True)
-        self._log_edit.setStyleSheet("font-family: Courier; font-size: 12px;")
+        self._log_edit.setStyleSheet("font-family: Courier; ")
         layout.addWidget(self._log_edit)
 
         # ── Control buttons ───────────────────────────────────────────────
         btn_row = QHBoxLayout()
         self.btn_start = QPushButton("▶  Start Visual QC Process")
         self.btn_start.setStyleSheet(
-            "background-color: #4CAF50; color: white; font-size: 16px; "
+            "background-color: #4CAF50; color: white; "
             "font-weight: bold; padding: 8px;"
         )
         self.btn_exit = QPushButton("✖  Exit Program")
         self.btn_exit.setStyleSheet(
-            "background-color: salmon; font-size: 16px; font-weight: bold; padding: 8px;"
+            "background-color: salmon; font-weight: bold; padding: 8px;"
         )
         btn_row.addWidget(self.btn_start)
         btn_row.addWidget(self.btn_exit)
@@ -1319,12 +1318,11 @@ def qc_thermograph_data(
 
         # Deal with nulls and nans
         orig_df = _null_to_na(orig_df)
-        for col in orig_df.columns:
+        # for col in orig_df.columns:
             # Create mask for finite values (not nan, not inf)
-            finite_mask = np.isfinite(orig_df[col])
-
+            # finite_mask = np.isfinite(orig_df[col])
             # Apply mask
-            orig_df[col] = orig_df[col][finite_mask]
+            # orig_df[col] = orig_df[col][finite_mask]
 
         orig_df_stored = orig_df.copy()
         orig_df = pd.DataFrame(orig_df).reset_index(drop=True)
