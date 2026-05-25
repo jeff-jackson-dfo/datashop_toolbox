@@ -1,13 +1,10 @@
-from datetime import datetime, timedelta
-import re
-import os
-import logging
-import struct
-from importlib import resources
 import json
-from numpy.lib import recfunctions as rfn
-import gsw
-
+import logging
+import os
+import re
+import struct
+from datetime import datetime, timedelta
+from importlib import resources
 
 try:
     import hashlib
@@ -652,9 +649,9 @@ class fCNV(CNV):
 
         try:
             # Python 3 requires this.
-            f = open(filename, "r", encoding="utf-8", errors="replace")
+            f = open(filename, encoding="utf-8", errors="replace")
         except:
-            f = open(filename, "r")
+            f = open(filename)
         text = f.read()
         f.close()
 
@@ -685,6 +682,7 @@ def main(my_string: str) -> None:
     # print(my_string)
 
     import os
+
     from seabird.cnv import fCNV
 
     root = os.getcwd()

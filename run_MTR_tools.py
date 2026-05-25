@@ -1,6 +1,7 @@
+from datashop_toolbox.qc_thermograph_data_old import main as qc_thermograph_data
+
 from datashop_toolbox.ai_thermograph_data import main as ai_thermograph_data
 from datashop_toolbox.process_mtr_files import main as process_mtr_files
-from datashop_toolbox.qc_thermograph_data_old import main as qc_thermograph_data
 
 
 def main():

@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 
 """Resources related to QC configuration
 """
 
-from collections import OrderedDict
 import copy
 import json
 import logging
 import os
+from collections import OrderedDict
 from importlib import resources
 
 from .utils import cotederc
@@ -131,7 +130,7 @@ def load_cfg(cfgname="cotede"):
                 f"{cfgname}.json",
             )
 
-            with open(user_cfg_path, "r", encoding="utf-8") as f:
+            with open(user_cfg_path, encoding="utf-8") as f:
                 cfg = json.load(f, object_pairs_hook=OrderedDict)
 
             module_logger.debug("User collection cfg - %s", cfgname)
@@ -327,7 +326,7 @@ def convert_021_to_022(cfg):
                     elif (len(f_cfg) == 3):
                         f_cfg = {"type": "trimf", "params": f_cfg}
                     else:
-                        assert (False), "Can't guess membership shape"
+                        raise AssertionError("Can't guess membership shape")
                 cfg["variables"][v][procedure]["output"][o] = f_cfg
 
             for f in cfg["variables"][v][procedure]["features"]:
@@ -338,7 +337,7 @@ def convert_021_to_022(cfg):
                     elif len(f_cfg["low"]) == 3:
                         f_cfg["low"] = {"type": "trimf", "params": f_cfg["low"]}
                     else:
-                        assert False, "Can't guess membership shape"
+                        raise AssertionError("Can't guess membership shape")
                 if ("medium" in f_cfg) and (isinstance(f_cfg["medium"], list)):
                     assert (len(f_cfg["medium"]) == 4), "Can't guess membership shape"
                     f_cfg["medium"] = {"type": "trapmf", "params": f_cfg["medium"]}

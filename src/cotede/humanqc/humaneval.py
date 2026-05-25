@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """ Procedures for visual inspection and human flagging.
 """
@@ -7,13 +6,12 @@ import numpy as np
 from numpy import ma
 
 try:
-    import pylab
     import matplotlib.pyplot as plt
-except:
+except Exception:
     print('matplotlib is not available')
 
 
-class HumanQC(object):
+class HumanQC:
     """ Plot a profile and collect human QC evaluation
 
         Still have much to improve here.
@@ -68,13 +66,13 @@ class HumanQC(object):
                     self.clim['mn'] - 3*self.clim['std'],
                     self.clim['mn'] + 3*self.clim['std'],
                     color='g', alpha=0.2)
-        except:
+        except Exception:
             print("Wasn't able to plot climatology")
         self.line, = self.ax.plot(self.x, self.z, 'b.',
                 picker=10) # 5 points tolerance
         # Plot the bad ones
-        self.ax.plot(self.x[self.baseflag==False],
-                self.z[self.baseflag==False], 'r^')
+        self.ax.plot(self.x[not self.baseflag],
+                self.z[not self.baseflag], 'r^')
 
         # Plot the dubious ones
         self.ax.plot(
@@ -103,12 +101,12 @@ class HumanQC(object):
         self.fig.canvas.mpl_connect('close_event', self.handle_close)
         self.fig.canvas.mpl_connect('pick_event', self.onpick)
         self.fig.canvas.mpl_connect('key_press_event', self.on_key)
-        #pylab.connect('button_press_event', self.onpick)
+        #plt.connect('button_press_event', self.onpick)
 
         if self.refname is not None:
-            self.ax.title(refname)
+            self.ax.title(self.refname)
 
-        pylab.show()
+        plt.show()
 
 
     def draw_humanflags(self, ind, flag):
@@ -137,26 +135,26 @@ class HumanQC(object):
             self.plot()
 
         elif (event.key == 'c') :
-            print("Removing %s from the human list" % self.dataind)
+            print(f"Removing {self.dataind} from the human list")
             self.draw_humanflags(self.dataind, None)
 
         elif (event.key == 'f') :
-            print("Adding %s on the bad list" % self.dataind)
+            print(f"Adding {self.dataind} on the bad list")
             self.draw_humanflags(self.dataind, 'bad')
 
         elif (event.key == 't') :
-            print("Adding %s on the good list" % self.dataind)
+            print(f"Adding {self.dataind} on the good list")
             self.draw_humanflags(self.dataind, 'good')
 
         elif (event.key == 'd') :
-            print("Adding %s on the dubious list" % self.dataind)
+            print(f"Adding {self.dataind} on the dubious list")
             self.draw_humanflags(self.dataind, 'doubt')
 
         elif (event.key == 'z') :
             (xini, xfin, zini, zfin) = self.ax.axis()
             xrange = xfin - xini
             yrange = zfin - zini
-            #pylab.axis([xini, xfin, zini, zfin])
+            #plt.axis([xini, xfin, zini, zfin])
             self.ax.set_xlim(self.x[self.dataind] - xrange/2., 
                     self.x[self.dataind] + xrange/2.)
             self.ax.set_ylim(self.z[self.dataind] - yrange/2., 
@@ -165,15 +163,17 @@ class HumanQC(object):
 
         elif (event.key == 'q') :
             print("Quiting.")
-            pylab.close()
+            plt.close()
 
     def onpick(self, event):
         """
         """
-        if event.artist != self.line: return True
+        if event.artist != self.line: 
+            return True
 
         N = len(event.ind)
-        if not N: return True
+        if not N: 
+            return True
 
         if N == 1:
             self.dataind = event.ind
@@ -192,6 +192,6 @@ class HumanQC(object):
 
     def handle_close(self, event):
         print('Closed Figure!')
-        print("Good list: %s" % np.nonzero(self.humanflag=='good')[0])
-        print("Bad list: %s" % np.nonzero(self.humanflag=='bad')[0])
-        print("Doubt list: %s" % np.nonzero(self.humanflag=='doubt')[0])
+        print(f"Good list: {np.nonzero(self.humanflag=='good')[0]}")
+        print(f"Bad list: {np.nonzero(self.humanflag=='bad')[0]}")
+        print(f"Doubt list: {np.nonzero(self.humanflag=='doubt')[0]}")

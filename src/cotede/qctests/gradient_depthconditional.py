@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
@@ -11,8 +10,8 @@ import logging
 import numpy as np
 from numpy import ma
 
-from .qctests import QCCheckVar
 from .gradient import curvature
+from .qctests import QCCheckVar
 
 module_logger = logging.getLogger(__name__)
 

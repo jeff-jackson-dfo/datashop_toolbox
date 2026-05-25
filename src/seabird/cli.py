@@ -6,6 +6,7 @@
 import click
 
 from seabird.exceptions import CNVError
+
 from .cnv import fCNV
 from .netcdf import cnv2nc
 
@@ -30,21 +31,21 @@ def dump(inputfilename):
     try:
         data = fCNV(inputfilename)
     except CNVError as e:
-        print("\033[91m%s\033[0m" % e.msg)
+        print(f"\033[91m{e.msg}\033[0m")
         return
     except:
         raise
 
-    print("file: %s" % inputfilename)
+    print(f"file: {inputfilename}")
     print("Global attributes")
     for a in sorted(data.attrs.keys()):
-        print("\t\033[93m{}\033[0m: {}".format(a, data.attrs[a]))
+        print(f"\t\033[93m{a}\033[0m: {data.attrs[a]}")
 
     print("\nVariabes")
     for k in data.keys():
-        print("\033[91m%s\033[0m" % k)
+        print(f"\033[91m{k}\033[0m")
         for a in data[k].attrs.keys():
-            print("\t\033[93m{}\033[0m: {}".format(a, data[k].attrs[a]))
+            print(f"\t\033[93m{a}\033[0m: {data[k].attrs[a]}")
 
 
 @cli.command(name="cnv2nc")
@@ -54,7 +55,7 @@ def nc(inputfilename, outputfilename):
     """Export a CNV file as a netCDF"""
     if outputfilename is None:
         outputfilename = inputfilename.replace(".cnv", ".nc")
-        click.echo("Saving on %s" % outputfilename)
+        click.echo(f"Saving on {outputfilename}")
     data = fCNV(inputfilename)
     cnv2nc(data, outputfilename)
 
@@ -65,11 +66,11 @@ def nc(inputfilename, outputfilename):
 @click.argument("inputfilename", type=click.Path(exists=True))
 def qc(inputfilename, outputfilename, config):
     """ """
-    from cotede.qc import ProfileQC, combined_flag
+    from cotede.qc import ProfileQC
 
     if outputfilename is None:
         outputfilename = inputfilename.replace(".cnv", ".nc")
-        click.echo("Saving on %s" % outputfilename)
+        click.echo(f"Saving on {outputfilename}")
     data = fCNV(inputfilename)
     profile = ProfileQC(data, cfg=config, verbose=False)
     print(profile.flags)

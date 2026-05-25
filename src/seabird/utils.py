@@ -1,11 +1,10 @@
+import json
+import logging
 import os
 import re
 from importlib import resources
-import logging
-import json
 
 # import codecs
-
 from seabird.exceptions import CNVError
 
 module_logger = logging.getLogger("seabird.utils")

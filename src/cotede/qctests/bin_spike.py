@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
@@ -10,12 +9,14 @@ import numpy as np
 from numpy import ma
 
 
-def bin_spike(x, l):
+def bin_spike(x, number_of_points):
     """
 
-        l is the number of points used for comparison, thus l=2 means that each
-          point will be compared only against the previous and following
-          measurements. l=2 is is probably not a good choice, too small.
+        number_of_points is the number of points used for comparison, 
+        thus number_of_points=2 means that each point will be compared 
+        only against the previous and following measurements.
+        
+        number_of_points=2 is is probably not a good choice, too small.
 
         Maybe use pstsd instead?
 
@@ -24,12 +25,12 @@ def bin_spike(x, l):
     """
     assert x.ndim == 1, "I'm not ready to deal with multidimensional x"
 
-    assert l%2 == 0, "l must be an even integer"
+    assert number_of_points%2 == 0, "number_of_points must be an even integer"
 
     N = len(x)
     bin = ma.masked_all(N)
     # bin_std = ma.masked_all(N)
-    half_window = int(l/2)
+    half_window = int(number_of_points/2)
     idx = (i for i in range(half_window, N - half_window) if np.isfinite(x[i]))
     for i in idx:
         ini = max(0, i - half_window)
@@ -43,7 +44,7 @@ def bin_spike(x, l):
     return bin
 
 
-class Bin_Spike(object):
+class Bin_Spike:
     def __init__(self, data, varname, cfg, autoflag=True):
         self.data = data
         self.varname = varname
@@ -55,24 +56,24 @@ class Bin_Spike(object):
 
     def keys(self):
         return self.features.keys() + \
-            ["flag_%s" % f for f in self.flags.keys()]
+            [f"flag_{f}" for f in self.flags.keys()]
 
     def set_features(self):
         self.features = {'bin_spike': bin_spike(self.data[self.varname],
-            self.cfg['l'])}
+            self.cfg['number_of_points'])}
 
     def test(self):
         self.flags = {}
         try:
             threshold = self.cfg['threshold']
-        except:
+        except Exception:
             print("Deprecated cfg format. It should contain a threshold item.")
             threshold = self.cfg
 
         try:
             flag_good = self.cfg['flag_good']
             flag_bad = self.cfg['flag_bad']
-        except:
+        except Exception:
             print("Deprecated cfg format. It should contain flag_good & flag_bad.")
             flag_good = 1
             flag_bad = 3

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """Evaluates if the coordinates of the measurements are at sea
@@ -10,10 +9,9 @@ interpolates the elevation for given coordinates.
 import logging
 
 import numpy as np
-from numpy import ma
 
-from .qctests import QCCheck
 from ..utils import extract_coordinates
+from .qctests import QCCheck
 
 module_logger = logging.getLogger(__name__)
 
@@ -43,11 +41,11 @@ def location_at_sea(data, cfg=None):
     """
     try:
         flag_good = cfg["flag_good"]
-    except:
+    except Exception:
         flag_good = 1
     try:
         flag_bad = cfg["flag_bad"]
-    except:
+    except Exception:
         flag_bad = 3
 
     assert hasattr(data, "attrs"), "Missing attributes"
@@ -66,9 +64,9 @@ def location_at_sea(data, cfg=None):
 
     if (
         ("LATITUDE" not in data.attrs)
-        or (data.attrs["LATITUDE"] == None)
+        or (data.attrs["LATITUDE"] is None)
         or ("LONGITUDE" not in data.attrs)
-        or (data.attrs["LONGITUDE"] == None)
+        or (data.attrs["LONGITUDE"] is None)
     ):
         module_logger.debug("Missing geolocation (lat/lon)")
         return 0
@@ -94,7 +92,7 @@ def location_at_sea(data, cfg=None):
 
         return flag
 
-    except:
+    except Exception:
         return 0
 
 
@@ -143,7 +141,7 @@ class LocationAtSea(QCCheck):
             self.features = get_bathymetry(lat=lat, lon=lon)
             # idx = np.isfinite(lat) & np.isfinite(lon)
             # self.features = get_bathymetry(lat=lat[idx], lon=lon[idx])
-        except:
+        except Exception:
             self.features = {
                 "bathymetry": np.nan * lat,
                 "bathymetry_std": np.nan * lat,

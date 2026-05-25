@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 
@@ -18,15 +17,14 @@
       stable areas would be less tolerant to variability, even with few samples.
 """
 
-from datetime import timedelta
 import logging
 
 import numpy as np
 from numpy import ma
 from oceansdb import WOA
 
+from ..utils import day_of_year, extract_coordinates, extract_depth, extract_time
 from .qctests import QCCheckVar
-from ..utils import extract_coordinates, extract_time, day_of_year, extract_depth
 
 module_logger = logging.getLogger(__name__)
 
@@ -41,7 +39,7 @@ def woa_normbias(data, varname, attrs=None, use_standard_error=False):
     """
     try:
         doy = day_of_year(extract_time(data, attrs))
-    except LookupError as err:
+    except LookupError:
         module_logger.error("Missing time")
         raise
 
@@ -75,7 +73,8 @@ def woa_normbias(data, varname, attrs=None, use_standard_error=False):
                 "lat": np.mean(lat),
                 "lon": np.mean(lon),
             }
-            module_logger.warning("Multiple lat/lon positions but too close to each other so it will be considered a single position for the WOA comparison. lat: {}, lon: {}".format(kwargs["lat"], kwargs["lon"]))
+            module_logger.warning("Multiple lat/lon positions but too close to each other so it will be considered a " \
+            "single position for the WOA comparison. lat: {}, lon: {}".format(kwargs["lat"], kwargs["lon"]))
     else:
         mode = "profile"
 
@@ -102,7 +101,7 @@ def woa_normbias(data, varname, attrs=None, use_standard_error=False):
     if (np.size(depth) > 0):
         idx = ~ma.getmaskarray(depth) & (np.array(depth) >= 0) & np.isfinite(depth)
         if not idx.any():
-            module_logger.error("Invalid depth(s) for WOA comparison: {}".format(depth))
+            module_logger.error(f"Invalid depth(s) for WOA comparison: {depth}")
             raise IndexError
         elif not idx.all():
             valid_depth = depth[idx]

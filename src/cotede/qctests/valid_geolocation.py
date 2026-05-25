@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """Evaluates if the coordinates are valid
@@ -8,11 +7,9 @@
 import logging
 
 import numpy as np
-from numpy import ma
 
-from .qctests import QCCheck
 from ..utils import extract_coordinates
-
+from .qctests import QCCheck
 
 module_logger = logging.getLogger(__name__)
 

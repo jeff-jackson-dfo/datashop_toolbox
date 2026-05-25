@@ -24,6 +24,10 @@ dependencies = [
     "pytz>=2024.1",
     "seabirdscientific",
     "termcolor>=2.4.0",
+    "oceansdb>=0.8.5",
+    "shapely>=2.1.2",
+    "click>=8.4.1",
+    "scikit-fuzzy>=0.5.0",
 ]
 
 # --- Dependency groups (PEP 735 / uv standard) ---

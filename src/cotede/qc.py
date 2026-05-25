@@ -1,14 +1,11 @@
 """ Apply Quality Control of CTD profiles
 """
 
-import importlib
+import logging
+import re
 from copy import deepcopy
 from datetime import datetime
-from os.path import basename
-import re
-import json
-import logging
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 from numpy import ma
@@ -17,11 +14,10 @@ from cotede import qctests
 from cotede.misc import combined_flag
 from cotede.utils import load_cfg
 
-
 module_logger = logging.getLogger(__name__)
 
 
-class ProfileQC(object):
+class ProfileQC:
     """Quality Control a CTD profile
     """
 
@@ -60,7 +56,7 @@ class ProfileQC(object):
 
         try:
             self.name = input.filename
-        except:
+        except Exception:
             self.name = None
         self.verbose = verbose
 
@@ -68,7 +64,7 @@ class ProfileQC(object):
 
         self.cfg = load_cfg(cfg)
         
-        module_logger.debug("Using cfg: {}".format(self.cfg))
+        module_logger.debug(f"Using cfg: {self.cfg}")
 
         self.input = deepcopy(input)
         self._set_attrs(attributes)
@@ -90,12 +86,12 @@ class ProfileQC(object):
             else:
                 vv = v
             for c in self.cfg['variables']:
-                if re.match("(%s)2?$" % c, vv):
-                    module_logger.debug(" %s - evaluating: %s, as type: %s" % (self.name, v, c))
+                if re.match(f"({c})2?$", vv):
+                    module_logger.debug(f" {self.name} - evaluating: {v}, as type: {c}")
                     self.evaluate(v, self.cfg['variables'][c])
                     break
 
-    def _set_attrs(self, attrs: Dict[str, Any]):
+    def _set_attrs(self, attrs: dict[str, Any]):
         """Define ProfileQC's attributes (attrs)
 
         Parameters
@@ -150,7 +146,7 @@ class ProfileQC(object):
 
         if 'valid_datetime' in self.cfg['common']:
             if 'datetime' in self.attrs.keys() and \
-                    type(self.attrs['datetime']) == datetime:
+                    type(self.attrs['datetime']) is datetime:
                 f = 1
             else:
                 f = 3
@@ -224,7 +220,7 @@ class ProfileQC(object):
                     self.flags[v]['valid_speed'], \
                             self.features[v]['valid_speed'] = \
                             qctests.possible_speed(self.input, cfg['valid_speed'])
-            except:
+            except Exception:
                 module_logger.warning("Fail on valid_speed")
 
         if 'grey_list' in cfg:
@@ -238,7 +234,8 @@ class ProfileQC(object):
             module_logger.warning(
                     "Sorry I'm not ready to evaluate frozen_profile()")
 
-        criteria = (c for c in cfg if (cfg[c] is not None) and ("procedure" in cfg[c]) and (cfg[c]["procedure"] in qctests.QCTESTS))
+        criteria = (c for c in cfg if (cfg[c] is not None) and ("procedure" in cfg[c]) and 
+                    (cfg[c]["procedure"] in qctests.QCTESTS))
         for criterion in criteria:
             Procedure = qctests.catalog(cfg[criterion]["procedure"])
             if issubclass(Procedure, qctests.QCCheckVar):
@@ -280,7 +277,7 @@ class ProfileQC(object):
             for f in cfg['anomaly_detection']['features']:
                 try:
                     features[f] = self.features[v][f]
-                except:
+                except Exception:
                     if f == 'spike':
                         features['spike'] = qctests.spike(self.input[v])
                     elif f == 'gradient':
@@ -302,7 +299,7 @@ class ProfileQC(object):
                                 np.abs(y.features['cars_normbias'])
                     else:
                         module_logger.error(
-                                "Sorry, I can't evaluate anomaly_detection with: %s" % f)
+                                f"Sorry, I can't evaluate anomaly_detection with: {f}")
 
             prob, self.flags[v]['anomaly_detection'] = \
                     qctests.anomaly_detection(features, cfg['anomaly_detection'])
@@ -347,7 +344,7 @@ class ProfileQCed(ProfileQC):
         """
         """
         self.name = 'ProfileQCed'
-        super(ProfileQCed, self).__init__(input, cfg)
+        super().__init__(input, cfg)
 
     def keys(self):
         """ Return the available keys in self.data
@@ -363,4 +360,4 @@ class ProfileQCed(ProfileQC):
             return ma.masked_array(self.input[key].data,
                     mask=(self.flags[key]['overall']!=1))
 
-        raise KeyError('%s not found' % key)
+        raise KeyError(f'{key} not found')

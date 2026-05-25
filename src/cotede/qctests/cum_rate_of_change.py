@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 
@@ -6,7 +5,11 @@
 
     Based on Timms 2011, p9597
 
-"The first case in Equation (1) ensures that the cumulative rate of change function is able to quickly respond to degradations in sensor quality, while the second case ensures that it takes a longer time for confidence to return in the measurements from that sensor once the rate of change of the parameter decreases." (Timms 2011)
+"The first case in Equation (1) ensures that the cumulative rate of change 
+function is able to quickly respond to degradations in sensor quality, 
+while the second case ensures that it takes a longer time for confidence 
+to return in the measurements from that sensor once the rate of change of 
+the parameter decreases." (Timms 2011)
 
         Small   S->M            Medium          M->L            Large
 Temp    <0.03   0.03 to 0.05    0.05 to 0.07    0.07 to 0.11    >0.11
@@ -23,9 +26,10 @@ else
 i = small, medium, large
 """
 
+import logging
+
 import numpy as np
 from numpy import ma
-import logging
 
 from .qctests import QCCheckVar
 

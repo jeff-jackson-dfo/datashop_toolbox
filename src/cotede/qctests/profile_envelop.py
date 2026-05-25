@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """Provile Envelop QC test
@@ -43,11 +42,11 @@ class ProfileEnvelop(QCCheckVar):
 
         flag = np.zeros(np.shape(x), dtype="i1")
         for layer in self.cfg["layers"]:
-            ind = np.nonzero(eval("(z %s) & (z %s)" % (layer[0], layer[1])))[0]
-            f = eval("(x[ind] > %s) & (x[ind] < %s)" % (layer[2], layer[3]))
+            ind = np.nonzero(eval(f"(z {layer[0]}) & (z {layer[1]})"))[0]
+            f = eval(f"(x[ind] > {layer[2]}) & (x[ind] < {layer[3]})")
 
-            flag[ind[f == True]] = self.flag_good
-            flag[ind[f == False]] = self.flag_bad
+            flag[ind[f]] = self.flag_good
+            flag[ind[not f]] = self.flag_bad
 
         flag[ma.getmaskarray(x) | ~np.isfinite(x)] = 9
         self.flags["profile_envelop"] = flag

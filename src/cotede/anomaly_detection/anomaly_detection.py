@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 
@@ -18,9 +17,16 @@ Target: Initially two main functionalities
         - Define the optimal thresholds comparing with flags from Q.C. config
             - There is the possibility to human interaction to overwrite the flags from the auto Q.C.
         - Estimate the error
-        - The threshold between good or bad flags were defined on the second step, but now consider the whole dataset. The highest probability of any bad value is the thresholds between 1 and 2. In other words, all data with higher probability that this threshold where good. Between this threshold and the optimal previously defined there were bad data, but it was mostly good ones, hence flag 2 which means probably good. With the same concept define the threshold between flags 3 and 4.
+        - The threshold between good or bad flags were defined on the second step, but now consider 
+        the whole dataset. The highest probability of any bad value is the thresholds between 1 and 2. 
+        In other words, all data with higher probability that this threshold where good. Between this 
+        threshold and the optimal previously defined there were bad data, but it was mostly good ones, 
+        hence flag 2 which means probably good. With the same concept define the threshold between 
+        flags 3 and 4.
 
-    With the coeficients determined, an independent procedure to flag all data. Independent because the anomaly detection flagging itself can simply be loaded by previsouly defined coeficients, hence start already from this point.
+    With the coeficients determined, an independent procedure to flag all data. Independent because 
+    the anomaly detection flagging itself can simply be loaded by previsouly defined coeficients, 
+    hence start already from this point.
     - Fit features, on full DB, there is no split data
     - With the parameters on the previous step estimate the probability of each measurement
     - Create a list sorted by:
@@ -29,14 +35,16 @@ Target: Initially two main functionalities
     - The output would be a list to feed the Human Q.C. system
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ma
+
 # from scipy.stats import norm, rayleigh, expon, halfnorm, exponpow, exponweib
 from scipy.stats import exponweib
-# from scipy.stats import kstest
 
-from cotede.misc import combined_flag
 from cotede.humanqc import HumanQC
+
+# from scipy.stats import kstest
 
 
 def fit_tests(features, q=0.90, verbose=False):
@@ -69,13 +77,12 @@ def fit_tests(features, q=0.90, verbose=False):
                     'qlimit': qlimit}
 
         if verbose is True:
-            import pylab
             x = np.linspace(samp.min(), samp.max(), 100)
             pdf_fitted = exponweib.pdf(x, *param[:-2], loc=param[-2], scale=param[-1])
-            pylab.plot(x, pdf_fitted, 'b-')
-            pylab.hist(ma.array(samp), 100, normed=1, alpha=.3)
-            pylab.title(f)
-            pylab.show()
+            plt.plot(x, pdf_fitted, 'b-')
+            plt.hist(ma.array(samp), 100, normed=1, alpha=.3)
+            plt.title(f)
+            plt.show()
 
     return output
 
@@ -101,7 +108,7 @@ def estimate_anomaly(features, params, method='produtorium'):
 
     features_names = list(features.keys())
     for k in params.keys():
-        assert k in features_names, "features doesn't have: %s" % k
+        assert k in features_names, f"features doesn't have: {k}"
 
     prob = ma.masked_all(np.shape(features[features_names[0]]), dtype='f8')
 
@@ -122,7 +129,7 @@ def estimate_anomaly(features, params, method='produtorium'):
         elif method == 'min':
             prob[ind] = min(prob[ind], p[ind])
         else:
-            assert "Invalid method: %s" % method
+            assert f"Invalid method: {method}"
 
         # Update prob if new value is valid and prob is masked
         # Operate twice the first feature if moved above.
@@ -154,8 +161,8 @@ def estimate_p_optimal(prob, binflag, verbose=False):
         err[i] = false_negative[i] + false_positive[i]
 
     if verbose is True:
-        import pylab
-        pylab.plot(P, err , 'b'); pylab.show()
+        plt.plot(P, err , 'b')
+        plt.show()
 
     return P[err.argmin()], float(err.min())/prob.size#, {'P': P, 'err': err}
 
@@ -201,8 +208,8 @@ def calibrate4flags(flags, features, q=0.90, verbose=False):
     prob = estimate_anomaly(features, params)
 
     if verbose is True:
-        pylab.hist(prob)
-        pylab.show()
+        plt.hist(prob)
+        plt.show()
 
     p_optimal, test_err = estimate_p_optimal(prob[indices['test']],
             binflags[indices['test']])
@@ -257,7 +264,7 @@ def split_data_groups(flag):
     ind_valid = ~ma.getmaskarray(flag)
 
     # ==== Good data ==================
-    ind_good = np.nonzero((flag == True)  & ind_valid)[0]
+    ind_good = np.nonzero(flag & ind_valid)[0]
     N_good = ind_good.size
     perm = np.random.permutation(N_good)
     N_test = int(round(N_good*.2))
@@ -269,7 +276,7 @@ def split_data_groups(flag):
     ind_fit[ind_good[perm[2*N_test:]]] = True
 
     # ==== Bad data ===================
-    ind_bad = np.nonzero((flag == False) & ind_valid)[0]
+    ind_bad = np.nonzero(not flag & ind_valid)[0]
     N_bad = ind_bad.size
     perm = np.random.permutation(N_bad)
     N_test = int(round(N_bad*.5))
@@ -279,7 +286,7 @@ def split_data_groups(flag):
     return {'fit': ind_fit, 'test': ind_test, 'err': ind_err}
 
 
-def i2b_flags(flags, good_flags=[1,2], bad_flags=[3,4]):
+def i2b_flags(flags, good_flags=None, bad_flags=None):
     """ Converts int flags (like IOC) into binary (T|F)
 
         If given a dictionary of flags, it will evaluate each item
@@ -289,6 +296,10 @@ def i2b_flags(flags, good_flags=[1,2], bad_flags=[3,4]):
           - Masked is all values are masked
     """
 
+    if bad_flags is None:
+        bad_flags = [3, 4]
+    if good_flags is None:
+        good_flags = [1, 2]
     if (hasattr(flags, 'keys')) and (np.ndim(flags) > 1):
         output= []
         for f in flags:
@@ -330,13 +341,12 @@ def calibrate_anomaly_detection(datadir, varname, cfg=None):
           cfg, and than calibrate params and p_optimal so that anomaly
           detection reproduces the combined flags from the Q.C.
     """
-    import pandas as pd
 
     assert type(varname) is str, "varname must be a string"
 
     db = ProfilesQCPandasCollection(datadir, cfg=cfg, saveauxiliary=True)
 
-    assert varname in db.keys(), "db does not contain variable %s" % varname
+    assert varname in db.keys(), f"db does not contain variable {varname}"
 
     # # Remove the value out of the possible range.
     # ind_outofrange = np.nonzero(db.flags[varname]['global_range'] != 1)
@@ -345,7 +355,7 @@ def calibrate_anomaly_detection(datadir, varname, cfg=None):
     ind = db.flags[varname]['global_range'] == 1
     #aux = db.auxiliary[varname][ind]
     #features = aux.drop(['id','profileid'], axis=1)
-    features = db.auxiliary[varname][ind]
+    # features = db.auxiliary[varname][ind]
     #flags = db.flags[varname][ind].drop(['id','profileid', 'density_inversion'], axis=1)
     #flags = db.flags[varname][ind].drop(['density_inversion'], axis=1)
     #flags = combined_flag(flags)
@@ -396,7 +406,6 @@ def human_calibrate_mistakes(data, varname, flagname, featuresnames, niter=5):
     q = 0.90
     assert varname in data
 
-    import pandas as pd
     #data['id'] = range(data.shape[0])
     #data.set_index('id', drop=True, inplace=True)
     # Guarantee that the indices are unique.
@@ -425,7 +434,7 @@ def human_calibrate_mistakes(data, varname, flagname, featuresnames, niter=5):
         # AD's severity error is given by how far away was the estimated
         #   probability from the prob. threshold.
         data['derr'] = (data.prob - result['p_optimal']).abs()
-        data.loc[data.mistake == False, 'derr'] = np.nan
+        data.loc[not data.mistake, 'derr'] = np.nan
 
         grp = data[data.mistake].groupby('profileid')
         profileids = grp['derr'].max().sort_values(ascending=False).index
@@ -436,7 +445,7 @@ def human_calibrate_mistakes(data, varname, flagname, featuresnames, niter=5):
         # 5 random profiles with mistakes
         # for pid in profileids[:10]:
         for pid in np.random.permutation(profileids[:10])[:5]:
-            print("Profile: %s" % pid)
+            print(f"Profile: {pid}")
             profile = data[data.profileid == pid]
             h = HumanQC().eval(
                     profile[varname],

@@ -1,11 +1,12 @@
 import pandas as pd
 
+
 def read_seaodf_ini():
 
     rows = []
-    filepath = '//ENT.dfo-mpo.ca/DFO-MPO/GROUP/NAT_Shares/DFO/EOS/SSPPI/BioDataSvc/ARC/CTDDAP/CTDSystemSoftware/CTDDAP/bio_exe/seaodf.ini'
+    filepath = '//ENT.dfo-mpo.ca/DFO-MPO/GROUP/NAT_Shares/DFO/EOS/SSPPI/BioDataSvc/ARC/CTDDAP/CTDSystemSoftware/CTDDAP/bio_exe/seaodf.ini'  # noqa: E501
 
-    with open(filepath, 'r', encoding='iso-8859-1', newline='') as f:
+    with open(filepath, encoding='iso-8859-1', newline='') as f:
         for raw_line in f:
             # Normalize for checks
             stripped = raw_line.strip()

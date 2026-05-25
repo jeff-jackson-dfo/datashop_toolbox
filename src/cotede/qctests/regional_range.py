@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
@@ -14,7 +13,7 @@ from .qctests import QCCheckVar
 
 module_logger = logging.getLogger(__name__)
 try:
-    import shapely.wkt
+    # import shapely.wkt
     from shapely.geometry import Point
 except ImportError:
     module_logger.debug("Module Shapely is not available")
@@ -43,7 +42,8 @@ class RegionalRange(QCCheckVar):
             import shapely
         except ImportError:
             module_logger.debug(
-                "Regional range currently depends on module Shapely, which is not available. Regional range will return flag 0."
+                "Regional range currently depends on module Shapely, which is not available. " \
+                "Regional range will return flag 0."
             )
             self.flags["regional_range"] = np.zeros(feature.shape, dtype="i1")
             return
@@ -74,10 +74,8 @@ class RegionalRange(QCCheckVar):
 
             minval = cfg["minval"]
             maxval = cfg["maxval"]
-
             assert minval < maxval, (
-                "Regional Range(%s): "
-                + "minval (%s) must be smaller than maxval(%s)" % (v, minval, maxval)
+                f"Regional Range: minval ({minval}) must be smaller than maxval ({maxval})"
             )
 
             g = shapely.wkt.loads(cfg["region"])

@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
 
 """Utilities for CoTeDe
 
 Miscelaneous resources to support CoTeDe.
 """
 
-from datetime import date, datetime
-import json
 import logging
-import numpy as np
 import os
-from os.path import expanduser
-import re
-from importlib import resources
+from datetime import date, datetime
+
+import numpy as np
 
 module_logger = logging.getLogger(__name__)
 
@@ -100,8 +96,8 @@ def _coordinate_flex_vocabulary(obj, latname=None, lonname=None):
         try:
             lat = obj[latname]
             lon = obj[lonname]
-        except KeyError:
-            raise LookupError
+        except KeyError as err:
+            raise LookupError from err
 
         if (np.size(lat) > 1) and (np.size(lon) > 1):
             lat = np.atleast_1d(lat)
@@ -171,8 +167,8 @@ def _time_flex_vocabulary(obj, varname=None):
     if varname is not None:
         try:
             t = obj[varname]
-        except KeyError:
-            raise LookupError
+        except KeyError as err:
+            raise LookupError from err
         return t
 
     vocab = ("time", "TIME", "date", "datetime")
@@ -183,7 +179,7 @@ def _time_flex_vocabulary(obj, varname=None):
                 t = np.atleast_1d(t).astype("datetime64[s]")
             return t
         except KeyError:
-            module_logger.debug("Couldn't extract time as '{}'".format(v))
+            module_logger.debug(f"Couldn't extract time as '{v}'")
     raise LookupError
 
 
@@ -206,14 +202,14 @@ def extract_time(obj, attrs=None, varname=None):
             return _time_flex_vocabulary(attrs, varname)
         except LookupError:
             module_logger.debug(
-                "Missing time in explicitly give attrs: {}".format(attrs)
+                f"Missing time in explicitly give attrs: {attrs}"
             )
     if hasattr(obj, "attrs"):
         try:
             return _time_flex_vocabulary(obj.attrs, varname)
         except LookupError:
             module_logger.debug(
-                "Missing time in obj's method attrs: {}".format(obj.attrs)
+                f"Missing time in obj's method attrs: {obj.attrs}"
             )
 
     raise LookupError
@@ -251,8 +247,8 @@ def extract_depth(obj, varname=None):
     if varname is not None:
         try:
             depth = obj[varname]
-        except KeyError:
-            raise LookupError
+        except KeyError as err:
+            raise LookupError from err
         if np.size(depth) > 1:
             depth = np.atleast_1d(depth)
         return depth
@@ -262,7 +258,7 @@ def extract_depth(obj, varname=None):
         try:
             return extract_depth(obj, varname=v)
         except LookupError:
-            module_logger.debug("Couldn't extract depth as '{}'".format(v))
+            module_logger.debug(f"Couldn't extract depth as '{v}'")
 
     vocab = ("pressure", "press", "PRES")
     for v in [v for v in vocab]:
@@ -271,7 +267,7 @@ def extract_depth(obj, varname=None):
             module_logger.warning("Using pressure as depth without any correction!")
             return depth
         except LookupError:
-            module_logger.debug("Couldn't define depth from '{}'".format(v))
+            module_logger.debug(f"Couldn't define depth from '{v}'")
 
 
 # ============================================================================
@@ -285,10 +281,9 @@ def savePQCCollection_pandas(db, filename):
             - Delete the tmp file
     """
     import os
-    import tempfile
-    import tarfile
     import shutil
-    import hashlib
+    import tarfile
+    import tempfile
 
     # tar = tarfile.open("%s.tar.bz2" % filename, "w:bz2")
     tar = tarfile.open(filename, "w:bz2")
@@ -296,7 +291,7 @@ def savePQCCollection_pandas(db, filename):
 
     try:
         # Data
-        f = "%s/data.hdf" % (tmpdir)
+        f = f"{tmpdir}/data.hdf"
         db.data.to_hdf(f, "df")
         tar.add(f, arcname="data.hdf")
         # hashlib.md5(open(f, 'rb').read()).digest()
@@ -305,31 +300,30 @@ def savePQCCollection_pandas(db, filename):
         p = os.path.join(tmpdir, "flags")
         os.mkdir(p)
         for k in db.flags.keys():
-            f = os.path.join(p, "flags_%s.hdf" % k)
+            f = os.path.join(p, f"flags_{k}.hdf")
             db.flags[k].to_hdf(f, "df")
-            tar.add(f, arcname="flags/flags_%s.hdf" % k)
+            tar.add(f, arcname=f"flags/flags_{k}.hdf")
         if hasattr(db, "auxiliary"):
             p = os.path.join(tmpdir, "aux")
             os.mkdir(p)
             for k in db.auxiliary.keys():
-                f = os.path.join(p, "aux_%s.hdf" % k)
+                f = os.path.join(p, f"aux_{k}%s.hdf")
                 db.auxiliary[k].to_hdf(f, "df")
-                tar.add(f, arcname="aux/aux_%s.hdf" % k)
+                tar.add(f, arcname=f"aux/aux_{k}.hdf")
         tar.close()
     except:
         shutil.rmtree(tmpdir)
         raise
         print("Problems saving the data")
-        shutil.rmtree("%s.tar.bz2" % filename)
+        shutil.rmtree(f"{filename}.tar.bz2")
     finally:
         shutil.rmtree(tmpdir)
 
 
 def loadPQCCollection_pandas(filename):
-    import os
-    import tempfile
-    import tarfile
     import shutil
+    import tarfile
+    import tempfile
 
     tmpdir = tempfile.mkdtemp()
     tar = tarfile.open(filename, "r:*")

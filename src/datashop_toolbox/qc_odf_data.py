@@ -146,9 +146,11 @@ _TEMP_CANDIDATES = ["TEMP_01", "TE90_01", "TEMP_02"]
 # Shared: LassoItem
 # ===========================================================================
 class LassoItem(pg.GraphicsObject):
-    """Freehand lasso selection overlay drawn in data coordinates (red dashed
-    line).  Fires ``sigSelected(indices)`` on mouse release."""
-
+    """Freehand lasso selector.
+    
+    The lasso selector is drawn as a red dashed line in data coordinates.
+    It triggers the sigSelected(indices) event on mouse release.
+    """
     sigSelected = pg.QtCore.Signal(object)  # emits ndarray of int indices
 
     def __init__(self, plot_item: pg.PlotItem, xs: np.ndarray, ys: np.ndarray):

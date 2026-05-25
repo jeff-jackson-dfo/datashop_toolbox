@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 
@@ -10,10 +9,9 @@
 """
 
 import numpy as np
-from numpy import ma
 
-from .membership_functions import smf, zmf, trapmf, trimf
 from .defuzz import defuzz
+from .membership_functions import smf, trapmf, trimf, zmf
 
 
 def fuzzyfy(data, features, output, require="all"):
@@ -25,7 +23,7 @@ def fuzzyfy(data, features, output, require="all"):
     """
     features_list = list(features.keys())
 
-    N = max([len(data[f]) for f in features_list])
+    # N = max([len(data[f]) for f in features_list])
 
     # The fuzzy set are usually: low, medium, high
     # The membership of each fuzzy set are each feature scaled.
@@ -34,7 +32,7 @@ def fuzzyfy(data, features, output, require="all"):
     mfuncs = {"smf": smf, "trimf": trimf, "trapmf": trapmf, "zmf": zmf}
     for t in features_list:
         for m in membership:
-            assert m in features[t], "Missing %s in %s" % (m, features[t])
+            assert m in features[t], f"Missing {m} in {features[t]}"
             f = mfuncs[features[t][m]["type"]]
             membership[m][t] = f(np.asanyarray(data[t]), features[t][m]["params"])
 
@@ -80,7 +78,11 @@ def fuzzy_uncertainty(data, features, output, require="all"):
     """
     # It's not clear at Morello 2014 what is the operator K()
     # Q is the uncertainty, hence Q_low is the low uncertainty
-    # Seems like K() is just a linear factor, which would give the level of uncertainty, like 0.1 for low, 0.5 for medium and 0.9 for high would define weights for each level?! I'm not sure. But the result would be a composite curve, so when the Qs are joinned it would give a curve with the possible values on Q (maybe multiple dimensions) and the y would be the composite result [0, 1].
+    # Seems like K() is just a linear factor, which would give the level of uncertainty, 
+    # like 0.1 for low, 0.5 for medium and 0.9 for high would define weights for each level?! 
+    # I'm not sure. But the result would be a composite curve, so when the Qs are joinned it 
+    # would give a curve with the possible values on Q (maybe multiple dimensions) and the y 
+    # would be the composite result [0, 1].
     # Q_low = 0.1 * u_low   # K_low(u_low)
     # Q_medium = 0.5 * u_medium   # K_medium(u_medium)
     # Q_high = 0.9 *u_high   # K_high(u_high)
@@ -88,7 +90,8 @@ def fuzzy_uncertainty(data, features, output, require="all"):
     # Bisector
 
     # They refer to Q_i x_l, which I understand as the uncertainty for each value for each level
-    # It looks like the uncertainties of all tests of the three levels are groupped and ordered, and the bisector would be the value that would define the half of the area.
+    # It looks like the uncertainties of all tests of the three levels are groupped and ordered, 
+    # and the bisector would be the value that would define the half of the area.
     # Is it x the observed value of hypotetical values?
 
     # CQ = bisector(Qs, ...

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
@@ -9,11 +8,12 @@ import logging
 
 import numpy as np
 
+from cotede.fuzzy import fuzzy_uncertainty
+
 from .core import QCCheckVar
 from .gradient import gradient
 from .spike import spike
 from .woa_normbias import woa_normbias
-from cotede.fuzzy import fuzzy_uncertainty
 
 module_logger = logging.getLogger(__name__)
 
@@ -30,9 +30,7 @@ def fuzzylogic(features, cfg, require="all"):
 
     if (require == "all") and not np.all([f in features for f in cfg["features"]]):
         module_logger.warning(
-            "Not all features (%s) required by fuzzy logic are available".format(
-                cfg["features"].keys()
-            )
+            f'Not all features {cfg["features"].keys()} required by fuzzy logic are available'
         )
         raise KeyError
 
@@ -63,7 +61,7 @@ class FuzzyLogic(QCCheckVar):
 
     def test(self):
         self.flags = {}
-        cfg = self.cfg
+        # cfg = self.cfg
         flag = np.zeros(np.shape(self.data[self.varname]), dtype="i1")
 
         uncertainty = self.features["fuzzylogic"]

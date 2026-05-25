@@ -4,11 +4,11 @@ This file exposes the most commonly used classes and subpackages so the
 package is convenient to use via `import cotede`.
 """
 
-from importlib import import_module
-from typing import Any
+# from importlib import import_module
+# from typing import Any
 
 # Public subpackages/modules
-from . import datasets, qctests, fuzzy, anomaly_detection, utils
+from . import anomaly_detection, datasets, fuzzy, qctests, utils
 from .misc import combined_flag, make_qc_index
 
 # Core classes

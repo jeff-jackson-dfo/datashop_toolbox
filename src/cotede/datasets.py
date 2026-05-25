@@ -1,6 +1,7 @@
+import os.path
+
 import numpy as np
 from numpy import datetime64, timedelta64
-import os.path
 
 from cotede.utils import cotederc
 
@@ -35,9 +36,9 @@ def load_ctd():
 
     varnames = np.load(filename, allow_pickle=True)["varnames"]
     values = np.load(filename, allow_pickle=True)["data"]
-    data = {k: v for k, v in zip(varnames, values)}
+    data = {k: v for k, v in zip(varnames, values, strict=True)}
 
-    class CoTeDeDataModel(object):
+    class CoTeDeDataModel:
         def __init__(self, attrs, data):
             self.attrs = attrs
             self.data = data

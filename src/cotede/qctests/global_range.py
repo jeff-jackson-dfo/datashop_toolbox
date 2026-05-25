@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
@@ -17,7 +16,6 @@ from numpy import ma
 
 from .qctests import QCCheckVar
 
-
 module_logger = logging.getLogger(__name__)
 
 
@@ -29,9 +27,8 @@ class GlobalRange(QCCheckVar):
         ), "Missing limits: minval & maxval"
 
         assert self.cfg["minval"] < self.cfg["maxval"], (
-            "Global Range(%s): "
-            + "minval (%s) must be smaller than maxval(%s)"
-            % (self.varname, self.cfg["minval"], self.cfg["maxval"])
+            f'Global Range({self.varname}): minval ({self.cfg["minval"]}) must ' \
+            'be smaller than maxval({self.cfg["maxval"]})'
         )
 
         minval = self.cfg["minval"]

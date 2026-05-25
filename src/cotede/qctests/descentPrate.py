@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 
 """
 """
 
 import logging
 
+import numpy as np
 from numpy import ma
-
 
 module_logger = logging.getLogger(__name__)
 

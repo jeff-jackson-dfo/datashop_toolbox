@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE_scikit-fuzzy.txt
 
 """
@@ -13,6 +12,8 @@
 """
 
 import numpy as np
+import skfuzzy as fuzz
+
 
 def defuzz(x, mfx, mode):
     """
@@ -51,7 +52,7 @@ def defuzz(x, mfx, mode):
         assert tot_area != 0, 'Total area is zero in defuzzification!'
 
         if 'centroid' in mode:
-            return centroid(x, mfx)
+            return fuzz.centroid(x, mfx)
 
         elif 'bisector' in mode:
             tmp = 0
@@ -72,4 +73,4 @@ def defuzz(x, mfx, mode):
         return tmp[tmp == np.abs(tmp).max()][0]
 
     else:
-        raise ValueError('The input for `mode`, %s, was incorrect.' % (mode))
+        raise ValueError(f'The input for `mode`, {mode}, was incorrect.')

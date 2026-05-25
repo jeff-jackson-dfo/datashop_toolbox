@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 
 import numpy as np
-from numpy import ma
-from numpy import radians
+from numpy import ma, radians
 
 AVG_EARTH_RADIUS = 6371000  # in m
 

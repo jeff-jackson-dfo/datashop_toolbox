@@ -1,16 +1,15 @@
+# import gsw
+import re
+
 import cotede
+
 # from cotede import datasets, qctests
 # import numpy as np
 # import pandas as pd
-
 # import oceansdb
 # import seabird
 from seabird.cnv import fCNV
 from seabird.qc import fProfileQC
-
-# import gsw
-
-import re
 
 # oceansdb.CARS()['sea_water_temperature']
 # oceansdb.WOA()['sea_water_temperature']
@@ -66,7 +65,7 @@ def fix_sigma_theta(profile: fProfileQC) -> fProfileQC:
 
 if use_qc:
     ## Use a real BIO CTD dataset with QC flags
-    cnv_file = './sampledata/cnv/Dat4805001.CNV'
+    cnv_file = './sampledata/cnv/Dat4805179.CNV'
     profile = fCNV(cnv_file)
     # profile = fProfileQC('dat4805001.cnv', cfg='gtspp')
     # print(profile.keys())

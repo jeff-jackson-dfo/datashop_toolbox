@@ -3,8 +3,8 @@ __email__ = "guilherme@castelao.net"
 
 # --- core imports ---
 from .cnv import CNV, fCNV
-from .qc import fProfileQC
 from .exceptions import CNVError
+from .qc import fProfileQC
 
 __all__ = [
     "CNV",
@@ -15,9 +15,9 @@ __all__ = [
 
 # --- version handling ---
 try:
-    from importlib.metadata import version, PackageNotFoundError
+    from importlib.metadata import PackageNotFoundError, version
 except ImportError:  # Python < 3.8
-    from importlib_metadata import version, PackageNotFoundError  # type: ignore
+    from importlib_metadata import PackageNotFoundError, version  # type: ignore
 
 try:
     __version__ = version("seabird")

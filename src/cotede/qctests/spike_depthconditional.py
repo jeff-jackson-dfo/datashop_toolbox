@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
@@ -13,7 +12,6 @@ from numpy import ma
 
 from .qctests import QCCheckVar
 from .spike import spike
-
 
 module_logger = logging.getLogger(__name__)
 

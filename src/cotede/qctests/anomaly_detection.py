@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
     Quality Control based on anomaly detection
@@ -7,9 +6,9 @@
 import logging
 
 import numpy as np
+
 #from numpy import ma
 from cotede.anomaly_detection import estimate_anomaly
-
 
 module_logger = logging.getLogger(__name__)
 

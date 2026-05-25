@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """ The tests itself to QC the data
@@ -6,13 +5,10 @@
 
 import logging
 
-import numpy as np
-from numpy import ma
-
 module_logger = logging.getLogger(__name__)
 
 
-class QCCheck(object):
+class QCCheck:
     """Basic template for a QC check
     """
 
@@ -58,7 +54,7 @@ class QCCheck(object):
             module_logger.debug("flag_bad undefined. Using default value")
 
     def keys(self):
-        return self.features.keys() + ["flag_%s" % f for f in self.flags.keys()]
+        return self.features.keys() + [f"flag_{f}" for f in self.flags.keys()]
 
     def test(self):
         """Actual test evaluation procedure: Expected from derived objects

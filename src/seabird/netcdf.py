@@ -3,9 +3,8 @@
 """ Export the parsed data into a NetCDF following different patterns
 """
 
-from __future__ import print_function
-from datetime import datetime, date, time
 import logging
+from datetime import date, datetime, time
 
 module_logger = logging.getLogger("seabird.netcdf")
 
@@ -82,9 +81,7 @@ def cnv2nc(data, filename):
         if "/" in name:
             nc_name = name.replace("/", "Per")
             logging.info(
-                "Replace {} in variable by {} to be compatible with NetCDF".format(
-                    name, nc_name
-                )
+                f"Replace {name} in variable by {nc_name} to be compatible with NetCDF"
             )
         else:
             nc_name = name
@@ -110,7 +107,7 @@ def cnv2nc(data, filename):
             # Ignore name and empty attributes
             if key in ["name"] or value == None:
                 continue
-            logging.info("\t\033[93m{}\033[0m: {}".format(key, value))
+            logging.info(f"\t\033[93m{key}\033[0m: {value}")
             cdf_variables[nc_name].__setattr__(key, value)
 
     nc.close()
