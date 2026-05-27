@@ -255,12 +255,15 @@ class LassoItem(pg.GraphicsObject):
 class QCWindow(QWidget):
     """Unified interactive QC window.
 
-    Behaviour differs by ``mode``:
-      ``"thermograph"``  – time-series plot (X = timestamps, Y = parameter)
-      ``"ctd"``          – profile plot (X = parameter, Y = pressure, Y inverted)
+    Behaviour differs by mode — thermograph plots time-series data with
+    timestamps on X and the parameter on Y; CTD plots a profile with the
+    parameter on X and inverted pressure on Y.
 
-    All flagging, lasso/click selection, undo, export, and navigation controls
-    are identical for both modes.
+    All flagging, lasso/click selection, undo, export, and navigation
+    controls are identical for both modes.
+
+    Args:
+        mode (str): Plotting mode. Either ``"thermograph"`` or ``"ctd"``.
     """
 
     closed = pg.QtCore.Signal()
@@ -294,6 +297,49 @@ class QCWindow(QWidget):
         current_file=None,
         param_map: dict | None = None,
     ):
+        """Initialise the QC window and build all UI components.
+
+            Args:
+                mode: Plotting mode. Either `"thermograph"` for a time-series
+                    plot or `"ctd"` for a pressure-profile plot.
+                df: The dataset to display and flag.
+                state: Shared application state passed in from the caller,
+                    used to persist flags and UI settings across navigation.
+                xnums: Unix timestamps corresponding to each row in `df`.
+                    Required when `mode="thermograph"`.
+                qc_start_ts: Unix timestamp marking the start of the QC window.
+                    Thermograph mode only.
+                qc_end_ts: Unix timestamp marking the end of the QC window.
+                    Thermograph mode only.
+                start_datetime_qc: Display-formatted start datetime for the QC
+                    window label. Thermograph mode only.
+                end_datetime_qc: Display-formatted end datetime for the QC
+                    window label. Thermograph mode only.
+                batch_name: Human-readable label for the current batch, shown
+                    in the window title. Thermograph mode only.
+                pres_col: Column name in `df` containing pressure values
+                    (Y-axis). Required when `mode="ctd"`.
+                x_col_default: Column name to use as the default X-axis
+                    parameter on first render. CTD mode only.
+                station: Station identifier shown in the window title.
+                    Defaults to `"—"` when not applicable.
+                event_num: Event number shown in the window title.
+                    Defaults to `"—"` when not applicable.
+                colors_initial: Per-point colour list matching the row order
+                    of `df`. If `None`, a default palette is applied.
+                instrument: Instrument identifier included in export metadata.
+                organization: Organisation name included in export metadata.
+                qc_mode_: Active QC mode label (e.g. `"auto"`, `"manual"`).
+                qc_mode_code_: Numeric code corresponding to `qc_mode_`.
+                block_next_: When non-zero, navigation to the next file is
+                    blocked until outstanding flags are resolved.
+                idx: Index of the current file within `file_list`. Defaults to `1`.
+                file_list: Ordered list of file paths for batch navigation.
+                    `None` disables prev/next controls.
+                current_file: Path or identifier of the file currently loaded.
+                param_map: Mapping of internal column names to display labels.
+                    `None` causes raw column names to be shown.
+            """
         super().__init__()
 
         # Set modality to block the rest of the application
@@ -477,7 +523,6 @@ class QCWindow(QWidget):
         lbl_info.setStyleSheet("color: navy;")
         lbl_info.setWordWrap(True)
         right_panel.addWidget(lbl_info)
-
         right_panel.addSpacing(12)
 
         # ── Axis-variable selector (mode-specific) ─────────────────────────
@@ -769,6 +814,16 @@ class QCWindow(QWidget):
     # Button slots
     # =======================================================================
     def _click_reset_view(self):
+        # Reapply current flag colours so pyqtgraph's redraw uses fresh brushes
+        brushes = [
+            pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+            for f in self._df[self._flag_col]
+        ]
+        if self._mode == "ctd":
+            self._scatter.scatter.setBrush(brushes)
+        else:
+            self._scatter.setBrush(brushes)
+        
         self._pw.setXRange(*self._x_range, padding=0)
         self._pw.setYRange(*self._y_range, padding=0)
 
