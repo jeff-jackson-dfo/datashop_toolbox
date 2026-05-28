@@ -734,9 +734,6 @@ class QCWindow(QWidget):
 
             self._x_col = col_name
             xs = self._current_xs()
-            # xs_mask = np.isfinite(xs)
-            # xs = xs[xs_mask]
-            # self._pres_data = self._pres_data[xs]
             self._scatter.setData(
                 x=xs, y=self._pres_data,
                 symbolBrush=brushes, symbolPen=pg.mkPen(None), symbolSize=8,
@@ -768,10 +765,28 @@ class QCWindow(QWidget):
             pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
             for f in self._df[self._flag_col]
         ]
-        if self._mode == "ctd":
-            self._scatter.scatter.setBrush(brushes)
-        else:
-            self._scatter.setBrush(brushes)
+
+        if self._mode == "thermograph":
+            self._scatter.setData(
+                x=self._xnums,
+                y=self._current_ys(),
+                brush=brushes,
+                pen=pg.mkPen(None),
+                size=8,
+            )
+        elif self._mode == "ctd":
+            self._scatter.setData(
+                x=self._current_xs(),
+                y=self._pres_data,
+                symbolBrush=brushes,
+                symbolPen=pg.mkPen(None),
+                symbolSize=8,
+                pen=pg.mkPen("k", width=1),
+            )
+        # if self._mode == "ctd":
+        #     self._scatter.scatter.setBrush(brushes)
+        # else:
+        #     self._scatter.setBrush(brushes)
         self._state["scatter"] = self._scatter
 
     # =======================================================================
@@ -814,16 +829,29 @@ class QCWindow(QWidget):
     # Button slots
     # =======================================================================
     def _click_reset_view(self):
-        # Reapply current flag colours so pyqtgraph's redraw uses fresh brushes
         brushes = [
             pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
             for f in self._df[self._flag_col]
         ]
-        if self._mode == "ctd":
-            self._scatter.scatter.setBrush(brushes)
-        else:
-            self._scatter.setBrush(brushes)
-        
+
+        if self._mode == "thermograph":
+            self._scatter.setData(
+                x=self._xnums,
+                y=self._current_ys(),
+                brush=brushes,
+                pen=pg.mkPen(None),
+                size=8,
+            )
+        elif self._mode == "ctd":
+            self._scatter.setData(
+                x=self._current_xs(),
+                y=self._pres_data,
+                symbolBrush=brushes,
+                symbolPen=pg.mkPen(None),
+                symbolSize=8,
+                pen=pg.mkPen("k", width=1),
+            )
+
         self._pw.setXRange(*self._x_range, padding=0)
         self._pw.setYRange(*self._y_range, padding=0)
 
