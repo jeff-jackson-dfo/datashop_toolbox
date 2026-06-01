@@ -11,7 +11,7 @@ import logging
 import numpy as np
 from numpy import ma
 
-from .qctests import QCCheckVar
+from .core import QCCheckVar
 
 module_logger = logging.getLogger(__name__)
 

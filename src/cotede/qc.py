@@ -238,9 +238,9 @@ class ProfileQC:
                     (cfg[c]["procedure"] in qctests.QCTESTS))
         for criterion in criteria:
             Procedure = qctests.catalog(cfg[criterion]["procedure"])
-            if issubclass(Procedure, qctests.QCCheckVar):
+            if issubclass(Procedure, qctests.core.QCCheckVar):
                 y = Procedure(self.input, varname=v, cfg=cfg[criterion], autoflag=True)
-            elif issubclass(Procedure, qctests.QCCheck):
+            elif issubclass(Procedure, qctests.core.QCCheck):
                 y = Procedure(self.input, cfg=cfg[criterion], autoflag=True)
 
             if self.saveauxiliary:

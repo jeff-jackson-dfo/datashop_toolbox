@@ -10,8 +10,8 @@ import logging
 import numpy as np
 from numpy import ma
 
+from .core import QCCheckVar
 from .gradient import curvature
-from .qctests import QCCheckVar
 
 module_logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@
 import numpy as np
 from numpy import ma
 
-from .qctests import QCCheckVar
+from .core import QCCheckVar
 
 
 def constant_cluster_size(x, tol=0):

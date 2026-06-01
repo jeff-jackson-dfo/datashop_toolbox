@@ -9,7 +9,7 @@ import logging
 import numpy as np
 from numpy import ma
 
-from .qctests import QCCheck
+from .core import QCCheck
 
 module_logger = logging.getLogger(__name__)
 

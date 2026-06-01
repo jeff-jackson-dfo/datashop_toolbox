@@ -269,7 +269,7 @@ wheels = [
 
 [[package]]
 name = "datashop-toolbox"
-version = "1.0.9.3"
+version = "1.0.9.6"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -306,7 +306,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.4.1" },
     { name = "jinja2", specifier = ">=3.1.4" },
     { name = "numpy", specifier = ">=2.0.0" },
-    { name = "oceansdb", specifier = ">=0.8.5" },
+    { name = "oceansdb", path = "../oceansdb/dist/oceansdb-0.9.1.dev2+gdeb87cd.d20260523-py3-none-any.whl" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "oracledb", specifier = ">=2.0.0" },
     { name = "pandas", specifier = ">=2.2.0" },
@@ -716,18 +716,36 @@ wheels = [
 
 [[package]]
 name = "oceansdb"
-version = "0.8.15"
-source = { registry = "https://pypi.org/simple" }
+version = "0.9.1.dev2+gdeb87cd.d20260523"
+source = { path = "../oceansdb/dist/oceansdb-0.9.1.dev2+gdeb87cd.d20260523-py3-none-any.whl" }
 dependencies = [
     { name = "netcdf4" },
     { name = "numpy" },
     { name = "scipy" },
     { name = "supportdata" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/03/a6/8c6f8c8795dfee2a19ff812c66b01bd83eea788db2a51187bfc1b0d7a263/oceansdb-0.8.15.tar.gz", hash = "sha256:17dc46045e2fe86c8967f8dd583bb161638e70b29850d67cceec3b09e14c937e", size = 40589, upload-time = "2023-02-22T03:56:49.385Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/24/f7/fd20d1a52ce473f6a2a146416a7c9fec2bcf49d649c7345c1b5c802a13cb/oceansdb-0.8.15-py2.py3-none-any.whl", hash = "sha256:1a7c65f3b1c0aa9dd672f9c9da868b49c196ce7d6cff86a8cfa91fc16958a1cf", size = 27358, upload-time = "2023-02-22T03:56:47.533Z" },
+    { filename = "oceansdb-0.9.1.dev2+gdeb87cd.d20260523-py3-none-any.whl", hash = "sha256:e44639e4e85f7f6f0b26f2c4a0c52dd2f2af06465e87b5b3f63560bc34ee6764" },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "coverage", marker = "extra == 'test'", specifier = ">=4.2" },
+    { name = "flake8", marker = "extra == 'test'", specifier = ">=3.2.1" },
+    { name = "hypothesis", marker = "extra == 'test'", specifier = ">=6.29.3" },
+    { name = "netcdf4", specifier = ">=1.2.4" },
+    { name = "numpy", specifier = ">=1.14" },
+    { name = "pip", marker = "extra == 'test'", specifier = ">=9.0.1" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=5.0.0" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=3.0.0" },
+    { name = "scipy", specifier = ">=1.1" },
+    { name = "sphinx", marker = "extra == 'dev'", specifier = ">=1.5.1" },
+    { name = "supportdata", specifier = ">=0.1.3" },
+    { name = "supportdata", marker = "extra == 'test'", specifier = ">=0.1.2" },
+    { name = "tox", marker = "extra == 'test'", specifier = ">=2.3.3" },
+    { name = "twine", marker = "extra == 'dev'", specifier = ">=1.8.1" },
+]
+provides-extras = ["dev", "test"]
 
 [[package]]
 name = "openpyxl"

@@ -24,7 +24,7 @@ from numpy import ma
 from oceansdb import WOA
 
 from ..utils import day_of_year, extract_coordinates, extract_depth, extract_time
-from .qctests import QCCheckVar
+from .core import QCCheckVar
 
 module_logger = logging.getLogger(__name__)
 

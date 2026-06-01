@@ -10,7 +10,7 @@ import logging
 import numpy as np
 from numpy import ma
 
-from cotede.qctests import QCCheckVar
+from .core import QCCheckVar
 
 try:
     import pandas as pd

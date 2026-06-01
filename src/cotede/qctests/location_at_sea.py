@@ -11,7 +11,7 @@ import logging
 import numpy as np
 
 from ..utils import extract_coordinates
-from .qctests import QCCheck
+from .core import QCCheck
 
 module_logger = logging.getLogger(__name__)
 

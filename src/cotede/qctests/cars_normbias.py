@@ -9,7 +9,7 @@ from numpy import ma
 from oceansdb import CARS
 
 from ..utils import day_of_year, extract_coordinates, extract_depth, extract_time
-from . import QCCheckVar
+from .core import QCCheckVar
 
 module_logger = logging.getLogger(__name__)
 

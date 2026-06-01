@@ -10,7 +10,7 @@ import logging
 import numpy as np
 from numpy import ma
 
-from .qctests import QCCheckVar
+from .core import QCCheckVar
 from .spike import spike
 
 module_logger = logging.getLogger(__name__)
