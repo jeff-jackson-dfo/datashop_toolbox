@@ -66,10 +66,11 @@ def fix_sigma_theta(profile: fProfileQC) -> fProfileQC:
 if use_qc:
     ## Use a real BIO CTD dataset with QC flags
     cnv_file = './sampledata/cnv/D146a001.CNV'
-    profile = fCNV(cnv_file)
-    # profile = fProfileQC('dat4805001.cnv', cfg='gtspp')
-    # print(profile.keys())
-    # print(profile.flags.keys())
+    # profile = fCNV(cnv_file)
+    profile = fProfileQC(cnv_file, cfg='gtspp_bio') 
+    
+    print(profile.keys())
+    print(profile.flags.keys())
     # print(profile.flags['TEMP'])
     # print(profile.flags['PSAL'])
     # print(profile.flags['PRES'])
@@ -77,8 +78,8 @@ if use_qc:
 
     # profile = fix_sigma_theta(profile)
     
-    # print(profile.keys())
-    pqc = cotede.ProfileQC(profile, 'gtspp')
+    # pqc = cotede.ProfileQC(profile, 'gtspp')
+
     # print(pqc.attributes)
     # print(pqc.keys())
     # print(pqc['sigma_theta00'])

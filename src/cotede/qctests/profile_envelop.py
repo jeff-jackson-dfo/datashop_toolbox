@@ -12,7 +12,7 @@ import logging
 import numpy as np
 from numpy import ma
 
-from .core import QCCheckVar
+from cotede.qctests.core import QCCheckVar
 
 module_logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class ProfileEnvelop(QCCheckVar):
             f = eval(f"(x[ind] > {layer[2]}) & (x[ind] < {layer[3]})")
 
             flag[ind[f]] = self.flag_good
-            flag[ind[not f]] = self.flag_bad
+            flag[ind[~f]] = self.flag_bad
 
         flag[ma.getmaskarray(x) | ~np.isfinite(x)] = 9
         self.flags["profile_envelop"] = flag
