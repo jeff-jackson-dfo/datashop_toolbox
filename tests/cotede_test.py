@@ -1,13 +1,16 @@
 # import gsw
 import re
 
-import cotede
+import matplotlib.pyplot as plt
+from icecream import ic
+
+import cotede.qc
 
 # from cotede import datasets, qctests
 # import numpy as np
 # import pandas as pd
 # import oceansdb
-# import seabird
+from seabird import cnv
 from seabird.cnv import fCNV
 from seabird.qc import fProfileQC
 
@@ -21,22 +24,22 @@ from seabird.qc import fProfileQC
 # print("The variables are: ", ", ".join(sorted(data.keys())))
 # print("There is a total of {} observed depths.".format(len(data["TEMP"])))
 # pqc = cotede.ProfileQC(data, 'gtspp')
-# print(pqc.keys())
-# print('Temperature:')
-# print(pqc['TEMP'])
-# print(pqc.flags['TEMP'])
-# print('Salinity:')
-# print(pqc['PSAL'])
-# print(pqc.flags['PSAL'])
+# ic(pqc.keys())
+# ic('Temperature:')
+# ic(pqc['TEMP'])
+# ic(pqc.flags['TEMP'])
+# ic('Salinity:')
+# ic(pqc['PSAL'])
+# ic(pqc.flags['PSAL'])
 ###################################
 
 ## Use a real CTD dataset from the seabird package
 # profile = fCNV('dPIRX003.cnv')
-# print(profile.keys())
-# print(profile.attributes)
-# print(profile['TEMP'])
-# print(profile['PSAL'])
-# print(profile['PRES'])
+# ic(profile.keys())
+# ic(profile.attributes)
+# ic(profile['TEMP'])
+# ic(profile['PSAL'])
+# ic(profile['PRES'])
 
 # Set to True to include QC flags for the dataset
 use_qc = True
@@ -64,48 +67,57 @@ def fix_sigma_theta(profile: fProfileQC) -> fProfileQC:
 
 
 if use_qc:
+    
     ## Use a real BIO CTD dataset with QC flags
     cnv_file = './sampledata/cnv/D146a001.CNV'
-    # profile = fCNV(cnv_file)
+
+    data = cnv.fCNV(cnv_file)
+    ic(data.as_DataFrame().head())
+    
+    ped = cotede.qc.ProfileQCed(data)
+    ic(ped.keys())
+
     profile = fProfileQC(cnv_file, cfg='gtspp_bio') 
-    
-    print(profile.keys())
-    print(profile.flags.keys())
-    # print(profile.flags['TEMP'])
-    # print(profile.flags['PSAL'])
-    # print(profile.flags['PRES'])
-    # print(profile['DEPTH'])
+    ic(profile.keys())
+    ic(profile.flags.keys())
 
-    # profile = fix_sigma_theta(profile)
-    
-    # pqc = cotede.ProfileQC(profile, 'gtspp')
+    # ic(profile.flags.keys())
+    # ic(profile['TEMP'])
+    # ic(profile.flags['TEMP'])
+    # ic(profile['PSAL'])
+    # ic(profile.flags['PSAL'])
+    # ic(profile['PRES'])
+    # ic(profile['DEPTH'])
+    # ic(profile.__getitem__('timeS'))
 
-    # print(pqc.attributes)
-    # print(pqc.keys())
-    # print(pqc['sigma_theta00'])
-    # print(profile.__getitem__('timeS'))
-    # print(profile.flags['TEMP'].keys())
+    profile = fix_sigma_theta(profile)
+    ic(profile['sigma_theta00'])
+    ic(profile.flags['sigma_theta00'])
+    plt.plot(profile['sigma_theta00'], profile['DEPTH'], '.')
+    plt.gca().invert_yaxis()
+    plt.show()
 
 else:
+
     ## Use a real BIO CTD dataset
     profile = fCNV('dat4805001.cnv')
-    # print(profile.keys())
-    # print(profile.attributes)
-    # print(profile['TEMP'])
-    # print(profile['PSAL'])
-    # print(profile['PRES'])
-    # print(profile['DEPTH'])
+    # ic(profile.keys())
+    # ic(profile.attributes)
+    # ic(profile['TEMP'])
+    # ic(profile['PSAL'])
+    # ic(profile['PRES'])
+    # ic(profile['DEPTH'])
     pqc = cotede.ProfileQC(profile)
-    # print(pqc['TEMP'])
-    # print(pqc.flags['TEMP'])
+    # ic(pqc['TEMP'])
+    # ic(pqc.flags['TEMP'])
 
 # Convert the profile (dict) to a pandas DataFrame
 # df = profile.as_DataFrame()
-# print(df.head())
+# ic(df.head())
 
 # pqc = cotede.ProfileQC(profile, 'gtspp')
-# print(pqc.keys())
-# print(pqc['sea_water_temperature'])
+# ic(pqc.keys())
+# ic(pqc['sea_water_temperature'])
 # pqc.flags['sea_water_salinity']
 # pqc.flags['sea_water_salinity']['gradient']
 # pqc = cotede.ProfileQC(profile, 'cotede')
