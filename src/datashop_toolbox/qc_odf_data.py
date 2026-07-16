@@ -49,7 +49,6 @@ import numpy as np
 import pandas as pd
 import pyqtgraph as pg
 import pytz
-from icecream import ic
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import (
@@ -2040,7 +2039,7 @@ def qc_ctd_data(
         df = pd.DataFrame({pres_col: pres_arr})
         for display, (data_col, flag_col) in param_map.items():
             df[display] = pd.to_numeric(orig_df[data_col], errors="coerce").to_numpy()
-            ic(df[display])
+            print(df[display])
             df[f"qualityflag_{display}"] = orig_df[flag_col].to_numpy().astype(int)
 
         print(df.head())

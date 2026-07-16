@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from icecream import ic
 from pyrsktools import RSK
 
 
@@ -10,14 +9,14 @@ def convert_rbr_to_odf(
     # Open the RSK file. Metadata is read here
     with RSK(rsk_file_path) as rsk:
         # Read, process, view, or export data here
-        # ic(rsk.filename)
-        # ic(rsk.version)
+        # print(f"rsk.filename: {rsk.filename}")
+        # print(f"rsk.version: {rsk.version}")
         # print(rsk)
 
         # Read the data into a numpy ndarray
         rsk.readdata()
-        # ic(len(rsk.data))
-        # ic(rsk.data["depth"])
+        # print(f"len(rsk.data) = {len(rsk.data)}")
+        # print(rsk.data["depth"])
 
         # 1. Shift temperature channel of the first four profiles with the same lag value.
         # rsk.alignchannel(channel="temperature", lag=2, profiles=range(0,3))
@@ -41,18 +40,18 @@ def convert_rbr_to_odf(
         # Print channel names after adding new channels
         # print(rsk.channelNames)
         for channel in rsk.channels:
-            ic(channel.longName)
-            ic(channel._dbName)
-            ic(channel.units)
+            print(f"channel.longName: {channel.longName}")
+            print(f"channel._dbName: {channel._dbName}")
+            print(f"channel.units: {channel.units}")
 
         # Display in succession a plot of each profile in the dataset
         # profiles = rsk.getprofilesindices(range(0, 3), direction="both")
         profiles = rsk.getprofilesindices(range(0, 3), direction="both")
-        for p, profile_indices in enumerate(profiles):
+        for p, _profile_indices in enumerate(profiles):
             if p == 1:
                 # print(f"Plotting profile {p}")
                 # rsk.removeloops(profiles=[p,p])
-                # print(rsk.data[profile_indices])
+                # print(rsk.data[_profile_indices])
                 fig, axes = rsk.plotprofiles(
                     channels=[
                         "temperature",

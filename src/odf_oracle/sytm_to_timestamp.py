@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import numpy as np
-from icecream import ic
 
 
 def sytm_to_timestamp(sytm: str, strid: str) -> datetime:
@@ -51,16 +50,10 @@ def sytm_to_timestamp(sytm: str, strid: str) -> datetime:
 def main():
 
     sytm = "01-JUL-2017 10:45:19.00"
-    ic(sytm)
-    ic(type(sytm))
-    # nps = np.str_(sytm)
-    # ic(nps)
-    # sytm = ndt.replace('\'', '')
     dt_object = datetime.strptime(sytm, "%d-%b-%Y %H:%M:%S.%f")
-    ic(dt_object)
+    print(dt_object)
     ts = sytm_to_timestamp(sytm, "datetime")
-    ic(ts)
-    ic(type(ts))
+    print(ts)
 
 
 if __name__ == "__main__":

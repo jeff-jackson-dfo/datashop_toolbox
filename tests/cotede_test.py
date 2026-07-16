@@ -2,7 +2,6 @@
 import re
 
 import matplotlib.pyplot as plt
-from icecream import ic
 
 import cotede.qc
 
@@ -72,14 +71,14 @@ if use_qc:
     cnv_file = './sampledata/cnv/D146a001.CNV'
 
     data = cnv.fCNV(cnv_file)
-    ic(data.as_DataFrame().head())
+    print(data.as_DataFrame().head())
     
     ped = cotede.qc.ProfileQCed(data)
-    ic(ped.keys())
+    print(f"ped.keys(): {ped.keys()}")
 
     profile = fProfileQC(cnv_file, cfg='gtspp_bio') 
-    ic(profile.keys())
-    ic(profile.flags.keys())
+    print(f"profile.keys(): {profile.keys()}")
+    print(f"profile.flags.keys(): {profile.flags.keys()}")
 
     # ic(profile.flags.keys())
     # ic(profile['TEMP'])
@@ -91,8 +90,8 @@ if use_qc:
     # ic(profile.__getitem__('timeS'))
 
     profile = fix_sigma_theta(profile)
-    ic(profile['sigma_theta00'])
-    ic(profile.flags['sigma_theta00'])
+    print(f"profile['sigma_theta00']: {profile['sigma_theta00']}")
+    print(f"profile.flags['sigma_theta00']: {profile.flags['sigma_theta00']}")
     plt.plot(profile['sigma_theta00'], profile['DEPTH'], '.')
     plt.gca().invert_yaxis()
     plt.show()
