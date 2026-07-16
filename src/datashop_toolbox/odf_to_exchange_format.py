@@ -65,7 +65,10 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
             ship_code = '35A3'
         expocode = f'{ship_code}{sdate}'
         event = int(odf.event_header.event_number)
-        output_file = Path(odf_folder, 'Exchange_Format/', f'{expocode}_{event}_ct1.csv')
+        output_path = Path(odf_folder, 'Exchange_Format/')
+        if not output_path.is_dir():
+            os.mkdir(output_path)
+        output_file = Path(output_path, f'{expocode}_{event}_ct1.csv')
         with open(output_file, 'w', newline='') as f:
             f.write(f'CTD,{current_date}DFOBIO{operator_initials}\n')
             f.write('NUMBER_HEADERS = 10\n')
