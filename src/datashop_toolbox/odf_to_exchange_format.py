@@ -19,15 +19,18 @@ col_formats = {
 }
 
 
-def odf2exchange(top_folder: Path):
+def odf2exchange(odf_folder: Path, wildcard: str) -> None:
+    """Generate CCHDO Exchange Formatted files from ODF files.
 
-    odf_folder = Path(top_folder, 'ODF')
+    Args:
+        odf_folder: The path to the ODF files.
+    """
 
     # Change to folder containing files to be modified
     os.chdir(odf_folder)
 
     # Find all ODF files in the current directory.
-    files = odf_folder.glob('*_DN.ODF')
+    files = odf_folder.glob(wildcard)
 
     # Loop through the list of ODF files and process both the DN and UP files.
     # Iterate through the list of input files.
@@ -58,9 +61,11 @@ def odf2exchange(top_folder: Path):
             ship_code = '18QL'
         elif odf.cruise_header.platform.upper() == 'JAMES COOK':
             ship_code = '740H'
+        elif odf.cruise_header.platform.upper() == 'LATALANTE':
+            ship_code = '35A3'
         expocode = f'{ship_code}{sdate}'
         event = int(odf.event_header.event_number)
-        output_file = Path(top_folder, 'Exchange_Format/', f'{expocode}_{event}_ct1.csv')
+        output_file = Path(odf_folder, 'Exchange_Format/', f'{expocode}_{event}_ct1.csv')
         with open(output_file, 'w', newline='') as f:
             f.write(f'CTD,{current_date}DFOBIO{operator_initials}\n')
             f.write('NUMBER_HEADERS = 10\n')
@@ -84,7 +89,8 @@ def odf2exchange(top_folder: Path):
                 temp_scale = 'ITS-90'
             else:
                 print("WARNING: Problem with temperature column handling.")
-            output_df = odf.data.data_frame[['PRES_01','QPRES_01','TEMP_01','QTEMP_01','PSAL_01','QPSAL_01','DOXY_01','QDOXY_01']]
+            output_df = odf.data.data_frame[['PRES_01','QPRES_01','TEMP_01','QTEMP_01','PSAL_01',
+                                             'QPSAL_01','DOXY_01','QDOXY_01']]
             formatted_cols = []
             for col in output_df.columns:
                 if col.startswith('Q'):
@@ -101,13 +107,16 @@ def odf2exchange(top_folder: Path):
         print('#######################################################################')
         print()
 
+    return
+
 
 def main():
 
-    base_folder = Path("C:/DFO-MPO/DEV/pythonProjects/CCHDO/")
-    print(base_folder)
+    odf_path = Path("C:/DFO-MPO/DEV/pythonProjects/CCHDO/ODF/")
+    print(odf_path)
 
-    odf2exchange(base_folder)
+    # odf2exchange(odf_path, 'D*.ODF')
+    odf2exchange(odf_path, '*_DN.ODF')
 
 if __name__ == "__main__":
     main()
