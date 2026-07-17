@@ -66,7 +66,7 @@ https://docs.astral.sh/uv/getting-started/installation/
 #### Step 4: Install dependencies
 > uv sync
 
-#### Step 4: Add package
+#### Step 5: Add package
 > uv add <path>\datashop_toolbox-<version>-py3-none-any.whl
 e.g. uv add C:\DFO-MPO\DEV\GitHub\datashop-toolbox\dist\datashop_toolbox-1.1.0.5-py3-none-any.whl
 
