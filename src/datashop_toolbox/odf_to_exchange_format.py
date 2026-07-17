@@ -97,10 +97,10 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
             formatted_cols = []
             for col in output_df.columns:
                 if col.startswith('Q'):
-                    formatted_cols.append(output_df[col].astype(int).map(col_formats[col].format))
                     # Convert flags to WOCE flags
                     output_df[col] = output_df[col].replace(2,3)
                     output_df[col] = output_df[col].replace(1,2)
+                    formatted_cols.append(output_df[col].astype(int).map(col_formats[col].format))
                 else:
                     formatted_cols.append(output_df[col].map(col_formats[col].format))
             formatted_df = pd.concat(formatted_cols, axis=1)
