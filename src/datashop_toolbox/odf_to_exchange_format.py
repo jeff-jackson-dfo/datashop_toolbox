@@ -8,7 +8,7 @@ from datashop_toolbox.basehdr import BaseHeader
 from datashop_toolbox.odfhdr import OdfHeader
 
 col_formats = {
-    'PRES_01':  '{:8.2f}',
+    'PRES_01':  '{:8.1f}',
     'QPRES_01': '{:>1d}',
     'TEMP_01':  '{:10.4f}',
     'QTEMP_01': '{:>1d}',
@@ -93,11 +93,14 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
             else:
                 print("WARNING: Problem with temperature column handling.")
             output_df = odf.data.data_frame[['PRES_01','QPRES_01','TEMP_01','QTEMP_01','PSAL_01',
-                                             'QPSAL_01','DOXY_01','QDOXY_01']]
+                                             'QPSAL_01','DOXY_01','QDOXY_01']]            
             formatted_cols = []
             for col in output_df.columns:
                 if col.startswith('Q'):
                     formatted_cols.append(output_df[col].astype(int).map(col_formats[col].format))
+                    # Convert flags to WOCE flags
+                    output_df[col] = output_df[col].replace(2,3)
+                    output_df[col] = output_df[col].replace(1,2)
                 else:
                     formatted_cols.append(output_df[col].map(col_formats[col].format))
             formatted_df = pd.concat(formatted_cols, axis=1)
