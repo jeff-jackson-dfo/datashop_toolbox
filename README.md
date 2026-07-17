@@ -70,7 +70,7 @@ https://docs.astral.sh/uv/getting-started/installation/
 > uv build --wheel
 
 #### Step 6: Add package
-> uv add <path>\datashop_toolbox-<version>-py3-none-any.whl
+> uv add <path_to_whl>\datashop_toolbox-<version>-py3-none-any.whl
 
 e.g. uv add dist\datashop_toolbox-1.1.0.5-py3-none-any.whl
 
