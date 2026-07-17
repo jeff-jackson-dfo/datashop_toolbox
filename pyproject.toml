@@ -77,3 +77,6 @@ ignore = []
 [tool.uv.sources]
 seabirdscientific = { path = "../seabirdscientific/dist/seabirdscientific-3.0.0a5-py3-none-any.whl" }
 oceansdb = { path = "../oceansdb/dist/oceansdb-0.9.1.dev2+gdeb87cd.d20260523-py3-none-any.whl" }
+
+[tool.uv]
+link-mode = "copy"
