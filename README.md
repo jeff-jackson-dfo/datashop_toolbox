@@ -28,10 +28,10 @@ Developed and maintained by **ODIS** at the Bedford Institute of Oceanography (B
 
 ### 1️⃣ Requirements
 - Python ≥ 3.11  
-- NumPy  
-- Pandas
-- Matplotlib  
-- PySide6 (for GUI QC tools)
+- numpy  
+- pandas
+- matplotlib  
+- pyside6 (for GUI QC tools)
 - scipy
 - netCDF4
 - gsw
@@ -39,15 +39,38 @@ Developed and maintained by **ODIS** at the Bedford Institute of Oceanography (B
 ---
 
 ### 2️⃣ Setup
+
+#### Step 1: Download the Package
+There are two ways to handle this step.
+##### a. Clone the Git Repo by running command in terminal window
+Git must be installed first (https://git-scm.com/install/windows)
+> git clone https://github.com/jeff-jackson-dfo/datashop_toolbox.git
+##### b. Download the Git Repo as a ZIP file and unzip it
+https://github.com/jeff-jackson-dfo/datashop_toolbox/archive/refs/heads/master.zip
+
+After package is on your system, open a Terminal window and make the change the working
+directory to be the folder where the package is located (cloned or unzipped).
+
+*The following commands will be run in the open terminal window.*
+
+#### Step 2: Create environment
 #### Install uv if required
 (On Windows) 
-#### Step 1: Create environment
-uv venv
-#### Step 2: Activate environment
-.venv\Scripts\activate
-#### Step 3: Install dependencies
-uv sync
+https://docs.astral.sh/uv/getting-started/installation/
 
+> uv venv
+
+#### Step 3: Activate environment
+> .venv\Scripts\activate
+
+#### Step 4: Install dependencies
+> uv sync
+
+#### Step 4: Add package
+> uv add <path>\datashop_toolbox-<version>-py3-none-any.whl
+e.g. uv add C:\DFO-MPO\DEV\GitHub\datashop-toolbox\dist\datashop_toolbox-1.1.0.5-py3-none-any.whl
+
+**Now you can import all or parts of the Datashop Python Toolbox to use in a script or run in a terminal window.**
 
 ▶️ Run Toolbox 
 
