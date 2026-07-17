@@ -48,7 +48,7 @@ Git must be installed first (https://git-scm.com/install/windows)
 ##### b. Download the Git Repo as a ZIP file and unzip it
 https://github.com/jeff-jackson-dfo/datashop_toolbox/archive/refs/heads/master.zip
 
-After package is on your system, open a Terminal window and make the change the working
+After package is on your system, open a Terminal window and change the working
 directory to be the folder where the package is located (cloned or unzipped).
 
 *The following commands will be run in the open terminal window.*
