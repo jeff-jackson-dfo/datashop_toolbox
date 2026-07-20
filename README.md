@@ -66,9 +66,13 @@ https://docs.astral.sh/uv/getting-started/installation/
 #### Step 4: Install dependencies
 > uv sync
 
-#### Step 5: Add package
-> uv add <path>\datashop_toolbox-<version>-py3-none-any.whl
-e.g. uv add C:\DFO-MPO\DEV\GitHub\datashop-toolbox\dist\datashop_toolbox-1.1.0.5-py3-none-any.whl
+#### Step 5: Build Wheel File
+> uv build --wheel
+
+#### Step 6: Add package
+> uv add <path_to_whl>\datashop_toolbox-<version>-py3-none-any.whl
+
+e.g. uv add dist\datashop_toolbox-1.1.0.5-py3-none-any.whl
 
 **Now you can import all or parts of the Datashop Python Toolbox to use in a script or run in a terminal window.**
 
