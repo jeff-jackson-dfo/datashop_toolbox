@@ -1993,32 +1993,32 @@ def qc_ctd_data(
                 logger.info(f"Created missing flag column {flag_col} for {col}")
             if col in _TEMP_CANDIDATES:
                 display = "Temperature"
-            elif col.startswith(("CNDC", "COND")):
-                display = "Conductivity"
-            elif col.startswith("PSAL"):
-                display = "Salinity"
-            elif col.startswith("DENS"):
-                display = "Density"
-            elif col.startswith("SIGP"):
-                display = "Potential Density"
-            elif col.startswith("SIGT"):
-                display = "Density Anomaly"
-            elif col.startswith("POTM"):
-                display = "Potential Temperature"
-            elif col.startswith("DOXY"):
-                display = "Dissolved Oxygen"
-            elif col.startswith("OSAT"):
-                display = "Oxygen Saturation"
-            elif col.startswith("OXYV"):
-                display = "Oxygen Voltage"
-            elif col.startswith("FLOR"):
-                display = "Fluorescence"
-                print(col)
-            elif col.startswith("CDOM"):
-                display = "CDOM"
-            elif col.startswith("TURB"):
-                display = "Turbidity"
-                print(col)
+            # elif col.startswith(("CNDC", "COND")):
+            #     display = "Conductivity"
+            # elif col.startswith("PSAL"):
+            #     display = "Salinity"
+            # elif col.startswith("DENS"):
+            #     display = "Density"
+            # elif col.startswith("SIGP"):
+            #     display = "Potential Density"
+            # elif col.startswith("SIGT"):
+            #     display = "Density Anomaly"
+            # elif col.startswith("POTM"):
+            #     display = "Potential Temperature"
+            # elif col.startswith("DOXY"):
+            #     display = "Dissolved Oxygen"
+            # elif col.startswith("OSAT"):
+            #     display = "Oxygen Saturation"
+            # elif col.startswith("OXYV"):
+            #     display = "Oxygen Voltage"
+            # elif col.startswith("FLOR"):
+            #     display = "Fluorescence"
+            #     print(col)
+            # elif col.startswith("CDOM"):
+            #     display = "CDOM"
+            # elif col.startswith("TURB"):
+            #     display = "Turbidity"
+            #     print(col)
             elif col.startswith("CNTR"):
                 display = "Scan Count"
             elif col.startswith("SNCNTR"):
