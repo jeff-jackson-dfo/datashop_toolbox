@@ -561,6 +561,15 @@ class QCWindow(QWidget):
 
         right_panel.addSpacing(12)
 
+        # ── Dual Profiles Enabled ──────────────────────────────────────────
+        if mode == "ctd":
+
+            row = QHBoxLayout()
+            self._dual_check = QCheckBox("Display all associated profiles (e.g. down, up, etc.) within input files?")
+            self._dual_check.setStyleSheet("font-weight: bold;")
+
+        right_panel.addSpacing(12)
+
         # ── Flag radio buttons ─────────────────────────────────────────────
         grp = QGroupBox("Assign Quality Codes for Selected Points:")
         grp.setStyleSheet("QGroupBox { font-weight: bold; color: navy; }")

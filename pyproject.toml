@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datashop-toolbox"
-version = "1.1.0.7"
+version = "1.1.1.1"
 description = "Python toolbox for oceanographic data processing"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -22,9 +22,7 @@ dependencies = [
     "pyside6>=6.7.0",
     "python-dateutil>=2.9.0",
     "pytz>=2024.1",
-    "seabirdscientific",
     "termcolor>=2.4.0",
-    "oceansdb>=0.8.5",
     "shapely>=2.1.2",
     "click>=8.4.1",
     "scikit-fuzzy>=0.5.0",
@@ -74,9 +72,9 @@ ignore = []
 [tool.ruff.lint.per-file-ignores]
 "tests/**.py" = ["S101"]
 
-[tool.uv.sources]
-oceansdb = { path = "../oceansdb/dist/oceansdb-0.9.1.dev2+gdeb87cd.d20260523-py3-none-any.whl" }
-seabirdscientific = { path = "../seabirdscientific/dist/seabirdscientific-3.0.0a5-py3-none-any.whl" }
+# [tool.uv.sources]
+# oceansdb = { path = "../oceansdb/dist/oceansdb-0.9.1.dev2+gdeb87cd.d20260523-py3-none-any.whl" }
+# seabirdscientific = { path = "../seabirdscientific/dist/seabirdscientific-3.0.0a21-py3-none-any.whl" }
 
 [tool.uv]
 link-mode = "copy"

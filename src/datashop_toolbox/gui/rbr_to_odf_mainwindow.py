@@ -10,7 +10,8 @@ from pathlib import Path
 # Import external libraries
 import numpy as np
 import pandas as pd
-import seabirdscientific.processing as proc
+
+# import seabirdscientific.processing as proc
 from pyrsktools import RSK
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QDoubleValidator
@@ -562,10 +563,10 @@ class MainWindow(QMainWindow):
                 # Set event qualifier and suffix for filename
                 if cast_direction == "down":
                     self._odf.event_header.event_qualifier2 = "DN"
-                    cast_type = 'DOWNCAST'
+                    # cast_type = 'DOWNCAST'
                 else:
                     self._odf.event_header.event_qualifier2 = "UP"
-                    cast_type = 'UPCAST'
+                    # cast_type = 'UPCAST'
 
                 # Subset to selected profiles for THIS direction (if any were saved)
                 if self._saved_profile_indices:
@@ -594,17 +595,18 @@ class MainWindow(QMainWindow):
                         xr_profile_df = profile_df.to_xarray()
 
                         # Use bin_average from seabirdscientific.processing to bin the data for this profile
-                        profile_xarray = proc.bin_average(xr_profile_df, bin_variable="sea_pressure", bin_size=0.5, \
-                                                          include_scan_count=True, cast_type=cast_type)
-                        binned_profile_df = profile_xarray.to_dataframe()
+                        # profile_xarray = proc.bin_average(xr_profile_df, bin_variable="sea_pressure", bin_size=0.5, \
+                        #                                   include_scan_count=True, cast_type=cast_type)
+                        # binned_profile_df = profile_xarray.to_dataframe()
 
-                        binned_profile_df['sea_pressure'] = \
-                            self.round_to_nearest_half(binned_profile_df['sea_pressure'])
+                        # binned_profile_df['sea_pressure'] = \
+                        #     self.round_to_nearest_half(binned_profile_df['sea_pressure'])
 
                         # print(binned_profile_df.head())
 
                         # Populate parameter headers & data object for THIS cast and direction
-                        parameter_dict = self._populate_parameter_headers(binned_profile_df)
+                        parameter_dict = self._populate_parameter_headers(xr_profile_df)
+                        # parameter_dict = self._populate_parameter_headers(binned_profile_df)
                         if not parameter_dict:
                             print(colored(f"Parameter population failed for {cast_direction}; skipping.", 'red'))
                             continue
