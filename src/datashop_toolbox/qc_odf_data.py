@@ -561,12 +561,16 @@ class QCWindow(QWidget):
 
         right_panel.addSpacing(12)
 
-        # ── Dual Profiles Enabled ──────────────────────────────────────────
+        # ── Overlay Profiles Enabled ──────────────────────────────────────────
         if mode == "ctd":
 
             row = QHBoxLayout()
-            self._dual_check = QCheckBox("Display all associated profiles (e.g. down, up, etc.) within input files?")
-            self._dual_check.setStyleSheet("font-weight: bold;")
+            self._overlay_checkbox = QCheckBox("Overlay all associated profiles (e.g. down, up, etc.)?")
+            self._overlay_checkbox.setStyleSheet("font-weight: bold;")
+            self._overlay_checkbox.setCheckState(Qt.CheckState.Unchecked)
+            row.addWidget(self._overlay_checkbox)
+            row.addStretch()
+            right_panel.addLayout(row)
 
         right_panel.addSpacing(12)
 
@@ -626,6 +630,7 @@ class QCWindow(QWidget):
         self._btn_export.clicked.connect(lambda: self._export_dataframe(self._current_file))
         self._btn_continue.clicked.connect(self._click_continue)
         self._btn_exit.clicked.connect(self._click_exit)
+        self._overlay_checkbox.connect(self._enable_overlay_checkbox)
 
         # Start in lasso mode
         self._click_lasso()
@@ -895,6 +900,13 @@ class QCWindow(QWidget):
         exit_requested = True
         logger.info("Exit clicked — exit_requested set True.")
         self.close()
+
+    def _enable_overlay_checkbox(self, s):
+        self._state["overlay_checkbox"] = Qt.CheckState(s)
+        if Qt.CheckState(s) == Qt.CheckState.Checked:
+            logger.info(f"Overlay checkbox enabled.")
+        elif Qt.CheckState(s) == Qt.CheckState.Unchecked:
+            logger.info(f"Overlay checkbox disabled.")
 
     def _export_dataframe(self, current_file):
         self._state["applied"] = True
