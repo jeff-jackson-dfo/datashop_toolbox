@@ -630,7 +630,7 @@ class QCWindow(QWidget):
         self._btn_export.clicked.connect(lambda: self._export_dataframe(self._current_file))
         self._btn_continue.clicked.connect(self._click_continue)
         self._btn_exit.clicked.connect(self._click_exit)
-        self._overlay_checkbox.connect(self._enable_overlay_checkbox)
+        self._overlay_checkbox.connect(self._enable_overlay_checkbox())
 
         # Start in lasso mode
         self._click_lasso()
@@ -901,11 +901,12 @@ class QCWindow(QWidget):
         logger.info("Exit clicked — exit_requested set True.")
         self.close()
 
-    def _enable_overlay_checkbox(self, s):
-        self._state["overlay_checkbox"] = Qt.CheckState(s)
-        if Qt.CheckState(s) == Qt.CheckState.Checked:
+    def _enable_overlay_checkbox(self):
+        checkbox_state = self._overlay_checkbox.isChecked()
+        self._state["overlay_checkbox"] = checkbox_state
+        if checkbox_state == True:
             logger.info(f"Overlay checkbox enabled.")
-        elif Qt.CheckState(s) == Qt.CheckState.Unchecked:
+        elif checkbox_state == False:
             logger.info(f"Overlay checkbox disabled.")
 
     def _export_dataframe(self, current_file):
