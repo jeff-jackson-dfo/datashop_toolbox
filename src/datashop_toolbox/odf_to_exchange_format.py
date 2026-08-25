@@ -12,6 +12,8 @@ col_formats = {
     'QPRES_01': '{:>1d}',
     'TEMP_01':  '{:10.4f}',
     'QTEMP_01': '{:>1d}',
+    'TE90_01':  '{:10.4f}',
+    'QTE90_01': '{:>1d}',
     'PSAL_01':  '{:10.4f}',
     'QPSAL_01': '{:>1d}',
     'DOXY_01':  '{:8.3f}',
@@ -88,12 +90,14 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
             cols = odf.data.parameter_list
             if "TEMP_01" in cols:
                 temp_scale = 'IPTS-68'
+                output_df = odf.data.data_frame[['PRES_01','QPRES_01','TEMP_01','QTEMP_01','PSAL_01',
+                                                 'QPSAL_01','DOXY_01','QDOXY_01']]            
             elif "TE90_01" in cols:
                 temp_scale = 'ITS-90'
+                output_df = odf.data.data_frame[['PRES_01','QPRES_01','TE90_01','QTE90_01','PSAL_01',
+                                                 'QPSAL_01','DOXY_01','QDOXY_01']]            
             else:
                 print("WARNING: Problem with temperature column handling.")
-            output_df = odf.data.data_frame[['PRES_01','QPRES_01','TEMP_01','QTEMP_01','PSAL_01',
-                                             'QPSAL_01','DOXY_01','QDOXY_01']]            
             formatted_cols = []
             for col in output_df.columns:
                 if col.startswith('Q'):
