@@ -146,24 +146,41 @@ _TEMP_CANDIDATES = ["TEMP_01", "TE90_01", "TEMP_02"]
 # ===========================================================================
 class LassoItem(pg.GraphicsObject):
     """Freehand lasso selector.
-    
+
     The lasso selector is drawn as a red dashed line in data coordinates.
-    It triggers the sigSelected(indices) event on mouse release.
+    It can test against one *or more* overlaid point sets at once (e.g. a
+    down-cast and an up-cast plotted together), and always emits a list of
+    index arrays — one per point set, in the same order the point sets were
+    supplied — via sigSelected on mouse release.
     """
-    sigSelected = pg.QtCore.Signal(object)  # emits ndarray of int indices
+    sigSelected = pg.QtCore.Signal(object)  # emits list[np.ndarray] of int indices
 
     def __init__(self, plot_item: pg.PlotItem, xs: np.ndarray, ys: np.ndarray):
         super().__init__()
         self._plot = plot_item
         self._vb = plot_item.getViewBox()
-        self._xs = xs
-        self._ys = ys
+        self.set_point_sets((xs, ys))
         self._verts: list[tuple[float, float]] = []
         self._drawing = False
         self._enabled = True
         self._pen = QPen(QColor("red"), 0)
         self._pen.setStyle(Qt.DashLine)
         plot_item.addItem(self)
+
+    # ── Point-set management ────────────────────────────────────────────────
+    def set_point_sets(self, point_sets):
+        """Replace the data the lasso hit-tests against.
+
+        Accepts either a single ``(xs, ys)`` tuple, or a list of such tuples
+        — one per overlaid data series. Internally always stored as a list.
+        """
+        if (
+            isinstance(point_sets, tuple)
+            and len(point_sets) == 2
+            and not isinstance(point_sets[0], (list, tuple))
+        ):
+            point_sets = [point_sets]
+        self._point_sets = [(np.asarray(xs), np.asarray(ys)) for xs, ys in point_sets]
 
     # ── Enable / disable (for zoom/pan mode hand-off) ──────────────────────
     def pause(self):
@@ -238,14 +255,21 @@ class LassoItem(pg.GraphicsObject):
             self.update()
             return
         poly = QPolygonF([QPointF(x, y) for x, y in self._verts])
-        selected = [
-            i for i, (x, y) in enumerate(zip(self._xs, self._ys, strict=True))
-            if poly.containsPoint(QPointF(x, y), Qt.OddEvenFill)
-        ]
+        results: list[np.ndarray] = []
+        any_selected = False
+        for xs, ys in self._point_sets:
+            selected = [
+                i for i, (x, y) in enumerate(zip(xs, ys, strict=True))
+                if not (np.isnan(x) or np.isnan(y))
+                and poly.containsPoint(QPointF(x, y), Qt.OddEvenFill)
+            ]
+            if selected:
+                any_selected = True
+            results.append(np.array(selected, dtype=int))
         self._verts = []
         self.update()
-        if selected:
-            self.sigSelected.emit(np.array(selected, dtype=int))
+        if any_selected:
+            self.sigSelected.emit(results)
 
 
 # ===========================================================================
@@ -270,7 +294,7 @@ class QCWindow(QWidget):
     def __init__(
         self,
         mode: str,          # "thermograph" or "ctd"
-        df: pd.DataFrame,
+        df: pd.DataFrame | None,
         state: dict,
         # --- thermograph-specific ---
         xnums: np.ndarray | None = None,          # unix timestamps
@@ -284,6 +308,7 @@ class QCWindow(QWidget):
         x_col_default: str | None = None,
         station: str = "—",
         event_num: str = "—",
+        ctd_profiles: list[dict] | None = None,
         # --- shared ---
         colors_initial: list | None = None,
         instrument: str = "",
@@ -317,13 +342,22 @@ class QCWindow(QWidget):
                 batch_name: Human-readable label for the current batch, shown
                     in the window title. Thermograph mode only.
                 pres_col: Column name in `df` containing pressure values
-                    (Y-axis). Required when `mode="ctd"`.
+                    (Y-axis). Required when `mode="ctd"` and `ctd_profiles`
+                    is not supplied (legacy single-profile call).
                 x_col_default: Column name to use as the default X-axis
                     parameter on first render. CTD mode only.
                 station: Station identifier shown in the window title.
                     Defaults to `"—"` when not applicable.
                 event_num: Event number shown in the window title.
                     Defaults to `"—"` when not applicable.
+                ctd_profiles: List of one-or-more profile dicts to overlay
+                    simultaneously in CTD mode — typically a down-cast and
+                    an up-cast from the same station/event. Each dict needs
+                    at minimum: `df`, `pres_col`, `param_map`,
+                    `current_file`, and `colors_initial`; `cast_label` and
+                    `symbol` are filled in automatically if omitted. When
+                    `mode="ctd"` this is required; `df`/`pres_col` above are
+                    then ignored (kept only for backwards compatibility).
                 colors_initial: Per-point colour list matching the row order
                     of `df`. If `None`, a default palette is applied.
                 instrument: Instrument identifier included in export metadata.
@@ -357,17 +391,53 @@ class QCWindow(QWidget):
             self._xnums = xnums
             self._y_col = "Temperature"
             self._flag_col = "qualityflag_Temperature"
-        elif mode == "ctd":
-            self._pres_col = pres_col
-            self._pres_data = df[pres_col].to_numpy()
-            self._x_col = x_col_default
-            self._flag_col = f"qualityflag_{x_col_default}"
 
-        # Snapshot all per-param flag columns for undo
-        self._qflag_snapshots = {
-            f"qualityflag_{d}": self._df[f"qualityflag_{d}"].to_numpy().copy()
-            for d in self._param_map
-        }
+            # Snapshot all per-param flag columns for undo
+            self._qflag_snapshots = {
+                f"qualityflag_{d}": self._df[f"qualityflag_{d}"].to_numpy().copy()
+                for d in self._param_map
+            }
+
+        elif mode == "ctd":
+            self._profiles: list[dict] = ctd_profiles or []
+            if not self._profiles:
+                raise ValueError(
+                    "QCWindow(mode='ctd') requires at least one entry in ctd_profiles."
+                )
+            primary = self._profiles[0]
+
+            # X-axis parameters common to every overlaid profile — switching
+            # the axis must stay valid for all of them at once.
+            self._common_params = [
+                d for d in primary["param_map"]
+                if all(d in p["param_map"] for p in self._profiles)
+            ] or list(primary["param_map"])
+
+            self._x_col = (
+                x_col_default if x_col_default in self._common_params
+                else "Temperature" if "Temperature" in self._common_params
+                else self._common_params[0]
+            )
+            self._flag_col = f"qualityflag_{self._x_col}"
+
+            _SYMBOLS = ["o", "t", "s", "d", "+", "x", "star", "p"]
+            for i, prof in enumerate(self._profiles):
+                prof.setdefault("symbol", _SYMBOLS[i % len(_SYMBOLS)])
+                prof.setdefault(
+                    "cast_label",
+                    Path(str(prof.get("current_file", f"Profile {i + 1}"))).stem,
+                )
+                prof["visible"] = True
+                prof["pres_data"] = prof["df"][prof["pres_col"]].to_numpy()
+                prof["qflag_snapshots"] = {
+                    f"qualityflag_{d}": prof["df"][f"qualityflag_{d}"].to_numpy().copy()
+                    for d in prof["param_map"]
+                }
+
+            # Backward-compat aliases (primary profile) for shared code paths
+            self._df = primary["df"]
+            self._pres_col = primary["pres_col"]
+            self._pres_data = primary["pres_data"]
 
         # ── Window title ───────────────────────────────────────────────────
         if mode == "thermograph":
@@ -377,9 +447,17 @@ class QCWindow(QWidget):
             )
             self.resize(1400, 700)
         elif mode == "ctd":
+            cast_summary = (
+                ", ".join(p["cast_label"] for p in self._profiles)
+                if len(self._profiles) > 1 else ""
+            )
+            fname_display = ", ".join(
+                Path(str(p["current_file"])).name for p in self._profiles
+            )
             self.setWindowTitle(
                 f"[{idx}/{len(file_list)}] {organization} "
-                f"CTD Profile QC — {getattr(current_file, 'name', current_file)}"
+                f"CTD Profile QC"
+                f"{f' — {cast_summary}' if cast_summary else ''} — {fname_display}"
             )
             self.resize(1200, 750)
 
@@ -452,40 +530,84 @@ class QCWindow(QWidget):
 
         elif mode == "ctd":
 
-            self._pw.setLabel("bottom", x_col_default)
-            self._pw.setLabel("left", pres_col)
+            self._pw.setLabel("bottom", self._x_col)
+            pres_labels = sorted({p["pres_col"] for p in self._profiles})
+            self._pw.setLabel("left", " / ".join(pres_labels))
+            title_suffix = (
+                f"<br><span style='font-size:9pt'>"
+                f"{' &nbsp;|&nbsp; '.join(p['cast_label'] for p in self._profiles)}"
+                f"</span>"
+                if len(self._profiles) > 1 else ""
+            )
             self._pw.setTitle(
                 f"[{idx}/{len(file_list)}] {organization} CTD Profile — "
-                f"Station: {station}  Event: {event_num}  Instrument: {instrument}"
+                f"Station: {station}  Event: {event_num}  "
+                f"Instrument: {instrument}{title_suffix}"
             )
             self._pw.getPlotItem().invertY(True)
 
-            pres = self._pres_data
-            xs_init = df[x_col_default].to_numpy()
-            brushes = [pg.mkBrush(QColor(c)) for c in (colors_initial or [])]
-            self._scatter = pg.PlotDataItem(
-                x=xs_init, y=pres,
-                symbol="o", symbolSize=8, symbolBrush=brushes,
-                symbolPen=pg.mkPen(None), pen=pg.mkPen("k", width=1),
-                connect="finite",
-            )
-            self._pw.addItem(self._scatter)
-            self._state["scatter"] = self._scatter
+            if len(self._profiles) > 1:
+                self._pw.addLegend(offset=(10, 10))
 
-            x_margin, y_margin = self._compute_margins(xs_init, pres)
-            self._x_range = (xs_init.min() - x_margin, xs_init.max() + x_margin)
-            self._y_range = (pres.min() - y_margin, pres.max() + y_margin)
+            for prof in self._profiles:
+                xs_init = self._profile_xs(prof)
+                colors = prof.get("colors_initial") or []
+                brushes = (
+                    [pg.mkBrush(QColor(c)) for c in colors]
+                    if colors else pg.mkBrush(QColor(FLAG_COLORS[0]))
+                )
+                scatter = pg.PlotDataItem(
+                    x=xs_init, y=prof["pres_data"],
+                    symbol=prof["symbol"], symbolSize=8, symbolBrush=brushes,
+                    symbolPen=pg.mkPen(None),
+                    pen=pg.mkPen("k" if len(self._profiles) == 1 else "#888888", width=1),
+                    connect="finite", name=prof["cast_label"],
+                )
+                self._pw.addItem(scatter)
+                prof["scatter"] = scatter
+
+            self._scatter = self._profiles[0]["scatter"]  # backward-compat alias
+            self._state["scatter"] = self._scatter
+            self._state["scatters"] = [p["scatter"] for p in self._profiles]
+
+            all_xs = np.concatenate([self._profile_xs(p) for p in self._profiles])
+            all_pres = np.concatenate([p["pres_data"] for p in self._profiles])
+            x_margin, y_margin = self._compute_margins(all_xs, all_pres)
+            valid_xs = all_xs[~np.isnan(all_xs)]
+            valid_pres = all_pres[~np.isnan(all_pres)]
+            self._x_range = (
+                (valid_xs.min() - x_margin, valid_xs.max() + x_margin)
+                if valid_xs.size else (0, 1)
+            )
+            self._y_range = (
+                (valid_pres.min() - y_margin, valid_pres.max() + y_margin)
+                if valid_pres.size else (0, 1)
+            )
             self._pw.setXRange(*self._x_range, padding=0)
             self._pw.setYRange(*self._y_range, padding=0)
             self._pw.getPlotItem().enableAutoRange(enable=False)
 
-            # Lasso: X = param, Y = pressure
-            self._lasso = LassoItem(self._pw.getPlotItem(), xs_init, pres)
+            # Lasso hit-tests against every overlaid profile simultaneously
+            self._lasso = LassoItem(
+                self._pw.getPlotItem(),
+                self._profile_xs(self._profiles[0]),
+                self._profiles[0]["pres_data"],
+            )
+            self._lasso.set_point_sets(
+                [(self._profile_xs(p), p["pres_data"]) for p in self._profiles]
+            )
 
         # Wire up selection signals — PlotDataItem (CTD) exposes clicks via its
         # internal ScatterPlotItem; ScatterPlotItem (thermograph) exposes them directly.
-        scatter_for_clicks = self._scatter.scatter if self._mode == "ctd" else self._scatter
-        scatter_for_clicks.sigClicked.connect(self._on_points_clicked)
+        if self._mode == "ctd":
+            for i, prof in enumerate(self._profiles):
+                prof["scatter"].scatter.sigClicked.connect(
+                    lambda _plot, points, pi=i: self._on_points_clicked(
+                        _plot, points, profile_idx=pi
+                    )
+                )
+        else:
+            self._scatter.sigClicked.connect(self._on_points_clicked)
         self._lasso.sigSelected.connect(self._on_lasso_select)
 
         # ── Left panel ─────────────────────────────────────────────────────
@@ -512,12 +634,25 @@ class QCWindow(QWidget):
                 f"<b>Batch:</b> {batch_name}"
             )
         elif mode == "ctd":
-            info_html = (
-                f"<b>Station:</b> {station}<br>"
-                f"<b>Event:</b> {event_num}<br>"
-                f"<b>Instrument:</b> {instrument}<br>"
-                f"<b>Y-axis:</b> {pres_col}"
-            )
+            if len(self._profiles) > 1:
+                file_lines = "<br>".join(
+                    f"&nbsp;&nbsp;• {p['cast_label']} ({p['symbol']}): "
+                    f"{Path(str(p['current_file'])).name}"
+                    for p in self._profiles
+                )
+                info_html = (
+                    f"<b>Station:</b> {station}<br>"
+                    f"<b>Event:</b> {event_num}<br>"
+                    f"<b>Instrument:</b> {instrument}<br>"
+                    f"<b>Profiles ({len(self._profiles)}):</b><br>{file_lines}"
+                )
+            else:
+                info_html = (
+                    f"<b>Station:</b> {station}<br>"
+                    f"<b>Event:</b> {event_num}<br>"
+                    f"<b>Instrument:</b> {instrument}<br>"
+                    f"<b>Y-axis:</b> {self._profiles[0]['pres_col']}"
+                )
         lbl_info = QLabel(info_html)
         lbl_info.setStyleSheet("color: navy;")
         lbl_info.setWordWrap(True)
@@ -550,9 +685,9 @@ class QCWindow(QWidget):
             lbl.setStyleSheet("color: navy;")
             self._axis_combo = QComboBox()
             self._axis_combo.setStyleSheet("font-weight: bold;")
-            for name in self._param_map:
+            for name in self._common_params:
                 self._axis_combo.addItem(name)
-            self._axis_combo.setCurrentText(x_col_default)
+            self._axis_combo.setCurrentText(self._x_col)
             self._axis_combo.currentTextChanged.connect(self._switch_axis)
             row.addWidget(lbl)
             row.addWidget(self._axis_combo)
@@ -561,16 +696,25 @@ class QCWindow(QWidget):
 
         right_panel.addSpacing(12)
 
-        # ── Overlay Profiles Enabled ──────────────────────────────────────────
-        if mode == "ctd":
+        # ── Per-profile visibility toggles (multi-profile CTD overlay only) ──
+        self._profile_checkboxes: list[QCheckBox] = []
+        if mode == "ctd" and len(self._profiles) > 1:
 
-            row = QHBoxLayout()
-            self._overlay_checkbox = QCheckBox("Overlay all associated profiles (e.g. down, up, etc.)?")
-            self._overlay_checkbox.setStyleSheet("font-weight: bold;")
-            self._overlay_checkbox.setCheckState(Qt.CheckState.Unchecked)
-            row.addWidget(self._overlay_checkbox)
-            row.addStretch()
-            right_panel.addLayout(row)
+            grp_vis = QGroupBox(f"Profiles Overlaid ({len(self._profiles)}):")
+            grp_vis.setStyleSheet("QGroupBox { font-weight: bold; color: navy; }")
+            vis_layout = QVBoxLayout(grp_vis)
+            for i, prof in enumerate(self._profiles):
+                cb = QCheckBox(
+                    f"{prof['cast_label']}  [{prof['symbol']}]  — "
+                    f"{Path(str(prof['current_file'])).name}"
+                )
+                cb.setChecked(True)
+                cb.stateChanged.connect(
+                    lambda cb_state, pi=i: self._toggle_profile_visibility(pi, cb_state)
+                )
+                vis_layout.addWidget(cb)
+                self._profile_checkboxes.append(cb)
+            right_panel.addWidget(grp_vis)
 
         right_panel.addSpacing(12)
 
@@ -630,7 +774,6 @@ class QCWindow(QWidget):
         self._btn_export.clicked.connect(lambda: self._export_dataframe(self._current_file))
         self._btn_continue.clicked.connect(self._click_continue)
         self._btn_exit.clicked.connect(self._click_exit)
-        self._overlay_checkbox.clicked.connect(self._enable_overlay_checkbox)
 
         # Start in lasso mode
         self._click_lasso()
@@ -674,6 +817,16 @@ class QCWindow(QWidget):
                 else self._df["Temperature"].to_numpy()
             )
         return self._pres_data
+
+    def _profile_xs(self, prof: dict) -> np.ndarray:
+        """X-values (current axis param) for one CTD profile in self._profiles."""
+        col = self._x_col
+        df = prof["df"]
+        return (
+            df[col].to_numpy() if col in df.columns
+            else np.full(len(prof["pres_data"]) if "pres_data" in prof
+                         else len(df), np.nan)
+        )
 
     # =======================================================================
     # Interaction mode management
@@ -719,23 +872,22 @@ class QCWindow(QWidget):
     # =======================================================================
     def _switch_axis(self, col_name: str):
         """Handle Y-axis switch (thermograph) or X-axis switch (CTD)."""
-        self._flag_col = f"qualityflag_{col_name}"
-        self._state["active_display"] = col_name
-        self._df["qualityflag"] = self._df[self._flag_col].copy()
-
-        brushes = [
-            pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
-            for f in self._df[self._flag_col]
-        ]
-
         if self._mode == "thermograph":
-            
+
+            self._flag_col = f"qualityflag_{col_name}"
+            self._state["active_display"] = col_name
+            self._df["qualityflag"] = self._df[self._flag_col].copy()
+            brushes = [
+                pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+                for f in self._df[self._flag_col]
+            ]
+
             self._y_col = col_name
             ys = self._current_ys()
             self._scatter.setData(
                 x=self._xnums, y=ys, brush=brushes, pen=pg.mkPen(None), size=8,
             )
-            self._lasso._ys = ys
+            self._lasso.set_point_sets((self._xnums, ys))
             valid = ys[~np.isnan(ys.astype(float))]
             if valid.size:
                 y_margin = (valid.max() - valid.min()) * 0.05 or 1.0
@@ -745,20 +897,38 @@ class QCWindow(QWidget):
 
         elif self._mode == "ctd":
 
+            if col_name not in self._common_params:
+                return
             self._x_col = col_name
-            xs = self._current_xs()
-            self._scatter.setData(
-                x=xs, y=self._pres_data,
-                symbolBrush=brushes, symbolPen=pg.mkPen(None), symbolSize=8,
-                pen=pg.mkPen("k", width=1),
+            self._flag_col = f"qualityflag_{col_name}"
+            self._state["active_display"] = col_name
+
+            for prof in self._profiles:
+                prof["df"]["qualityflag"] = prof["df"][self._flag_col].copy()
+                xs = self._profile_xs(prof)
+                brushes = [
+                    pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+                    for f in prof["df"][self._flag_col]
+                ]
+                prof["scatter"].setData(
+                    x=xs, y=prof["pres_data"],
+                    symbol=prof["symbol"], symbolSize=8,
+                    symbolBrush=brushes, symbolPen=pg.mkPen(None),
+                    pen=pg.mkPen("k" if len(self._profiles) == 1 else "#888888", width=1),
+                    connect="finite", name=prof["cast_label"],
+                )
+
+            self._lasso.set_point_sets(
+                [(self._profile_xs(p), p["pres_data"]) for p in self._profiles]
             )
-            self._lasso._xs = xs
-            self._lasso._ys = self._pres_data
-            x_margin, _ = self._compute_margins(xs, self._pres_data)
-            xs_mask = ~np.isnan(xs)
-            temp_xs = xs[xs_mask]
-            self._x_range = (temp_xs.min() - x_margin, temp_xs.max() + x_margin)
-            self._pw.setXRange(*self._x_range, padding=0)
+            all_xs = np.concatenate([self._profile_xs(p) for p in self._profiles])
+            valid_xs = all_xs[~np.isnan(all_xs)]
+            if valid_xs.size:
+                x_margin, _ = self._compute_margins(all_xs, np.concatenate(
+                    [p["pres_data"] for p in self._profiles]
+                ))
+                self._x_range = (valid_xs.min() - x_margin, valid_xs.max() + x_margin)
+                self._pw.setXRange(*self._x_range, padding=0)
             self._pw.setLabel("bottom", col_name)
 
         logger.info(f"Axis switched to: {col_name} (flag col: {self._flag_col})")
@@ -802,10 +972,54 @@ class QCWindow(QWidget):
         #     self._scatter.setBrush(brushes)
         self._state["scatter"] = self._scatter
 
+    def _apply_flags_to_profile(self, profile_idx: int, indices: np.ndarray):
+        """CTD-only: apply the current flag to one overlaid profile's points."""
+        flag = self._state["current_flag"]
+        prof = self._profiles[profile_idx]
+        df = prof["df"]
+        df.iloc[indices, df.columns.get_loc(self._flag_col)] = flag
+        df["qualityflag"] = df[self._flag_col].copy()
+        brushes = [
+            pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+            for f in df[self._flag_col]
+        ]
+        prof["scatter"].setData(
+            x=self._profile_xs(prof), y=prof["pres_data"],
+            symbol=prof["symbol"], symbolSize=8,
+            symbolBrush=brushes, symbolPen=pg.mkPen(None),
+            pen=pg.mkPen("k" if len(self._profiles) == 1 else "#888888", width=1),
+            connect="finite", name=prof["cast_label"],
+        )
+
+    def _record_selection(self, profile_idx: int, indices: np.ndarray):
+        """CTD-only: track a selection group against a specific profile for undo/export."""
+        prof = self._profiles[profile_idx]
+        groups = self._state.setdefault("selection_groups", {})
+        groups.setdefault(profile_idx, []).append(pd.DataFrame({
+            self._x_col: self._profile_xs(prof)[indices],
+            "idx": indices,
+            "Flag": self._state["current_flag"],
+        }))
+
     # =======================================================================
     # Selection events
     # =======================================================================
-    def _on_lasso_select(self, indices: np.ndarray):
+    def _on_lasso_select(self, selections):
+        """selections: list[np.ndarray] — one index array per overlaid point set."""
+        if self._mode == "ctd":
+            for i, indices in enumerate(selections):
+                if indices.size == 0:
+                    continue
+                logger.info(
+                    f"Lasso: {len(indices)} point(s) selected on "
+                    f"{self._profiles[i]['cast_label']} — "
+                    f"flag {self._state['current_flag']} on {self._x_col}"
+                )
+                self._apply_flags_to_profile(i, indices)
+                self._record_selection(i, indices)
+            return
+
+        indices = selections[0] if selections else np.array([], dtype=int)
         if indices.size == 0:
             return
         active = self._current_active_col()
@@ -815,16 +1029,26 @@ class QCWindow(QWidget):
         )
         self._apply_flags_to_points(indices)
         self._state["selection_groups"].append(pd.DataFrame({
-            active: self._current_ys()[indices] if self._mode == "thermograph"
-                    else self._current_xs()[indices],
+            active: self._current_ys()[indices],
             "idx": indices,
             "Flag": self._state["current_flag"],
         }))
 
-    def _on_points_clicked(self, _plot, points):
+    def _on_points_clicked(self, _plot, points, profile_idx: int = 0):
         indices = np.array([p.index() for p in points], dtype=int)
         if indices.size == 0:
             return
+
+        if self._mode == "ctd":
+            logger.info(
+                f"Click: {len(indices)} point(s) selected on "
+                f"{self._profiles[profile_idx]['cast_label']} — "
+                f"flag {self._state['current_flag']} on {self._x_col}"
+            )
+            self._apply_flags_to_profile(profile_idx, indices)
+            self._record_selection(profile_idx, indices)
+            return
+
         active = self._current_active_col()
         logger.info(
             f"Click: {len(indices)} point(s) selected — "
@@ -832,8 +1056,7 @@ class QCWindow(QWidget):
         )
         self._apply_flags_to_points(indices)
         self._state["selection_groups"].append(pd.DataFrame({
-            active: self._current_ys()[indices] if self._mode == "thermograph"
-                    else self._current_xs()[indices],
+            active: self._current_ys()[indices],
             "idx": indices,
             "Flag": self._state["current_flag"],
         }))
@@ -842,12 +1065,11 @@ class QCWindow(QWidget):
     # Button slots
     # =======================================================================
     def _click_reset_view(self):
-        brushes = [
-            pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
-            for f in self._df[self._flag_col]
-        ]
-
         if self._mode == "thermograph":
+            brushes = [
+                pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+                for f in self._df[self._flag_col]
+            ]
             self._scatter.setData(
                 x=self._xnums,
                 y=self._current_ys(),
@@ -856,21 +1078,42 @@ class QCWindow(QWidget):
                 size=8,
             )
         elif self._mode == "ctd":
-            self._scatter.setData(
-                x=self._current_xs(),
-                y=self._pres_data,
-                symbolBrush=brushes,
-                symbolPen=pg.mkPen(None),
-                symbolSize=8,
-                pen=pg.mkPen("k", width=1),
-            )
+            for prof in self._profiles:
+                brushes = [
+                    pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+                    for f in prof["df"][self._flag_col]
+                ]
+                prof["scatter"].setData(
+                    x=self._profile_xs(prof), y=prof["pres_data"],
+                    symbol=prof["symbol"], symbolSize=8,
+                    symbolBrush=brushes, symbolPen=pg.mkPen(None),
+                    pen=pg.mkPen("k" if len(self._profiles) == 1 else "#888888", width=1),
+                    connect="finite", name=prof["cast_label"],
+                )
 
         self._pw.setXRange(*self._x_range, padding=0)
         self._pw.setYRange(*self._y_range, padding=0)
 
     def _click_deselect_all(self):
-        self._state["selection_groups"].clear()
         logger.info("Undo All Selections — restoring original flags.")
+
+        if self._mode == "ctd":
+            self._state["selection_groups"] = {}
+            for prof in self._profiles:
+                for fc, snap in prof["qflag_snapshots"].items():
+                    prof["df"][fc] = snap.copy()
+                prof["df"]["qualityflag"] = prof["df"][self._flag_col].copy()
+                brushes = [
+                    pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
+                    for f in prof["df"][self._flag_col]
+                ]
+                prof["scatter"].scatter.setBrush(brushes)
+            self._lasso.set_point_sets(
+                [(self._profile_xs(p), p["pres_data"]) for p in self._profiles]
+            )
+            return
+
+        self._state["selection_groups"].clear()
         for fc, snap in self._qflag_snapshots.items():
             self._df[fc] = snap.copy()
         self._df["qualityflag"] = self._df[self._flag_col].copy()
@@ -878,14 +1121,8 @@ class QCWindow(QWidget):
             pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
             for f in self._df[self._flag_col]
         ]
-        if self._mode == "ctd":
-            self._scatter.scatter.setBrush(brushes)
-        else:
-            self._scatter.setBrush(brushes)
-        if self._mode == "thermograph":
-            self._lasso._ys = self._current_ys()
-        elif self._mode == "ctd":
-            self._lasso._xs = self._current_xs()
+        self._scatter.setBrush(brushes)
+        self._lasso.set_point_sets((self._xnums, self._current_ys()))
         self._state["scatter"] = self._scatter
 
     def _click_continue(self):
@@ -901,15 +1138,48 @@ class QCWindow(QWidget):
         logger.info("Exit clicked — exit_requested set True.")
         self.close()
 
-    def _enable_overlay_checkbox(self, checked: bool):
-        self._state["overlay_checkbox"] = checked
-        if checked:
-            logger.info("Overlay checkbox enabled.")
-        else:
-            logger.info("Overlay checkbox disabled.")
+    def _toggle_profile_visibility(self, profile_idx: int, cb_state):
+        """CTD-only: show/hide one overlaid profile without affecting its flags."""
+        visible = bool(cb_state)
+        prof = self._profiles[profile_idx]
+        prof["visible"] = bool(visible)
+        prof["scatter"].setVisible(bool(visible))
+        logger.info(
+            f"{prof['cast_label']} {'shown' if visible else 'hidden'} in overlay."
+        )
 
     def _export_dataframe(self, current_file):
         self._state["applied"] = True
+
+        if self._mode == "ctd" and len(self._profiles) > 1:
+            directory = QFileDialog.getExistingDirectory(
+                self, "Select Folder to Export QC'd Profiles"
+            )
+            if not directory:
+                return
+            exported = []
+            try:
+                for prof in self._profiles:
+                    stem = Path(str(prof["current_file"])).stem
+                    out_path = Path(directory) / f"{stem}_QC_Export.csv"
+                    df_export = prof["df"].copy()
+                    df_export.reset_index(inplace=True)
+                    df_export.rename(columns={"index": "SEQ_INDEX"}, inplace=True)
+                    df_export.to_csv(out_path, index=False)
+                    exported.append(str(out_path))
+                logger.info(f"DataFrames exported to {directory}")
+                QMessageBox.information(
+                    self, "Export Successful",
+                    "✅ Exported:\n" + "\n".join(exported),
+                )
+            except Exception as exc:
+                logger.error(f"Failed to export DataFrames: {exc}")
+                QMessageBox.critical(
+                    self, "Export Failed", f"❌ Failed to export DataFrames:\n{exc}",
+                )
+            return
+
+        df_to_export = self._profiles[0]["df"] if self._mode == "ctd" else self._df
         stem = Path(str(current_file)).stem
         export_path, _ = QFileDialog.getSaveFileName(
             self, "Export DataFrame to CSV",
@@ -919,7 +1189,7 @@ class QCWindow(QWidget):
         if not export_path:
             return
         try:
-            df_export = self._df.copy()
+            df_export = df_to_export.copy()
             df_export.reset_index(inplace=True)
             df_export.rename(columns={"index": "SEQ_INDEX"}, inplace=True)
             df_export.to_csv(export_path, index=False)
@@ -1734,7 +2004,7 @@ def qc_thermograph_data(
         else:
             df["qualityflag"] = df["qualityflag_Temperature"].copy()
 
-        colors_initial = [FLAG_COLORS.get(int(f), "#808080") for f in df["qualityflag"]]
+        colors_initial = [FLAG_COLORS.get(int(f), "#8A8787") for f in df["qualityflag"]]
 
         state.clear()
         state.update({
@@ -1914,6 +2184,203 @@ def qc_thermograph_data(
 # ===========================================================================
 # CTD QC core loop
 # ===========================================================================
+class _FilenameMismatchError(Exception):
+    """Raised by _load_ctd_profile when the ODF's generated file spec doesn't
+    match the file it was read from — a hard stop, matching legacy behaviour."""
+
+
+def _cast_label_from_filename(ctd_file_name: str) -> str:
+    """Infer a human-readable cast label from an ODF filename suffix.
+
+    ODF CTD filenames typically end in ``_DN`` (down-cast) or ``_UP``
+    (up-cast), e.g. ``CTD_BCD2024669_001_01_DN.ODF``. Falls back to the
+    bare filename stem when no recognised suffix is present.
+    """
+    stem = Path(ctd_file_name).stem
+    upper = stem.upper()
+    if upper.endswith("_DN"):
+        return "Downcast"
+    if upper.endswith("_UP"):
+        return "Upcast"
+    return stem
+
+
+def _load_ctd_profile(ctd_file: Path, in_folder_path: str, qc_mode_user: int) -> dict | None:
+    """Read one ODF file and prepare everything QCWindow needs to plot it.
+
+    Returns None if the file should be skipped (unreadable, no pressure
+    column, no plottable parameters). Raises _FilenameMismatchError on a
+    filename/file-spec mismatch, which the caller treats as a hard stop —
+    matching the previous single-file behaviour.
+    """
+    ctd_file_name = ctd_file.name
+    logger.info(f"Reading file: {ctd_file}")
+    full_path = str(pathlib.Path(in_folder_path, ctd_file))
+    try:
+        ctd = OdfHeader()
+        ctd.read_odf(full_path)
+    except Exception as e:
+        logger.exception(f"Failed to read ODF {full_path}: {e}")
+        return None
+
+    orig_df = ctd.data.data_frame
+    orig_df = _null_to_na(orig_df)
+    orig_df_stored = orig_df.copy()
+    orig_df = pd.DataFrame(orig_df).reset_index(drop=True)
+
+    # Filename verification
+    file_name = f"{ctd.generate_file_spec()}.ODF"
+    if file_name != ctd_file_name:
+        logger.warning(f"Filename mismatch: '{file_name}' vs '{ctd_file_name}'")
+        raise _FilenameMismatchError(ctd_file_name)
+    logger.info(f"Filename verified: {ctd_file_name}")
+
+    organization = ctd.cruise_header.organization
+    instrument = ctd.instrument_header.instrument_type
+    station = getattr(ctd.event_header, "station_name", "—") or "—"
+    event_num = getattr(ctd.event_header, "event_number", "—") or "—"
+    logger.info(f"Organization: {organization}  Station: {station}  Event: {event_num}")
+
+    # Pressure/depth column
+    pres_col = next((c for c in _PRES_CANDIDATES if c in orig_df.columns), None)
+    if pres_col is None:
+        logger.warning(
+            f"No pressure/depth column found in {ctd_file_name}. "
+            f"Columns: {list(orig_df.columns)}. Skipping."
+        )
+        return None
+    logger.info(f"Using '{pres_col}' as Y-axis.")
+
+    # Build param_map
+    _time_cols = {c for c in orig_df.columns if c.upper().startswith("SYTM")}
+    _skip_as_y = {pres_col}
+    param_map: dict = {}
+    for col in orig_df.columns:
+        if col in _time_cols or col in _skip_as_y:
+            continue
+        if col.upper().startswith("Q") and col[1:] in orig_df.columns:
+            continue
+        if col.upper().startswith("QCFF"):
+            continue
+        try:
+            arr = pd.to_numeric(orig_df[col], errors="coerce")
+            if not arr.notna().any():
+                continue
+        except Exception:
+            continue
+        flag_col = "Q" + col
+        if flag_col not in orig_df.columns:
+            orig_df[flag_col] = np.zeros(len(orig_df), dtype=int)
+            logger.info(f"Created missing flag column {flag_col} for {col}")
+        if col in _TEMP_CANDIDATES:
+            display = "Temperature"
+        elif col.startswith("CNTR"):
+            display = "Scan Count"
+        elif col.startswith("SNCNTR"):
+            display = "Count of averaged records in bin"
+        else:
+            display = col
+        param_map[display] = (col, flag_col)
+
+    if not param_map:
+        logger.warning(f"No plottable parameters in {ctd_file_name}. Skipping.")
+        return None
+
+    pres_flag_col = "Q" + pres_col
+    if pres_flag_col not in orig_df.columns:
+        orig_df[pres_flag_col] = np.zeros(len(orig_df), dtype=int)
+
+    pres_arr = pd.to_numeric(orig_df[pres_col], errors="coerce").to_numpy()
+    df = pd.DataFrame({pres_col: pres_arr})
+    for display, (data_col, flag_col) in param_map.items():
+        df[display] = pd.to_numeric(orig_df[data_col], errors="coerce").to_numpy()
+        df[f"qualityflag_{display}"] = orig_df[flag_col].to_numpy().astype(int)
+
+    x_col_default = "Temperature" if "Temperature" in param_map else next(iter(param_map))
+    df["qualityflag"] = df[f"qualityflag_{x_col_default}"].copy()
+
+    # QC mode detection
+    has_previous_qc = np.any(df[f"qualityflag_{x_col_default}"] != 0)
+    if (not has_previous_qc) and qc_mode_user == 0:
+        qc_mode_ = " QC Mode - Initial\n(No Previous QC Flags)"
+        qc_mode_code_ = 0
+        block_next_ = 0
+    elif (not has_previous_qc) and qc_mode_user == 1:
+        qc_mode_ = " QC Mode - Invalid\n(Mode Selection Mismatch)"
+        qc_mode_code_ = 1
+        block_next_ = 1
+        logger.warning("QC Mode Mismatch: Review mode but no previous flags.")
+        QMessageBox.warning(None, "QC Mode Mismatch",
+            "⚠️ You selected Review QC Mode but no previous flags were found.\n\n"
+            "Please run Initial QC Mode first.\n\nThis file will not proceed.")
+    elif has_previous_qc and qc_mode_user == 1:
+        qc_mode_ = " QC Mode - Review\n(With Previous QC Flags)"
+        qc_mode_code_ = 1
+        block_next_ = 0
+    else:
+        qc_mode_ = " QC Mode - Invalid\n(Mode Selection Mismatch)"
+        qc_mode_code_ = 1
+        block_next_ = 1
+        logger.warning("QC Mode Mismatch: Initial mode but flags already exist.")
+        QMessageBox.warning(None, "QC Mode Mismatch",
+            "⚠️ You selected Initial QC Mode but existing flags were found.\n\n"
+            "Please select Review QC Mode.\n\nThis file will not proceed.")
+
+    logger.info(f"QC Mode: {qc_mode_.strip()}")
+
+    if qc_mode_code_ == 0:
+        for d in param_map:
+            df[f"qualityflag_{d}"] = 1
+        df["qualityflag"] = df[f"qualityflag_{x_col_default}"].copy()
+
+    colors_initial = [
+        FLAG_COLORS.get(int(f), "#808080")
+        for f in df[f"qualityflag_{x_col_default}"]
+    ]
+
+    return {
+        "ctd": ctd,
+        "df": df,
+        "orig_df": orig_df,
+        "orig_df_stored": orig_df_stored,
+        "pres_col": pres_col,
+        "param_map": param_map,
+        "colors_initial": colors_initial,
+        "current_file": ctd_file,
+        "ctd_file_name": ctd_file_name,
+        "cast_label": _cast_label_from_filename(ctd_file_name),
+        "station": station,
+        "event_num": event_num,
+        "organization": organization,
+        "instrument": instrument,
+        "qc_mode_": qc_mode_,
+        "qc_mode_code_": qc_mode_code_,
+        "block_next_": block_next_,
+        "x_col_default": x_col_default,
+    }
+
+
+def _group_ctd_profiles(profiles: list[dict]) -> list[list[dict]]:
+    """Group loaded CTD profiles by (station, event) so that associated
+    casts — typically a down-cast and an up-cast of the same event — are
+    QC'd together in one overlaid window. Downcasts are ordered before
+    upcasts within a group; original discovery order is otherwise preserved.
+    """
+    groups: dict[tuple, list[dict]] = {}
+    order: list[tuple] = []
+    for p in profiles:
+        key = (p["station"], str(p["event_num"]))
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(p)
+
+    _rank = {"Downcast": 0, "Upcast": 1}
+    for key in order:
+        groups[key].sort(key=lambda p: _rank.get(p["cast_label"], 0.5))
+    return [groups[key] for key in order]
+
+
 def qc_ctd_data(
     in_folder_path: str,
     wildcard: str,
@@ -1945,197 +2412,73 @@ def qc_ctd_data(
     logger.info(f"Output folder: {out_odf_path}")
     os.chdir(cwd)
 
-    state: dict = {}
+    # ── Pass 1: load every file, then group associated casts together ──────
+    loaded_profiles: list[dict] = []
+    for ctd_file in ctd_files:
+        try:
+            profile = _load_ctd_profile(ctd_file, in_folder_path, qc_mode_user)
+        except _FilenameMismatchError:
+            batch_result["finished"] = False
+            return batch_result
+        if profile is not None:
+            loaded_profiles.append(profile)
 
-    for idx, ctd_file in enumerate(ctd_files, start=1):
+    groups = _group_ctd_profiles(loaded_profiles)
+    logger.info(
+        f"Grouped {len(loaded_profiles)} file(s) into {len(groups)} QC window(s) "
+        f"(associated casts, e.g. down/up, are overlaid together)."
+    )
+
+    state: dict = {}
+    group_idx = 0
+
+    # ── Pass 2: QC each group (1 or more overlaid profiles) interactively ──
+    for group_idx, group in enumerate(groups, start=1):
         if exit_requested:
             logger.warning("Exit requested — stopping QC loop.")
             break
 
-        ctd_file_name = ctd_file.name
-        logger.info(f"Reading file {idx}/{len(ctd_files)}: {ctd_file}")
-        full_path = str(pathlib.Path(in_folder_path, ctd_file))
-        try:
-            ctd = OdfHeader()
-            ctd.read_odf(full_path)
-        except Exception as e:
-            logger.exception(f"Failed to read ODF {full_path}: {e}")
-            continue
+        file_names = ", ".join(p["ctd_file_name"] for p in group)
+        logger.info(
+            f"QC group {group_idx}/{len(groups)}: {len(group)} profile(s) — {file_names}"
+        )
 
-        orig_df = ctd.data.data_frame
-        orig_df = _null_to_na(orig_df)
-        orig_df_stored = orig_df.copy()
-        orig_df = pd.DataFrame(orig_df).reset_index(drop=True)
-
-        # Filename verification
-        file_name = f"{ctd.generate_file_spec()}.ODF"
-        if file_name != ctd_file_name:
-            logger.warning(f"Filename mismatch: '{file_name}' vs '{ctd_file_name}'")
-            batch_result["finished"] = False
-            return batch_result
-        logger.info(f"Filename verified: {ctd_file_name}")
-
-        organization = ctd.cruise_header.organization
-        instrument = ctd.instrument_header.instrument_type
-        station = getattr(ctd.event_header, "station_name", "—") or "—"
-        event_num = getattr(ctd.event_header, "event_number", "—") or "—"
-        logger.info(f"Organization: {organization}  Station: {station}  Event: {event_num}")
-
-        # Pressure/depth column
-        pres_col = next((c for c in _PRES_CANDIDATES if c in orig_df.columns), None)
-        if pres_col is None:
-            logger.warning(
-                f"No pressure/depth column found in {ctd_file_name}. "
-                f"Columns: {list(orig_df.columns)}. Skipping."
-            )
-            continue
-        logger.info(f"Using '{pres_col}' as Y-axis.")
-
-        # Build param_map
-        _time_cols = {c for c in orig_df.columns if c.upper().startswith("SYTM")}
-        _skip_as_y = {pres_col}
-        param_map: dict = {}
-        for col in orig_df.columns:
-            if col in _time_cols or col in _skip_as_y:
-                continue
-            if col.upper().startswith("Q") and col[1:] in orig_df.columns:
-                continue
-            if col.upper().startswith("QCFF"):
-                continue
-            try:
-                arr = pd.to_numeric(orig_df[col], errors="coerce")
-                if not arr.notna().any():
-                    continue
-            except Exception:
-                continue
-            flag_col = "Q" + col
-            if flag_col not in orig_df.columns:
-                orig_df[flag_col] = np.zeros(len(orig_df), dtype=int)
-                logger.info(f"Created missing flag column {flag_col} for {col}")
-            if col in _TEMP_CANDIDATES:
-                display = "Temperature"
-            # elif col.startswith(("CNDC", "COND")):
-            #     display = "Conductivity"
-            # elif col.startswith("PSAL"):
-            #     display = "Salinity"
-            # elif col.startswith("DENS"):
-            #     display = "Density"
-            # elif col.startswith("SIGP"):
-            #     display = "Potential Density"
-            # elif col.startswith("SIGT"):
-            #     display = "Density Anomaly"
-            # elif col.startswith("POTM"):
-            #     display = "Potential Temperature"
-            # elif col.startswith("DOXY"):
-            #     display = "Dissolved Oxygen"
-            # elif col.startswith("OSAT"):
-            #     display = "Oxygen Saturation"
-            # elif col.startswith("OXYV"):
-            #     display = "Oxygen Voltage"
-            # elif col.startswith("FLOR"):
-            #     display = "Fluorescence"
-            #     print(col)
-            # elif col.startswith("CDOM"):
-            #     display = "CDOM"
-            # elif col.startswith("TURB"):
-            #     display = "Turbidity"
-            #     print(col)
-            elif col.startswith("CNTR"):
-                display = "Scan Count"
-            elif col.startswith("SNCNTR"):
-                display = "Count of averaged records in bin"
-            else:
-                display = col
-            param_map[display] = (col, flag_col)
-
-        if not param_map:
-            logger.warning(f"No plottable parameters in {ctd_file_name}. Skipping.")
-            continue
-
-        pres_flag_col = "Q" + pres_col
-        if pres_flag_col not in orig_df.columns:
-            orig_df[pres_flag_col] = np.zeros(len(orig_df), dtype=int)
-
-        pres_arr = pd.to_numeric(orig_df[pres_col], errors="coerce").to_numpy()
-        df = pd.DataFrame({pres_col: pres_arr})
-        for display, (data_col, flag_col) in param_map.items():
-            df[display] = pd.to_numeric(orig_df[data_col], errors="coerce").to_numpy()
-            print(df[display])
-            df[f"qualityflag_{display}"] = orig_df[flag_col].to_numpy().astype(int)
-
-        print(df.head())
-
-        x_col_default = "Temperature" if "Temperature" in param_map else next(iter(param_map))
-        df["qualityflag"] = df[f"qualityflag_{x_col_default}"].copy()
-
-        # QC mode detection
-        has_previous_qc = np.any(df[f"qualityflag_{x_col_default}"] != 0)
-        if (not has_previous_qc) and qc_mode_user == 0:
-            qc_mode_ = " QC Mode - Initial\n(No Previous QC Flags)"
-            qc_mode_code_ = 0
-            block_next_ = 0
-        elif (not has_previous_qc) and qc_mode_user == 1:
-            qc_mode_ = " QC Mode - Invalid\n(Mode Selection Mismatch)"
-            qc_mode_code_ = 1
-            block_next_ = 1
-            logger.warning("QC Mode Mismatch: Review mode but no previous flags.")
-            QMessageBox.warning(None, "QC Mode Mismatch",
-                "⚠️ You selected Review QC Mode but no previous flags were found.\n\n"
-                "Please run Initial QC Mode first.\n\nThis file will not proceed.")
-        elif has_previous_qc and qc_mode_user == 1:
-            qc_mode_ = " QC Mode - Review\n(With Previous QC Flags)"
-            qc_mode_code_ = 1
-            block_next_ = 0
-        else:
-            qc_mode_ = " QC Mode - Invalid\n(Mode Selection Mismatch)"
-            qc_mode_code_ = 1
-            block_next_ = 1
-            logger.warning("QC Mode Mismatch: Initial mode but flags already exist.")
-            QMessageBox.warning(None, "QC Mode Mismatch",
-                "⚠️ You selected Initial QC Mode but existing flags were found.\n\n"
-                "Please select Review QC Mode.\n\nThis file will not proceed.")
-
-        logger.info(f"QC Mode: {qc_mode_.strip()}")
-
-        if qc_mode_code_ == 0:
-            for d in param_map:
-                df[f"qualityflag_{d}"] = 1
-            df["qualityflag"] = df[f"qualityflag_{x_col_default}"].copy()
-
-        colors_initial = [
-            FLAG_COLORS.get(int(f), "#808080")
-            for f in df[f"qualityflag_{x_col_default}"]
-        ]
+        primary = group[0]
+        # Represent the group's combined QC mode / block-next state as the
+        # most restrictive across its profiles, since they're QC'd together.
+        qc_mode_ = primary["qc_mode_"]
+        qc_mode_code_ = max(p["qc_mode_code_"] for p in group)
+        block_next_ = max(p["block_next_"] for p in group)
+        instrument = " / ".join(dict.fromkeys(p["instrument"] for p in group))
 
         state.clear()
         state.update({
-            "selection_groups": [],
+            "selection_groups": {},
             "applied": False,
             "user_exited": False,
             "exit_requested": False,
             "current_flag": 4,
-            "param_map": param_map,
-            "active_display": x_col_default,
+            "param_map": primary["param_map"],
+            "active_display": primary["x_col_default"],
         })
 
         qc_win = QCWindow(
             mode="ctd",
-            df=df,
+            df=None,
             state=state,
-            pres_col=pres_col,
-            x_col_default=x_col_default,
-            station=station,
-            event_num=str(event_num),
-            colors_initial=colors_initial,
+            x_col_default=primary["x_col_default"],
+            station=primary["station"],
+            event_num=str(primary["event_num"]),
+            ctd_profiles=group,
             instrument=instrument,
-            organization=organization,
+            organization=primary["organization"],
             qc_mode_=qc_mode_,
             qc_mode_code_=qc_mode_code_,
             block_next_=block_next_,
-            idx=idx,
-            file_list=ctd_files,
-            current_file=ctd_file,
-            param_map=param_map,
+            idx=group_idx,
+            file_list=groups,
+            current_file=primary["current_file"],
+            param_map=primary["param_map"],
         )
 
         if block_next_ == 1:
@@ -2157,7 +2500,9 @@ def qc_ctd_data(
             "  - Choose the desired quality flag BEFORE selecting points.\n"
             "  - Switch the X-axis variable using the combo box.\n"
             "  - Flags apply to the currently displayed parameter only.\n"
-            "  - Click 'Continue Next >>' to save and move to the next file.\n"
+            "  - When multiple casts are overlaid (e.g. down/up), each is "
+            "flagged independently — use the profile checkboxes to hide one.\n"
+            "  - Click 'Continue Next >>' to save and move to the next group.\n"
             "  - Click 'Exit' to stop immediately."
         )
 
@@ -2169,90 +2514,108 @@ def qc_ctd_data(
         if state["exit_requested"]:
             exit_requested = True
 
-        # Write back flags
-        if state["applied"]:
-            if len(orig_df) != len(df):
-                logger.error(
-                    f"Size mismatch: orig_df {len(orig_df)} vs df {len(df)} rows. Skipping."
-                )
-            else:
-                combined_indices = (
-                    np.unique(np.concatenate([g["idx"].to_numpy()
-                                              for g in state["selection_groups"]])).astype(int)
-                    if state["selection_groups"] else np.array([], dtype=int)
-                )
-                logger.info(
-                    f"{len(combined_indices)} unique point(s) flagged across all x-axis variables."
-                )
-                for display, (_data_col, flag_col) in param_map.items():
-                    df_fc = f"qualityflag_{display}"
-                    if qc_mode_code_ == 0:
-                        orig_df[flag_col] = 1
-                    if len(combined_indices) > 0:
-                        orig_df.iloc[combined_indices,
-                                        orig_df.columns.get_loc(flag_col)] = \
-                            df.iloc[combined_indices][df_fc].to_numpy()
+        # Write back flags and save each profile in the group.
+        for profile_idx, profile in enumerate(group):
+            ctd = profile["ctd"]
+            ctd_file = profile["current_file"]
+            ctd_file_name = profile["ctd_file_name"]
+            orig_df = profile["orig_df"]
+            orig_df_stored = profile["orig_df_stored"]
+            df = profile["df"]
+            param_map = profile["param_map"]
+            qc_mode_code_p = profile["qc_mode_code_"]
+            event_num = profile["event_num"]
 
-        # Log flag changes
-        orig_df_after = orig_df.copy()
-        total_changed = 0
-        for display, (data_col, flag_col) in param_map.items():
-            if flag_col not in orig_df_stored.columns:
-                continue
-            after = orig_df_after[flag_col].to_numpy().astype(int)
-            before = orig_df_stored[flag_col].to_numpy().astype(int)
-            mask = before != after
-            n = mask.sum()
-            total_changed += n
-            if n > 0:
-                logger.info(f"  [{display} / {data_col} / {flag_col}] {n} flag(s) changed:")
-                for (b, a), cnt in Counter(
-                    zip(before[mask], after[mask], strict=True)
-                ).items():
-                    logger.info(f"    Flag {b} → {a}: {cnt}")
-            else:
-                logger.info(f"  [{display} / {data_col} / {flag_col}] No changes.")
-        if total_changed == 0:
-            logger.info(f"No quality flag changes for {ctd_file}")
-        else:
-            logger.info(f"Total flags changed for {ctd_file}: {total_changed}")
-
-        # Write ODF
-        try:
-            ctd.data.data_frame = orig_df
-            ctd.add_history()
-            ctd.add_to_history(
-                f"APPLIED QUALITY CODE FLAGGING AND PERFORMED INITIAL VISUAL QC BY {qc_operator.upper()}"
-                if qc_mode_code_ == 0 else
-                f"REVIEWED AND UPDATED QUALITY CODE FLAGGING BY {qc_operator.upper()}"
-            )
-            ctd.update_odf()
-            file_spec = ctd.generate_file_spec()
-            if "__" in file_spec or not event_num or event_num == "—":
-                match = re.search(r"_(\d{1,4})_", ctd_file_name)
-                if match:
-                    en = match.group(1).zfill(3)
-                    parts = file_spec.split("__")
-                    file_spec = (f"{parts[0]}_{en}_{parts[1]}" if len(parts) == 2
-                                 else f"{file_spec.replace('.ODF', '')}_{en}.ODF")
-                else:
-                    raise ValueError(
-                        f"Could not determine event number from filename: {ctd_file_name}"
+            if state["applied"]:
+                if len(orig_df) != len(df):
+                    logger.error(
+                        f"Size mismatch: orig_df {len(orig_df)} vs df {len(df)} rows "
+                        f"for {ctd_file_name}. Skipping write-back."
                     )
-            ctd.file_specification = file_spec
-            out_file = pathlib.Path(out_odf_path) / f"{file_spec}.ODF"
-            logger.info(f"Writing [{idx}/{len(ctd_files)}]: {out_file}")
-            ctd.write_odf(str(out_file), version=2.0)
-            logger.info(f"Saved [{idx}/{len(ctd_files)}]: {out_file}")
-        except Exception as e:
-            logger.exception(f"Failed writing QC ODF for {ctd_file}: {e}")
+                else:
+                    idx_lists = state["selection_groups"].get(profile_idx, [])
+                    combined_indices = (
+                        np.unique(np.concatenate(
+                            [g["idx"].to_numpy() for g in idx_lists]
+                        )).astype(int)
+                        if idx_lists else np.array([], dtype=int)
+                    )
+                    logger.info(
+                        f"{len(combined_indices)} unique point(s) flagged across all "
+                        f"x-axis variables for {ctd_file_name}."
+                    )
+                    for display, (_data_col, flag_col) in param_map.items():
+                        df_fc = f"qualityflag_{display}"
+                        if qc_mode_code_p == 0:
+                            orig_df[flag_col] = 1
+                        if len(combined_indices) > 0:
+                            orig_df.iloc[combined_indices,
+                                            orig_df.columns.get_loc(flag_col)] = \
+                                df.iloc[combined_indices][df_fc].to_numpy()
+
+            # Log flag changes
+            orig_df_after = orig_df.copy()
+            total_changed = 0
+            for display, (data_col, flag_col) in param_map.items():
+                if flag_col not in orig_df_stored.columns:
+                    continue
+                after = orig_df_after[flag_col].to_numpy().astype(int)
+                before = orig_df_stored[flag_col].to_numpy().astype(int)
+                mask = before != after
+                n = mask.sum()
+                total_changed += n
+                if n > 0:
+                    logger.info(f"  [{display} / {data_col} / {flag_col}] {n} flag(s) changed:")
+                    for (b, a), cnt in Counter(
+                        zip(before[mask], after[mask], strict=True)
+                    ).items():
+                        logger.info(f"    Flag {b} → {a}: {cnt}")
+                else:
+                    logger.info(f"  [{display} / {data_col} / {flag_col}] No changes.")
+            if total_changed == 0:
+                logger.info(f"No quality flag changes for {ctd_file}")
+            else:
+                logger.info(f"Total flags changed for {ctd_file}: {total_changed}")
+
+            # Write ODF
+            try:
+                ctd.data.data_frame = orig_df
+                ctd.add_history()
+                ctd.add_to_history(
+                    f"APPLIED QUALITY CODE FLAGGING AND PERFORMED INITIAL VISUAL QC BY {qc_operator.upper()}"
+                    if qc_mode_code_p == 0 else
+                    f"REVIEWED AND UPDATED QUALITY CODE FLAGGING BY {qc_operator.upper()}"
+                )
+                ctd.update_odf()
+                file_spec = ctd.generate_file_spec()
+                if "__" in file_spec or not event_num or event_num == "—":
+                    match = re.search(r"_(\d{1,4})_", ctd_file_name)
+                    if match:
+                        en = match.group(1).zfill(3)
+                        parts = file_spec.split("__")
+                        file_spec = (f"{parts[0]}_{en}_{parts[1]}" if len(parts) == 2
+                                     else f"{file_spec.replace('.ODF', '')}_{en}.ODF")
+                    else:
+                        raise ValueError(
+                            f"Could not determine event number from filename: {ctd_file_name}"
+                        )
+                ctd.file_specification = file_spec
+                out_file = pathlib.Path(out_odf_path) / f"{file_spec}.ODF"
+                logger.info(f"Writing [{group_idx}/{len(groups)}]: {out_file}")
+                ctd.write_odf(str(out_file), version=2.0)
+                logger.info(f"Saved [{group_idx}/{len(groups)}]: {out_file}")
+            except Exception as e:
+                logger.exception(f"Failed writing QC ODF for {ctd_file}: {e}")
 
     # End loop
-    if not exit_requested and idx == len(ctd_files):
-        logger.info(f"CTD QC complete — all {len(ctd_files)} file(s) processed.")
+    if not exit_requested and group_idx == len(groups):
+        logger.info(
+            f"CTD QC complete — all {len(groups)} group(s) "
+            f"({len(loaded_profiles)} file(s)) processed."
+        )
         batch_result["finished"] = True
     elif exit_requested:
-        logger.info(f"CTD QC interrupted after {idx}/{len(ctd_files)} file(s).")
+        logger.info(f"CTD QC interrupted after {group_idx}/{len(groups)} group(s).")
     return batch_result
 
 
