@@ -37,10 +37,27 @@ class HeaderFieldRangeSchema(TypedDict):
 
 
 class OdfHeader(ValidatedBase, BaseHeader):
-    """
-    Odf Header Class
-    This class is responsible for storing the metadata associated with an ODF object (file).
-    It contains a series of header subclasses that store metadata associated with various aspects of the ODF object.
+    """Store metadata, headers, and data associated with an ODF file.
+
+    The class aggregates the standard ODF header sections and the data
+    records associated with the file. It also provides methods for reading,
+    writing, updating, and inspecting ODF files.
+
+    Attributes:
+        file_specification: ODF file specification identifier.
+        odf_specification_version: ODF specification version.
+        cruise_header: Cruise metadata.
+        event_header: Event metadata.
+        meteo_header: Optional meteorological metadata.
+        instrument_header: Instrument metadata.
+        quality_header: Optional quality-control metadata.
+        general_cal_headers: General calibration headers.
+        compass_cal_headers: Compass calibration headers.
+        polynomial_cal_headers: Polynomial calibration headers.
+        history_headers: Processing history headers.
+        parameter_headers: Parameter definitions associated with the data.
+        record_header: Record-level metadata and counts.
+        data: Data records contained in the ODF file.
     """
 
     model_config = ConfigDict(validate_assignment=True)
@@ -64,6 +81,12 @@ class OdfHeader(ValidatedBase, BaseHeader):
     data: DataRecords = Field(default_factory=DataRecords)
 
     def __init__(self, config=None, **data):
+        """Initialize the ODF header and its child header objects.
+
+        Args:
+            config: Optional configuration passed to :class:`BaseHeader`.
+            **data: Field values used to initialize the Pydantic model.
+        """
         super().__init__(**data)  # Calls Pydantic's __init__
         BaseHeader.__init__(self, config)  # Ensures logger and config are set
         self.cruise_header.set_logger_and_config(self.logger, self.config)
@@ -76,6 +99,16 @@ class OdfHeader(ValidatedBase, BaseHeader):
         self.record_header.set_logger_and_config(self.logger, self.config)
 
     def log_odf_message(self, message: str, type: str = "self"):
+        """Log a message for the ODF header.
+
+        Args:
+            message: Message to log.
+            type: Logging destination. ``"self"`` adds the message to the
+                ODF header log; ``"base"`` delegates to the base-header log.
+
+        Raises:
+            AssertionError: If ``message`` or ``type`` is not a string.
+        """
         assert isinstance(message, str), "Input argument 'message' must be a string."
         assert isinstance(type, str), "Input argument 'type' must be a string."
         if type == "self":
@@ -90,6 +123,17 @@ class OdfHeader(ValidatedBase, BaseHeader):
     @field_validator("file_specification")
     @classmethod
     def validate_file_specification(cls, v: str) -> str:
+        """Validate that the file specification is not empty.
+
+        Args:
+            v: File specification to validate.
+
+        Returns:
+            The validated file specification.
+
+        Raises:
+            ValueError: If the value is empty or contains only whitespace.
+        """
         if not v.strip():
             raise ValueError("file_specification cannot be empty.")
         return v
@@ -99,6 +143,18 @@ class OdfHeader(ValidatedBase, BaseHeader):
     @field_validator("compass_cal_headers", "history_headers", "parameter_headers")
     @classmethod
     def ensure_list_items_are_models(cls, v, field):
+        """Validate that list items provide an ODF serialization method.
+
+        Args:
+            v: Header objects to validate.
+            field: Pydantic field being validated.
+
+        Returns:
+            The validated list.
+
+        Raises:
+            TypeError: If an item does not provide a ``print_object`` method.
+        """
         if not all(hasattr(item, "print_object") for item in v):
             raise TypeError(
                 f"All elements in {field.name} must be valid header objects "
@@ -109,11 +165,36 @@ class OdfHeader(ValidatedBase, BaseHeader):
     @field_validator("quality_header", "meteo_header")
     @classmethod
     def check_optional_headers(cls, v, field):
+        """Validate an optional header object.
+
+        Args:
+            v: Header object or ``None``.
+            field: Pydantic field being validated.
+
+        Returns:
+            The validated header or ``None``.
+
+        Raises:
+            TypeError: If ``v`` is neither ``None`` nor an object providing a
+                ``print_object`` method.
+        """
         if v is not None and not hasattr(v, "print_object"):
             raise TypeError(f"{field.name} must be None or a valid header object.")
         return v
 
     def populate_object(self, odf_dict: dict):
+        """Populate ODF-level fields from a dictionary.
+
+        Args:
+            odf_dict: Dictionary containing ODF header fields such as
+                ``FILE_SPECIFICATION`` and ``ODF_SPECIFICATION_VERSION``.
+
+        Returns:
+            This :class:`OdfHeader` instance.
+
+        Raises:
+            AssertionError: If ``odf_dict`` is not a dictionary.
+        """
         assert isinstance(odf_dict, dict), "Input argument 'value' must be a dict."
         for key, value in odf_dict.items():
             match key.strip():
@@ -124,6 +205,19 @@ class OdfHeader(ValidatedBase, BaseHeader):
         return self
 
     def print_object(self, file_version: float = 2.0) -> str:
+        """Serialize the ODF header and data to ODF-formatted text.
+
+        Args:
+            file_version: ODF output format version. Version ``2.0`` uses the
+                comma-delimited format; versions ``3.0`` and later use the
+                non-comma-delimited format.
+
+        Returns:
+            The complete ODF header followed by the data records.
+
+        Raises:
+            AssertionError: If ``file_version`` is not a float.
+        """
         assert isinstance(file_version, float), "Input argument 'file_version' must be a float."
 
         # Add modifications to the OdfHeader instance before outputting it
@@ -203,6 +297,21 @@ class OdfHeader(ValidatedBase, BaseHeader):
         return odf_output
 
     def read_odf(self, odf_file_path: str):
+        """Read an ODF file and populate this object.
+
+        The method parses the ODF header blocks, populates their corresponding
+        header objects, and uses the parameter definitions to parse the data
+        records.
+
+        Args:
+            odf_file_path: Path to the ODF file to read.
+
+        Returns:
+            This :class:`OdfHeader` instance.
+
+        Raises:
+            AssertionError: If ``odf_file_path`` is not a string.
+        """
         assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
         file_lines = read_file_lines(odf_file_path)
 
@@ -319,7 +428,13 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
 
     def update_odf(self) -> None:
-        
+        """Update derived ODF metadata from the current contents.
+
+        Record-header counts, event depth information, depth off bottom, and
+        parameter minimum and maximum values are updated from the current
+        calibration headers, history, parameters, and data.
+        """
+
         # Update the record header counts if required.
         number_of_calibrations = len(self.polynomial_cal_headers) + len(self.general_cal_headers)
         if self.record_header.num_calibration != number_of_calibrations:
@@ -356,10 +471,19 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
 
     def write_odf(self, odf_file_path: str, version: float = 2.0) -> None:
+        """Write the ODF object to a file.
+
+        Args:
+            odf_file_path: Path where the ODF file will be written.
+            version: ODF output format version passed to :meth:`print_object`.
+
+        Raises:
+            AssertionError: If ``odf_file_path`` is not a string or ``version``
+                is not a float.
+        """
         assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
         assert isinstance(version, float), "Input argument 'version' must be a float."
 
-        """ Write the ODF file to disk. """
         odf_file_text = self.print_object(file_version=version)
         file1 = Path.open(odf_file_path, "w")
         file1.write(odf_file_text)
@@ -371,16 +495,31 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
     @staticmethod
     def generate_creation_date() -> str:
+        """Generate the current timestamp in ODF history-header format.
+
+        Returns:
+            A timestamp formatted as ``DD-MON-YYYY HH:MM:SS.xx``.
+        """
         dt = datetime.now().strftime("%d-%b-%Y %H:%M:%S.%f").upper()
         creation_date = dt[:-4]
         return creation_date
 
     def add_history(self) -> None:
+        """Append a new processing history header.
+
+        The new history header is initialized with the current creation date.
+        """
         nhh = HistoryHeader()
         nhh.creation_date = self.generate_creation_date()
         self.history_headers.append(nhh)
 
     def add_to_history(self, history_comment) -> None:
+        """Add a processing comment to the most recent history entry.
+
+        Args:
+            history_comment: Comment or history entry to add. ``None`` is
+                ignored.
+        """
         if history_comment is not None:
             if len(self.history_headers) > 0:
                 self.history_headers[-1].add_process(history_comment)
@@ -388,12 +527,24 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 self.history_headers.append(history_comment)
 
     def add_log_to_history(self) -> None:
+        """Add pending shared log messages to processing history.
+
+        After the messages are added, the shared log list is cleared.
+        """
         # Access the log records stored in the custom handler
         for log_entry in self.shared_log_list:
             self.add_to_history(log_entry)
         self.shared_log_list.clear()
 
     def add_to_log(self, message: str) -> None:
+        """Append a message to the shared ODF log.
+
+        Args:
+            message: Message to append to the shared log.
+
+        Raises:
+            AssertionError: If ``message`` is not a string.
+        """
         assert isinstance(message, str), "Input argumnet 'message' must be a string."
         # Access the log records stored in the custom handler
         self.shared_log_list.append(message)
@@ -408,18 +559,34 @@ class OdfHeader(ValidatedBase, BaseHeader):
     #         eval(f"self.parameter_headers[codes.index(parameter_code)].set_{attribute}({value})")
 
     def get_parameter_codes(self) -> list:
+        """Return the codes of all parameter headers.
+
+        Returns:
+            Parameter codes in parameter-header order.
+        """
         parameter_codes = list()
         for ph1 in self.parameter_headers:
             parameter_codes.append(ph1.code)
         return parameter_codes
 
     def get_parameter_names(self) -> list:
+        """Return the names of all parameter headers.
+
+        Returns:
+            Parameter names in parameter-header order.
+        """
         parameter_names = list()
         for ph2 in self.parameter_headers:
             parameter_names.append(ph2.name)
         return parameter_names
 
     def generate_file_spec(self) -> str:
+        """Generate a file specification from cruise and event metadata.
+
+        Returns:
+            A file specification composed of data type, cruise number, event
+            number, and the two event qualifiers.
+        """
         dt = self.event_header.data_type.strip("'")
         cn = self.cruise_header.cruise_number.strip("'")
         en = self.event_header.event_number.strip("'")
@@ -429,6 +596,12 @@ class OdfHeader(ValidatedBase, BaseHeader):
         return file_spec
 
     def generate_set_file_spec(self) -> str:
+        """Generate a file specification for an event set.
+
+        Returns:
+            A set file specification composed of data type, cruise number,
+            set number, and the two event qualifiers.
+        """
         dt = self.event_header.data_type.strip("'")
         cn = self.cruise_header.cruise_number.strip("'")
         sn = self.event_header.set_number.strip("'")
@@ -501,17 +674,52 @@ class OdfHeader(ValidatedBase, BaseHeader):
     #     return self
 
     def is_parameter_code(self, code: str) -> bool:
+        """Check whether a parameter code is present.
+
+        Args:
+            code: Parameter code to search for.
+
+        Returns:
+            ``True`` if the code exists; otherwise ``False``.
+
+        Raises:
+            AssertionError: If ``code`` is not a string.
+        """
         assert isinstance(code, str), "Input argument 'code' must be a string."
         codes = self.get_parameter_codes()
         return code in codes
 
     @staticmethod
     def null2empty(df: pd.DataFrame) -> pd.DataFrame:
+        """Replace ODF null values with ``None`` in a DataFrame.
+
+        Args:
+            df: DataFrame containing ODF null values.
+
+        Returns:
+            A copy of ``df`` with :attr:`BaseHeader.NULL_VALUE` replaced by
+            ``None``.
+
+        Raises:
+            AssertionError: If ``df`` is not a pandas DataFrame.
+        """
         assert isinstance(df, pd.DataFrame), "Input argument 'df' must be a Pandas DataFrame."
         new_df = df.replace(BaseHeader.NULL_VALUE, None, inplace=False)
         return new_df
 
     def add_quality_flags(self):
+        """Add quality-flag parameters and columns to the ODF data.
+
+        Quality flags are added for each parameter except parameters whose
+        codes begin with ``SYTM``, ``CNTR``, or ``SNCNTR``. A corresponding
+        :class:`QualityHeader` is also created.
+
+        Returns:
+            This :class:`OdfHeader` instance.
+
+        Raises:
+            ValueError: If the data frame is missing or empty.
+        """
 
         excluded_cols = ["SYTM", "CNTR", "SNCNTR"]
         qf_params = []
