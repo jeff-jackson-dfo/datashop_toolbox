@@ -6,7 +6,43 @@ from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 
 class EventHeader(ValidatedBase, BaseHeader):
-    """A class to represent an Event Header in an ODF object."""
+    """A class to represent an Event Header in an ODF object.
+
+    Stores the metadata describing a single sampling event (e.g. a CTD
+    cast) within a cruise, and provides methods for populating the
+    header from parsed ODF text, logging field changes, managing event
+    comments, and rendering the header back to ODF-formatted text.
+
+    Attributes:
+        data_type: Type of data collected for the event, e.g. ``"CTD"``.
+        event_number: Identifier assigned to the event.
+        event_qualifier1: First event qualifier.
+        event_qualifier2: Second event qualifier.
+        creation_date: Date/time the event record was created, in ODF
+            SYTM format.
+        orig_creation_date: Date/time the event record was originally
+            created, in ODF SYTM format.
+        start_date_time: Event start date/time in ODF SYTM format.
+        end_date_time: Event end date/time in ODF SYTM format.
+        initial_latitude: Latitude at the start of the event, in decimal
+            degrees.
+        initial_longitude: Longitude at the start of the event, in
+            decimal degrees.
+        end_latitude: Latitude at the end of the event, in decimal
+            degrees.
+        end_longitude: Longitude at the end of the event, in decimal
+            degrees.
+        min_depth: Minimum sampling depth, in metres.
+        max_depth: Maximum sampling depth, in metres.
+        sampling_interval: Interval between samples.
+        sounding: Water depth (sounding) at the event location, in
+            metres.
+        depth_off_bottom: Height of the instrument off the bottom, in
+            metres.
+        station_name: Name of the station at which the event occurred.
+        set_number: Identifier of the set to which the event belongs.
+        event_comments: Free-text comments about the event.
+    """
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -32,15 +68,39 @@ class EventHeader(ValidatedBase, BaseHeader):
     event_comments: list[str] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
+        """Initialize the event header.
+
+        Args:
+            config: Unused; accepted for interface consistency with
+                :class:`~datashop_toolbox.basehdr.BaseHeader`. Call
+                :meth:`set_logger_and_config` to attach a logger and
+                config after construction.
+            **data: Field values used to initialize the Pydantic model.
+        """
         super().__init__(**data)  # Calls Pydantic's __init__
 
     def set_logger_and_config(self, logger, config):
+        """Attach a shared logger and config to this header.
+
+        Args:
+            logger: Logger instance to use for this header.
+            config: Logger configuration associated with ``logger``.
+        """
         self.logger = logger
         self.config = config
 
     @field_validator("*", mode="before")
     @classmethod
     def strip_strings(cls, v):
+        """Strip surrounding quotes, asterisks, and whitespace from strings.
+
+        Args:
+            v: Raw value assigned to any field on this model.
+
+        Returns:
+            The stripped string if ``v`` is a string, otherwise ``v``
+            unchanged.
+        """
         if isinstance(v, str):
             return v.strip("' *").strip()
         return v
@@ -58,7 +118,25 @@ class EventHeader(ValidatedBase, BaseHeader):
         mode="before",
     )
     @classmethod
-    def validate_floats(cls, v, info: ValidationInfo):        
+    def validate_floats(cls, v, info: ValidationInfo):
+        """Coerce a numeric field to a native Python float.
+
+        Args:
+            v: Raw value assigned to one of the event's numeric fields
+                (e.g. ``initial_latitude``, ``sounding``). Accepts a
+                numpy scalar, a float, or a string representation of a
+                float.
+            info: Pydantic validation info for the field being set,
+                used to name the field in error messages.
+
+        Returns:
+            The value converted to a native Python ``float``.
+
+        Raises:
+            ValueError: If ``v`` is a string that cannot be converted
+                to a float.
+            TypeError: If ``v`` is not a numpy scalar, float, or string.
+        """
         # Coerce numpy scalars to native Python float
         if isinstance(v, np.generic):
             v = v.item()
@@ -74,6 +152,15 @@ class EventHeader(ValidatedBase, BaseHeader):
         )
 
     def log_event_message(self, field: str, old_value, new_value) -> None:
+        """Log a change made to an event header field.
+
+        Args:
+            field: Name of the field that was changed. If
+                ``"EVENT_COMMENTS"``, no change is logged and the caller
+                is directed to :meth:`set_event_comment` instead.
+            old_value: Value of the field before the change.
+            new_value: Value of the field after the change.
+        """
         field = field.upper()
         if field == "EVENT_COMMENTS":
             self.logger.info("Use method 'set_event_comment' to modify EVENT_COMMENTS.")
@@ -99,6 +186,20 @@ class EventHeader(ValidatedBase, BaseHeader):
         self.shared_log_list.append(message)
 
     def set_event_comment(self, event_comment: str, comment_number: int = 0) -> None:
+        """Add or replace an entry in ``event_comments``.
+
+        Args:
+            event_comment: Comment text to store. Surrounding single
+                quotes and whitespace are stripped.
+            comment_number: One-based position of the comment to
+                replace. If ``0`` (the default) or greater than the
+                current number of comments, ``event_comment`` is
+                appended as a new comment instead of replacing one.
+
+        Raises:
+            AssertionError: If ``event_comment`` is not a string or
+                ``comment_number`` is not an integer.
+        """
         assert isinstance(event_comment, str), "event_comment must be a string."
         assert isinstance(comment_number, int), "comment_number must be an integer."
         event_comment = event_comment.strip("' ")
@@ -108,6 +209,20 @@ class EventHeader(ValidatedBase, BaseHeader):
             self.event_comments[comment_number - 1] = event_comment
 
     def populate_object(self, event_fields: list):
+        """Populate fields from parsed ODF event header lines.
+
+        Args:
+            event_fields: Raw header lines of the form
+                ``"KEY = VALUE"`` taken from the ``EVENT_HEADER``
+                section of an ODF file. Repeated ``EVENT_COMMENTS``
+                lines are accumulated into the ``event_comments`` list.
+
+        Returns:
+            This :class:`EventHeader` instance.
+
+        Raises:
+            AssertionError: If ``event_fields`` is not a list.
+        """
         assert isinstance(event_fields, list), "event_fields must be a list."
         for header_line in event_fields:
             tokens = header_line.split("=", maxsplit=1)
@@ -138,6 +253,14 @@ class EventHeader(ValidatedBase, BaseHeader):
         return self
 
     def print_object(self) -> str:
+        """Serialize the event header to ODF-formatted text.
+
+        Returns:
+            The ``EVENT_HEADER`` section as ODF-formatted text. Numeric
+            fields that are set to :attr:`BaseHeader.NULL_VALUE` are
+            printed unformatted; other numeric fields are printed with
+            fixed decimal precision.
+        """
         lines = [
             "EVENT_HEADER",
             f"  DATA_TYPE = '{self.data_type}'",

@@ -14,7 +14,20 @@ from datashop_toolbox.validated_base import (
 
 
 class DataRecords(ValidatedBase, BaseHeader):
-    """Represents the data records stored within an ODF object."""
+    """Represents the data records stored within an ODF object.
+
+    Wraps the tabular cast/cycle data as a pandas ``DataFrame`` along
+    with the parameter names and print-format metadata needed to
+    reconstruct the ODF ``DATA`` section, and provides methods for
+    populating the records from parsed ODF text and rendering them back
+    to CSV or fixed-width ODF-formatted text.
+
+    Attributes:
+        data_frame: Tabular data, with one column per parameter.
+        parameter_list: Parameter codes, in column order.
+        print_formats: Mapping of parameter code to its ODF print
+            format specification (e.g. field width).
+    """
 
     data_frame: pd.DataFrame = Field(default_factory=pd.DataFrame)
     parameter_list: list[str] = Field(default_factory=list)
@@ -24,9 +37,24 @@ class DataRecords(ValidatedBase, BaseHeader):
         arbitrary_types_allowed = True  # allow pandas DataFrame
 
     def __init__(self, config=None, **data):
+        """Initialize the data records container.
+
+        Args:
+            config: Unused; accepted for interface consistency with
+                :class:`~datashop_toolbox.basehdr.BaseHeader`. Call
+                :meth:`set_logger_and_config` to attach a logger and
+                config after construction.
+            **data: Field values used to initialize the Pydantic model.
+        """
         super().__init__(**data)  # Calls Pydantic's __init__
 
     def set_logger_and_config(self, logger, config):
+        """Attach a shared logger and config to this object.
+
+        Args:
+            logger: Logger instance to use for this object.
+            config: Logger configuration associated with ``logger``.
+        """
         self.logger = logger
         self.config = config
 
@@ -36,6 +64,17 @@ class DataRecords(ValidatedBase, BaseHeader):
     @field_validator("data_frame")
     @classmethod
     def validate_dataframe(cls, v: pd.DataFrame) -> pd.DataFrame:
+        """Validate that ``data_frame`` is a pandas DataFrame.
+
+        Args:
+            v: Value assigned to ``data_frame``.
+
+        Returns:
+            The validated DataFrame.
+
+        Raises:
+            TypeError: If ``v`` is not a ``pandas.DataFrame``.
+        """
         if not isinstance(v, pd.DataFrame):
             raise TypeError(f"Expected pandas DataFrame, got {type(v)}")
         return v
@@ -43,11 +82,33 @@ class DataRecords(ValidatedBase, BaseHeader):
     @field_validator("parameter_list", mode="before")
     @classmethod
     def validate_parameters(cls, v: list[str]) -> list[str]:
+        """Normalize each parameter code in ``parameter_list``.
+
+        Args:
+            v: Raw list of parameter codes assigned to
+                ``parameter_list``.
+
+        Returns:
+            The list with each item passed through
+            :func:`~datashop_toolbox.validated_base.check_string`.
+        """
         return [check_string(p) for p in v]
 
     @field_validator("print_formats", mode="before")
     @classmethod
     def validate_print_formats(cls, v: dict[str, str]) -> dict[str, str]:
+        """Validate and normalize the ``print_formats`` mapping.
+
+        Args:
+            v: Raw value assigned to ``print_formats``.
+
+        Returns:
+            The mapping with each key and value passed through
+            :func:`~datashop_toolbox.validated_base.check_string`.
+
+        Raises:
+            TypeError: If ``v`` is not a ``dict``.
+        """
         if not isinstance(v, dict):
             raise TypeError(f"Expected dict, got {type(v)}")
         return {check_string(k): check_string(val) for k, val in v.items()}
@@ -56,9 +117,21 @@ class DataRecords(ValidatedBase, BaseHeader):
     # Methods
     # ------------------------
     def __len__(self) -> int:
+        """Return the number of data rows.
+
+        Returns:
+            The number of rows in ``data_frame``.
+        """
         return len(self.data_frame)
 
     def log_data_message(self, field: str, old_value, new_value) -> None:
+        """Log a change made to a data field.
+
+        Args:
+            field: Name of the field that was changed.
+            old_value: Value of the field before the change.
+            new_value: Value of the field after the change.
+        """
         message = (
             f"In DataRecords field {field.upper()} was changed from '{old_value}' to '{new_value}'"
         )
@@ -71,6 +144,20 @@ class DataRecords(ValidatedBase, BaseHeader):
         data_formats: dict[str, str],
         data_lines_list: list[str],
     ) -> Self:
+        """Populate the data frame from parsed ODF data lines.
+
+        Args:
+            parameter_list: Parameter codes to use as the DataFrame's
+                column names, in column order.
+            data_formats: Mapping of parameter code to its ODF print
+                format specification.
+            data_lines_list: Raw ``DATA`` section lines from an ODF
+                file, one per record, with values separated by commas
+                and optionally quoted.
+
+        Returns:
+            This :class:`DataRecords` instance.
+        """
         data_record_list = [split_string_with_quotes(s) for s in data_lines_list]
         df = pd.DataFrame(columns=parameter_list, data=data_record_list)
         df = convert_dataframe(df)
@@ -97,7 +184,17 @@ class DataRecords(ValidatedBase, BaseHeader):
         return buffer.getvalue()
 
     def print_object_old_style(self) -> str:
-        # """Return V2 style formatted string representation of the data."""
+        """Return V2 style fixed-width string representation of the data.
+
+        Formats each parameter column per its entry in
+        ``print_formats``: SYTM columns are right-aligned strings,
+        CNTR/SNCN columns are right-aligned integers, and all other
+        columns are right-aligned floats.
+
+        Returns:
+            The data rows rendered as fixed-width text, one row per
+            line, with no header row.
+        """
         formatters = {}
         for key, value in self.print_formats.items():
             width = value

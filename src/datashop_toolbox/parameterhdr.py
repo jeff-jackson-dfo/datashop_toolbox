@@ -15,7 +15,36 @@ from datashop_toolbox.validated_base import (
 
 
 class ParameterHeader(ValidatedBase, BaseHeader):
-    """A class to represent a Parameter Header in an ODF object."""
+    """A class to represent a Parameter Header in an ODF object.
+
+    Describes a single data parameter recorded in an ODF file — its
+    type, name, units, code, and printing/range metadata — and provides
+    methods for populating the header from parsed ODF text, logging
+    field changes, and rendering the header back to ODF-formatted text.
+
+    Attributes:
+        type: ODF parameter type code, e.g. ``"SYTM"``, ``"INTE"``,
+            ``"SING"``, or ``"DOUB"``.
+        name: Descriptive name of the parameter.
+        units: Units in which the parameter is recorded.
+        code: Parameter code, e.g. ``"PRES_01"``.
+        wmo_code: WMO code for the parameter, used as a fallback for
+            ``code`` when not otherwise set.
+        null_string: String representation of the parameter's null/missing
+            value.
+        print_field_order: Column position used when printing the
+            parameter, for ODF file version 3.0 and later.
+        print_field_width: Field width used when printing the parameter.
+        print_decimal_places: Number of decimal places used when
+            printing floating-point values.
+        angle_of_section: Angle of the section, in degrees.
+        magnetic_variation: Magnetic variation, in degrees.
+        depth: Depth associated with the parameter, in metres.
+        minimum_value: Minimum recorded value of the parameter.
+        maximum_value: Maximum recorded value of the parameter.
+        number_valid: Number of valid (non-null) data values.
+        number_null: Number of null/missing data values.
+    """
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -37,20 +66,54 @@ class ParameterHeader(ValidatedBase, BaseHeader):
     number_null: int = 0
 
     def __init__(self, config=None, **data):
+        """Initialize the parameter header.
+
+        Args:
+            config: Unused; accepted for interface consistency with
+                :class:`~datashop_toolbox.basehdr.BaseHeader`. Call
+                :meth:`set_logger_and_config` to attach a logger and
+                config after construction.
+            **data: Field values used to initialize the Pydantic model.
+        """
         super().__init__(**data)  # Calls Pydantic's __init__
 
     def set_logger_and_config(self, logger, config):
+        """Attach a shared logger and config to this header.
+
+        Args:
+            logger: Logger instance to use for this header.
+            config: Logger configuration associated with ``logger``.
+        """
         self.logger = logger
         self.config = config
 
     @field_validator("*", mode="before")
     @classmethod
     def strip_strings(cls, v):
+        """Strip surrounding quotes and whitespace from string fields.
+
+        Args:
+            v: Raw value assigned to any field on this model.
+
+        Returns:
+            The stripped string if ``v`` is a string, otherwise ``v``
+            unchanged.
+        """
         if isinstance(v, str):
             return v.strip("' ").strip()
         return v
 
     def log_parameter_message(self, field: str, old_value: str, new_value: str) -> None:
+        """Log a change made to a parameter header field.
+
+        Args:
+            field: Name of the field that was changed.
+            old_value: Value of the field before the change.
+            new_value: Value of the field after the change.
+
+        Raises:
+            AssertionError: If ``field`` is not a string.
+        """
         assert isinstance(field, str), "Input argument 'field' must be a string."
         message = f"In Parameter Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
         # self.logger.info(message)
@@ -58,6 +121,16 @@ class ParameterHeader(ValidatedBase, BaseHeader):
 
     @staticmethod
     def is_float_and_int(value) -> bool:
+        """Check whether a value represents a whole-number float.
+
+        Args:
+            value: Value to check, typically a string or number.
+
+        Returns:
+            ``True`` if ``value`` can be converted to a float with no
+            fractional part, ``False`` otherwise (including when
+            conversion to float fails).
+        """
         try:
             # Attempt to convert the string to a float
             f = float(value)
@@ -68,6 +141,26 @@ class ParameterHeader(ValidatedBase, BaseHeader):
             return False
 
     def populate_object(self, parameter_fields: list) -> "ParameterHeader":
+        """Populate fields from parsed ODF parameter header lines.
+
+        Args:
+            parameter_fields: Raw header lines of the form
+                ``"KEY = VALUE"`` taken from a ``PARAMETER_HEADER``
+                section of an ODF file. ``NULL_VALUE``, ``MINIMUM_VALUE``,
+                and ``MAXIMUM_VALUE`` are parsed according to the
+                parameter's ``type`` (e.g. as a date/time for
+                ``"SYTM"``, an integer for ``"INTE"``, or a float for
+                ``"SING"``/``"DOUB"``).
+
+        Returns:
+            This :class:`ParameterHeader` instance.
+
+        Raises:
+            AssertionError: If ``parameter_fields`` is not a list.
+            ValueError: If ``MINIMUM_VALUE`` or ``MAXIMUM_VALUE`` is
+                present for an ``"INTE"`` parameter but is not a valid
+                whole-number value.
+        """
         assert isinstance(parameter_fields, list), (
             "Input argument 'parameter_fields' must be a list."
         )
@@ -164,6 +257,22 @@ class ParameterHeader(ValidatedBase, BaseHeader):
         return self
 
     def print_object(self, file_version: float = 2.0) -> str:
+        """Serialize the parameter header to ODF-formatted text.
+
+        Args:
+            file_version: ODF output format version. Must be ``>= 2.0``.
+                ``PRINT_FIELD_ORDER`` is only included in the output
+                for version ``3`` and later. Date/time-typed and
+                GMT/UTC-unit values are rendered as SYTM strings;
+                other values are rendered per ``type`` with
+                ``print_decimal_places`` precision.
+
+        Returns:
+            The ``PARAMETER_HEADER`` section as ODF-formatted text.
+
+        Raises:
+            AssertionError: If ``file_version`` is less than ``2.0``.
+        """
         assert file_version >= 2.0, f"File version must be >= 2.0 but is: {file_version}"
         lines = [
             "PARAMETER_HEADER",

@@ -11,7 +11,22 @@ from datashop_toolbox.validated_base import (
 
 
 class QualityHeader(ValidatedBase, BaseHeader):
-    """A class to represent a Quality Header in an ODF object."""
+    """A class to represent a Quality Header in an ODF object.
+
+    Records the quality-control tests applied to an ODF file's data and
+    any related comments, and provides methods for populating the
+    header from parsed ODF text, logging field changes, managing tests
+    and comments (including standard boilerplate for quality codes and
+    QCFF flag descriptions), and rendering the header back to
+    ODF-formatted text.
+
+    Attributes:
+        quality_date: Date/time the quality control was performed, in
+            ODF SYTM format.
+        quality_tests: Descriptions of the quality-control tests that
+            were applied.
+        quality_comments: Free-text comments about the quality control.
+    """
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -20,15 +35,39 @@ class QualityHeader(ValidatedBase, BaseHeader):
     quality_comments: list[str] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
+        """Initialize the quality header.
+
+        Args:
+            config: Unused; accepted for interface consistency with
+                :class:`~datashop_toolbox.basehdr.BaseHeader`. Call
+                :meth:`set_logger_and_config` to attach a logger and
+                config after construction.
+            **data: Field values used to initialize the Pydantic model.
+        """
         super().__init__(**data)  # Calls Pydantic's __init__
 
     def set_logger_and_config(self, logger, config):
+        """Attach a shared logger and config to this header.
+
+        Args:
+            logger: Logger instance to use for this header.
+            config: Logger configuration associated with ``logger``.
+        """
         self.logger = logger
         self.config = config
 
     @field_validator("quality_date", mode="before")
     @classmethod
     def validate_quality_date(cls, v):
+        """Normalize and validate the quality date.
+
+        Args:
+            v: Raw value assigned to ``quality_date``.
+
+        Returns:
+            The value converted to a stripped, upper-case, validated
+            ODF SYTM date/time string.
+        """
         v = check_string(v)
         v = check_datetime(v)
         return v.upper()
@@ -36,6 +75,18 @@ class QualityHeader(ValidatedBase, BaseHeader):
     @field_validator("quality_tests", "quality_comments", mode="before")
     @classmethod
     def validate_lists(cls, v):
+        """Normalize ``quality_tests``/``quality_comments`` to a list of strings.
+
+        Args:
+            v: Raw value assigned to ``quality_tests`` or
+                ``quality_comments``. Accepts ``None``, a single
+                string, or an iterable of values.
+
+        Returns:
+            An empty list if ``v`` is ``None``; a single-item list if
+            ``v`` is a string; otherwise a list with each item passed
+            through :func:`~datashop_toolbox.validated_base.check_string`.
+        """
         if v is None:
             return []
         if isinstance(v, str):
@@ -43,11 +94,27 @@ class QualityHeader(ValidatedBase, BaseHeader):
         return [check_string(item) for item in v]
 
     def log_quality_message(self, field: str, old_value: str, new_value: str) -> None:
+        """Log a change made to a quality header field.
+
+        Args:
+            field: Name of the field that was changed.
+            old_value: Value of the field before the change.
+            new_value: Value of the field after the change.
+        """
         message = f"In Quality Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
         # self.logger.info(message)
         self.shared_log_list.append(message)
 
     def set_quality_test(self, quality_test: str, test_number: int = 0) -> None:
+        """Add or replace an entry in ``quality_tests``.
+
+        Args:
+            quality_test: Test description to store.
+            test_number: One-based position of the test to replace. If
+                ``0`` (the default) or greater than the current number
+                of tests, ``quality_test`` is appended as a new entry
+                instead of replacing one.
+        """
         quality_test = check_string(quality_test)
         if test_number == 0 or test_number > len(self.quality_tests):
             self.quality_tests.append(quality_test)
@@ -55,10 +122,24 @@ class QualityHeader(ValidatedBase, BaseHeader):
             self.quality_tests[test_number - 1] = quality_test
 
     def add_quality_test(self, quality_test: str) -> None:
+        """Append a quality-control test description to ``quality_tests``.
+
+        Args:
+            quality_test: Test description to append.
+        """
         quality_test = check_string(quality_test)
         self.quality_tests.append(quality_test)
 
     def set_quality_comment(self, quality_comment: str, comment_number: int = 0) -> None:
+        """Add or replace an entry in ``quality_comments``.
+
+        Args:
+            quality_comment: Comment text to store.
+            comment_number: One-based position of the comment to
+                replace. If ``0`` (the default) or greater than the
+                current number of comments, ``quality_comment`` is
+                appended as a new entry instead of replacing one.
+        """
         quality_comment = check_string(quality_comment)
         if comment_number == 0 or comment_number > len(self.quality_comments):
             self.quality_comments.append(quality_comment)
@@ -66,10 +147,23 @@ class QualityHeader(ValidatedBase, BaseHeader):
             self.quality_comments[comment_number - 1] = quality_comment
 
     def add_quality_comment(self, quality_comment: str) -> None:
+        """Append a comment to ``quality_comments``.
+
+        Args:
+            quality_comment: Comment text to append.
+        """
         quality_comment = check_string(quality_comment)
         self.quality_comments.append(quality_comment)
 
     def add_quality_codes(self) -> None:
+        """Append the standard quality-code definitions and set the date.
+
+        Sets ``quality_date`` to the current date/time if it is still
+        the null sentinel, ensures ``quality_tests`` is non-empty by
+        adding a placeholder entry if needed, and appends the standard
+        ``QUALITY CODES`` description to ``quality_comments`` for any
+        line not already present.
+        """
         defaults_comments = [
             "QUALITY CODES",
             "  0: Value has not been quality controlled",
@@ -89,6 +183,14 @@ class QualityHeader(ValidatedBase, BaseHeader):
                 self.quality_comments.append(comment)
 
     def add_qcff_info(self) -> None:
+        """Append the standard QCFF flag description and set the date.
+
+        Sets ``quality_date`` to the current date/time if it is still
+        the null sentinel, ensures ``quality_tests`` is non-empty by
+        adding a placeholder entry if needed, and appends the standard
+        ``QCFF CHANNEL`` description to ``quality_comments`` for any
+        line not already present.
+        """
         defaults_comments = [
             "QCFF CHANNEL",
             "  The QCFF flag allows one to determine from which test(s) the quality flag(s) originate.",
@@ -108,6 +210,18 @@ class QualityHeader(ValidatedBase, BaseHeader):
                 self.quality_comments.append(comment)
 
     def populate_object(self, quality_fields: list) -> "QualityHeader":
+        """Populate fields from parsed ODF quality header lines.
+
+        Args:
+            quality_fields: Raw header lines of the form
+                ``"KEY = VALUE"`` taken from the ``QUALITY_HEADER``
+                section of an ODF file. Repeated ``QUALITY_TESTS`` and
+                ``QUALITY_COMMENTS`` lines are accumulated into their
+                respective lists.
+
+        Returns:
+            This :class:`QualityHeader` instance.
+        """
         for header_line in quality_fields:
             tokens = header_line.split("=", maxsplit=1)
             quality_dict = list_to_dict(tokens)
@@ -124,6 +238,15 @@ class QualityHeader(ValidatedBase, BaseHeader):
         return self
 
     def print_object(self) -> str:
+        """Serialize the quality header to ODF-formatted text.
+
+        Returns:
+            The ``QUALITY_HEADER`` section as ODF-formatted text, with
+            one ``QUALITY_TESTS`` line per entry in ``quality_tests``
+            and one ``QUALITY_COMMENTS`` line per entry in
+            ``quality_comments`` (or a single empty line for each if
+            there are none).
+        """
         lines = ["QUALITY_HEADER", f"  QUALITY_DATE = '{check_string(self.quality_date)}'"]
         if not self.quality_tests:
             lines.append("  QUALITY_TESTS = ''")

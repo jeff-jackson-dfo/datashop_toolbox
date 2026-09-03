@@ -7,7 +7,21 @@ from datashop_toolbox.validated_base import ValidatedBase, list_to_dict
 
 
 class RecordHeader(ValidatedBase, BaseHeader):
-    """A class to represent a Record Header in an ODF object."""
+    """A class to represent a Record Header in an ODF object.
+
+    Stores counts of the various header sections and data cycles
+    contained in an ODF file, and provides methods for populating the
+    header from parsed ODF text, logging field changes, and rendering
+    the header back to ODF-formatted text.
+
+    Attributes:
+        num_calibration: Number of calibration headers in the file.
+        num_swing: Number of compass swing (calibration) headers in the
+            file.
+        num_history: Number of history headers in the file.
+        num_cycle: Number of data cycles (records) in the file.
+        num_param: Number of parameter headers in the file.
+    """
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -18,9 +32,24 @@ class RecordHeader(ValidatedBase, BaseHeader):
     num_param: int = Field(default=0)
 
     def __init__(self, config=None, **data):
+        """Initialize the record header.
+
+        Args:
+            config: Unused; accepted for interface consistency with
+                :class:`~datashop_toolbox.basehdr.BaseHeader`. Call
+                :meth:`set_logger_and_config` to attach a logger and
+                config after construction.
+            **data: Field values used to initialize the Pydantic model.
+        """
         super().__init__(**data)  # Calls Pydantic's __init__
 
     def set_logger_and_config(self, logger, config):
+        """Attach a shared logger and config to this header.
+
+        Args:
+            logger: Logger instance to use for this header.
+            config: Logger configuration associated with ``logger``.
+        """
         self.logger = logger
         self.config = config
 
@@ -29,6 +58,18 @@ class RecordHeader(ValidatedBase, BaseHeader):
     )
     @classmethod
     def validate_ints(cls, v):
+        """Coerce a count field to a native Python int.
+
+        Args:
+            v: Raw value assigned to one of the record count fields.
+                Accepts ``None``, a string representation of a number,
+                or any value convertible via ``int()``.
+
+        Returns:
+            ``0`` if ``v`` is ``None``; otherwise ``v`` converted to an
+            ``int`` (via ``float`` first when ``v`` is a string, to
+            tolerate values like ``"5.0"``).
+        """
         if v is None:
             return 0
         if isinstance(v, str):
@@ -36,6 +77,16 @@ class RecordHeader(ValidatedBase, BaseHeader):
         return int(v)
 
     def log_record_message(self, field: str, old_value: Any, new_value: Any) -> None:
+        """Log a change made to a record header field.
+
+        Args:
+            field: Name of the field that was changed.
+            old_value: Value of the field before the change.
+            new_value: Value of the field after the change.
+
+        Raises:
+            AssertionError: If ``field`` is not a string.
+        """
         assert isinstance(field, str), "Input argument 'field' must be a string."
         message = (
             f"In Record Header field {field.upper()} was changed from {old_value} to {new_value}"
@@ -44,6 +95,19 @@ class RecordHeader(ValidatedBase, BaseHeader):
         self.shared_log_list.append(message)
 
     def populate_object(self, record_fields: list) -> "RecordHeader":
+        """Populate fields from parsed ODF record header lines.
+
+        Args:
+            record_fields: Raw header lines of the form
+                ``"KEY = VALUE"`` taken from the ``RECORD_HEADER``
+                section of an ODF file.
+
+        Returns:
+            This :class:`RecordHeader` instance.
+
+        Raises:
+            AssertionError: If ``record_fields`` is not a list.
+        """
         assert isinstance(record_fields, list), "Input argument 'record_fields' must be a list."
         for record_line in record_fields:
             tokens = record_line.split("=", maxsplit=1)
@@ -65,6 +129,11 @@ class RecordHeader(ValidatedBase, BaseHeader):
         return self
 
     def print_object(self) -> str:
+        """Serialize the record header to ODF-formatted text.
+
+        Returns:
+            The ``RECORD_HEADER`` section as ODF-formatted text.
+        """
         lines = [
             "RECORD_HEADER",
             f"  NUM_CALIBRATION = {self.num_calibration}",

@@ -5,7 +5,25 @@ from datashop_toolbox.validated_base import ValidatedBase, check_string, list_to
 
 
 class MeteoHeader(ValidatedBase, BaseHeader):
-    """A class to represent a Meteo Header in an ODF object."""
+    """A class to represent a Meteo Header in an ODF object.
+
+    Records meteorological observations taken during a sampling event
+    and provides methods for populating the header from parsed ODF
+    text, logging field changes, managing comments, converting between
+    common meteorological units and WMO codes, and rendering the header
+    back to ODF-formatted text.
+
+    Attributes:
+        air_temperature: Air temperature, in degrees Celsius.
+        atmospheric_pressure: Atmospheric pressure.
+        wind_speed: Wind speed, in metres per second.
+        wind_direction: Wind direction, in degrees.
+        sea_state: Sea state, as a WMO sea-state code.
+        cloud_cover: Cloud cover, as a WMO cloud-cover code.
+        ice_thickness: Ice thickness, in metres.
+        meteo_comments: Free-text comments about the meteorological
+            observations.
+    """
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -19,15 +37,41 @@ class MeteoHeader(ValidatedBase, BaseHeader):
     meteo_comments: list[str] = Field(default_factory=list)
 
     def __init__(self, config=None, **data):
+        """Initialize the meteo header.
+
+        Args:
+            config: Unused; accepted for interface consistency with
+                :class:`~datashop_toolbox.basehdr.BaseHeader`. Call
+                :meth:`set_logger_and_config` to attach a logger and
+                config after construction.
+            **data: Field values used to initialize the Pydantic model.
+        """
         super().__init__(**data)  # Calls Pydantic's __init__
 
     def set_logger_and_config(self, logger, config):
+        """Attach a shared logger and config to this header.
+
+        Args:
+            logger: Logger instance to use for this header.
+            config: Logger configuration associated with ``logger``.
+        """
         self.logger = logger
         self.config = config
 
     @field_validator("meteo_comments", mode="before")
     @classmethod
     def validate_comments(cls, v):
+        """Normalize ``meteo_comments`` to a list of stripped strings.
+
+        Args:
+            v: Raw value assigned to ``meteo_comments``. Accepts
+                ``None``, a single string, or an iterable of values.
+
+        Returns:
+            An empty list if ``v`` is ``None``; a single-item list if
+            ``v`` is a string; otherwise a list with each item passed
+            through :func:`~datashop_toolbox.validated_base.check_string`.
+        """
         if v is None:
             return []
         if isinstance(v, str):
@@ -35,6 +79,16 @@ class MeteoHeader(ValidatedBase, BaseHeader):
         return [check_string(item) for item in v]
 
     def log_meteo_message(self, field: str, old_value, new_value) -> None:
+        """Log a change made to a meteo header field.
+
+        Args:
+            field: Name of the field that was changed.
+            old_value: Value of the field before the change.
+            new_value: Value of the field after the change.
+
+        Raises:
+            AssertionError: If ``field`` is not a string.
+        """
         assert isinstance(field, str), "Input argument 'field' must be a string."
         message = (
             f"In Meteo Header field {field.upper()} was changed from '{old_value}' to '{new_value}'"
@@ -43,6 +97,15 @@ class MeteoHeader(ValidatedBase, BaseHeader):
         self.shared_log_list.append(message)
 
     def set_meteo_comment(self, meteo_comment: str, comment_number: int = 0) -> None:
+        """Add or replace an entry in ``meteo_comments``.
+
+        Args:
+            meteo_comment: Comment text to store.
+            comment_number: One-based position of the comment to
+                replace. If ``0`` (the default) or greater than the
+                current number of comments, ``meteo_comment`` is
+                appended as a new entry instead of replacing one.
+        """
         meteo_comment = check_string(meteo_comment)
         if comment_number == 0 or comment_number > len(self.meteo_comments):
             self.meteo_comments.append(meteo_comment)
@@ -50,10 +113,29 @@ class MeteoHeader(ValidatedBase, BaseHeader):
             self.meteo_comments[comment_number - 1] = meteo_comment
 
     def add_meteo_comment(self, meteo_comment: str) -> None:
+        """Append a comment to ``meteo_comments``.
+
+        Args:
+            meteo_comment: Comment text to append.
+        """
         meteo_comment = check_string(meteo_comment)
         self.meteo_comments.append(meteo_comment)
 
     def populate_object(self, meteo_fields: list) -> "MeteoHeader":
+        """Populate fields from parsed ODF meteo header lines.
+
+        Args:
+            meteo_fields: Raw header lines of the form
+                ``"KEY = VALUE"`` taken from the ``METEO_HEADER``
+                section of an ODF file. Repeated ``METEO_COMMENTS``
+                lines are accumulated into ``meteo_comments``.
+
+        Returns:
+            This :class:`MeteoHeader` instance.
+
+        Raises:
+            AssertionError: If ``meteo_fields`` is not a list.
+        """
         assert isinstance(meteo_fields, list), "Input argument 'meteo_fields' must be a list."
         for header_line in meteo_fields:
             tokens = header_line.split("=", maxsplit=1)
@@ -81,6 +163,14 @@ class MeteoHeader(ValidatedBase, BaseHeader):
         return self
 
     def print_object(self) -> str:
+        """Serialize the meteo header to ODF-formatted text.
+
+        Returns:
+            The ``METEO_HEADER`` section as ODF-formatted text.
+            Numeric fields that are set to :attr:`BaseHeader.NULL_VALUE`
+            are printed unformatted; other numeric fields are printed
+            with fixed decimal precision.
+        """
         lines = [
             "METEO_HEADER",
             f"  AIR_TEMPERATURE = " \
@@ -107,6 +197,19 @@ class MeteoHeader(ValidatedBase, BaseHeader):
 
     @staticmethod
     def wind_speed_knots_to_ms(wind_speed_knots: float) -> float:
+        """Convert wind speed from knots to metres per second.
+
+        Args:
+            wind_speed_knots: Wind speed, in knots.
+
+        Returns:
+            The wind speed in metres per second, or
+            :attr:`BaseHeader.NULL_VALUE` if ``wind_speed_knots`` is
+            negative.
+
+        Raises:
+            AssertionError: If ``wind_speed_knots`` is not a float.
+        """
         assert isinstance(wind_speed_knots, float), "Input argument 'wind_speed_knots' must be a float."
         if wind_speed_knots < 0:
             return BaseHeader.NULL_VALUE
@@ -114,6 +217,21 @@ class MeteoHeader(ValidatedBase, BaseHeader):
 
     @staticmethod
     def cloud_cover_percentage_to_wmo_code(cloud_cover_percentage: float) -> int:
+        """Convert a cloud-cover fraction to its WMO cloud-cover code.
+
+        Args:
+            cloud_cover_percentage: Cloud cover as a fraction between
+                ``0.0`` (clear) and ``1.0`` (fully overcast).
+
+        Returns:
+            The corresponding WMO cloud-cover code (``0``-``9``), or
+            ``int(BaseHeader.NULL_VALUE)`` if ``cloud_cover_percentage``
+            is negative.
+
+        Raises:
+            AssertionError: If ``cloud_cover_percentage`` is not a
+                float.
+        """
         assert isinstance(cloud_cover_percentage, float), (
             "Input argument 'cloud_cover_percentage' must be a float."
         )
@@ -142,6 +260,19 @@ class MeteoHeader(ValidatedBase, BaseHeader):
 
     @staticmethod
     def wave_height_meters_to_wmo_code(wave_height_meters: float) -> int:
+        """Convert a wave height to its WMO wave-height (sea-state) code.
+
+        Args:
+            wave_height_meters: Wave height, in metres.
+
+        Returns:
+            The corresponding WMO wave-height code (``0``-``9``), or
+            ``int(BaseHeader.NULL_VALUE)`` if ``wave_height_meters`` is
+            negative.
+
+        Raises:
+            AssertionError: If ``wave_height_meters`` is not a float.
+        """
         assert isinstance(wave_height_meters, float), (
             "Input argument 'wave_height_meters' must be a float."
         )
