@@ -24,8 +24,18 @@ col_formats = {
 def odf2exchange(odf_folder: Path, wildcard: str) -> None:
     """Generate CCHDO Exchange Formatted files from ODF files.
 
+    For each ODF file matching ``wildcard`` in ``odf_folder``, reads
+    the file, derives a WOCE-style expocode from the cruise platform
+    and start date, and writes a corresponding CCHDO Exchange
+    ``ct1.csv`` file (pressure, temperature, salinity, and oxygen with
+    WOCE quality flags) to an ``Exchange_Format`` subfolder.
+
     Args:
-        odf_folder: The path to the ODF files.
+        odf_folder: The path to the ODF files. Also used as the
+            output location, under an ``Exchange_Format`` subfolder
+            created if it does not already exist.
+        wildcard: Glob pattern used to select which ODF files in
+            ``odf_folder`` to process, e.g. ``"*_DN.ODF"``.
     """
 
     # Change to folder containing files to be modified

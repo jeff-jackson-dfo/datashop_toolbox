@@ -5,16 +5,14 @@ def remove_parameter(odfobj: OdfHeader, code: str) -> OdfHeader:
     """
     Removes a parameter from the input OdfHeader object.
 
-    Parameters
-    ----------
-    odfobj: OdfHeader class object
-    code: str
-      A valid GF3 code (ex: code='FFFF_01')
+    Args:
+        odfobj: The ODF header object to remove the parameter from.
+        code: A valid GF3 code (ex: code='FFFF_01').
 
-    Returns
-    -------
-    odfobj: OdfHeader class object
-        A modified copy of the input OdfHeader object.
+    Returns:
+        The same :class:`OdfHeader` object, modified in place with the
+        parameter's data column, parameter header, parameter code, and
+        print format removed.
     """
 
     # Get the parameter headers and the data records.

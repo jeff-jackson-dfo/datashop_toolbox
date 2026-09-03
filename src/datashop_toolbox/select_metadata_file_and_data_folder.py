@@ -24,7 +24,34 @@ meta_dir.mkdir(parents=True, exist_ok=True)
 
 
 class MainWindow(QMainWindow):
+    """Dialog for collecting MTR/thermograph processing inputs.
+
+    Prompts for the data processor's name, institution/instrument
+    selection, cruise-header metadata (with institution-dependent
+    defaults), and the metadata file, input data folder, and output
+    data folder to use for creating ODF files. Selections can be
+    persisted to and reloaded from a small JSON file so returning
+    users don't have to re-enter them.
+
+    Attributes:
+        meta_store_path: Path to the JSON file used to remember the
+            last-entered metadata.
+        line_edit_text: Data processor's name.
+        institution: Selected institution, ``"BIO"`` or ``"FSRS"``.
+        instrument: Selected instrument, ``"Minilog"`` or ``"Hobo"``.
+        metadata_file: Path to the selected metadata file.
+        input_data_folder: Path to the selected input data folder.
+        output_data_folder: Path to the selected output data folder.
+        result: ``"accept"`` or ``"reject"`` after the dialog closes.
+        user_input_meta: Cruise-header field values entered by the
+            user.
+        remember_input_dict: Metadata dict persisted when "remember"
+            is checked.
+        remember_input_choice: Whether to persist ``remember_input_dict``.
+    """
+
     def __init__(self):
+        """Build the window's widgets and layout."""
         super().__init__()
         self.meta_store_path = meta_dir / ".mtr_last_user_metadata.json"
         self.setWindowTitle("MTR Processing Toolbox - ODF Generator")
@@ -254,6 +281,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
     def editing_finished(self):
+        """Store and log the processor name once editing of the field ends."""
         text = self.line_edit.text().strip()
         if not text:
             return
@@ -262,6 +290,12 @@ class MainWindow(QMainWindow):
         print(f"\n(1 of 4) Data processor: {self.line_edit_text}\n")
 
     def institution_text_changed(self, s):
+        """Update the instrument options for the newly selected institution.
+
+        Args:
+            s: Newly selected institution text, ``"BIO"`` or
+                ``"FSRS"``.
+        """
         self.institution = s
         if s == "BIO":
             # Allow both instruments
@@ -277,12 +311,25 @@ class MainWindow(QMainWindow):
         self.populate_defaults(s)
 
     def instrument_text_changed(self, s):
+        """Store the newly selected instrument.
+
+        Args:
+            s: Newly selected instrument text.
+        """
         self.instrument = s
 
     def find_raw_data_folder(self, base_dir):
         """
         Search for a folder containing 'raw' in its name (case-insensitive)
         inside base_dir.
+
+        Args:
+            base_dir: Directory to search, one level deep.
+
+        Returns:
+            The first subdirectory of ``base_dir`` whose lower-cased
+            name contains ``"raw"``, ``"csv"``, or ``"input"``, or
+            ``None`` if none match.
         """
         keywords = ["raw", "csv", "input"]
         for p in base_dir.iterdir():
@@ -291,6 +338,12 @@ class MainWindow(QMainWindow):
         return None
 
     def choose_metadata_file(self):
+        """Prompt for the metadata file and auto-fill the folder fields.
+
+        Also attempts to auto-detect the input data folder near the
+        chosen file via :meth:`find_raw_data_folder`, and sets the
+        output data folder to the metadata file's parent directory.
+        """
         file_path, _ = QFileDialog.getOpenFileName(self, "Select the Metadata file")
         if not file_path:
             return
@@ -317,6 +370,7 @@ class MainWindow(QMainWindow):
             print(f"(4 of 4) Output data folder auto-set to: {self.output_data_folder}\n")
 
     def choose_input_data_folder(self):
+        """Prompt for and store the input data folder."""
         input_folder_path = QFileDialog.getExistingDirectory(self, "Select the input data folder")
         if input_folder_path:
             self.input_data_folder = input_folder_path
@@ -324,6 +378,7 @@ class MainWindow(QMainWindow):
             self.input_data_folder_path_text.setText(self.input_data_folder)
 
     def choose_output_data_folder(self):
+        """Prompt for and store the output data folder."""
         output_folder_path = QFileDialog.getExistingDirectory(self, "Select the output data folder")
         if output_folder_path:
             self.output_data_folder = output_folder_path
@@ -331,6 +386,14 @@ class MainWindow(QMainWindow):
             self.output_data_folder_path_text.setText(self.output_data_folder)
 
     def on_accept(self):
+        """Collect all field values, optionally persist them, and close.
+
+        Sets :attr:`result` to ``"accept"`` and populates
+        :attr:`user_input_meta` from the cruise-header fields. If the
+        "remember" checkbox is checked, saves the entered values (via
+        :meth:`save_last_user_metadata`); otherwise clears any
+        previously saved values (via :meth:`clear_last_user_metadata`).
+        """
         self.result = "accept"
         processor_name = self.line_edit.text().strip()
         # Read text from the Cruise Header input fields
@@ -367,10 +430,12 @@ class MainWindow(QMainWindow):
         # self.hide()
 
     def on_reject(self):
+        """Set :attr:`result` to ``"reject"`` and close the window."""
         self.result = "reject"
         self.close()
 
     def save_last_user_metadata(self):
+        """Persist :attr:`remember_input_dict` to :attr:`meta_store_path` as JSON."""
         try:
             with Path.open(self.meta_store_path, "w", encoding="utf-8") as f:
                 json.dump(self.remember_input_dict, f, indent=4)
@@ -379,6 +444,7 @@ class MainWindow(QMainWindow):
             print(f"❌ Failed to save metadata: {e}")
 
     def clear_last_user_metadata(self):
+        """Delete the persisted metadata file, if one exists."""
         try:
             if self.meta_store_path.exists():
                 self.meta_store_path.unlink()
@@ -387,7 +453,13 @@ class MainWindow(QMainWindow):
             print(f"❌ Failed to clear metadata: {e}")
 
     def populate_defaults(self, institution):
-        """Populate 4 fields based on institution selection."""
+        """Populate 4 fields based on institution selection.
+
+        Args:
+            institution: Selected institution, ``"BIO"`` or
+                ``"FSRS"``. Any other value clears the fields instead
+                of filling in defaults.
+        """
         if institution == "BIO":
             self.organization_input.setText("DFO BIO")
             self.chiefscientist_input.setText("ADAM DROZDOWSKI")
@@ -415,6 +487,11 @@ class MainWindow(QMainWindow):
             self.cruise_number_input.clear()
 
     def load_last_user_metadata(self):
+        """Load and apply any previously persisted metadata, or defaults.
+
+        If no persisted file exists, falls back to
+        :meth:`populate_defaults` with ``"BIO"``.
+        """
         if not self.meta_store_path.exists():
             self.populate_defaults("BIO")
             return
@@ -470,7 +547,42 @@ class MainWindow(QMainWindow):
 
 
 class SubWindowOne(QMainWindow):
+    """Dialog for collecting QC-flagging run inputs.
+
+    Prompts for the QC reviewer/operator name, a metadata file (used
+    to auto-detect the input ODF folder and derive a batch name), the
+    input and output ODF folders, and a file-matching wildcard.
+    Selections can be persisted to and reloaded from a small JSON file
+    so returning users don't have to re-enter them.
+
+    Attributes:
+        meta_store_path: Path to the JSON file used to remember the
+            last-entered metadata.
+        review_mode: If ``True``, the dialog is configured for
+            reviewing previously QC'd files (``Step_2_Assign_QFlag``);
+            if ``False``, for initial QC of newly created ODF files
+            (``Step_1_Create_ODF``).
+        line_edit_text: QC reviewer/operator name.
+        metadata_file: Path to the selected metadata file.
+        input_data_folder: Path to the selected input ODF folder.
+        output_data_folder: Path to the selected output folder.
+        result: ``"accept"`` or ``"reject"`` after the dialog closes.
+        reviewer_input_meta: Unused placeholder for reviewer metadata.
+        remember_input_dict: Metadata dict persisted when "remember"
+            is checked.
+        remember_input_choice: Whether to persist ``remember_input_dict``.
+        generate_batch: Batch name derived from the metadata file name.
+        wildcard_string: File-matching wildcard entered by the user.
+    """
+
     def __init__(self, review_mode: bool):
+        """Build the window's widgets and layout.
+
+        Args:
+            review_mode: ``True`` to configure the dialog for
+                reviewing previously QC'd files, ``False`` for initial
+                QC.
+        """
         super().__init__()
         self.meta_store_path = meta_dir / ".last_reviewer_metadata.json"
         self.review_mode = review_mode
@@ -633,6 +745,7 @@ class SubWindowOne(QMainWindow):
         self.setCentralWidget(container)
 
     def editing_finished(self):
+        """Store and log the reviewer/operator name once editing ends."""
         text = self.line_edit.text().strip()
         if not text:
             return
@@ -644,6 +757,15 @@ class SubWindowOne(QMainWindow):
         """
         Search for a folder containing 'raw' in its name (case-insensitive)
         inside base_dir.
+
+        Args:
+            base_dir: Directory to search, one level deep.
+
+        Returns:
+            The first subdirectory of ``base_dir`` whose name contains
+            ``"Step_1_Create_ODF"`` (if not in review mode) or
+            ``"Step_2_Assign_QFlag"`` (if in review mode), or ``None``
+            if none match.
         """
         if self.review_mode is False:
             keywords = ["Step_1_Create_ODF"]
@@ -658,6 +780,18 @@ class SubWindowOne(QMainWindow):
         return None
 
     def build_batch_name(self, meta_path: str) -> str:
+        """Derive a batch name (e.g. ``"LFA-34-2024"``) from a metadata filename.
+
+        Args:
+            meta_path: Path to the metadata file. Recognizes ``LFA``
+                (with an optional trailing 2- or 4-digit year token)
+                and ``BCD`` naming patterns.
+
+        Returns:
+            A batch name of the form ``"LFA-<number>[-<year(s)>]"`` or
+            ``"BCD-<number>"`` if a recognized pattern is found in the
+            filename, otherwise ``"UNKNOWN_BATCH"``.
+        """
         filename = Path(meta_path).stem
         lfa_match = re.search(r"LFA\s*[_\-]?\s*(\d+[A-Z]?)", filename, re.IGNORECASE)
 
@@ -698,6 +832,13 @@ class SubWindowOne(QMainWindow):
         return "UNKNOWN_BATCH"
 
     def choose_metadata_file(self):
+        """Prompt for the metadata file and auto-fill folder/batch fields.
+
+        Also attempts to auto-detect the input ODF folder near the
+        chosen file via :meth:`find_raw_data_folder`, sets the output
+        folder to the metadata file's parent directory, and derives
+        the batch name via :meth:`build_batch_name`.
+        """
         file_path, _ = QFileDialog.getOpenFileName(self, "Select the Metadata file")
         if not file_path:
             return
@@ -728,6 +869,7 @@ class SubWindowOne(QMainWindow):
             self.generate_batch_text.setText(self.generate_batch)
 
     def choose_input_data_folder(self):
+        """Prompt for and store the input ODF folder."""
         folder_path = QFileDialog.getExistingDirectory(self, "Select folder with ODF files")
         if folder_path:
             self.input_data_folder = folder_path
@@ -735,6 +877,7 @@ class SubWindowOne(QMainWindow):
             self.input_path_text.setText(self.input_data_folder)
 
     def choose_output_data_folder(self):
+        """Prompt for and store the QC output folder."""
         folder_path = QFileDialog.getExistingDirectory(self, "Select QC output folder")
         if folder_path:
             self.output_data_folder = folder_path
@@ -742,6 +885,17 @@ class SubWindowOne(QMainWindow):
             self.output_path_text.setText(self.output_data_folder)
 
     def on_accept(self):
+        """Validate required fields, optionally persist them, and close.
+
+        Requires the reviewer/operator name, input folder, and output
+        folder to be set; otherwise prints an error and returns
+        without closing. On success, sets :attr:`result` to
+        ``"accept"`` and :attr:`wildcard_string` from the wildcard
+        field. If the "remember" checkbox is checked, saves the
+        reviewer name (via :meth:`save_last_user_metadata`);
+        otherwise clears any previously saved value (via
+        :meth:`clear_last_user_metadata`).
+        """
         if not self.line_edit_text.strip():
             print("❌ QC reviewer name missing.")
             return
@@ -771,10 +925,12 @@ class SubWindowOne(QMainWindow):
         self.close()
 
     def on_reject(self):
+        """Set :attr:`result` to ``"reject"`` and close the window."""
         self.result = "reject"
         self.close()
 
     def save_last_user_metadata(self):
+        """Persist :attr:`remember_input_dict` to :attr:`meta_store_path` as JSON."""
         try:
             with Path.open(self.meta_store_path, "w", encoding="utf-8") as f:
                 json.dump(self.remember_input_dict, f, indent=4)
@@ -783,6 +939,7 @@ class SubWindowOne(QMainWindow):
             print(f"❌ Failed to save metadata: {e}")
 
     def clear_last_user_metadata(self):
+        """Delete the persisted metadata file, if one exists."""
         try:
             if self.meta_store_path.exists():
                 self.meta_store_path.unlink()
@@ -791,6 +948,11 @@ class SubWindowOne(QMainWindow):
             print(f"❌ Failed to clear metadata: {e}")
 
     def load_last_user_metadata(self):
+        """Load and apply any previously persisted reviewer name, or defaults.
+
+        If no persisted file exists, falls back to
+        :meth:`populate_defaults`.
+        """
         if not self.meta_store_path.exists():
             self.populate_defaults()
             return
@@ -819,6 +981,7 @@ class SubWindowOne(QMainWindow):
             print(f"⚠️ Failed to load saved metadata: {e}")
 
     def populate_defaults(self):
+        """Set the reviewer-name field's placeholder text."""
         self.line_edit.setPlaceholderText("Please Provide Reviewer Name")
 
 

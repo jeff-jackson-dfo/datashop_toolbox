@@ -6,6 +6,17 @@ import pandas as pd
 
 
 def parse_xmlcon(filename: str) -> pd.DataFrame:
+    """Parse a Sea-Bird .xmlcon file into a sensor DataFrame.
+
+    Args:
+        filename: Path to the ``.xmlcon`` file to parse. The event
+            number is taken from characters 4:7 of the filename.
+
+    Returns:
+        A DataFrame with one row per sensor, and columns ``Event``,
+        ``Sensor``, ``Index``, ``SensorID``, and ``SerialNumber``.
+        Returns ``None`` if the file cannot be parsed as XML.
+    """
     # df = pd.DataFrame(columns = ['Event', 'Sensor', 'Index', 'SensorID', 'SerialNumber', 'CalibrationDate'])
     df = pd.DataFrame(columns=["Event", "Sensor", "Index", "SensorID", "SerialNumber"])
     try:
@@ -43,6 +54,18 @@ def parse_xmlcon(filename: str) -> pd.DataFrame:
 
 
 def compare_xmlcons(df: pd.DataFrame) -> pd.DataFrame:
+    """Find rows where a sensor's serial number changes between events.
+
+    Args:
+        df: Combined sensor DataFrame, as produced by
+            :func:`parse_xmlcon`, with one row per sensor per event.
+
+    Returns:
+        The subset of rows, for each sensor ``Index``, where
+        ``SerialNumber`` differs from the immediately preceding row
+        (in file order) for that index — i.e. the events at which a
+        sensor was swapped.
+    """
     indices = df["Index"].unique()
     df_sensor_changes = pd.DataFrame(
         columns=["Event", "Sensor", "Index", "SensorID", "SerialNumber"]
@@ -61,6 +84,16 @@ def compare_xmlcons(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def transform_to_wide_format(df: pd.DataFrame) -> pd.DataFrame:
+    """Pivot a long-format sensor-change table to wide format.
+
+    Args:
+        df: Long-format DataFrame with ``Event``, ``SensorName``, and
+            ``SerialNumber`` columns.
+
+    Returns:
+        A DataFrame indexed by ``Event`` with one column per
+        ``SensorName``, holding the corresponding ``SerialNumber``.
+    """
     # Pivot the DataFrame to wide format
     df_wide = df.pivot(index="Event", columns="SensorName", values="SerialNumber")
     return df_wide

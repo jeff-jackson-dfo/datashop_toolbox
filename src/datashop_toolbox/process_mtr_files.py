@@ -42,6 +42,44 @@ def process_mtr_files_for_worker(
     batch_id,
     user_input_metadata,
 ):
+    """Process a batch of raw MTR ``.csv`` files into ODF files (worker entry point).
+
+    For each ``.csv`` file in ``input_data_folder_path``, builds a
+    :class:`~datashop_toolbox.thermograph.ThermographHeader`, adds an
+    initial history entry, processes the raw thermograph data via
+    :meth:`~datashop_toolbox.thermograph.ThermographHeader.process_thermograph`,
+    assigns default quality flags and a quality header, and writes the
+    result to a ``Step_1_Create_ODF`` output folder. Progress and
+    errors are reported via ``log``. Intended to be run inside a
+    :class:`~datashop_toolbox.log_window.Worker` thread.
+
+    Args:
+        log: Callable used to report progress messages, e.g. a
+            :class:`~datashop_toolbox.log_window.Worker`'s
+            ``log.emit``.
+        metadata_file_path: Path to the batch's metadata file.
+        input_data_folder_path: Path to the folder containing the raw
+            ``.csv`` MTR files.
+        output_data_folder_path: Parent path under which the
+            ``Step_1_Create_ODF`` output folder is created (cleared
+            and recreated if it already exists).
+        operator: Name of the data processor, recorded in the ODF
+            history.
+        institution: Institution the data was collected for, e.g.
+            ``"BIO"`` or ``"FSRS"``.
+        instrument: Instrument type used, e.g. ``"minilog"``.
+        batch_id: Identifier for this processing batch, used only in
+            log messages.
+        user_input_metadata: Cruise-header field values to apply to
+            each generated ODF file.
+
+    Raises:
+        RuntimeError: If ``input_data_folder_path`` cannot be made the
+            current working directory.
+        TypeError: If ``user_input_metadata`` is not a dict.
+        FileNotFoundError: If no ``.csv`` files are found in
+            ``input_data_folder_path``.
+    """
     # -------------------------------------------------------------
     #  """Process MTR files to generate ODF files."""
     # -------------------------------------------------------------
@@ -158,6 +196,19 @@ def process_mtr_files_for_worker(
 
 
 def run_automated_start_qc():
+    """Run the automated (multi-batch, background-worker) MTR processing UI.
+
+    Shows a :class:`~datashop_toolbox.log_window.LogWindow`, then
+    repeatedly shows a
+    :class:`~datashop_toolbox.select_metadata_file_and_data_folder.MainWindow`
+    input dialog. On each accepted selection, derives a batch ID from
+    the institution and metadata filename, starts a
+    :class:`~datashop_toolbox.log_window.Worker` running
+    :func:`process_mtr_files_for_worker` in the background, and — on
+    completion or failure — reopens the input dialog for the next
+    batch. Runs the Qt event loop until the log window's exit is
+    requested.
+    """
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
@@ -340,6 +391,21 @@ def run_automated_start_qc():
 class MTRProcessingThread(QThread):
     """
     Worker thread to process MTR data without blocking the GUI.
+
+    Attributes:
+        finished: Signal emitted with ``True``/``False`` when
+            processing completes successfully or not.
+        metadata_file_path: Path to the batch's metadata file.
+        input_path: Path to the folder containing the raw ``.csv`` MTR
+            files.
+        output_path: Parent path under which the output ODF folder is
+            created.
+        operator: Name of the data processor.
+        institution: Institution the data was collected for.
+        instrument: Instrument type used.
+        user_metadata: Cruise-header field values to apply to each
+            generated ODF file.
+        batch_id: Identifier for this processing batch.
     """
 
     finished = Signal(bool)  # Signal to indicate processing done
@@ -355,6 +421,21 @@ class MTRProcessingThread(QThread):
         user_metadata,
         batch_id,
     ):
+        """Initialize the processing thread.
+
+        Args:
+            metadata_file_path: Path to the batch's metadata file.
+            input_path: Path to the folder containing the raw ``.csv``
+                MTR files.
+            output_path: Parent path under which the output ODF
+                folder is created.
+            operator: Name of the data processor.
+            institution: Institution the data was collected for.
+            instrument: Instrument type used.
+            user_metadata: Cruise-header field values to apply to each
+                generated ODF file.
+            batch_id: Identifier for this processing batch.
+        """
         super().__init__()
         self.metadata_file_path = metadata_file_path
         self.input_path = input_path
@@ -366,6 +447,7 @@ class MTRProcessingThread(QThread):
         self.batch_id = batch_id
 
     def run(self):
+        """Run :func:`run_process_thermograph_data` and emit :attr:`finished`."""
         try:
             task_result = run_process_thermograph_data(
                 self.metadata_file_path,
@@ -395,6 +477,36 @@ def process_thermograph_data(
     user_input_metadata,
     batch_id,
 ):
+    """Process a batch of raw MTR ``.csv`` files into ODF files (synchronous).
+
+    Print-based counterpart of :func:`process_mtr_files_for_worker`,
+    used by the manual (single-threaded, ``print``-logged) QC flow.
+    Checks a module-level ``exit_requested`` flag between files so the
+    loop can be interrupted early.
+
+    Args:
+        metadata_file_path: Path to the batch's metadata file.
+        input_data_folder_path: Path to the folder containing the raw
+            ``.csv`` MTR files.
+        output_data_folder_path: Parent path under which the
+            ``Step_1_Create_ODF`` output folder is created (cleared
+            and recreated if it already exists).
+        operator: Name of the data processor, recorded in the ODF
+            history.
+        institution: Institution the data was collected for.
+        instrument: Instrument type used.
+        user_input_metadata: Cruise-header field values to apply to
+            each generated ODF file. Must be a ``dict``.
+        batch_id: Identifier for this processing batch, used only in
+            log messages.
+
+    Returns:
+        A dict with a ``"finished"`` key, ``True`` if the batch
+        completed and all files were processed, ``False`` (returned
+        early) if the input directory could not be entered,
+        ``user_input_metadata`` was not a dict, or no ``.csv`` files
+        were found.
+    """
 
     global exit_requested
     exit_requested = False
@@ -530,6 +642,24 @@ def run_process_thermograph_data(
     user_input_metadata,
     batch_id,
 ):
+    """Run :func:`process_thermograph_data` and log the outcome.
+
+    Args:
+        metadata_file_path: Path to the batch's metadata file.
+        input_data_folder_path: Path to the folder containing the raw
+            ``.csv`` MTR files.
+        output_data_folder_path: Parent path under which the output
+            ODF folder is created.
+        operator: Name of the data processor.
+        institution: Institution the data was collected for.
+        instrument: Instrument type used.
+        user_input_metadata: Cruise-header field values to apply to
+            each generated ODF file.
+        batch_id: Identifier for this processing batch.
+
+    Returns:
+        The dict returned by :func:`process_thermograph_data`.
+    """
 
     task_completion = process_thermograph_data(
         metadata_file_path,
@@ -553,6 +683,21 @@ def run_process_thermograph_data(
 
 
 def main_select_inputs():
+    """Show the input selection dialog and block until it closes.
+
+    Instantiates a Qt application if none exists, shows a
+    :class:`select_metadata_file_and_data_folder.MainWindow` dialog,
+    derives a batch ID from the institution and metadata filename
+    (prompting for an operator name if one was not entered), and runs
+    the Qt event loop until the dialog is accepted or rejected.
+
+    Returns:
+        An 8-tuple of ``(metadata_file_path, input_data_folder_path,
+        output_data_folder_path, operator, institution, instrument,
+        user_input_metadata, batch_id)`` if the dialog was accepted
+        with all required fields filled in, otherwise an 8-tuple of
+        ``None``.
+    """
     app = QApplication.instance()
     must_quit_app = app is None
     if must_quit_app:
@@ -667,6 +812,19 @@ def main_select_inputs():
 
 
 def initialize_mtr_process(log_ui: LogWindowProcessMTR, logger):
+    """Collect processing inputs and start the MTR processing thread.
+
+    Prompts for inputs via :func:`main_select_inputs`; if any required
+    input is missing, logs a message and returns without starting
+    anything. Otherwise starts a :class:`MTRProcessingThread` on
+    ``log_ui`` and connects its completion to
+    :func:`on_mtr_processing_finished`.
+
+    Args:
+        log_ui: Log window whose ``worker`` attribute is set to the
+            started :class:`MTRProcessingThread`.
+        logger: Logger used to report progress and input selections.
+    """
     global exit_requested
     exit_requested = False
     logger.info(
@@ -760,6 +918,13 @@ def initialize_mtr_process(log_ui: LogWindowProcessMTR, logger):
 
 
 def exit_program(app, log_ui):
+    """Stop any running MTR processing thread and quit the application.
+
+    Args:
+        app: The running ``QApplication`` instance to quit.
+        log_ui: Log window whose ``worker`` (if any and running) is
+            interrupted and waited on before exiting.
+    """
 
     logger = logging.getLogger("process_mtr_logger")
 
@@ -782,6 +947,13 @@ def exit_program(app, log_ui):
 
 
 def run_manual_start_qc():
+    """Run the manual (single-batch, button-driven) MTR processing UI.
+
+    Shows a :class:`~datashop_toolbox.log_window.LogWindowProcessMTR`,
+    sets up a file/console logger, and wires its "Start" and "Exit"
+    buttons to :func:`initialize_mtr_process` and :func:`exit_program`
+    respectively before starting the Qt event loop.
+    """
     app = QApplication.instance()
     if app is None:
         app = QApplication(sys.argv)
@@ -805,6 +977,16 @@ def run_manual_start_qc():
 
 
 def logger_setup():
+    """Create (or return the existing) MTR-processing logger.
+
+    Configures a ``"process_mtr_logger"`` logger with both a console
+    handler and a timestamped file handler under a ``logs`` folder in
+    the current working directory. If the logger already has handlers
+    attached, returns it unchanged (to avoid duplicate handlers).
+
+    Returns:
+        The configured ``logging.Logger`` named ``"process_mtr_logger"``.
+    """
     # --- create logs folder in project root ---
     log_dir = Path.cwd() / "logs"
     log_dir.mkdir(exist_ok=True)
@@ -834,6 +1016,20 @@ def logger_setup():
 
 
 def attach_gui_logger(logger, gui_handler):
+    """Attach a GUI log handler to a logger via a background queue listener.
+
+    Args:
+        logger: Logger to attach the queued handler to.
+        gui_handler: Log handler (e.g. a
+            :class:`~datashop_toolbox.log_window.QTextEditLogger`) that
+            should receive log records without blocking the emitting
+            thread.
+
+    Returns:
+        The started ``QueueListener`` forwarding records to
+        ``gui_handler``. Keep a reference to it for as long as
+        logging should continue.
+    """
     log_queue = queue.Queue()
 
     queue_handler = QueueHandler(log_queue)
@@ -846,6 +1042,17 @@ def attach_gui_logger(logger, gui_handler):
 
 
 def on_mtr_processing_finished(log_ui, success):
+    """Handle completion of an :class:`MTRProcessingThread`.
+
+    Logs the outcome, re-enables the log window's start button, and
+    cleans up the finished worker thread.
+
+    Args:
+        log_ui: Log window whose ``btn_start`` is re-enabled and
+            ``worker`` is stopped and cleared.
+        success: Whether the processing thread completed
+            successfully.
+    """
     logger = logging.getLogger("process_mtr_logger")
 
     if success:

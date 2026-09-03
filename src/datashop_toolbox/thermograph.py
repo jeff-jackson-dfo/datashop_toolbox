@@ -25,25 +25,51 @@ class ThermographHeader(OdfHeader):
     """
     Mtr Class: subclass of OdfHeader.
     This class is responsible for storing the metadata and data associated with a moored thermograph (MTR).
+
+    Attributes:
+        date_format: ``strptime`` format string for the ``date``
+            column in raw MTR/metadata files.
+        time_format: ``strptime`` format string for the ``time``
+            column in raw MTR/metadata files.
     """
     date_format: ClassVar[str] = r'%Y-%m-%d'
     time_format: ClassVar[str] = r'%H:%M:%S'
 
 
     def __init__(self) -> None:
+        """Initialize the thermograph header."""
         super().__init__()
 
 
     def get_date_format(self) -> str:
+        """Return the ``strptime`` format used for the ``date`` column.
+
+        Returns:
+            :attr:`ThermographHeader.date_format`.
+        """
         return ThermographHeader.date_format
     
 
     def get_time_format(self) -> str:
+        """Return the ``strptime`` format used for the ``time`` column.
+
+        Returns:
+            :attr:`ThermographHeader.time_format`.
+        """
         return ThermographHeader.time_format
 
 
     @staticmethod
     def clean_lfa(value):
+        """Coerce an LFA value to an int where possible.
+
+        Args:
+            value: Raw LFA value, typically numeric or numeric-like.
+
+        Returns:
+            ``value`` converted to ``int`` if it can be interpreted as
+            a float, otherwise ``value`` unchanged.
+        """
         try:
             # Try converting to float first
             f = float(value)
@@ -59,6 +85,16 @@ class ThermographHeader(OdfHeader):
 
     @staticmethod
     def clean_soakday(value):
+        """Coerce a soak-days value to an int where possible.
+
+        Args:
+            value: Raw soak-days value, typically numeric or
+                numeric-like.
+
+        Returns:
+            ``value`` converted to ``int`` if it can be interpreted as
+            a float, otherwise ``0``.
+        """
         try:
             # Try converting to float first
             f = float(value)
@@ -74,6 +110,19 @@ class ThermographHeader(OdfHeader):
 
     @staticmethod
     def load_meta_file(metafile):
+        """Load a metadata file into a DataFrame, dispatching by extension.
+
+        Args:
+            metafile: Path to the metadata file. Supports ``.txt``/
+                ``.tsv`` (tab-delimited), ``.csv``, and ``.xls``/
+                ``.xlsx``.
+
+        Returns:
+            The file's contents as a DataFrame.
+
+        Raises:
+            ValueError: If ``metafile``'s extension is not supported.
+        """
         ext = Path(metafile).suffix.lower()
         if ext in [".txt", ".tsv"]:
             df = pd.read_table(
@@ -107,7 +156,15 @@ class ThermographHeader(OdfHeader):
 
 
     def start_date_time(self, df: pd.DataFrame) -> datetime:
-        """ Retrieve the first date-time value from the data frame. """
+        """Retrieve the first date-time value from the data frame.
+
+        Args:
+            df: DataFrame with either a ``date_time`` column, or
+                separate ``date`` and ``time`` columns.
+
+        Returns:
+            The date/time of the first row.
+        """
         if 'date_time' in df.columns:
             start_date_time = df['date_time'].iloc[0]
         else:
@@ -118,7 +175,15 @@ class ThermographHeader(OdfHeader):
 
 
     def end_date_time(self, df: pd.DataFrame) -> datetime:
-        """ Retrieve the last date-time value from the data frame. """
+        """Retrieve the last date-time value from the data frame.
+
+        Args:
+            df: DataFrame with either a ``date_time`` column, or
+                separate ``date`` and ``time`` columns.
+
+        Returns:
+            The date/time of the last row.
+        """
         if 'date_time' in df.columns:
             end_date_time = df['date_time'].iloc[-1]
         else:
@@ -129,7 +194,16 @@ class ThermographHeader(OdfHeader):
 
 
     def get_sampling_interval(self, df: pd.Series) -> float:
-        """ Compute the time interval between the first two date-time values. """
+        """Compute the time interval between the first two date-time values.
+
+        Args:
+            df: DataFrame with either a ``date_time`` column, or
+                separate ``date`` and ``time`` columns.
+
+        Returns:
+            The interval, in whole seconds, between the first and
+            second rows.
+        """
         if 'date_time' in df.columns:
             datetime1 = df['date_time'][0]
             datetime2 = df['date_time'][1]
@@ -148,7 +222,16 @@ class ThermographHeader(OdfHeader):
 
 
     def create_sytm(self, df: pd.DataFrame) -> pd.DataFrame:
-        """ Updated the data frame with the proper SYTM column. """
+        """Updated the data frame with the proper SYTM column.
+
+        Args:
+            df: DataFrame with either a ``date_time`` column, or
+                separate ``date`` and ``time`` columns.
+
+        Returns:
+            ``df`` with those column(s) replaced by a single quoted
+            ``sytm`` column in ODF SYTM format.
+        """
         if 'date_time' in df.columns:
             df['sytm'] = df['date_time'].map(lambda x: datetime.strftime(x, BaseHeader.SYTM_FORMAT)).str.upper()
             df = df.drop('date_time', axis=1)
@@ -173,6 +256,16 @@ class ThermographHeader(OdfHeader):
 
     @staticmethod
     def check_datetime_format(date_string, format):
+        """Check whether a string matches a given date/time format.
+
+        Args:
+            date_string: Date/time string to check.
+            format: ``strptime``-style format string to check against.
+
+        Returns:
+            ``True`` if ``date_string`` matches ``format``, ``False``
+            otherwise.
+        """
         try:
             datetime.strptime(date_string, format)
             return True
@@ -182,7 +275,25 @@ class ThermographHeader(OdfHeader):
 
     @staticmethod
     def fix_datetime(df: pd.DataFrame, date_times: bool) -> pd.DataFrame:
-        """ Fix the date and time columns in the data frame. """
+        """Fix the date and time columns in the data frame.
+
+        Fills missing times with ``"12:00"`` (when ``date_times`` is
+        ``False``) or derives ``date``/``time`` from an existing
+        ``datetime`` column (when ``date_times`` is ``True``), then
+        auto-detects which of several supported date and time formats
+        each row uses and combines them into a ``datetime`` column.
+
+        Args:
+            df: DataFrame with either ``date``/``time`` columns, or a
+                ``datetime`` column (if ``date_times`` is ``True``).
+            date_times: If ``True``, derive ``date``/``time`` from an
+                existing ``datetime`` column instead of using ``df``'s
+                own ``date``/``time`` columns directly.
+
+        Returns:
+            ``df`` with a new ``datetime`` column of combined,
+            parsed date/time values.
+        """
 
         if not date_times:
             # Replace all NaN values with 12:00 in times as this is not important other than to have a time.
@@ -290,6 +401,15 @@ class ThermographHeader(OdfHeader):
 
     @staticmethod
     def convert_to_decimal_degrees(pos: str) -> float:
+        """Convert a degrees/decimal-minutes position string to decimal degrees.
+
+        Args:
+            pos: Position string, either ``"<degrees> <decimal
+                minutes>"`` or a plain decimal-degrees value.
+
+        Returns:
+            The position converted to decimal degrees.
+        """
         toks = str(pos).strip().split()
         if len(toks) == 2:
             deg = float(toks[0])
@@ -302,12 +422,40 @@ class ThermographHeader(OdfHeader):
 
     @staticmethod
     def extract_number(s: str) -> float | None:
+        """Extract a numeric value from a string, ignoring non-numeric characters.
+
+        Args:
+            s: String to extract a number from, e.g. ``"12.5 m"``.
+
+        Returns:
+            The extracted value as a float, or ``None`` if no digits
+            or decimal point remain after stripping non-numeric
+            characters.
+        """
         match = re.sub(r'[^0-9.]', '', s)
         return float(match) if match else None
 
 
     def populate_parameter_headers(self, df: pd.DataFrame):
-        """ Populate the parameter headers and the data object. """
+        """Populate the parameter headers and the data object.
+
+        Recognizes the ``"sytm"``, ``"temperature"``, ``"pressure"``,
+        ``"depth"``, and ``"dissolved_oxygen"`` columns, builds a
+        :class:`~datashop_toolbox.parameterhdr.ParameterHeader` for
+        each with metadata looked up via
+        :func:`~datashop_toolbox.lookup_parameter.lookup_parameter`,
+        and appends it to ``self.parameter_headers``. Also updates
+        ``self.data`` with the resulting parameter list, print
+        formats, and data frame.
+
+        Args:
+            df: Data to summarize, with columns among ``"sytm"``,
+                ``"temperature"``, ``"pressure"``, ``"depth"``, and
+                ``"dissolved_oxygen"``.
+
+        Returns:
+            This :class:`ThermographHeader` instance.
+        """
         parameter_list = list()
         print_formats = dict()
         number_of_rows = df.count().iloc[0]
@@ -378,6 +526,16 @@ class ThermographHeader(OdfHeader):
 
     @staticmethod
     def is_minilog_file(file_path: str) -> bool:
+        """Check whether a file looks like a Minilog MTR file.
+
+        Args:
+            file_path: Path to the file to check.
+
+        Returns:
+            ``True`` if the word ``"minilog"`` (case-insensitive)
+            appears in the first 8 lines of the file, ``False``
+            otherwise.
+        """
         with open(file_path, encoding="utf-8", errors="ignore") as f:
             for i, line in enumerate(f):
                 if i >= 8:  # only check first 8 lines
@@ -392,8 +550,42 @@ class ThermographHeader(OdfHeader):
         """ 
         Read an MTR data file and return a pandas DataFrame. 
 
-        :mtrfile: Full path to the thermograph source data text file.
-        :instrument_type: Type of instrument used to acquire the data ('minilog' or 'hobo')
+        For ``instrument_type="minilog"``: auto-detects the number of
+        header lines, reads the ``date``/``time``/``temperature``
+        data columns, extracts the instrument model and serial number
+        (gauge) from the header (falling back to parsing them from the
+        filename, or prompting via a dialog if that also fails), and
+        applies any detected UTC/GMT offset to convert the
+        date/time values to UTC.
+
+        For ``instrument_type="hobo"``: auto-detects the number of
+        header lines, matches columns against known name variants
+        (date/time, pressure, depth, temperature, dissolved oxygen),
+        extracts the instrument serial number from the temperature
+        column header if present, converts date/time values to UTC
+        using any detected UTC/GMT offset, and attempts to identify
+        the instrument model (``"hobo U20"``/``"hobo U22"``/``"hobo"``)
+        from the filename.
+
+        Args:
+            mtrfile: Full path to the thermograph source data text
+                file.
+            instrument_type: Type of instrument used to acquire the
+                data (``"minilog"`` or ``"hobo"``).
+
+        Returns:
+            A dict with keys ``"df"`` (the parsed DataFrame),
+            ``"inst_model"`` (instrument model string), ``"gauge"``
+            (instrument serial number), and ``"filename"`` (the input
+            ``mtrfile`` path). Returns an empty dict if
+            ``instrument_type`` is neither ``"minilog"`` nor
+            ``"hobo"``.
+
+        Raises:
+            Exception: If ``instrument_type=="minilog"`` and the
+                instrument model or gauge cannot be determined from
+                the file header or filename, and the user chooses
+                "Ok" in the resulting dialog (rather than "Quit App").
         """
         
         mtr_dict = dict()
@@ -652,8 +844,25 @@ class ThermographHeader(OdfHeader):
         """
         Read a Metadata file and return a pandas DataFrame.
 
-        :metafile: The file containing the metadata information.
-        :institution: A string identifying the group who supplied the metadata. (currently "FSRS" or "BIO")
+        For ``institution="FSRS"``: loads the file via
+        :meth:`load_meta_file`, drops fully-empty rows, coerces the
+        LFA/soak-days/vessel-code/gauge columns, drops some
+        unused columns, renames the remaining columns to their
+        canonical lower_snake_case names, and fixes the date/time
+        columns via :meth:`fix_datetime`.
+
+        For ``institution`` of ``"BIO"`` or ``"DFO BIO"``: reads the
+        file as an Excel spreadsheet with no further transformation.
+
+        Args:
+            metafile: The file containing the metadata information.
+            institution: A string identifying the group who supplied
+                the metadata (currently ``"FSRS"``, ``"BIO"``, or
+                ``"DFO BIO"``).
+
+        Returns:
+            The metadata as a DataFrame. Empty if ``institution`` is
+            not one of the recognized values.
         """
         dfmeta = pd.DataFrame()
 
@@ -693,7 +902,35 @@ class ThermographHeader(OdfHeader):
 
     def process_thermograph(self, institution_name: str, instrument_type: str, 
                             metadata_file_path: str, data_file_path: str, user_input_metadata: dict) -> None:
+        """Populate this ODF object from raw MTR data and metadata.
 
+        Reads the metadata (:meth:`read_metadata`) and raw MTR data
+        (:meth:`read_mtr`) files, looks up the matching metadata row
+        for the instrument's gauge/serial number (institution-specific
+        matching logic for ``"FSRS"`` vs. ``"BIO"``), and populates
+        the cruise, event, and instrument headers plus the parameter
+        headers and data frame (via :meth:`create_sytm` and
+        :meth:`populate_parameter_headers`) from the combined
+        information. User-supplied cruise-header values in
+        ``user_input_metadata`` take precedence over
+        institution-specific defaults.
+
+        Args:
+            institution_name: Institution the data was collected for,
+                ``"FSRS"`` or ``"BIO"``.
+            instrument_type: Instrument type used, ``"minilog"`` or
+                ``"hobo"``.
+            metadata_file_path: Path to the metadata file.
+            data_file_path: Path to the raw MTR data file.
+            user_input_metadata: Cruise-header field overrides
+                (``organization``, ``chief_scientist``,
+                ``cruise_description``, ``platform_name``,
+                ``country_code``, ``cruise_number``); missing or empty
+                values fall back to institution-specific defaults.
+
+        Returns:
+            This :class:`ThermographHeader` instance.
+        """
         if institution_name == 'FSRS':
             # Get user input metadata values with defaults
             organization = user_input_metadata.get("organization") or "FSRS"

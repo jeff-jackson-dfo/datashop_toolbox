@@ -5,6 +5,15 @@ from pyrsktools import RSK
 def convert_rbr_to_odf(
     rsk_file_path: str, station_latitude: float = 0.0, station_longitude: float = 0.0
 ):
+    """Read an RBR .rsk file, derive sigma-t, and plot selected profiles.
+
+    Args:
+        rsk_file_path: Path to the RBR ``.rsk`` file to open.
+        station_latitude: Station latitude, in decimal degrees, used to
+            derive density (sigma-t).
+        station_longitude: Station longitude, in decimal degrees, used
+            to derive density (sigma-t).
+    """
 
     # Open the RSK file. Metadata is read here
     with RSK(rsk_file_path) as rsk:

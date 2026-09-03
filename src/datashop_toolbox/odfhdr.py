@@ -243,12 +243,11 @@ class OdfHeader(ValidatedBase, BaseHeader):
             odf_output += f"  FILE_SPECIFICATION = {self.file_specification},\n"
             odf_output += add_commas(self.cruise_header.print_object())
             odf_output += add_commas(self.event_header.print_object())
+            odf_output += add_commas(self.instrument_header.print_object())
 
             for _name, header in optional_headers:
                 if header is not None:
                     odf_output += add_header_output(header)
-
-            odf_output += add_commas(self.instrument_header.print_object())
 
             for cal in (
                 self.general_cal_headers + self.polynomial_cal_headers + self.compass_cal_headers
@@ -296,7 +295,28 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
         return odf_output
 
-    def read_odf(self, odf_file_path: str):
+    @staticmethod
+    def repair_text(text: str) -> str:
+        result = text
+
+        for _ in range(5):
+            if not any(x in result for x in ("Ã", "Â", "Æ", "â")):
+                break
+
+            try:
+                repaired = result.encode("cp1252").decode("utf-8")
+
+                if repaired == result:
+                    break
+
+                result = repaired
+
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                break
+
+        return result
+
+    def read_odf(self, odf_file_path: Path):
         """Read an ODF file and populate this object.
 
         The method parses the ODF header blocks, populates their corresponding
@@ -312,10 +332,11 @@ class OdfHeader(ValidatedBase, BaseHeader):
         Raises:
             AssertionError: If ``odf_file_path`` is not a string.
         """
-        assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
-        file_lines = read_file_lines(odf_file_path)
-
+        assert isinstance(odf_file_path, Path), "Input argument 'odf_file_path' must be a string."
+        all_lines = read_file_lines(odf_file_path)
+        file_lines = [self.repair_text(line) for line in all_lines]
         substrings_to_find = ["_HEADER"]
+        header_lines_with_indices = []
         if isinstance(file_lines, list):
             header_lines_with_indices = find_lines_with_text(file_lines, substrings_to_find)
         header_starts_list = list()
@@ -330,6 +351,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
 
         data_line = "-- DATA --"
         substrings_to_find = [data_line]
+        data_lines_with_indices = []
         if isinstance(file_lines, list):
             data_lines_with_indices = find_lines_with_text(file_lines, substrings_to_find)
         else:
@@ -366,9 +388,9 @@ class OdfHeader(ValidatedBase, BaseHeader):
         # Loop through the header lines, populating the OdfHeader object as it goes.
         for i in range(ndf):
             header_block = str(header_blocks_df.at[i, "name"])
-            x = header_field_range.at[i, "Start"]
-            y = header_field_range.at[i, "End"]
-            block_lines = list(header_lines[x : (y + 1)])
+            x = int(header_field_range.at[i, "Start"]) # pyright: ignore[reportArgumentType]
+            y = int(header_field_range.at[i, "End"]) # pyright: ignore[reportArgumentType]
+            block_lines = header_lines[x:y + 1]
             match header_block:
                 case "COMPASS_CAL_HEADER":
                     compass_cal_header = CompassCalHeader()
@@ -470,7 +492,7 @@ class OdfHeader(ValidatedBase, BaseHeader):
                 ph.maximum_value = max(param_data)
 
 
-    def write_odf(self, odf_file_path: str, version: float = 2.0) -> None:
+    def write_odf(self, odf_file_path: Path, version: float = 2.0) -> None:
         """Write the ODF object to a file.
 
         Args:
@@ -481,13 +503,12 @@ class OdfHeader(ValidatedBase, BaseHeader):
             AssertionError: If ``odf_file_path`` is not a string or ``version``
                 is not a float.
         """
-        assert isinstance(odf_file_path, str), "Input argument 'odf_file_path' must be a string."
+        assert isinstance(odf_file_path, Path), "Input argument 'odf_file_path' must be a string."
         assert isinstance(version, float), "Input argument 'version' must be a float."
 
         odf_file_text = self.print_object(file_version=version)
-        file1 = Path.open(odf_file_path, "w")
-        file1.write(odf_file_text)
-        file1.close()
+        with open(odf_file_path, "w", encoding="iso-8859-1") as file1:
+            file1.write(odf_file_text)
         msg1 = colored("ODF file written to: ", "yellow")
         msg2 = colored(f"{odf_file_path}", "cyan")
         msg = msg1 + msg2
@@ -778,8 +799,8 @@ class OdfHeader(ValidatedBase, BaseHeader):
             if match:
                 new_param_list.append(match)
                 new_df[match.code] = default_qf_col
-            new_print_formats[param.code] = (
-                f"{param.print_field_width}.{param.print_decimal_places}"
+            new_print_formats[existing_param.code] = (
+                f"{existing_param.print_field_width}.{existing_param.print_decimal_places}"
             )
 
         self.parameter_headers = new_param_list
@@ -1046,14 +1067,16 @@ def main():
         # my_file = 'mcm_95007_1197_4430830_900.odf'
         # my_file = 'mtr_79999_46_61036_14400.odf'
         # my_file = 'MADCPS_BCD2004909_1544_1269-60_3600.ODF' # Fails due to bad null_value in SYTM parameter header and bad data in SYTM channel.  # noqa: E501
-        my_file = "MCTD_CAR2023648_2264_11689_1800.ODF"
-        my_path = "C:\\DFO-MPO\\DEV\\GitHub\\datashop-toolbox\\"
+        # my_file = "MCTD_CAR2023648_2264_11689_1800.ODF"
+        my_file = "CTD_AT4802_008_1_DN.ODF"
+        my_path = "C:/DFO-MPO/DEV/GitHub/datashop_toolbox/"
 
         odf = OdfHeader()
         odf.reset_log_list()
-        print(odf.shared_log_list)
+        # print(odf.shared_log_list)
 
-        odf.read_odf(my_path + "tests\\ODF\\" + my_file)
+        input_file_path = Path(my_path, "sampledata/ctd/" + my_file)
+        odf.read_odf(input_file_path)
 
         # Add a new History Header to record the modifications that are made.
         odf.add_history()
@@ -1063,15 +1086,6 @@ def main():
 
         odf.event_header.set_event_comment("We had a successful trip!", 1)
 
-        odf.quality_header = QualityHeader()
-        odf.quality_header.set_logger_and_config(odf.logger, odf.config)
-        qd = odf.quality_header.quality_date
-        odf.quality_header.log_quality_message("QUALITY_DATE", qd, "01-JUL-2017 10:45:19.00")
-        odf.quality_header.quality_date = "01-JUL-2017 10:45:19.00"
-        odf.quality_header.set_quality_test("Test 1")
-        odf.quality_header.set_quality_test("Test 2")
-        odf.quality_header.quality_comments = ["Comment 1", "Comment 2"]
-
         print(odf.shared_log_list)
 
         odf.update_odf()
@@ -1080,13 +1094,24 @@ def main():
         file_spec = odf.generate_file_spec()
         odf.file_specification = file_spec
         out_file = f"{file_spec}.ODF"
-        odf.write_odf(my_path + "tests\\Output\\" + out_file, version=2.0)
+        out_file_path = Path("c:/dfo-mpo/test/output/", out_file)
+        odf.write_odf(out_file_path, version=2.0)
 
-        odf.add_quality_flags()
-        odf.quality_header.add_quality_codes()
-        odf.quality_header.add_qcff_info()
-        qfs_out_file = f"{file_spec}_QFs.ODF"
-        odf.write_odf(my_path + "tests\\Output\\" + qfs_out_file, version=3.0)
+        if not odf.quality_header:
+            odf.quality_header = QualityHeader()
+            odf.quality_header.set_logger_and_config(odf.logger, odf.config)
+            qd = odf.quality_header.quality_date
+            odf.quality_header.log_quality_message("QUALITY_DATE", qd, "01-JUL-2017 10:45:19.00")
+            odf.quality_header.quality_date = "01-JUL-2017 10:45:19.00"
+            odf.quality_header.set_quality_test("Test 1")
+            odf.quality_header.set_quality_test("Test 2")
+            odf.quality_header.quality_comments = ["Comment 1", "Comment 2"]
+            odf.add_quality_flags()
+            odf.quality_header.add_quality_codes()
+            odf.quality_header.add_qcff_info()
+            qfs_out_file = f"{file_spec}_QFs.ODF"
+            qfs_out_file_path = Path("c:/dfo-mpo/test/output/", qfs_out_file)
+            odf.write_odf(qfs_out_file_path, version=3.0)
 
 
 if __name__ == "__main__":

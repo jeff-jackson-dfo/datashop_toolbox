@@ -4,6 +4,13 @@ import pandas as pd
 
 
 def read_seaodf_parameters() -> pd.DataFrame:
+    """Read the packaged SeaODF parameters lookup table.
+
+    Returns:
+        The contents of ``src/datashop_toolbox/lookups/seaodf_parameters.csv``,
+        read relative to the current working directory, as a
+        DataFrame.
+    """
 
     seaodf_df = pd.DataFrame()
     

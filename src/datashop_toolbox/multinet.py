@@ -18,17 +18,33 @@ class MultinetHeader(OdfHeader):
     """
     Multinet Class: subclass of OdfHeader.
     This class is responsible for storing the metadata and data associated with a HYDRO-BIOS multinet CTD profile.
+
+    Attributes:
+        date_format: ``strptime`` format string for the ``date``
+            column in raw multinet files.
+        time_format: ``strptime`` format string for the ``time``
+            column in raw multinet files.
+        calibrations: Mapping of channel name (e.g. ``"temperature"``,
+            ``"conductivity"``, ``"pressure"``, ``"volume"``) to its
+            calibration coefficients.
     """
 
     date_format: ClassVar[str] = r"%Y-%m-%d"
     time_format: ClassVar[str] = r"%H:%M:%S"
 
     def __init__(self, calibrations=None) -> NoReturn:
+        """Initialize the multinet header.
+
+        Args:
+            calibrations: Initial calibration coefficients, keyed by
+                channel name. Defaults to an empty dict.
+        """
         super().__init__()
         self.calibrations = calibrations if calibrations is not None else dict()
 
     @property
     def calibrations(self):
+        """dict: Calibration coefficients, keyed by channel name."""
         return self._calibrations
 
     @calibrations.setter
@@ -36,27 +52,59 @@ class MultinetHeader(OdfHeader):
         self._calibrations = cals
 
     def get_date_format(self) -> str:
+        """Return the ``strptime`` format used for the ``date`` column.
+
+        Returns:
+            :attr:`MultinetHeader.date_format`.
+        """
         return MultinetHeader.date_format
 
     def get_time_format(self) -> str:
+        """Return the ``strptime`` format used for the ``time`` column.
+
+        Returns:
+            :attr:`MultinetHeader.time_format`.
+        """
         return MultinetHeader.time_format
 
     def start_date_time(self, df: pd.Series) -> datetime:
-        """Retrieve the first date-time value from the data frame."""
+        """Retrieve the first date-time value from the data frame.
+
+        Args:
+            df: DataFrame with ``date`` and ``time`` columns.
+
+        Returns:
+            The combined date/time of the first row.
+        """
         start_date = datetime.strptime(df["date"].iloc[0], MultinetHeader.date_format)
         start_time = datetime.strptime(df["time"].iloc[0], MultinetHeader.time_format).time()
         start_date_time = datetime.combine(start_date, start_time)
         return start_date_time
 
     def end_date_time(self, df: pd.Series) -> datetime:
-        """Retrieve the last date-time value from the data frame."""
+        """Retrieve the last date-time value from the data frame.
+
+        Args:
+            df: DataFrame with ``date`` and ``time`` columns.
+
+        Returns:
+            The combined date/time of the last row.
+        """
         end_date = datetime.strptime(df["date"].iloc[-1], MultinetHeader.date_format)
         end_time = datetime.strptime(df["time"].iloc[-1], MultinetHeader.time_format).time()
         end_date_time = datetime.combine(end_date, end_time)
         return end_date_time
 
     def sampling_interval(self, df: pd.Series) -> int:
-        """Compute the time interval between the first two date-time values."""
+        """Compute the time interval between the first two date-time values.
+
+        Args:
+            df: DataFrame with ``date`` and ``time`` columns.
+
+        Returns:
+            The interval, in whole seconds, between the first and
+            second rows.
+        """
         date1 = datetime.strptime(df["date"].iloc[0], MultinetHeader.date_format)
         time1 = datetime.strptime(df["time"].iloc[0], MultinetHeader.time_format).time()
         datetime1 = datetime.combine(date1, time1)
@@ -68,7 +116,16 @@ class MultinetHeader(OdfHeader):
         return time_interval
 
     def create_sytm(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Updated the data frame with the proper SYTM column."""
+        """Updated the data frame with the proper SYTM column.
+
+        Args:
+            df: DataFrame with ``date`` and ``time`` columns.
+
+        Returns:
+            ``df`` with ``date``/``time`` (and intermediate helper
+            columns) replaced by a single quoted ``sytm`` column in
+            ODF SYTM format.
+        """
         df["dates"] = df["date"].apply(
             lambda x: datetime.strptime(x, MultinetHeader.date_format).date()
         )
@@ -92,6 +149,16 @@ class MultinetHeader(OdfHeader):
 
     @staticmethod
     def check_datetime_format(date_string, format):
+        """Check whether a string matches a given date/time format.
+
+        Args:
+            date_string: Date/time string to check.
+            format: ``strptime``-style format string to check against.
+
+        Returns:
+            ``True`` if ``date_string`` matches ``format``, ``False``
+            otherwise.
+        """
         try:
             datetime.strptime(date_string, format)
             return True
@@ -99,7 +166,26 @@ class MultinetHeader(OdfHeader):
             return False
 
     def fix_datetime(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Fix the date and time columns in the data frame."""
+        """Fix the date and time columns in the data frame.
+
+        Fills missing times with ``"12:00"``, detects which of several
+        supported date formats the ``date`` column uses, and converts
+        both ``date`` and ``time`` to proper ``datetime``/``time``
+        objects.
+
+        Args:
+            df: DataFrame with ``date`` and ``time`` columns.
+
+        Returns:
+            ``df`` with ``date`` converted to ``datetime`` values,
+            ``time`` converted to ``time`` values, and a new
+            ``datetime`` column added.
+
+        Raises:
+            ValueError: If the first row's ``date`` or ``time`` value
+                does not match :attr:`MultinetHeader.date_format` /
+                :attr:`MultinetHeader.time_format` after conversion.
+        """
 
         # Replace all NaN values with 12:00 in times as this is not important other than to have a time.
         df["time"] = df["time"].fillna("12:00")
@@ -150,6 +236,19 @@ class MultinetHeader(OdfHeader):
         """
         Reads a text file with header lines and tab-delimited data,
         returning header and data separately.
+
+        Args:
+            file_path: Path to the tab-delimited multinet file to
+                read. Lines before the first tab-containing line are
+                treated as header lines; the first tab-containing line
+                is treated as the column-name row.
+
+        Returns:
+            A ``(header_lines, column_names, data_rows)`` tuple, where
+            ``header_lines`` is the list of non-blank lines preceding
+            the column-name row, ``column_names`` is the list of
+            tab-split column names, and ``data_rows`` is a list of
+            tab-split value lists for each remaining line.
         """
         header_lines = []
         column_names = []
@@ -173,6 +272,19 @@ class MultinetHeader(OdfHeader):
 
     @staticmethod
     def fix_column_names(names: list) -> list:
+        """Normalize raw column-name strings into snake_case identifiers.
+
+        Args:
+            names: Raw column-header strings, e.g. as read by
+                :meth:`read_tab_delimited_file`. Any trailing
+                ``"[units]"`` portion is dropped, and multi-word names
+                are lower-cased, period-stripped, and joined with
+                underscores.
+
+        Returns:
+            The list of normalized column names, in the same order as
+            ``names``.
+        """
         new_names = []
         for name in names:
             name = name.lower()
@@ -197,6 +309,14 @@ class MultinetHeader(OdfHeader):
         Splits a calibration string into a list of floats.
         Example input: 'Cal0: -2.43644E+0  Cal1: 5.90671E-4  Cal2: 0E+0'
         Returns a list of floats.
+
+        Args:
+            cal_string: Calibration line of the form
+                ``"Cal0: <v0>  Cal1: <v1>  ..."``.
+
+        Returns:
+            The calibration coefficients as a list of floats, in
+            ``Cal`` index order.
         """
         toks = cal_string.split("Cal")
         cal = []
@@ -210,6 +330,20 @@ class MultinetHeader(OdfHeader):
         return cal
 
     def extract_calibrations(self, header_lines) -> NoReturn:
+        """Parse temperature/conductivity/pressure/volume calibrations.
+
+        Scans ``header_lines`` for the ``"Temperature [°C]"``,
+        ``"Conductivity [mS/cm]"``, ``"Pressure [dbar]"``, and
+        ``"Volume [m³]"`` labels and the calibration line that follows
+        each, and stores the parsed coefficients in
+        :attr:`calibrations` under keys ``"temperature"``,
+        ``"conductivity"``, ``"pressure"``, and ``"volume"`` (the
+        latter as a single float if only one coefficient is found).
+
+        Args:
+            header_lines: Header lines of a raw multinet file, as
+                returned by :meth:`read_tab_delimited_file`.
+        """
         temp_line = False
         cond_line = False
         pres_line = False
@@ -252,6 +386,14 @@ class MultinetHeader(OdfHeader):
     def compute_conductivity(conductivity_raw: pd.Series, ccal: list) -> float:
         """
         Computes the conductivity in mS/cm by applying a calibration equation to the raw conductivity values.
+
+        Args:
+            conductivity_raw: Raw conductivity values.
+            ccal: Three quadratic calibration coefficients
+                ``[c0, c1, c2]``.
+
+        Returns:
+            The calibrated conductivity, in mS/cm.
         """
         conductivity_ms = ccal[0] + ccal[1] * conductivity_raw + ccal[2] * (conductivity_raw**2)
         return conductivity_ms
@@ -260,6 +402,14 @@ class MultinetHeader(OdfHeader):
     def compute_temperature(temp_raw: pd.Series, tcal: list) -> float:
         """
         Computes the temperature in Celsius by applying a calibration equation to the raw temperature voltavaluesge.
+
+        Args:
+            temp_raw: Raw temperature (voltage) values.
+            tcal: Three quadratic calibration coefficients
+                ``[t0, t1, t2]``.
+
+        Returns:
+            The calibrated temperature, in degrees Celsius.
         """
         temp_celsius = tcal[0] + tcal[1] * temp_raw + tcal[2] * (temp_raw**2)
         return temp_celsius
@@ -270,6 +420,17 @@ class MultinetHeader(OdfHeader):
     ) -> float:
         """
         Computes the pressure in dbar by applying a calibration equation to the raw pressure values.
+
+        Args:
+            pressure_raw: Raw pressure values.
+            pressure_temp_raw: Raw pressure-sensor temperature values,
+                used for temperature compensation.
+            pcal: Nine calibration coefficients ``[p0..p8]`` for the
+                offset, temperature-coefficient, and pressure
+                polynomials.
+
+        Returns:
+            The calibrated, temperature-compensated pressure, in dbar.
         """
         pressure_offset = pcal[0] + pcal[1] * pressure_temp_raw + pcal[2] * pressure_temp_raw**2
         pressure_data = pressure_raw - pressure_offset
@@ -282,6 +443,15 @@ class MultinetHeader(OdfHeader):
     def compute_volume(volume_raw: pd.Series, vcal: float) -> float:
         """
         Computes the volume in m**3 by applying a calibration equation to the raw volume values.
+
+        Args:
+            volume_raw: Raw volume values.
+            vcal: Volume calibration factor. A value of ``0.25`` or
+                greater selects a scale factor of ``1``; smaller
+                values select a scale factor of ``0.1``.
+
+        Returns:
+            The calibrated volume, in cubic metres.
         """
         if vcal >= 0.25:
             x = 1
@@ -295,6 +465,12 @@ class MultinetHeader(OdfHeader):
     def compute_flow(flow_raw: pd.Series) -> float:
         """
         Computes the flow rate by applying a calibration to the raw flow rate.
+
+        Args:
+            flow_raw: Raw flow-rate values.
+
+        Returns:
+            The calibrated flow rate (``flow_raw`` scaled by ``0.1``).
         """
         return flow_raw * 0.1
 
@@ -302,6 +478,17 @@ class MultinetHeader(OdfHeader):
     def compute_flow_ratio(flow_in: pd.Series, flow_out: pd.Series) -> pd.Series:
         """
         Computes the flow rate by applying a calibration to the raw flow rate.
+
+        Args:
+            flow_in: Inflow-rate values (only the first 5 entries are
+                used).
+            flow_out: Outflow-rate values (only the first 5 entries
+                are used).
+
+        Returns:
+            The elementwise ratio of the first 5 ``flow_in`` values to
+            the first 5 ``flow_out`` values, with any resulting
+            infinite values replaced by ``0``.
         """
         fin = flow_in[0:5]
         fin[0] = 5
@@ -318,7 +505,15 @@ class MultinetHeader(OdfHeader):
         return flow_ratio_cleaned
 
     def populate_odf_headers(self, df: pd.DataFrame):
-        """Populate the ODF headers and the data object."""
+        """Populate the ODF headers and the data object.
+
+        Args:
+            df: DataFrame of multinet cast data with ``cruise``,
+                ``station``, ``latitude``, and ``longitude`` columns.
+
+        Returns:
+            This :class:`MultinetHeader` instance.
+        """
         # Create the ODF header.
         self.odf_header.cruise_header = CruiseHeader()
         self.odf_header.cruise_header.cruise_name = "LAT2025146"
@@ -344,7 +539,23 @@ class MultinetHeader(OdfHeader):
         return self
 
     def populate_parameter_headers(self, df: pd.DataFrame):
-        """Populate the parameter headers and the data object."""
+        """Populate the parameter headers and the data object.
+
+        Recognizes the ``"sytm"`` and ``"temperature"`` columns,
+        builds a :class:`~datashop_toolbox.parameterhdr.ParameterHeader`
+        for each with metadata looked up via
+        :func:`~datashop_toolbox.lookup_parameter.lookup_parameter`,
+        and appends it to ``self.parameter_headers``. Also updates
+        ``self.data`` with the resulting parameter list, print
+        formats, and data frame.
+
+        Args:
+            df: Data to summarize, with columns including ``"sytm"``
+                and/or ``"temperature"``.
+
+        Returns:
+            This :class:`MultinetHeader` instance.
+        """
         parameter_list = list()
         print_formats = dict()
         number_of_rows = df.count().iloc[0]
@@ -409,6 +620,27 @@ class MultinetHeader(OdfHeader):
     def read_multinet_files(self, file_type: str, file_path: str) -> pd.DataFrame:
         """
         Main function to read a tab-delimited file and print the header and data lines.
+
+        Reads the tab-delimited multinet file, builds a DataFrame from
+        its data rows with normalized column names, populates the ODF
+        headers and parameter headers, and — for ``file_type=="raw"``
+        — extracts the instrument calibrations from the header lines
+        and applies them to compute pressure, temperature,
+        conductivity, volume, and flow-in/flow-out from their raw
+        channels.
+
+        Args:
+            file_type: Which kind of multinet file is being read.
+                ``"raw"`` triggers calibration extraction and
+                application to the raw channels; ``"computed"``
+                overrides ``file_path`` with a fixed path to a
+                pre-computed data file; any other value skips both.
+            file_path: Path to the tab-delimited multinet file to
+                read.
+
+        Returns:
+            The populated DataFrame, with calibrated columns added
+            when ``file_type == "raw"``.
         """
 
         multinet = MultinetHeader()

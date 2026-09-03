@@ -15,7 +15,15 @@ import shutil
 
 
 def fix_header(header: str) -> str:
-    """Return the header with the proper spacing between column names."""
+    """Return the header with the proper spacing between column names.
+
+    Args:
+        header: Raw BTL header line to fix.
+
+    Returns:
+        ``header`` with the run-together ``"Par/sat/log"`` column
+        label replaced by a properly spaced ``"  ParSatLog"``.
+    """
 
     new_header = re.sub('Par/sat/log', '  ParSatLog', header)
 

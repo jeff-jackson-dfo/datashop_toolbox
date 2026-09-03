@@ -2,6 +2,18 @@ import pandas as pd
 
 
 def read_seaodf_ini():
+    """Parse the shared ``seaodf.ini`` parameter mapping file.
+
+    Reads the CTDDAP ``seaodf.ini`` file from its fixed network path,
+    skipping blank lines and lines beginning with ``"REM"``, and
+    splits each remaining line into 8 comma-separated fields (padding
+    with empty strings if fewer are present).
+
+    Returns:
+        A DataFrame with one row per parameter mapping and columns
+        ``sbe_code``, ``odf_code``, ``odf_name``, ``data_type``,
+        ``format_type``, ``width``, ``precision``, and ``description``.
+    """
 
     rows = []
     filepath = '//ENT.dfo-mpo.ca/DFO-MPO/GROUP/NAT_Shares/DFO/EOS/SSPPI/BioDataSvc/ARC/CTDDAP/CTDSystemSoftware/CTDDAP/bio_exe/seaodf.ini'  # noqa: E501

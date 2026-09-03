@@ -6,6 +6,17 @@ from odf_oracle.database_connection_pool import get_database_pool
 
 
 class ParamInfo(TypedDict):
+    """Metadata describing an ODF parameter code.
+
+    Attributes:
+        description: Descriptive name of the parameter.
+        units: Units in which the parameter is recorded.
+        print_field_width: Field width used when printing the
+            parameter.
+        print_decimal_places: Number of decimal places used when
+            printing the parameter.
+    """
+
     description: str
     units: str
     print_field_width: int
@@ -13,7 +24,21 @@ class ParamInfo(TypedDict):
 
 
 def lookup_parameter(database: str, parameter: str) -> ParamInfo:
-    """Get the parameter information from the a database."""
+    """Get the parameter information from the a database.
+
+    Args:
+        database: Which database backend to query — ``"oracle"`` to
+            use the ODF Oracle connection pool, or ``"sqlite"`` to
+            query the packaged ``parameters.db`` SQLite database. Any
+            other value returns the default "Unknown" info unchanged.
+        parameter: Parameter code to look up, e.g. ``"TEMP"``.
+
+    Returns:
+        A :class:`ParamInfo` dict with the parameter's description,
+        units, and print formatting. Fields default to ``"Unknown"``
+        or ``0`` if the parameter is not found or ``database`` is not
+        recognized.
+    """
 
     parameter_info: ParamInfo = {
         "description": "Unknown",

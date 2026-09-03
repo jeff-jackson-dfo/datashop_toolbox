@@ -15,15 +15,14 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
     """
     Generates a report based on the metadata from ODF files as an Excel file.
 
-    Parameters
-    ----------
-    file_path : str
-        The file path to where the ODF files are located.
-    wildcard:
-        The wildcard string to filter ODF files.
-    outfile:
-        The output file name.
+    Args:
+        file_path: The file path to where the ODF files are located.
+        wildcard: The wildcard string to filter ODF files.
+        outfile: The output file name.
 
+    Raises:
+        ValueError: If the workbook's default worksheet cannot be
+            found.
     """
 
     report_headings = [

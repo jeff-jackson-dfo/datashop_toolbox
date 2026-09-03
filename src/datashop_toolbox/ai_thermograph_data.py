@@ -14,6 +14,15 @@ from datashop_toolbox.thermograph import ThermographHeader
 
 
 def regional_meta_bioregions():
+    """Load the DFO marine bioregions GeoJSON lookup file.
+
+    Returns:
+        The ``"features"`` list from the packaged
+        ``map/All_Federal_Marine_bioregions.geojson`` file. May be
+        left undefined and raise ``NameError`` on return if the file
+        is missing or not valid JSON (an error message is printed in
+        either case).
+    """
     base_dir = Path(Path(__file__).resolve()).parent
 
     bioregions_file_path = Path(base_dir / "map" / "All_Federal_Marine_bioregions.geojson").resolve()
@@ -31,6 +40,15 @@ def regional_meta_bioregions():
 
 
 def regional_meta_temp_climatology():
+    """Load the seasonal surface-temperature climatology lookup file.
+
+    Returns:
+        The parsed contents of the packaged ``map/temp_climatology.txt``
+        JSON file, mapping bioregion name to seasonal temperature
+        limits. May be left undefined and raise ``NameError`` on
+        return if the file is missing or not valid JSON (an error
+        message is printed in either case).
+    """
     base_dir = Path(Path(__file__).resolve()).parent
 
     temp_climatology_path = Path(base_dir / "map" / "temp_climatology.txt")
@@ -47,6 +65,18 @@ def regional_meta_temp_climatology():
 
 
 def point_in_polygon(lon, lat, polygon):
+    """Check whether a point lies inside a polygon (ray-casting test).
+
+    Args:
+        lon: Longitude of the point to test.
+        lat: Latitude of the point to test.
+        polygon: Sequence of ``(lon, lat)`` vertices describing the
+            polygon's ring.
+
+    Returns:
+        ``True`` if the point is inside ``polygon``, ``False``
+        otherwise.
+    """
     inside = False
     n = len(polygon)
 
@@ -63,6 +93,18 @@ def point_in_polygon(lon, lat, polygon):
 
 
 def get_bioregion(lat, lon):
+    """Determine which DFO marine bioregion contains a point.
+
+    Args:
+        lat: Latitude of the point to test.
+        lon: Longitude of the point to test.
+
+    Returns:
+        The ``"NAME_E"`` property of the first bioregion feature (from
+        :func:`regional_meta_bioregions`) whose polygon or
+        multipolygon contains the point, or ``None`` if no bioregion
+        matches.
+    """
     bioregions = regional_meta_bioregions()
     for feature in bioregions:
         geom = feature["geometry"]
@@ -82,6 +124,19 @@ def get_bioregion(lat, lon):
 
 
 def get_surface_temp_profile(lat, lon):
+    """Look up the seasonal surface-temperature profile for a location.
+
+    Args:
+        lat: Latitude of the location.
+        lon: Longitude of the location.
+
+    Returns:
+        A dict with ``"Latitude"``, ``"Longitude"``, ``"Bioregion"``,
+        and ``"SurfaceTemperatureProfile"`` keys. If :func:`get_bioregion`
+        finds no matching bioregion, ``"Bioregion"`` is
+        ``"DFO-Special Region"`` and the profile is looked up under
+        that name instead.
+    """
     temp_climatology = regional_meta_temp_climatology()
     region = get_bioregion(lat, lon)
 
@@ -105,7 +160,15 @@ def get_surface_temp_profile(lat, lon):
 
 
 def get_season(dt):
-    """Return climatological season name for a datetime"""
+    """Return climatological season name for a datetime.
+
+    Args:
+        dt: Datetime-like object with a ``month`` attribute.
+
+    Returns:
+        ``"Winter"`` (Dec-Feb), ``"Spring"`` (Mar-May), ``"Summer"``
+        (Jun-Aug), or ``"Fall"`` (Sep-Nov).
+    """
     month = dt.month
     if month in (12, 1, 2):
         return "Winter"
@@ -118,6 +181,20 @@ def get_season(dt):
 
 
 def prepare_output_folder(in_folder_path: str, out_folder_path: str, qc_operator: str) -> str:
+    """Create (or clear and recreate) the ``Step_2_Assign_QFlag`` output folder.
+
+    Args:
+        in_folder_path: Path to the input folder. Only used to check
+            whether it is a ``"Step_1_Create_ODF"`` folder.
+        out_folder_path: Parent path under which the
+            ``Step_2_Assign_QFlag`` output folder is created.
+        qc_operator: Unused; accepted for interface consistency but
+            not referenced in this function.
+
+    Returns:
+        The resolved path to the ``Step_2_Assign_QFlag`` output
+        folder.
+    """
     base_name_input = "Step_1_Create_ODF"
     in_folder_path = Path(in_folder_path).resolve()
 
@@ -145,6 +222,32 @@ def prepare_output_folder(in_folder_path: str, out_folder_path: str, qc_operator
 def qc_ai_thermograph_data(
     in_folder_path: str, wildcard: str, out_folder_path: str, qc_operator: str
 ):
+    """Automatically quality-flag a batch of thermograph ODF files.
+
+    For each ODF file matching ``wildcard`` in ``in_folder_path``,
+    reads the thermograph data, derives an in-water time window (from
+    the event header for FSRS files, or from detected temperature
+    rate/jump signals for DFO BIO files), flags data outside that
+    window as missing (flag 4), flags temperature values outside the
+    seasonal climatology range for the cast's bioregion as
+    questionable (flag 3), flags points with high rolling-standard-
+    deviation instability as inconsistent (flag 2), flags the
+    remaining in-water points as good (flag 1), updates the ODF
+    object's history and quality flags accordingly, and writes the
+    result to the ``Step_2_Assign_QFlag`` output folder as both a new
+    ODF file and a CSV file.
+
+    Args:
+        in_folder_path: Path to the folder containing the input ODF
+            files.
+        wildcard: Glob pattern used to select which files in
+            ``in_folder_path`` to process, e.g. ``"*.ODF"``.
+        out_folder_path: Parent path under which the
+            ``Step_2_Assign_QFlag`` output folder is created (see
+            :func:`prepare_output_folder`).
+        qc_operator: Name of the operator performing the QC, recorded
+            in the ODF history.
+    """
 
     cwd = Path.cwd()
 
@@ -494,6 +597,18 @@ def qc_ai_thermograph_data(
 
 
 def main_select_inputs():
+    """Show the input/output folder selection dialog and block until closed.
+
+    Instantiates a Qt application if none exists, shows a
+    :class:`select_metadata_file_and_data_folder.SubWindowOne` dialog,
+    and runs the Qt event loop until the dialog is accepted or
+    rejected.
+
+    Returns:
+        A ``(input_path, output_path, operator)`` tuple if the dialog
+        was accepted with all required fields filled in, otherwise
+        ``(None, None, None)``.
+    """
     app = QApplication.instance()
     must_quit_app = app is None
     if must_quit_app:

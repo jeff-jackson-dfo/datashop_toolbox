@@ -1,0 +1,25 @@
+site_name: Datashop Toolbox Docs
+
+theme:
+  name: "material"
+  features:
+    - content.code.copy  # This enables the copy button globally
+
+plugins:
+  - mkdocstrings
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.mark
+  
+nav:
+  - Datashop Toolbox Docs: index.md
+  - tutorials.md
+  - How-To Guides: how-to-guides.md
+  - reference.md
+  - explanation.md

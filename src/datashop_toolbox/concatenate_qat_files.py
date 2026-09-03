@@ -6,6 +6,21 @@ from pathlib import Path
 
 
 def concatenate_qat_files(mission_number: str, qat_folder_path: str):
+    """Concatenate all .qat files in a folder into one CSV file.
+
+    Reads every ``*.qat`` file in ``qat_folder_path``, extracts the
+    event number from each filename, and writes a single combined
+    ``"<mission_number>_QAT.csv"`` file (in the same folder) with the
+    source filename prepended to every data row and the cruise-name
+    column removed.
+
+    Args:
+        mission_number: Mission number used to name the output file,
+            e.g. ``"BCD2025669"``.
+        qat_folder_path: Path to the folder containing the ``.qat``
+            files to concatenate. This also becomes the current
+            working directory and the location of the output file.
+    """
 
     os.chdir(qat_folder_path)
 
