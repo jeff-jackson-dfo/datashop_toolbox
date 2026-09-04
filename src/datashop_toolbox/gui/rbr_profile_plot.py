@@ -22,9 +22,32 @@ class PlotDialog(QDialog):
     """
     Dialog that displays RSK profile figures one at a time with Next/Prev navigation
     and keyboard left/right support. No jump wheel/spinbox; no up/down arrows.
+
+    Attributes:
+        ui: The generated UI object providing this dialog's widgets.
+        fig_handles: The Matplotlib figures (or ``(figure, ...)``
+            tuples) to display, one per profile.
+        current_profile_index: Index into :attr:`fig_handles` of the
+            currently displayed profile.
+        saved_profiles: Indices of profiles the user has checked
+            "save" for.
+        plotContainer: Container widget holding the toolbar and canvas
+            for the current profile.
+        plotLayout: Layout managing :attr:`plotContainer`'s children.
+        canvas: ``FigureCanvas`` for the currently displayed profile,
+            or ``None`` if none is displayed.
+        toolbar: Navigation toolbar for :attr:`canvas`, or ``None``.
     """
 
     def __init__(self, fig_handles: list | None = None, parent=None, title: str = "RSK Profiles"):
+        """Build the dialog and display the first profile, if any.
+
+        Args:
+            fig_handles: The Matplotlib figures (or ``(figure, ...)``
+                tuples) to display, one per profile.
+            parent: Optional parent widget.
+            title: Initial window title.
+        """
         super().__init__(parent)
         self.ui = Ui_plot_dialog()
         self.ui.setupUi(self)
@@ -91,6 +114,7 @@ class PlotDialog(QDialog):
         self._update_nav_enabled()
 
     def _update_nav_enabled(self):
+        """Enable/disable the prev/next actions based on the current index."""
         total = len(self.fig_handles)
         at_first = self.current_profile_index <= 0
         at_last = self.current_profile_index >= (total - 1)
@@ -101,6 +125,7 @@ class PlotDialog(QDialog):
 
     # ---------- Display one profile ----------
     def _clear_plot_area(self):
+        """Remove and delete the current toolbar/canvas widgets from the layout."""
         while self.plotLayout.count():
             item = self.plotLayout.takeAt(0)
             w = item.widget()
@@ -148,6 +173,12 @@ class PlotDialog(QDialog):
         self._connect_key_navigation(figure)
 
     def _connect_key_navigation(self, figure):
+        """Wire left/right arrow key presses on a figure to prev/next navigation.
+
+        Args:
+            figure: Matplotlib figure whose canvas should respond to
+                arrow-key events.
+        """
         def on_key(event):
             if event.key == "left":
                 self.on_prev_profile()
@@ -158,29 +189,45 @@ class PlotDialog(QDialog):
 
     # ---------- Handlers ----------
     def on_prev_profile(self):
+        """Display the previous profile, if not already at the first."""
         if self.current_profile_index > 0:
             self.current_profile_index -= 1
             self.display_current_profile()
 
     def on_next_profile(self):
+        """Display the next profile, if not already at the last."""
         if self.current_profile_index < len(self.fig_handles) - 1:
             self.current_profile_index += 1
             self.display_current_profile()
 
     def on_save_checkbox_changed(self, state):
+        """Add or remove the current profile from :attr:`saved_profiles`.
+
+        Args:
+            state: New checkbox state; ``Qt.CheckState.Checked.value``
+                marks the current profile as saved, any other value
+                unmarks it.
+        """
         if state == Qt.CheckState.Checked.value:
             self.saved_profiles.add(self.current_profile_index)
         else:
             self.saved_profiles.discard(self.current_profile_index)
 
     def on_accept(self):
+        """Accept the dialog."""
         self.accept()
 
     def on_reject(self):
+        """Reject the dialog."""
         self.reject()
 
     # ---------- API ----------
     def get_saved_profiles(self):
+        """Return the indices of profiles the user marked as saved.
+
+        Returns:
+            A sorted list of indices into :attr:`fig_handles`.
+        """
         return sorted(list(self.saved_profiles))
 
 

@@ -7,19 +7,15 @@ def cruise_event_to_oracle(odfobj: OdfHeader, connection, infile: str) -> str:
     """
     Load the ODF object's cruise header and event header metadata into Oracle.
 
-    Parameters
-    ----------
-    odfobj: OdfHeader class object
-        The ODF object to be loaded into Oracle.
-    connection: oracledb connection
-        Oracle database connection object.
-    infile: str
-        Name of ODF file currently being loaded into the database.
+    Args:
+        odfobj: The ODF object to be loaded into Oracle.
+        connection: Oracle database connection object.
+        infile: Name of ODF file currently being loaded into the
+            database.
 
-    Returns
-    -------
-    odf_file: str
-        The file name of the ODF object that was loaded into the database.
+    Returns:
+        The file name of the ODF object that was loaded into the
+        database.
     """
 
     # Check the Country Institute Code.

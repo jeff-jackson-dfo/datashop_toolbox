@@ -5,7 +5,14 @@ from dotenv import load_dotenv
 
 
 def init_session(connection, requested_tag):
-    """Modify some settings of the Oracle connection."""
+    """Modify some settings of the Oracle connection.
+
+    Args:
+        connection: Oracle connection to configure, used as the pool's
+            ``session_callback``.
+        requested_tag: Unused; accepted for compatibility with
+            ``oracledb``'s ``session_callback`` signature.
+    """
     connection.current_schema = "ODF_ARCHIVE"
     with connection.cursor() as cursor:
         cursor.execute(
@@ -18,6 +25,16 @@ def init_session(connection, requested_tag):
 
 
 def get_database_pool():
+    """Create an Oracle connection pool for the ODF_ARCHIVE database.
+
+    Reads the username, password, host, and service name from
+    environment variables loaded from a fixed ``.env`` file path, and
+    initializes the Oracle client before creating the pool.
+
+    Returns:
+        An ``oracledb`` connection pool with 1-5 connections,
+        configured via :func:`init_session` on each new session.
+    """
 
     load_dotenv(r"C:\Users\JacksonJ\OneDrive - DFO-MPO\Documents\.env")
     username = os.environ.get("ODF_ARCHIVE_USERNAME")

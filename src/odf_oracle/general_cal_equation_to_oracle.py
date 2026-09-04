@@ -7,19 +7,12 @@ def general_cal_equation_to_oracle(
     """
     Load a GENERAL_CAL_Header equation into Oracle.
 
-    Parameters
-    ----------
-    general_cal_header: GeneralCalHeader class object
-    connection: Oracle database connection object.
-    gg: int
-        Iterator identifying the order of the GENERAL_CAL_HEADERS in the
-        ODF file.
-    filename: str
-        The ODF file name.
-
-    Returns
-    -------
-    None
+    Args:
+        general_cal_header: A general calibration header object.
+        connection: Oracle database connection object.
+        gg: Iterator identifying the order of the GENERAL_CAL_HEADERS
+            in the ODF file.
+        filename: The ODF file name.
     """
 
     # Create a cursor to the open connection.

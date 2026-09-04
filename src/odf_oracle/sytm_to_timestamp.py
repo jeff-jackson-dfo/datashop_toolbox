@@ -7,20 +7,21 @@ def sytm_to_timestamp(sytm: str, strid: str) -> datetime:
     """
     Convert SYTM strings to Oracle timestamps.
 
-    Parameters
-    ----------
-    sytm: str
-        A date/time string in the ODF SYTM format.
-    strid: str
-        A string identifier indicating if it should be output as just a date
-        or a date/time string in the ODF SYTM format.
+    Args:
+        sytm: A date/time string in the ODF SYTM format. If empty,
+            defaults to the ODF SYTM null value
+            (``"17-NOV-1858 00:00:00.00"``).
+        strid: A string identifier indicating whether the intermediate
+            formatted string should be a plain date (``"date"``) or a
+            date/time string (``"datetime"``) in the ODF SYTM format.
+            Note: this only affects an internal, unused ``dstr``
+            value — see Returns.
 
-    Returns
-    -------
-    dstr: str
-        A date string in Oracle's date or timestamp format according to
-        the datainsert function in MATLAB's Database toolbox.
-
+    Returns:
+        The parsed ``datetime`` object for ``sytm`` (not the
+        ``strid``-formatted string, despite the function's name and
+        docstring — the formatted ``dstr`` value is computed but not
+        returned).
     """
 
     dstr = ""

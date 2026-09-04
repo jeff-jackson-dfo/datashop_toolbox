@@ -8,7 +8,18 @@ from .odf_metadata_form import OdfMetadataForm
 
 
 class OdfMetadataDialog(QDialog):
+    """Modal dialog that wraps :class:`OdfMetadataForm` for editing ODF metadata.
+
+    Attributes:
+        form: The embedded :class:`OdfMetadataForm` widget.
+    """
+
     def __init__(self, parent=None):
+        """Build the dialog and wire up the embedded form's signals.
+
+        Args:
+            parent: Optional parent widget.
+        """
         super().__init__(parent)
         self.setWindowTitle("ODF Metadata Editor (Dialog)")
 
@@ -34,6 +45,11 @@ class OdfMetadataDialog(QDialog):
         self.resize(1100, 800)
 
     def _on_submitted(self, odf):
+        """Store the submitted ODF object and accept the dialog.
+
+        Args:
+            odf: The ODF object produced by the embedded form.
+        """
         # Write/export using the form method (or your own)
         self._odf = odf
         self.accept()
