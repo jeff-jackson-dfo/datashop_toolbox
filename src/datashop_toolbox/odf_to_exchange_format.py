@@ -44,6 +44,8 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
     # Find all ODF files in the current directory.
     files = odf_folder.glob(wildcard)
 
+    error_files = []
+
     # Loop through the list of ODF files and process both the DN and UP files.
     # Iterate through the list of input files.
     for file_name in files:
@@ -55,7 +57,12 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
 
         # Read the ODF file in as an ODF object
         odf = OdfHeader()
-        odf.read_odf(file_name.name)
+
+        try:
+            odf.read_odf(file_name)
+        except Exception as ex:
+            error_files.append((file_name.name, ex))
+            continue
 
         # Print Exchange header lines
         now = datetime.now()
@@ -63,6 +70,7 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
         operator_initials = 'JWJ'
         start_date = datetime.strptime(odf.cruise_header.start_date, BaseHeader.SYTM_FORMAT)
         sdate = start_date.strftime('%Y%m%d')
+        ship_code = ''
         if odf.cruise_header.platform.upper() == 'HUDSON':
             ship_code = '18HU'
         elif odf.cruise_header.platform.upper() == 'AMUNDSEN':
@@ -98,6 +106,7 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
             f.write(f'DEPTH =  {int(odf.event_header.sounding)}\n')
             # Check to see which scale the temperature is in: IPTS-68 or ITS-90?
             cols = odf.data.parameter_list
+            output_df = odf.data.data_frame
             if "TEMP_01" in cols:
                 temp_scale = 'IPTS-68'
                 output_df = odf.data.data_frame[['PRES_01','QPRES_01','TEMP_01','QTEMP_01','PSAL_01',
@@ -127,6 +136,11 @@ def odf2exchange(odf_folder: Path, wildcard: str) -> None:
         print('#######################################################################')
         print()
 
+    print("================ ERROR REPORT ==============")
+    for err in error_files:
+        print(f"{err[0]} - {err[1]}")
+        print("===========================")
+              
     return
 
 
