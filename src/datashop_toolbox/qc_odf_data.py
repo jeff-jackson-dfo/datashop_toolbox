@@ -175,7 +175,18 @@ class LassoItem(pg.GraphicsObject):
     """
     sigSelected = pg.QtCore.Signal(object)  # emits list[np.ndarray] of int indices
 
+<<<<<<< HEAD
     def __init__(self, plot_item: PlotItemProtocol, xs: np.ndarray, ys: np.ndarray):
+=======
+    def __init__(self, plot_item: pg.PlotItem, xs: np.ndarray, ys: np.ndarray):
+        """Initialize the lasso selector.
+
+        Args:
+            plot_item: Plot to draw the lasso on and hit-test against.
+            xs: Initial x-coordinates of the point set to hit-test.
+            ys: Initial y-coordinates of the point set to hit-test.
+        """
+>>>>>>> 5535a697e7ae4da3f3d1112694deddc8bab63cb0
         super().__init__()
         self._plot = plot_item
         self._vb = plot_item.getViewBox()
@@ -193,6 +204,10 @@ class LassoItem(pg.GraphicsObject):
 
         Accepts either a single ``(xs, ys)`` tuple, or a list of such tuples
         — one per overlaid data series. Internally always stored as a list.
+
+        Args:
+            point_sets: A single ``(xs, ys)`` tuple, or a list of
+                ``(xs, ys)`` tuples, one per overlaid data series.
         """
         if (
             isinstance(point_sets, tuple)
@@ -204,6 +219,7 @@ class LassoItem(pg.GraphicsObject):
 
     # ── Enable / disable (for zoom/pan mode hand-off) ──────────────────────
     def pause(self):
+        """Disable the lasso and discard any in-progress selection."""
         self._enabled = False
         self._drawing = False
         self._verts = []
@@ -211,19 +227,36 @@ class LassoItem(pg.GraphicsObject):
         self.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
 
     def resume(self):
+        """Re-enable the lasso for left-button drawing."""
         self._enabled = True
         self.setAcceptedMouseButtons(Qt.MouseButton.LeftButton)
 
     # ── GraphicsObject required overrides ──────────────────────────────────
     def boundingRect(self):
+        """Return the current view's bounding rectangle.
+
+        Returns:
+            The view box's current visible rectangle, in data
+            coordinates.
+        """
         return self._vb.viewRect()
 
+<<<<<<< HEAD
     def paint(
         self,
         painter: QPainter,
         option: QStyleOptionGraphicsItem,
         widget: QWidget | None = None,
     ) -> None:
+=======
+    def paint(self, p, *args):
+        """Paint the in-progress lasso outline.
+
+        Args:
+            p: ``QPainter`` to draw with.
+            *args: Unused extra Qt paint arguments.
+        """
+>>>>>>> 5535a697e7ae4da3f3d1112694deddc8bab63cb0
         if len(self._verts) < 2:
             return
 
@@ -239,10 +272,23 @@ class LassoItem(pg.GraphicsObject):
 
     # ── Mouse events ───────────────────────────────────────────────────────
     def _scene_to_data(self, scene_pos):
+        """Convert a scene position to data coordinates.
+
+        Args:
+            scene_pos: Scene-space position to convert.
+
+        Returns:
+            An ``(x, y)`` tuple in data coordinates.
+        """
         pt = self._vb.mapSceneToView(scene_pos)
         return pt.x(), pt.y()
 
     def mousePressEvent(self, ev):
+        """Start a new lasso outline on a left-button press.
+
+        Args:
+            ev: The mouse press event.
+        """
         if not self._enabled:
             ev.ignore()
             return
@@ -255,6 +301,11 @@ class LassoItem(pg.GraphicsObject):
             ev.ignore()
 
     def mouseMoveEvent(self, ev):
+        """Extend the in-progress lasso outline as the mouse moves.
+
+        Args:
+            ev: The mouse move event.
+        """
         if not self._enabled:
             ev.ignore()
             return
@@ -266,6 +317,11 @@ class LassoItem(pg.GraphicsObject):
             ev.ignore()
 
     def mouseReleaseEvent(self, ev):
+        """Close the lasso outline and finalize the selection on release.
+
+        Args:
+            ev: The mouse release event.
+        """
         if not self._enabled:
             ev.ignore()
             return
@@ -279,6 +335,15 @@ class LassoItem(pg.GraphicsObject):
             ev.ignore()
 
     def _finish(self):
+        """Hit-test the closed lasso polygon and emit :attr:`sigSelected`.
+
+        Builds a closed polygon from the accumulated vertices and, for
+        each point set registered via :meth:`set_point_sets`, finds
+        the indices of points lying inside it. Emits
+        :attr:`sigSelected` with the list of per-point-set index
+        arrays if any point set has at least one match; polygons with
+        fewer than 3 vertices are discarded without emitting.
+        """
         if len(self._verts) < 3:
             self._verts = []
             self.update()
@@ -838,6 +903,17 @@ class QCWindow(QWidget):
     # =======================================================================
     @staticmethod
     def _compute_margins(xs: np.ndarray, ys: np.ndarray):
+        """Compute 5% plot-range margins for a pair of coordinate arrays.
+
+        Args:
+            xs: X-coordinates (NaNs are ignored).
+            ys: Y-coordinates (NaNs are ignored).
+
+        Returns:
+            An ``(x_margin, y_margin)`` tuple, each defaulting to
+            ``0.5`` if the corresponding array has fewer than 2 finite
+            values or a zero range.
+        """
         xs_mask = ~np.isnan(xs)
         xs = xs[xs_mask]
         ys_mask = ~np.isnan(ys)
@@ -847,14 +923,25 @@ class QCWindow(QWidget):
         return xm or 0.5, ym or 0.5
 
     def _current_active_col(self) -> str:
-        """Return the name of the column currently plotted on the selectable axis."""
+        """Return the name of the column currently plotted on the selectable axis.
+
+        Returns:
+            ``self._y_col`` in thermograph mode, or ``self._x_col`` in
+            CTD mode.
+        """
         if self._mode == "thermograph":
             return getattr(self, "_y_col", "Temperature")
         else:
             return getattr(self, "_x_col", "Temperature")
 
     def _current_xs(self) -> np.ndarray:
-        """X-values for the current scatter (thermograph: timestamps; CTD: param)."""
+        """X-values for the current scatter (thermograph: timestamps; CTD: param).
+
+        Returns:
+            ``self._xnums`` in thermograph mode, or the current
+            X-axis column's values (falling back to the DataFrame's
+            first column) in CTD mode.
+        """
         if self._mode == "thermograph":
             return self._xnums
         col = self._x_col        
@@ -864,7 +951,13 @@ class QCWindow(QWidget):
         )
 
     def _current_ys(self) -> np.ndarray:
-        """Y-values for the current scatter (thermograph: param; CTD: pressure)."""
+        """Y-values for the current scatter (thermograph: param; CTD: pressure).
+
+        Returns:
+            The current Y-axis column's values (falling back to
+            ``"Temperature"``) in thermograph mode, or
+            ``self._pres_data`` in CTD mode.
+        """
         if self._mode == "thermograph":
             col = getattr(self, "_y_col", "Temperature")
             return (
@@ -874,7 +967,16 @@ class QCWindow(QWidget):
         return self._pres_data
 
     def _profile_xs(self, prof: dict) -> np.ndarray:
-        """X-values (current axis param) for one CTD profile in self._profiles."""
+        """X-values (current axis param) for one CTD profile in self._profiles.
+
+        Args:
+            prof: One profile dict from ``self._profiles``.
+
+        Returns:
+            The current X-axis column's values from ``prof["df"]``, or
+            an all-NaN array of matching length if the column is
+            absent.
+        """
         col = self._x_col
         df = prof["df"]
         return (
@@ -887,6 +989,12 @@ class QCWindow(QWidget):
     # Interaction mode management
     # =======================================================================
     def _set_button_active(self, active_btn):
+        """Highlight the active interaction-mode button.
+
+        Args:
+            active_btn: The lasso/zoom-box/pan button to draw with a
+                highlighted border; the others are drawn plain.
+        """
         nav = {
             self._btn_lasso:    "#ffcc66",
             self._btn_zoom_box: "#9999ff",
@@ -902,6 +1010,7 @@ class QCWindow(QWidget):
             btn.setStyleSheet(style)
 
     def _click_lasso(self):
+        """Switch to lasso selection mode."""
         self._lasso.resume()
         self._vb.setMouseMode(pg.ViewBox.PanMode)
         self._vb.setMouseEnabled(x=False, y=False)
@@ -909,6 +1018,7 @@ class QCWindow(QWidget):
         logger.info("Lasso mode activated.")
 
     def _click_zoom_box(self):
+        """Switch to rectangular zoom-box mode."""
         self._lasso.pause()
         self._vb.setMouseEnabled(x=True, y=True)
         self._vb.setMouseMode(pg.ViewBox.RectMode)
@@ -916,6 +1026,7 @@ class QCWindow(QWidget):
         logger.info("Zoom Box mode activated.")
 
     def _click_pan(self):
+        """Switch to pan mode."""
         self._lasso.pause()
         self._vb.setMouseEnabled(x=True, y=True)
         self._vb.setMouseMode(pg.ViewBox.PanMode)
@@ -926,7 +1037,16 @@ class QCWindow(QWidget):
     # Axis switching
     # =======================================================================
     def _switch_axis(self, col_name: str):
-        """Handle Y-axis switch (thermograph) or X-axis switch (CTD)."""
+        """Handle Y-axis switch (thermograph) or X-axis switch (CTD).
+
+        Updates the active flag column and scatter plot(s) to reflect
+        the newly selected parameter, recolors points by their
+        existing flags, and rescales the corresponding axis.
+
+        Args:
+            col_name: Name of the parameter column to switch to. In
+                CTD mode, ignored if not one of ``self._common_params``.
+        """
         if self._mode == "thermograph":
 
             self._flag_col = f"qualityflag_{col_name}"
@@ -992,10 +1112,21 @@ class QCWindow(QWidget):
     # Flag assignment
     # =======================================================================
     def _on_flag_selected(self, flag_id: int):
+        """Store the newly selected QC flag as the "current" flag to apply.
+
+        Args:
+            flag_id: QC flag code selected via the radio buttons.
+        """
         self._state["current_flag"] = flag_id
         logger.info(f"Current flag set to {flag_id}")
 
     def _apply_flags_to_points(self, indices: np.ndarray):
+        """Apply the current flag to points at the given indices and recolor them.
+
+        Args:
+            indices: Row indices, into ``self._df``, of the points to
+                flag.
+        """
         flag = self._state["current_flag"]
         self._df.iloc[indices, self._df.columns.get_loc(self._flag_col)] = flag
         self._df["qualityflag"] = self._df[self._flag_col].copy()
@@ -1028,7 +1159,14 @@ class QCWindow(QWidget):
         self._state["scatter"] = self._scatter
 
     def _apply_flags_to_profile(self, profile_idx: int, indices: np.ndarray):
-        """CTD-only: apply the current flag to one overlaid profile's points."""
+        """CTD-only: apply the current flag to one overlaid profile's points.
+
+        Args:
+            profile_idx: Index into ``self._profiles`` of the profile
+                to flag.
+            indices: Row indices, into that profile's DataFrame, of
+                the points to flag.
+        """
         flag = self._state["current_flag"]
         prof = self._profiles[profile_idx]
         df = prof["df"]
@@ -1047,7 +1185,14 @@ class QCWindow(QWidget):
         )
 
     def _record_selection(self, profile_idx: int, indices: np.ndarray):
-        """CTD-only: track a selection group against a specific profile for undo/export."""
+        """CTD-only: track a selection group against a specific profile for undo/export.
+
+        Args:
+            profile_idx: Index into ``self._profiles`` of the profile
+                the selection belongs to.
+            indices: Row indices, into that profile's DataFrame, that
+                were selected.
+        """
         prof = self._profiles[profile_idx]
         groups = self._state.setdefault("selection_groups", {})
         groups.setdefault(profile_idx, []).append(pd.DataFrame({
@@ -1060,7 +1205,14 @@ class QCWindow(QWidget):
     # Selection events
     # =======================================================================
     def _on_lasso_select(self, selections):
-        """selections: list[np.ndarray] — one index array per overlaid point set."""
+        """Apply the current flag to points selected by the lasso.
+
+        Args:
+            selections: One index array per overlaid point set (as
+                emitted by :attr:`LassoItem.sigSelected`). In CTD
+                mode, index ``i`` corresponds to ``self._profiles[i]``;
+                otherwise only the first array is used.
+        """
         if self._mode == "ctd":
             for i, indices in enumerate(selections):
                 if indices.size == 0:
@@ -1090,6 +1242,14 @@ class QCWindow(QWidget):
         }))
 
     def _on_points_clicked(self, _plot, points, profile_idx: int = 0):
+        """Apply the current flag to individually clicked scatter points.
+
+        Args:
+            _plot: The plot item that was clicked (unused).
+            points: The clicked ``SpotItem`` points.
+            profile_idx: Index into ``self._profiles`` of the profile
+                clicked. CTD mode only.
+        """
         indices = np.array([p.index() for p in points], dtype=int)
         if indices.size == 0:
             return
@@ -1120,6 +1280,7 @@ class QCWindow(QWidget):
     # Button slots
     # =======================================================================
     def _click_reset_view(self):
+        """Redraw the scatter(s) with current flag colors and reset the axis ranges."""
         if self._mode == "thermograph":
             brushes = [
                 pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
@@ -1150,6 +1311,7 @@ class QCWindow(QWidget):
         self._pw.setYRange(*self._y_range, padding=0)
 
     def _click_deselect_all(self):
+        """Restore all quality flags to their pre-session snapshot values."""
         logger.info("Undo All Selections — restoring original flags.")
 
         if self._mode == "ctd":
@@ -1181,11 +1343,13 @@ class QCWindow(QWidget):
         self._state["scatter"] = self._scatter
 
     def _click_continue(self):
+        """Mark the QC session as applied and close the window."""
         self._state["applied"] = True
         logger.info("Continue clicked.")
         self.close()
 
     def _click_exit(self):
+        """Mark the QC session as user-exited and close the window."""
         global exit_requested
         self._state["user_exited"] = True
         self._state["exit_requested"] = True
@@ -1194,7 +1358,14 @@ class QCWindow(QWidget):
         self.close()
 
     def _toggle_profile_visibility(self, profile_idx: int, cb_state):
-        """CTD-only: show/hide one overlaid profile without affecting its flags."""
+        """CTD-only: show/hide one overlaid profile without affecting its flags.
+
+        Args:
+            profile_idx: Index into ``self._profiles`` of the profile
+                to show or hide.
+            cb_state: Checkbox state; truthy shows the profile,
+                falsy hides it.
+        """
         visible = bool(cb_state)
         prof = self._profiles[profile_idx]
         prof["visible"] = bool(visible)
@@ -1204,6 +1375,17 @@ class QCWindow(QWidget):
         )
 
     def _export_dataframe(self, current_file):
+        """Export the QC'd DataFrame(s) to CSV.
+
+        In CTD mode with more than one overlaid profile, prompts for a
+        folder and exports one CSV per profile; otherwise prompts for
+        a single save path and exports one CSV. Each export adds a
+        ``SEQ_INDEX`` column from the DataFrame's row index.
+
+        Args:
+            current_file: Path or identifier used to derive the
+                default export filename (single-profile case).
+        """
         self._state["applied"] = True
 
         if self._mode == "ctd" and len(self._profiles) > 1:
@@ -1260,6 +1442,11 @@ class QCWindow(QWidget):
             )
 
     def closeEvent(self, ev):
+        """Emit :attr:`closed` before handling the standard close event.
+
+        Args:
+            ev: The Qt close event.
+        """
         self.closed.emit()
         super().closeEvent(ev)
 
@@ -1272,9 +1459,27 @@ class InputDialog(QMainWindow):
 
     ``mode``         : ``"thermograph"`` or ``"ctd"``
     ``review_mode``  : True → Review QC, False → Initial QC
+
+    Attributes:
+        line_edit_text: QC operator/reviewer name.
+        input_data_folder: Path to the selected input ODF folder.
+        output_data_folder: Path to the selected output folder.
+        wildcard_string: File-matching wildcard entered by the user.
+        metadata_file: Path to the selected metadata file (thermograph
+            mode only).
+        generate_batch: Batch name entered by the user (thermograph
+            mode only).
+        result: ``"accept"`` or ``"reject"`` after the dialog closes.
     """
 
     def __init__(self, mode: str, review_mode: bool):
+        """Build the dialog's widgets and layout.
+
+        Args:
+            mode: ``"thermograph"`` or ``"ctd"``.
+            review_mode: ``True`` for reviewing previously QC'd files,
+                ``False`` for initial QC.
+        """
         super().__init__()
         self._mode = mode
         self.review_mode = review_mode
@@ -1411,18 +1616,21 @@ class InputDialog(QMainWindow):
 
     # ── Folder / file pickers ─────────────────────────────────────────────
     def _choose_input(self):
+        """Prompt for and store the ODF input folder."""
         folder = QFileDialog.getExistingDirectory(self, "Select ODF input folder")
         if folder:
             self.input_data_folder = folder
             self._input_path.setText(folder)
 
     def _choose_output(self):
+        """Prompt for and store the QC output folder."""
         folder = QFileDialog.getExistingDirectory(self, "Select QC output folder")
         if folder:
             self.output_data_folder = folder
             self._output_path.setText(folder)
 
     def _choose_metadata(self):
+        """Prompt for and store the metadata file (thermograph mode)."""
         path, _ = QFileDialog.getOpenFileName(
             self, "Select metadata file", "",
             "Excel / CSV Files (*.xlsx *.xls *.csv);;All Files (*)",
@@ -1433,6 +1641,13 @@ class InputDialog(QMainWindow):
 
     # ── Accept / reject ───────────────────────────────────────────────────
     def _on_accept(self):
+        """Validate required fields, optionally persist the name, and close.
+
+        Requires the operator/reviewer name, input folder, and output
+        folder to be set; otherwise shows a warning dialog and returns
+        without closing. On success, sets :attr:`result` to
+        ``"accept"``.
+        """
         self.line_edit_text = self._name_edit.text().strip()
         self.wildcard_string = self._wc_edit.text().strip() or "*.ODF"
         if self._mode == "thermograph":
@@ -1454,11 +1669,13 @@ class InputDialog(QMainWindow):
         self.close()
 
     def _on_reject(self):
+        """Set :attr:`result` to ``"reject"`` and close the window."""
         self.result = "reject"
         self.close()
 
     # ── Persistent name storage ───────────────────────────────────────────
     def _save_name(self):
+        """Persist the operator/reviewer name to :attr:`_meta_store` as JSON."""
         try:
             self._meta_store.write_text(
                 json.dumps({"remember": True, "name": self.line_edit_text}), encoding="utf-8"
@@ -1467,6 +1684,7 @@ class InputDialog(QMainWindow):
             pass
 
     def _clear_saved(self):
+        """Delete the persisted name file, if one exists."""
         try:
             if self._meta_store.exists():
                 self._meta_store.unlink()
@@ -1474,6 +1692,7 @@ class InputDialog(QMainWindow):
             pass
 
     def _load_saved(self):
+        """Load and apply a previously persisted operator/reviewer name, if any."""
         try:
             if not self._meta_store.exists():
                 return
@@ -1495,9 +1714,18 @@ class LogWindow(QWidget):
 
     Mirrors the interface of LogWindowThermographQC / LogWindowCTDQC but is
     a single class used for both data types.
+
+    Attributes:
+        radio_opt: Toggle for enabling QC-reviewer mode.
+        radio_initial: Toggle for initial-QC mode (checked by default).
+        btn_start: Button that starts the visual QC process.
+        btn_exit: Button that exits the program.
+        qtext_handler: Logging handler that appends formatted records
+            to the window's log text area.
     """
 
     def __init__(self):
+        """Build the window's widgets and layout."""
         super().__init__()
         self.setWindowTitle("Datashop ODF QC Toolbox")
         self.resize(900, 550)
@@ -1553,11 +1781,26 @@ class LogWindow(QWidget):
 
         # ── Qt logging handler that appends to _log_edit ──────────────────
         class _QtHandler(logging.Handler):
+            """A logging.Handler that appends formatted records to a QTextEdit."""
+
             def __init__(self, widget):
+                """Initialize the handler.
+
+                Args:
+                    widget: ``QTextEdit`` that formatted log records
+                        are appended to.
+                """
                 super().__init__()
                 self._w = widget
 
             def emit(self, record):
+                """Format a log record and append it to the text widget.
+
+                Args:
+                    record: Log record to format and display. Any
+                        exception raised while formatting or appending
+                        is silently ignored.
+                """
                 try:
                     msg = self.format(record)
                     self._w.append(msg)
@@ -1572,6 +1815,7 @@ class LogWindow(QWidget):
 
     @property
     def selected_data_type(self) -> str:
+        """str: ``"thermograph"`` or ``"ctd"``, per the selected radio button."""
         return "thermograph" if self._rb_thermograph.isChecked() else "ctd"
 
 
@@ -1581,6 +1825,25 @@ class LogWindow(QWidget):
 def prepare_output_folder(
     in_folder_path: str, out_folder_path: str, qc_operator: str
 ) -> str:
+    """Create the appropriate QC output folder for initial or review mode.
+
+    If ``in_folder_path`` is a ``"Step_1_Create_ODF"`` folder (initial
+    QC), creates (or clears and recreates) a ``Step_2_Assign_QFlag``
+    folder under ``out_folder_path``. Otherwise (review QC), creates a
+    new timestamped ``Step_3_Review_QFlag_<operator>_<timestamp>``
+    folder under ``out_folder_path``.
+
+    Args:
+        in_folder_path: Path to the input folder. Only used to check
+            whether it is a ``"Step_1_Create_ODF"`` folder.
+        out_folder_path: Parent path under which the output folder is
+            created.
+        qc_operator: Name of the QC operator/reviewer, used in the
+            review-mode folder name.
+
+    Returns:
+        The resolved path to the created output folder.
+    """
     base_name_input = "Step_1_Create_ODF"
     in_folder_path = str(Path(in_folder_path).resolve())
     out_folder_path = str(Path(out_folder_path).resolve())
@@ -1618,6 +1881,22 @@ def prepare_output_folder(
 # Thermograph helpers
 # ===========================================================================
 def _parse_datetime(date_str, time_str):
+    """Parse separate date/time strings into a combined datetime string.
+
+    Tries several common date formats and several time formats;
+    missing/blank time defaults to ``"12:00"``.
+
+    Args:
+        date_str: Date string to parse. Returns ``pd.NaT`` if missing
+            or blank.
+        time_str: Time string to parse. Defaults to ``"12:00"`` if
+            missing, blank, or unparseable.
+
+    Returns:
+        A ``"YYYY-MM-DD HH:MM:SS"`` string, or ``pd.NaT`` if
+        ``date_str`` is missing/blank or does not match any supported
+        format.
+    """
     date_formats = [
         "%d/%m/%Y", "%d/%m/%y", "%d-%m-%Y", "%d-%m-%y",
         "%b-%d-%y", "%B-%d-%y", "%d-%b-%y", "%d-%B-%y",
@@ -1649,6 +1928,21 @@ def _parse_datetime(date_str, time_str):
 
 
 def _parse_to_utc(dt_str, tz_mode):
+    """Parse a datetime string and convert it to UTC.
+
+    Args:
+        dt_str: Datetime string to parse. Any trailing
+            ``"/<3-letter-code>"`` timezone abbreviation is stripped
+            before parsing.
+        tz_mode: If ``"local"`` (case-insensitive), a naive parsed
+            datetime is localized to ``Canada/Atlantic`` before
+            converting to UTC; otherwise a naive datetime is treated
+            as already UTC.
+
+    Returns:
+        The datetime converted to UTC, or ``pd.NaT`` if ``dt_str`` is
+        missing, blank, or unparseable.
+    """
     if pd.isna(dt_str) or str(dt_str).strip() == "":
         return pd.NaT
     dt_str = re.sub(r"/[A-Z]{3}$", "", str(dt_str)).strip()
@@ -1669,6 +1963,18 @@ def _parse_to_utc(dt_str, tz_mode):
 
 
 def _validate_bio_metadata(meta: pd.DataFrame) -> bool:
+    """Check that a BIO metadata DataFrame has the required columns.
+
+    Args:
+        meta: Metadata DataFrame to validate.
+
+    Returns:
+        ``False`` if ``meta`` is ``None``/empty, lacks both ``"ID"``
+        and ``"gauge"`` columns, lacks ``"deploy"``/``"recover"``
+        columns, or lacks any recognized time-zone column name;
+        ``True`` otherwise. A warning is logged for each failing
+        check.
+    """
     if meta is None or meta.empty:
         return False
     cols = set(meta.columns)
@@ -1689,6 +1995,15 @@ def _validate_bio_metadata(meta: pd.DataFrame) -> bool:
 
 # Replace all ODF null values in the dataframe with np.nan
 def _null_to_na(df: pd.DataFrame) -> pd.DataFrame:
+    """Replace ODF's numeric null sentinel with NaN.
+
+    Args:
+        df: DataFrame to convert.
+
+    Returns:
+        A copy of ``df`` with all ``-99.0`` values replaced by
+        ``np.nan``.
+    """
     return df.replace(-99.0, np.nan)
     
 
@@ -1704,6 +2019,44 @@ def qc_thermograph_data(
     review_mode: bool,
     batch_name: str,
 ) -> dict:
+    """Run the interactive visual QC loop over a batch of thermograph ODF files.
+
+    For each ODF file matching ``wildcard`` in ``in_folder_path``,
+    reads the thermograph data, builds a parameter map of numeric
+    columns, derives the deploy/recover QC time window (from metadata
+    when available, otherwise from the event header), opens a
+    :class:`QCWindow` for interactive flagging, applies the resulting
+    flags to the full (including out-of-window) data, updates the ODF
+    object's history and quality header, and writes the result to
+    ``out_folder_path`` (via :func:`prepare_output_folder`) as both a
+    new ODF file and a CSV file. Runs until all files are processed or
+    the user exits.
+
+    Args:
+        in_folder_path: Path to the folder containing the input ODF
+            files.
+        wildcard: Glob pattern used to select which files in
+            ``in_folder_path`` to process, e.g. ``"*.ODF"``.
+        out_folder_path: Parent path under which the output folder is
+            created (see :func:`prepare_output_folder`).
+        qc_operator: Name of the QC operator/reviewer, recorded in the
+            ODF history and used in the review-mode output folder
+            name.
+        metadata_file_path: Path to an optional metadata file used to
+            derive per-cast deploy/recover times and time-zone
+            information (DFO BIO / FSRS institutions).
+        review_mode: If ``True``, run in review-QC mode (existing
+            flags are reviewed and folder naming differs); if
+            ``False``, run in initial-QC mode.
+        batch_name: Human-readable label for the batch, shown in the
+            QC window title.
+
+    Returns:
+        A dict with a ``"finished"`` key, ``True`` if every file in
+        the batch was processed without an early exit, ``False``
+        otherwise (including if the input directory could not be
+        entered or no matching files were found).
+    """
     global exit_requested
     exit_requested = False
     batch_result = {"finished": False}
@@ -1933,6 +2286,16 @@ def qc_thermograph_data(
             drop_threshold, rise_threshold, temp_jump_mag = -0.2, 0.2, 2.0
 
             def _best(candidates, key):
+                """Return the candidate dict with the highest value of ``key``.
+
+                Args:
+                    candidates: List of dicts to search.
+                    key: Dict key to compare candidates by.
+
+                Returns:
+                    The candidate with the maximum ``key`` value, or
+                    ``None`` if ``candidates`` is empty.
+                """
                 return max(candidates, key=lambda x: x[key], default=None)
 
             dep_rate = [{"time": t, "severity": abs(temp_rate.loc[t]),
@@ -2250,6 +2613,12 @@ def _cast_label_from_filename(ctd_file_name: str) -> str:
     ODF CTD filenames typically end in ``_DN`` (down-cast) or ``_UP``
     (up-cast), e.g. ``CTD_BCD2024669_001_01_DN.ODF``. Falls back to the
     bare filename stem when no recognised suffix is present.
+
+    Args:
+        ctd_file_name: Name of the ODF file to infer a label from.
+
+    Returns:
+        ``"Downcast"``, ``"Upcast"``, or the filename stem.
     """
     stem = Path(ctd_file_name).stem
     upper = stem.upper()
@@ -2263,10 +2632,29 @@ def _cast_label_from_filename(ctd_file_name: str) -> str:
 def _load_ctd_profile(ctd_file: Path, in_folder_path: str, qc_mode_user: int) -> dict | None:
     """Read one ODF file and prepare everything QCWindow needs to plot it.
 
-    Returns None if the file should be skipped (unreadable, no pressure
-    column, no plottable parameters). Raises _FilenameMismatchError on a
-    filename/file-spec mismatch, which the caller treats as a hard stop —
-    matching the previous single-file behaviour.
+    Builds a parameter map of plottable numeric columns (creating any
+    missing quality-flag columns), determines the QC mode (initial vs.
+    review) by checking for pre-existing flags against the requested
+    mode, and warns the user if the two are mismatched.
+
+    Args:
+        ctd_file: Path to the ODF file to read, relative to
+            ``in_folder_path``.
+        in_folder_path: Path to the folder containing ``ctd_file``.
+        qc_mode_user: Requested QC mode: ``0`` for initial QC, ``1``
+            for review QC.
+
+    Returns:
+        A dict of everything :class:`QCWindow` needs to plot and QC
+        this profile (``ctd``, ``df``, ``orig_df``, ``pres_col``,
+        ``param_map``, QC-mode info, etc.), or ``None`` if the file
+        should be skipped (unreadable, no pressure column, or no
+        plottable parameters).
+
+    Raises:
+        _FilenameMismatchError: If the ODF's generated file spec
+            doesn't match the file it was read from — a hard stop,
+            matching legacy behaviour.
     """
     ctd_file_name = ctd_file.name
     logger.info(f"Reading file: {ctd_file}")
@@ -2420,6 +2808,13 @@ def _group_ctd_profiles(profiles: list[dict]) -> list[list[dict]]:
     casts — typically a down-cast and an up-cast of the same event — are
     QC'd together in one overlaid window. Downcasts are ordered before
     upcasts within a group; original discovery order is otherwise preserved.
+
+    Args:
+        profiles: Profile dicts as returned by :func:`_load_ctd_profile`.
+
+    Returns:
+        A list of groups, each a list of profile dicts sharing the
+        same station and event number, in original discovery order.
     """
     groups: dict[tuple, list[dict]] = {}
     order: list[tuple] = []
@@ -2443,6 +2838,39 @@ def qc_ctd_data(
     qc_operator: str,
     review_mode: bool,
 ) -> dict:
+    """Run the interactive visual QC loop over a batch of CTD ODF files.
+
+    Loads every ODF file matching ``wildcard`` in ``in_folder_path``
+    (via :func:`_load_ctd_profile`), groups associated casts (e.g. a
+    down-cast and up-cast of the same station/event) together via
+    :func:`_group_ctd_profiles`, then for each group opens a single
+    overlaid :class:`QCWindow` for interactive flagging. After each
+    window closes, applies the resulting flags to each profile in the
+    group, updates its ODF object's history and quality header, and
+    writes the result to ``out_folder_path`` (via
+    :func:`prepare_output_folder`) as both a new ODF file and a CSV
+    file. Runs until every group is processed or the user exits.
+
+    Args:
+        in_folder_path: Path to the folder containing the input ODF
+            files.
+        wildcard: Glob pattern used to select which files in
+            ``in_folder_path`` to process, e.g. ``"*.ODF"``.
+        out_folder_path: Parent path under which the output folder is
+            created (see :func:`prepare_output_folder`).
+        qc_operator: Name of the QC operator/reviewer, recorded in the
+            ODF history and used in the review-mode output folder
+            name.
+        review_mode: If ``True``, run in review-QC mode (existing
+            flags are reviewed); if ``False``, run in initial-QC mode.
+
+    Returns:
+        A dict with a ``"finished"`` key, ``True`` if every group was
+        processed without an early exit, ``False`` otherwise
+        (including if the input directory could not be entered, no
+        matching files were found, or a filename/file-spec mismatch
+        was encountered).
+    """
     global exit_requested
     exit_requested = False
     batch_result = {"finished": False}
@@ -2680,8 +3108,21 @@ def qc_ctd_data(
 def main_select_inputs(mode: str, review_mode: bool):
     """Open the input dialog and return collected values.
 
-    Returns for thermograph: (input, output, operator, metadata, batch, wildcard)
-    Returns for CTD:         (input, output, operator, wildcard)
+    Instantiates a Qt application if none exists, shows an
+    :class:`InputDialog` for ``mode``, and blocks (processing events)
+    until it closes.
+
+    Args:
+        mode: ``"thermograph"`` or ``"ctd"``.
+        review_mode: ``True`` for reviewing previously QC'd files,
+            ``False`` for initial QC.
+
+    Returns:
+        For ``mode="thermograph"``: a 6-tuple of ``(input_path,
+        output_path, operator, metadata_file_path, batch_name,
+        wildcard)``. For ``mode="ctd"``: a 4-tuple of ``(input_path,
+        output_path, operator, wildcard)``. All elements are ``None``
+        if the dialog was not accepted.
     """
     app_inst = QApplication.instance() or QApplication(sys.argv)
     app_inst.setStyle("Fusion")
@@ -2727,6 +3168,21 @@ def run_qc_thermograph_data(
     batch_name: str,
     wildcard: str,
 ) -> dict:
+    """Run :func:`qc_thermograph_data` and log the outcome.
+
+    Args:
+        input_path: Path to the folder containing the input ODF files.
+        output_path: Parent path under which the output folder is
+            created.
+        qc_operator: Name of the QC operator/reviewer.
+        metadata_file_path: Path to an optional metadata file.
+        review_mode: ``True`` for review QC, ``False`` for initial QC.
+        batch_name: Human-readable label for the batch.
+        wildcard: Glob pattern used to select which files to process.
+
+    Returns:
+        The dict returned by :func:`qc_thermograph_data`.
+    """
     logger.info(f"Starting Thermograph QC by {qc_operator} on {input_path}")
     result = qc_thermograph_data(
         input_path, wildcard, output_path,
@@ -2747,6 +3203,19 @@ def run_qc_ctd_data(
     review_mode: bool,
     wildcard: str,
 ) -> dict:
+    """Run :func:`qc_ctd_data` and log the outcome.
+
+    Args:
+        input_path: Path to the folder containing the input ODF files.
+        output_path: Parent path under which the output folder is
+            created.
+        qc_operator: Name of the QC operator/reviewer.
+        review_mode: ``True`` for review QC, ``False`` for initial QC.
+        wildcard: Glob pattern used to select which files to process.
+
+    Returns:
+        The dict returned by :func:`qc_ctd_data`.
+    """
     logger.info(f"Starting CTD QC by {qc_operator} on {input_path}")
     result = qc_ctd_data(input_path, wildcard, output_path, qc_operator, review_mode)
     if result["finished"]:
@@ -2760,6 +3229,18 @@ def run_qc_ctd_data(
 # Log-window Start button handler
 # ===========================================================================
 def start_qc_process(log_ui: LogWindow):
+    """Handle the log window's "Start" button: collect inputs and run QC.
+
+    Reads the selected data type and review-mode from ``log_ui``,
+    prompts for the remaining inputs via :func:`main_select_inputs`,
+    and dispatches to :func:`run_qc_thermograph_data` or
+    :func:`run_qc_ctd_data`. Logs and returns early if any required
+    input is missing.
+
+    Args:
+        log_ui: Log window to read the data-type/review-mode selection
+            from and log progress to.
+    """
     global exit_requested
     exit_requested = False
     mode = log_ui.selected_data_type
@@ -2808,6 +3289,11 @@ def start_qc_process(log_ui: LogWindow):
 # Exit handler
 # ===========================================================================
 def exit_program(app_inst):
+    """Signal the running QC loop to stop and quit the application.
+
+    Args:
+        app_inst: The running ``QApplication`` instance to quit.
+    """
     global exit_requested
     exit_requested = True
     logger.info("Exit Program clicked.")
