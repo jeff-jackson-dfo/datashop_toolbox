@@ -44,13 +44,14 @@ import time
 from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Protocol
 
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
 import pytz
-from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QColor, QPainterPath, QPen, QPolygonF
+from PySide6.QtCore import QPointF, QRectF, Qt
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -66,6 +67,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QRadioButton,
+    QStyleOptionGraphicsItem,
     QVBoxLayout,
     QWidget,
 )
@@ -141,6 +143,24 @@ _PRES_CANDIDATES = ["PRES_01", "PRES_02", "DEPH_01", "DEPH_02"]
 _TEMP_CANDIDATES = ["TEMP_01", "TE90_01", "TEMP_02"]
 
 
+# ---------------------------------------------------------------------------
+# Pylance QtPyGraph Type Solutions
+# ---------------------------------------------------------------------------
+class ViewBoxProtocol(Protocol):
+    def mapSceneToView(self, pos) -> QPointF:
+        ...
+
+    def viewRect(self) -> QRectF:
+        ...
+
+class PlotItemProtocol(Protocol):
+    def getViewBox(self) -> ViewBoxProtocol:
+        ...
+
+    def addItem(self, item) -> None:
+        ...
+
+
 # ===========================================================================
 # Shared: LassoItem
 # ===========================================================================
@@ -155,7 +175,7 @@ class LassoItem(pg.GraphicsObject):
     """
     sigSelected = pg.QtCore.Signal(object)  # emits list[np.ndarray] of int indices
 
-    def __init__(self, plot_item: pg.PlotItem, xs: np.ndarray, ys: np.ndarray):
+    def __init__(self, plot_item: PlotItemProtocol, xs: np.ndarray, ys: np.ndarray):
         super().__init__()
         self._plot = plot_item
         self._vb = plot_item.getViewBox()
@@ -164,7 +184,7 @@ class LassoItem(pg.GraphicsObject):
         self._drawing = False
         self._enabled = True
         self._pen = QPen(QColor("red"), 0)
-        self._pen.setStyle(Qt.DashLine)
+        self._pen.setStyle(Qt.PenStyle.DashLine)
         plot_item.addItem(self)
 
     # ── Point-set management ────────────────────────────────────────────────
@@ -188,25 +208,34 @@ class LassoItem(pg.GraphicsObject):
         self._drawing = False
         self._verts = []
         self.update()
-        self.setAcceptedMouseButtons(Qt.NoButton)
+        self.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
 
     def resume(self):
         self._enabled = True
-        self.setAcceptedMouseButtons(Qt.LeftButton)
+        self.setAcceptedMouseButtons(Qt.MouseButton.LeftButton)
 
     # ── GraphicsObject required overrides ──────────────────────────────────
     def boundingRect(self):
         return self._vb.viewRect()
 
-    def paint(self, p, *args):
+    def paint(
+        self,
+        painter: QPainter,
+        option: QStyleOptionGraphicsItem,
+        widget: QWidget | None = None,
+    ) -> None:
         if len(self._verts) < 2:
             return
-        p.setPen(self._pen)
+
+        painter.setPen(self._pen)
+
         path = QPainterPath()
         path.moveTo(QPointF(*self._verts[0]))
+
         for x, y in self._verts[1:]:
             path.lineTo(QPointF(x, y))
-        p.drawPath(path)
+
+        painter.drawPath(path)
 
     # ── Mouse events ───────────────────────────────────────────────────────
     def _scene_to_data(self, scene_pos):
@@ -217,7 +246,7 @@ class LassoItem(pg.GraphicsObject):
         if not self._enabled:
             ev.ignore()
             return
-        if ev.button() == Qt.LeftButton:
+        if ev.button() == Qt.MouseButton.LeftButton:
             self._verts = [self._scene_to_data(ev.scenePos())]
             self._drawing = True
             self.update()
@@ -240,7 +269,7 @@ class LassoItem(pg.GraphicsObject):
         if not self._enabled:
             ev.ignore()
             return
-        if ev.button() == Qt.LeftButton and self._drawing:
+        if ev.button() == Qt.MouseButton.LeftButton and self._drawing:
             self._drawing = False
             self._verts.append(self._verts[0])
             self.update()
@@ -261,7 +290,7 @@ class LassoItem(pg.GraphicsObject):
             selected = [
                 i for i, (x, y) in enumerate(zip(xs, ys, strict=True))
                 if not (np.isnan(x) or np.isnan(y))
-                and poly.containsPoint(QPointF(x, y), Qt.OddEvenFill)
+                and poly.containsPoint(QPointF(x, y), Qt.FillRule.OddEvenFill)
             ]
             if selected:
                 any_selected = True
@@ -392,6 +421,9 @@ class QCWindow(QWidget):
             self._y_col = "Temperature"
             self._flag_col = "qualityflag_Temperature"
 
+            if self._df is None:
+                return
+
             # Snapshot all per-param flag columns for undo
             self._qflag_snapshots = {
                 f"qualityflag_{d}": self._df[f"qualityflag_{d}"].to_numpy().copy()
@@ -470,7 +502,9 @@ class QCWindow(QWidget):
         self._pw = pg.PlotWidget()
         self._pw.showGrid(x=True, y=True, alpha=0.3)
         self._pw.setMouseEnabled(x=True, y=True)
-        self._pw.getPlotItem().setMenuEnabled(True)
+        plot_item = self._pw.getPlotItem()
+        if plot_item is not None:
+            plot_item.setMenuEnabled(True)
         self._vb = self._pw.getViewBox()
 
         if mode == "thermograph":
@@ -483,7 +517,7 @@ class QCWindow(QWidget):
             )
             axis = pg.DateAxisItem(orientation="bottom")
             self._pw.setAxisItems({"bottom": axis})
-            self._vb.setMouseMode(pg.ViewBox.RectMode)
+            self._vb.setMouseMode(1) # Set to RectMode
 
             # Deploy/Recover shaded region + lines
             lr = pg.LinearRegionItem(
@@ -495,38 +529,55 @@ class QCWindow(QWidget):
             self._pw.addItem(lr)
             self._pw.addItem(pg.InfiniteLine(
                 pos=qc_start_ts, angle=90,
-                pen=pg.mkPen("b", width=2, style=Qt.DashLine),
+                pen=pg.mkPen("b", width=2, style=Qt.PenStyle.DashLine),
                 label="Deployment: Start",
                 labelOpts={"color": "purple", "rotateAxis": (1, 0)},
             ))
             self._pw.addItem(pg.InfiniteLine(
                 pos=qc_end_ts, angle=90,
-                pen=pg.mkPen("b", width=2, style=Qt.DashLine),
+                pen=pg.mkPen("b", width=2, style=Qt.PenStyle.DashLine),
                 label="Recovered: End",
                 labelOpts={"color": "purple", "rotateAxis": (1, 0)},
             ))
 
             # Scatter: X = timestamps, Y = Temperature
             brushes = [pg.mkBrush(QColor(c)) for c in (colors_initial or [])]
-            self._scatter = pg.ScatterPlotItem(
-                x=xnums, y=df["Temperature"].to_numpy(),
-                size=8, brush=brushes, pen=pg.mkPen(None),
-            )
+            if df is not None:
+                self._scatter = pg.ScatterPlotItem(
+                    x=xnums, y=df["Temperature"].to_numpy(),
+                    size=8, brush=brushes, pen=pg.mkPen(None),
+                )
             self._pw.addItem(self._scatter)
             self._state["scatter"] = self._scatter
 
             # Fit view
-            x_margin = (xnums.max() - xnums.min()) * 0.03 or 86400
-            temps = df["Temperature"].to_numpy()
-            y_margin = (temps.max() - temps.min()) * 0.05 or 1.0
-            self._pw.setXRange(xnums.min() - x_margin, xnums.max() + x_margin, padding=0)
-            self._pw.setYRange(temps.min() - y_margin, temps.max() + y_margin, padding=0)
-            self._pw.getPlotItem().enableAutoRange(enable=False)
-            self._x_range = (xnums.min() - x_margin, xnums.max() + x_margin)
-            self._y_range = (temps.min() - y_margin, temps.max() + y_margin)
+            if xnums is not None and df is not None:
+                # Explicitly verify self._pw is valid
+                if self._pw is not None:
+                    
+                    # Calculate your manual padded margins
+                    x_margin = (xnums.max() - xnums.min()) * 0.03 or 86400
+                    temps = df["Temperature"].to_numpy()
+                    y_margin = (temps.max() - temps.min()) * 0.05 or 1.0
+                    
+                    x_min, x_max = xnums.min() - x_margin, xnums.max() + x_margin
+                    y_min, y_max = temps.min() - y_margin, temps.max() + y_margin
+                    
+                    # FIX: PlotWidget itself has a direct setRange method!
+                    # This completely avoids getPlotItem() and safely accepts padding=0.
+                    self._pw.setRange(newRect=(x_min, x_max), padding=0)
+                    self._pw.setRange(newRect=(y_min, y_max), padding=0)
+                    
+                    # Disable auto-range safely directly from the PlotWidget
+                    self._pw.disableAutoRange()
+                    
+                    # Synchronize your state variables
+                    self._x_range = (x_min, x_max)
+                    self._y_range = (y_min, y_max)
 
             # Lasso: X = timestamps, Y = Temperature
-            self._lasso = LassoItem(self._pw.getPlotItem(), xnums, df["Temperature"].to_numpy())
+            if xnums is not None and df  is not None:
+                self._lasso = LassoItem(self._pw.getPlotItem(), xnums, df["Temperature"].to_numpy()) # pyright: ignore[reportArgumentType]
 
         elif mode == "ctd":
 
@@ -544,7 +595,10 @@ class QCWindow(QWidget):
                 f"Station: {station}  Event: {event_num}  "
                 f"Instrument: {instrument}{title_suffix}"
             )
-            self._pw.getPlotItem().invertY(True)
+            plot_item = self._pw.getPlotItem()
+            assert plot_item is not None
+            vb = plot_item.getViewBox()
+            vb.invertY(True)
 
             if len(self._profiles) > 1:
                 self._pw.addLegend(offset=(10, 10))
@@ -583,9 +637,9 @@ class QCWindow(QWidget):
                 (valid_pres.min() - y_margin, valid_pres.max() + y_margin)
                 if valid_pres.size else (0, 1)
             )
-            self._pw.setXRange(*self._x_range, padding=0)
-            self._pw.setYRange(*self._y_range, padding=0)
-            self._pw.getPlotItem().enableAutoRange(enable=False)
+            self._pw.setXRange(*self._x_range)
+            self._pw.setYRange(*self._y_range)
+            vb.enableAutoRange(enable=False)
 
             # Lasso hit-tests against every overlaid profile simultaneously
             self._lasso = LassoItem(
@@ -626,6 +680,7 @@ class QCWindow(QWidget):
         right_panel.addWidget(lbl_mode)
 
         # Info block
+        info_html = ("")
         if mode == "thermograph":
             info_html = (
                 f"<b>Deployed:</b> {start_datetime_qc}<br>"

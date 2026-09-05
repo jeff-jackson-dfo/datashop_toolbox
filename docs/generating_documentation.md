@@ -1,36 +1,40 @@
+# Steps to Generate Package Documentation
+
 > Note: development was performed in the project's
-> root folder using a virtual environment created 
+> root folder using a virtual environment created
 > by uv.
 
-# Below are the Steps used to Generate the Package's Documentation
+## Install Required `mkdocs` Packages
 
-## Installed Required `mkdocs` Packages
 ```powershell
 (venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install mkdocs
 (venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install "mkdocstrings[python]"
 (venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install mkdocs-material
 ```
 
-## Created the Docstrings
-The docstrings were created using the Google-style 
+## Create the Docstrings
+
+The docstrings are created using the Google-style
 because it involves less text (cleaner) and it
 is the preferred style for Mkdocs.
 
 Once docstrings are created for say a module
 called `tabulate`, one can access the info
 using the help command:
+
 ```python
 >>> help(tabulate)
 ```
 
 ## Create the Mkdocs Structure for Your Project
+
 ```powershell
 (venv) PS C:\Dev\GitHub\datashop_toolbox> mkdocs new .
 ```
 
-## Updated the `mkdocs.yml` File
+## Update the `mkdocs.yml` File
 
-### 1. Changed the site_name
+### 1. Change the `site_name`
 
 ```yaml
 site_name: My Docs
@@ -42,7 +46,7 @@ to
 site_name: Datashop Toolbox Docs
 ```
 
-### 2. Added required functionality
+### 2. Add Required Functionality
 
 ```yaml
 site_name: Datashop Toolbox Docs
@@ -66,16 +70,16 @@ markdown_extensions:
   
 ```
 
-## Created New Markdown Files
+## Create New Markdown Files
 
 The only Markdown file that exists when you run
 mkdocs the first time is index.md; which needs
 to be modified as it is the home page for the
 documentation.
 
-It is highly recommended that documentation follow 
-the best practice for project documentation as 
-described by Daniele Procida in the 
+It is highly recommended that documentation follow
+the best practice for project documentation as
+described by Daniele Procida in the
 [Diátaxis documentation framework](https://diataxis.fr/)
 and consists of four separate parts:
 
@@ -116,7 +120,7 @@ nav:
   - explanation.md
 ```
 
-## Check Documentation 
+## View While Editing the Documentation
 
 ```powershell
 (venv) PS C:\DEV\GitHub\datashop_toolbox> mkdocs serve
@@ -145,5 +149,17 @@ INFO    -  [15:05:39] Watching paths for changes: 'docs', 'mkdocs.yml'
 INFO    -  [15:05:39] Serving on http://127.0.0.1:8000/
 ```
 
-One of the more useful features of Mkdocs is that 
-during 
+One of the more useful features of Mkdocs is that
+when working on the documentation locally, any
+changes made are automatically pushed to the
+webpage running on the local webserver.
+
+## Publish the Documentation to GitHub
+
+The final step once the documentation is ready
+for public release is to push it to your GitHub
+repository in a branch called `gh-deploy`:
+
+```powershell
+(venv) PS C:\DEV\GitHub\datashop_toolbox> mkdocs gh-deploy
+```

@@ -1,8 +1,7 @@
 # Welcome to Datashop Toolbox Docs
 
 This site contains the project documentation for the
-`datashop-toolbox` project
-[Datashop Toolbox](
+[`Datashop Toolbox`](
 https://github.com/jeff-jackson-dfo/datashop_toolbox/).
 
 ## Table Of Contents
