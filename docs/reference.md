@@ -93,7 +93,7 @@ Base model providing validation/normalization similar to old check_* functions.
 | `convert_dataframe(df: pd.DataFrame) -> pd.DataFrame` | Convert DataFrame values to floats where possible. |
 | `add_commas(lines: str, skip_last: bool = False) -> str` | Add commas at end of each line, skip last if requested. |
 | `get_current_date_time() -> str` | Return current date/time in SYTM_FORMAT (truncated). |
-| `read_file_lines(file_with_path: str) -> list[str]` | Read all lines from a file and strip whitespace. Print errors to console, always return a list. |
+| `read_file_lines(file_with_path: Path) -> list[str]` | Read all lines from a file and strip whitespace. Print errors to console, always return a list. |
 | `find_lines_with_text(odf_file_lines: list[str], substrings: list[str]) -> list[tuple[int, str]]` | Find all lines containing any of the given substrings. |
 | `split_lines_into_dict(lines: list) -> dict` | Convert alternating header lines into a dictionary. |
 
@@ -114,9 +114,10 @@ Store metadata, headers, and data associated with an ODF file.
 | *(field_validator('quality_header', 'meteo_header'))* `check_optional_headers(cls, v, field)` | Validate an optional header object. |
 | `populate_object(odf_dict: dict)` | Populate ODF-level fields from a dictionary. |
 | `print_object(file_version: float = 2.0) -> str` | Serialize the ODF header and data to ODF-formatted text. |
-| `read_odf(odf_file_path: str)` | Read an ODF file and populate this object. |
+| *(static)* `repair_text(text: str) -> str` |  |
+| `read_odf(odf_file_path: Path)` | Read an ODF file and populate this object. |
 | `update_odf() -> None` | Update derived ODF metadata from the current contents. |
-| `write_odf(odf_file_path: str, version: float = 2.0) -> None` | Write the ODF object to a file. |
+| `write_odf(odf_file_path: Path, version: float = 2.0) -> None` | Write the ODF object to a file. |
 | *(static)* `generate_creation_date() -> str` | Generate the current timestamp in ODF history-header format. |
 | `add_history() -> None` | Append a new processing history header. |
 | `add_to_history(history_comment) -> None` | Add a processing comment to the most recent history entry. |
@@ -1066,4 +1067,3 @@ Bottle data to export BTL file (header labels / order).
 | `_pad_left(text: str, width: int) -> str` | Left-align text within a fixed-width field. |
 | `_pad_right(text: str, width: int) -> str` | Right-align text within a fixed-width field. |
 | `print_btl_table(rows: Iterable[Mapping[str, Any]], param_enum: Iterable[columns] = (columns.oxygen, columns.salinity, columns.potential_temperature, columns.sigma_theta, columns.scan, columns.pressure, columns.conductivity, columns.par, columns.turbidity, columns.fluorescence, columns.cdom), widths: Mapping[str, int] = print_widths) -> None` | Print a BTL-style table with: |
-
