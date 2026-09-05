@@ -5,18 +5,10 @@ def instrument_to_oracle(odfobj: OdfHeader, connection, infile: str) -> None:
     """
     Load the ODF object's instrument header metadata into Oracle.
 
-    Parameters
-    ----------
-    odfobj: OdfHeader class object
-        An ODF object.
-    connection: oracledb connection
-        Oracle database connection object.
-    infile: str
-        ODF file currently being loaded into the database.
-
-    Returns
-    -------
-    None
+    Args:
+        odfobj: An ODF object.
+        connection: Oracle database connection object.
+        infile: ODF file currently being loaded into the database.
     """
 
     # Check to see if the ODF structure contains an Instrument_Header.

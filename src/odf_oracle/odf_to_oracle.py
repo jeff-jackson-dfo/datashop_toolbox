@@ -26,24 +26,14 @@ def odf_to_oracle(
     """
     Read ODF files and load them into the ODF_ARCHIVE Oracle database.
 
-    Parameters
-    ----------
-    wildcard: str
-      used to identify specific ODF files in the supplied directory path.
-    user: str
-      The username for Oracle account.
-    password: str
-      The password for Oracle account.
-    oracle_host: str
-      Server on which Oracle database exists.
-    oracle_service_name: str
-      Oracle database service name.
-    mypath: str
-      Directory where ODF files to be loaded reside.
-
-    Returns
-    -------
-    None
+    Args:
+        wildcard: Used to identify specific ODF files in the supplied
+            directory path.
+        user: The username for Oracle account.
+        password: The password for Oracle account.
+        oracle_host: Server on which Oracle database exists.
+        oracle_service_name: Oracle database service name.
+        mypath: Directory where ODF files to be loaded reside.
     """
 
     # Acquire a connection from the pool (will always have the new date and

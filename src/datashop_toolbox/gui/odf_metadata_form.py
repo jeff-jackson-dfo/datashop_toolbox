@@ -21,6 +21,12 @@ class OdfMetadataForm(QWidget):
     Reusable content widget that hosts the controls from Ui_ODF_Metadata_Window.
     Because the .ui was compiled as a QMainWindow, we use a temporary host
     QMainWindow to build it, then reparent the centralwidget into this QWidget.
+
+    Attributes:
+        submitted: Signal emitted with the built :class:`OdfHeader`
+            when the user clicks OK with valid input.
+        cancelled: Signal emitted when the user clicks Cancel.
+        ui: The generated UI object providing this form's widgets.
     """
 
     # Signals you can use from wrappers
@@ -28,6 +34,14 @@ class OdfMetadataForm(QWidget):
     cancelled = Signal()         # emits on Cancel
 
     def __init__(self, parent=None, mission_templates_path: Path | None = None):
+        """Build the form, load mission templates, and wire up its widgets.
+
+        Args:
+            parent: Optional parent widget.
+            mission_templates_path: Path to the mission-header
+                templates JSON file. Defaults to the packaged
+                ``gui/templates/mission_header_templates.json``.
+        """
         super().__init__(parent)
 
         # ---- 1) Build UI using a temporary QMainWindow host (adapter pattern) ----
@@ -51,6 +65,7 @@ class OdfMetadataForm(QWidget):
     # Setup helpers
     # -----------------------------
     def _setup_validators(self):
+        """Set placeholder text and numeric validators on the input fields."""
         # Placeholders
         self.ui.year_line_edit.setPlaceholderText("####")
         self.ui.initial_latitude_line_edit.setPlaceholderText("####.######")
@@ -111,10 +126,12 @@ class OdfMetadataForm(QWidget):
         self.ui.mission_template_selector_combo_box.addItems(keys)
 
     def _populate_year(self):
+        """Populate the year field with the current year."""
         # Populate year with current year
         self.ui.year_line_edit.setText(str(datetime.now().year))
 
     def _show_warning_dialog(self):
+        """Show (after the current event loop tick) a warning about the auto-filled year."""
         # Defer to ensure parent (dialog) is actually visible
         def _run():
             parent = self.window() if isinstance(self.window(), QWidget) else self
@@ -130,7 +147,11 @@ class OdfMetadataForm(QWidget):
         QTimer.singleShot(0, _run)
 
     def showEvent(self, event) -> None:  # noqa: N802
-        """Overrides the show event to run code after the dialog is visible."""
+        """Overrides the show event to run code after the dialog is visible.
+
+        Args:
+            event: The Qt show event.
+        """
         super().showEvent(event)  # Call base class handler
         # Populate year now
         self._on_dialog_visible()
@@ -143,6 +164,7 @@ class OdfMetadataForm(QWidget):
         self._populate_year()
 
     def _connect_signals(self):
+        """Wire the template selector and OK/Cancel buttons to their handlers."""
         self.ui.mission_template_selector_combo_box.currentTextChanged.connect(self._on_template_changed)
         # Your UI provides dedicated OK/Cancel buttons on the form
         self.ui.ok_push_button.clicked.connect(self._on_ok_clicked)
@@ -152,6 +174,7 @@ class OdfMetadataForm(QWidget):
     # Template loading
     # -----------------------------
     def _clear_cruise_header_fields(self):
+        """Clear all CRUISE_HEADER input fields."""
         for w in (
             self.ui.country_institute_code_line_edit,
             self.ui.cruise_number_line_edit,
@@ -166,6 +189,7 @@ class OdfMetadataForm(QWidget):
             w.clear()
 
     def _clear_event_header_fields(self):
+        """Clear all EVENT_HEADER input fields."""
         for w in (
             self.ui.data_type_line_edit,
             self.ui.event_number_line_edit,
@@ -192,7 +216,13 @@ class OdfMetadataForm(QWidget):
 
     @Slot(str)
     def _on_template_changed(self, name: str) -> None:
-        """Load CRUISE_HEADER + default EVENT_HEADER from selected template."""
+        """Load CRUISE_HEADER + default EVENT_HEADER from selected template.
+
+        Args:
+            name: Name of the selected mission template. If empty or
+                one of the placeholder values (``"No templates
+                found"``, ``"---"``), clears the fields instead.
+        """
         if not name or name in ("No templates found", "---"):
             self._clear_cruise_header_fields()
             self._clear_event_header_fields()
@@ -276,6 +306,18 @@ class OdfMetadataForm(QWidget):
         """
         Parse a date/time from a Q_line_edit using check_datetime.
         Raises a ValueError with a labeled, machine-parseable message on failure.
+
+        Args:
+            widget: Line-edit widget to read the date/time text from.
+            label: Human-readable field label used in the error
+                message (e.g. ``"Start Date/Time"``).
+
+        Returns:
+            The validated ODF SYTM date/time string.
+
+        Raises:
+            ValueError: If the text is not a valid SYTM date/time,
+                prefixed with ``"[DATETIME] <label>: "``.
         """
         text = widget.text().strip()
         try:
@@ -290,6 +332,19 @@ class OdfMetadataForm(QWidget):
         Parse a float from a Q_line_edit. Uses Python float() for semantic validation.
         QDoubleValidator only ensures format while editing; we still need a final parse.
         Raises a ValueError with a labeled, machine-parseable message on failure.
+
+        Args:
+            widget: Line-edit widget to read the numeric text from.
+            label: Human-readable field label used in the error
+                message (e.g. ``"Min Depth"``).
+
+        Returns:
+            The parsed float, or :attr:`BaseHeader.NULL_VALUE` if the
+            field is empty.
+
+        Raises:
+            ValueError: If the text is non-empty but not a valid
+                float, prefixed with ``"[FLOAT] <label>: "``.
         """
         text = widget.text().strip()
         if text == "":
@@ -303,7 +358,17 @@ class OdfMetadataForm(QWidget):
             raise ValueError(f"[FLOAT] {label}: {e}") from e
 
     def collect_metadata(self) -> OdfHeader:
-        """Create and fill an OdfHeader from current UI values."""
+        """Create and fill an OdfHeader from current UI values.
+
+        Returns:
+            A new :class:`OdfHeader` with its cruise and event header
+            fields populated from the form's widgets.
+
+        Raises:
+            ValueError: If a date/time or numeric field fails
+                validation (via :meth:`_parse_datetime` or
+                :meth:`_parse_float`).
+        """
         odf = OdfHeader()
 
         # CRUISE_HEADER
@@ -359,6 +424,12 @@ class OdfMetadataForm(QWidget):
     # -----------------------------
     @Slot()
     def _on_ok_clicked(self):
+        """Collect and validate form input, then emit :attr:`submitted` or show an error.
+
+        On a validation error from :meth:`collect_metadata`, shows a
+        titled warning dialog and focuses the offending field instead
+        of closing.
+        """
         try:
             odf = self.collect_metadata()
         except ValueError as e:
@@ -404,5 +475,6 @@ class OdfMetadataForm(QWidget):
 
     @Slot()
     def _on_cancel_clicked(self):
+        """Emit :attr:`cancelled`."""
         self.cancelled.emit()
     

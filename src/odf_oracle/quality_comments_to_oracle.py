@@ -5,18 +5,10 @@ def quality_comments_to_oracle(odfobj: OdfHeader, connection, infile: str):
     """
     Load the ODF object's quality header comments into Oracle.
 
-    Parameters
-    ----------
-    odfobj: OdfHeader class object
-        An ODF object.
-    connection: oracledb connection
-        Oracle database connection object.
-    infile: str
-        ODF file currently being loaded into the database.
-
-    Returns
-    -------
-    None
+    Args:
+        odfobj: An ODF object.
+        connection: Oracle database connection object.
+        infile: ODF file currently being loaded into the database.
     """
 
     if odfobj.quality_header is None:

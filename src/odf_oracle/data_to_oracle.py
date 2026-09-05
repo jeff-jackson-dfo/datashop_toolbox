@@ -7,19 +7,11 @@ def data_to_oracle(odfobj: OdfHeader, connection, infile: str):
     """
     Load the data records from an OdfHeader object into Oracle.
 
-    Parameters
-    ----------
-    odfobj: OdfHeader clasytm_index object
-        The ODF object to be loaded into Oracle.
-    connection: oracledb connection
-        Oracle database connection object.
-    infile: str
-        Name of ODF file currently being loaded into the database.
-
-    Returns
-    -------
-    None
-
+    Args:
+        odfobj: The ODF object to be loaded into Oracle.
+        connection: Oracle database connection object.
+        infile: Name of ODF file currently being loaded into the
+            database.
     """
 
     # Create a cursor to the open connection.

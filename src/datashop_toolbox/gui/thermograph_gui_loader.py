@@ -9,7 +9,24 @@ from .ui_thermograph_main_window import Ui_thermograph_main_window
 
 
 class ThermographMainWindow(QMainWindow):
+    """Main window for collecting thermograph processing inputs.
+
+    Loads its UI from the Qt-Designer-generated
+    :class:`~datashop_toolbox.gui.ui_thermograph_main_window.Ui_thermograph_main_window`
+    and wires up the input widgets to internal state.
+
+    Attributes:
+        ui: The generated UI object providing this window's widgets.
+        metadata_file: Path to the selected metadata file.
+        data_folder: Path to the selected data folder.
+        processor_name: Data processor's name.
+        institution: Selected institution.
+        instrument: Selected instrument.
+        result: ``"accept"`` or ``"reject"`` after the window closes.
+    """
+
     def __init__(self):
+        """Build the window from the generated UI and connect its signals."""
         super().__init__()
         # Set up the UI from the generated module
         self.ui = Ui_thermograph_main_window()
@@ -34,17 +51,29 @@ class ThermographMainWindow(QMainWindow):
 
     # --- Slots ---
     def on_name_entered(self):
+        """Store and log the processor name once editing of the field ends."""
         self.processor_name = self.ui.name_line_edit.text()
         msg = colored(f"(1 of 3) Data processor: {self.processor_name}", 'light_blue')
         print(msg)
 
     def on_institution_changed(self, text: str):
+        """Store the newly selected institution.
+
+        Args:
+            text: Newly selected institution text.
+        """
         self.institution = text
 
     def on_instrument_changed(self, text: str):
+        """Store the newly selected instrument.
+
+        Args:
+            text: Newly selected instrument text.
+        """
         self.instrument = text
 
     def choose_metadata_file(self):
+        """Prompt for and store the metadata file."""
         file_path, _ = QFileDialog.getOpenFileName(self, "Select the Metadata file")
         if file_path:
             self.metadata_file = file_path
@@ -53,6 +82,7 @@ class ThermographMainWindow(QMainWindow):
             print(msg)
 
     def choose_data_folder(self):
+        """Prompt for and store the data folder."""
         folder_path = QFileDialog.getExistingDirectory(self, "Select the Data folder")
         if folder_path:
             self.data_folder = folder_path
@@ -61,10 +91,12 @@ class ThermographMainWindow(QMainWindow):
             print(msg)
 
     def accept_clicked(self):
+        """Set :attr:`result` to ``"accept"`` and close the window."""
         self.result = "accept"
         self.close()
 
     def reject_clicked(self):
+        """Set :attr:`result` to ``"reject"`` and close the window."""
         self.result = "reject"
         self.close()
 

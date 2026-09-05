@@ -28,7 +28,15 @@ class columns(Enum):
 
 def _fmt_value(val: Any) -> str:
     """Format values similarly to the example: integers as-is, floats right-aligned,
-    using scientific notation for very large/small magnitudes, 4 decimal places otherwise."""
+    using scientific notation for very large/small magnitudes, 4 decimal places otherwise.
+
+    Args:
+        val: Value to format. ``None`` or a NaN float formats as an
+            empty string.
+
+    Returns:
+        The formatted string representation of ``val``.
+    """
     if val is None:
         return ""
     if isinstance(val, int):
@@ -43,9 +51,27 @@ def _fmt_value(val: Any) -> str:
     return str(val)
 
 def _pad_left(text: str, width: int) -> str:
+    """Left-align text within a fixed-width field.
+
+    Args:
+        text: Text to pad.
+        width: Total field width.
+
+    Returns:
+        ``text`` left-aligned and padded with spaces to ``width``.
+    """
     return f"{text:<{width}}"
 
 def _pad_right(text: str, width: int) -> str:
+    """Right-align text within a fixed-width field.
+
+    Args:
+        text: Text to pad.
+        width: Total field width.
+
+    Returns:
+        ``text`` right-aligned and padded with spaces to ``width``.
+    """
     return f"{text:>{width}}"
 
 def print_btl_table(
@@ -69,16 +95,20 @@ def print_btl_table(
     Print a BTL-style table with:
       - 2 header lines (Bottle/Bottle/Date) and (Position/S/N/Time)
       - For each bottle: an average line with date, and a sdev line with time.
-    
-    Each `row` should be a mapping with at least:
-      {
-        "bottle": int | str,
-        "bottle_sn": int | str,
-        "date": str,           # e.g. "Oct 14 2025"
-        "time": str,           # e.g. "13:14:48"
-        "avg":  { <param_label>: number, ... },   # using labels from param_enum.value
-        "sdev": { <param_label>: number, ... },
-      }
+
+    Args:
+        rows: Bottle records to print. Each row should be a mapping
+            with at least:
+            ``{"bottle": int | str, "bottle_sn": int | str, "date":
+            str, "time": str, "avg": {<param_label>: number, ...},
+            "sdev": {<param_label>: number, ...}}``, where
+            ``<param_label>`` values come from ``param_enum``'s
+            members' ``.value``.
+        param_enum: Which :class:`columns` members to print, and in
+            what order, as data columns.
+        widths: Field widths keyed by ``"Bottle"``, ``"Bottle_SN"``,
+            ``"Date_Time"``, and ``"parameter"`` (the last used as the
+            default minimum width for parameter columns).
     """
     # Resolve fixed widths
     w_btl = int(widths.get("Bottle", 10))

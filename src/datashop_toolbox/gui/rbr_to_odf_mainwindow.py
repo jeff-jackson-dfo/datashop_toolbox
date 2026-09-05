@@ -37,7 +37,20 @@ from .ui_rbr_to_odf import Ui_main_window
 
 @dataclass
 class BtlHeader:
-    """Bottle header information to export BTL file."""
+    """Bottle header information to export BTL file.
+
+    Attributes:
+        ship: Name of the ship/platform.
+        cruise: Cruise number.
+        latitude: Formatted latitude string.
+        longitude: Formatted longitude string.
+        sounding: Water depth (sounding), in metres.
+        event_number: Event number.
+        cast: Cast identifier (event qualifier 1).
+        station_name: Name of the station.
+        event_comments: Free-text comments about the event.
+        instrument_serial_number: Serial number of the instrument.
+    """
     ship: str
     cruise: str
     latitude: float
@@ -50,16 +63,39 @@ class BtlHeader:
     instrument_serial_number: str
 
     def __str__(self) -> str:
+        """Format all fields as a multi-line ``"* ** <Field>: <value>"`` block.
+
+        Returns:
+            The formatted, newline-joined field listing.
+        """
         lines = [f"* ** {f.name.title()}: {getattr(self, f.name)}" for f in fields(self)]
         return "\n".join(lines)
 
 
 class MainWindow(QMainWindow):
+    """Main window for converting RBR ``.rsk`` CTD files to ODF and BTL files.
+
+    Lets the user browse ``.rsk`` files in a folder, inspect their
+    channels, plot profiles, edit ODF cruise/event metadata, and
+    export the processed data as ODF and BTL files. Window state
+    (folder, selections, geometry) is persisted to a small JSON file
+    under the user's home directory.
+
+    Attributes:
+        ui: The generated UI object providing this window's widgets.
+    """
+
     class Position_Type(Enum):
+        """Which kind of geographic position a value represents."""
         LAT = 'latitude'
         LON = 'longitude'
 
     def __init__(self, parent=None):
+        """Build the window, restore saved state, and connect signals.
+
+        Args:
+            parent: Optional parent widget.
+        """
         super().__init__(parent)
 
         # =====================================================
@@ -108,6 +144,7 @@ class MainWindow(QMainWindow):
         self._restoring_state = False
 
     def _setup_validators(self):
+        """Set placeholder text and numeric validators on the lat/lon fields."""
         self.ui.latitude_line_edit.setPlaceholderText("###.######")
         self.ui.longitude_line_edit.setPlaceholderText("####.######")
 
@@ -125,6 +162,7 @@ class MainWindow(QMainWindow):
         self.ui.longitude_line_edit.setValidator(longitude_validator)
 
     def _connect_signals(self):
+        """Wire the window's buttons and list widget to their handlers."""
         self.ui.select_folder_push_button.clicked.connect(self._choose_rsk_folder)
         self.ui.profile_plots_push_button.clicked.connect(self._profile_plots)
         self.ui.clear_info_push_button.clicked.connect(self._clear_settings)
@@ -136,18 +174,26 @@ class MainWindow(QMainWindow):
 
     @property
     def rsk_file_path(self) -> str:
+        """str: Full path to the currently selected ``.rsk`` file, or ``""``."""
         if not self._rsk_folder or not self._rsk_file:
             return ""
         path = str(Path(self._rsk_folder) / self._rsk_file)
         return path
 
     def _on_rsk_selected(self, current, previous):
+        """Update the channel list when the selected RSK file changes.
+
+        Args:
+            current: Newly selected list item, or ``None``.
+            previous: Previously selected list item (unused).
+        """
         if self._restoring_state or not current:
             return
         self._rsk_file = current.text()
         self._update_channel_list()
 
     def _save_settings(self):
+        """Persist the folder, lat/lon, selections, and window geometry to disk."""
         data = {
             "folder": self.ui.folder_line_edit.text(),
             "latitude": self.ui.latitude_line_edit.text(),
@@ -170,6 +216,7 @@ class MainWindow(QMainWindow):
             colored(f"Failed to save settings: {e}", 'light_red')
 
     def _load_settings(self):
+        """Restore the folder, lat/lon, selections, and window geometry from disk."""
         if not self._config_path.exists():
             return
 
@@ -217,10 +264,19 @@ class MainWindow(QMainWindow):
             self.restoreGeometry(bytes.fromhex(geometry_hex))
 
     def close_event(self, event):
+        """Persist settings before closing.
+
+        Note: named ``close_event`` (not Qt's ``closeEvent``), so this
+        is not actually connected as the window's close handler.
+
+        Args:
+            event: The close event.
+        """
         self._save_settings()
         super().closeEvent(event)
 
     def _choose_rsk_folder(self):
+        """Prompt for the RSK folder and populate the RSK file list."""
 
         folder_path = QFileDialog.getExistingDirectory(
             self, "Select the folder containing the RSK files", dir="."
@@ -241,6 +297,7 @@ class MainWindow(QMainWindow):
 
     # Update the channel_list_widget when a RSK file is selected
     def _update_channel_list(self):
+        """Read the selected RSK file's channels and restore prior selections."""
         self.ui.channel_list_widget.clear()
 
         try:
@@ -265,6 +322,13 @@ class MainWindow(QMainWindow):
             self.ui.channel_list_widget.addItem(f"Error reading RSK: {e}")
 
     def _profile_plots(self):
+        """Build and show a profile-plot dialog for the selected RSK file.
+
+        Derives sea pressure, salinity, density anomaly, and (if
+        available) dissolved-oxygen channels; detects individual
+        down-cast profiles; and opens one :class:`PlotDialog` showing
+        a plot per profile.
+        """
         fig_list = []
         channels_to_plot = []
 
@@ -317,6 +381,7 @@ class MainWindow(QMainWindow):
 
        
     def _clear_settings(self):
+        """Clear the folder, RSK/channel lists, and lat/lon fields."""
         # Clear all widgets
         self.ui.folder_line_edit.clear()
         self.ui.rsk_list_widget.clear()
@@ -326,6 +391,7 @@ class MainWindow(QMainWindow):
 
 
     def _edit_metadata(self):
+        """Open the ODF metadata dialog and store the resulting ODF object."""
         msg = colored("Editing ODF metadata ...", 'cyan')
         print(msg)
         dlg = OdfMetadataDialog(self)  # parent = MainWindow
@@ -347,6 +413,16 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _split_string_get_end_number(s):
+        """Split a string into its non-numeric prefix and trailing digits.
+
+        Args:
+            s: String to split, e.g. a channel name like
+                ``"temperature01"``.
+
+        Returns:
+            ``[prefix, digits]`` if ``s`` ends in one or more digits,
+            otherwise ``[s]``.
+        """
         digits = ""
         for i in range(len(s) - 1, -1, -1):
             if s[i].isdigit():
@@ -361,7 +437,27 @@ class MainWindow(QMainWindow):
 
 
     def _populate_parameter_headers(self, df: pd.DataFrame) -> dict:
-        """Populate the parameter headers and the data object."""
+        """Populate the parameter headers and the data object.
+
+        Maps each RSK-derived column (timestamp, sample, pressure,
+        temperature, salinity, etc.) to its ODF parameter code, builds
+        a :class:`~datashop_toolbox.parameterhdr.ParameterHeader` for
+        each with metadata looked up via
+        :func:`~datashop_toolbox.lookup_parameter.lookup_parameter`,
+        and formats the timestamp column as quoted ODF SYTM strings.
+
+        Args:
+            df: RSK profile data, with one column per channel.
+
+        Returns:
+            A dict with keys ``"parameter_headers"`` (list of
+            :class:`~datashop_toolbox.parameterhdr.ParameterHeader`),
+            ``"parameter_list"`` (list of parameter codes),
+            ``"print_formats"`` (dict of code to print-format string),
+            and ``"data_frame"`` (``df`` with columns renamed to
+            parameter codes and ``"specific_conductivity"`` dropped if
+            present).
+        """
         parameter_headers = list()
         parameter_dict = dict()
         parameter_list = list()
@@ -478,6 +574,12 @@ class MainWindow(QMainWindow):
         return parameter_dict
 
     def _choose_export_odf_folder(self) -> str:
+        """Prompt for the ODF export folder.
+
+        Returns:
+            The selected folder path, or ``""`` if the dialog was
+            cancelled.
+        """
 
         odf_folder_path = QFileDialog.getExistingDirectory(
             self, "Select the folder to save the ODF file(s)", dir="."
@@ -491,10 +593,30 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def round_to_nearest_half(number):
+        """Round a number to the nearest half (e.g. ``1.3`` -> ``1.5``).
+
+        Args:
+            number: Value to round.
+
+        Returns:
+            ``number`` rounded to the nearest multiple of ``0.5``.
+        """
         return round(number * 2) / 2
 
 
     def _export_odf(self):
+        """Process the selected RSK file and write down-cast/up-cast ODF files.
+
+        Reads the RSK file, computes profiles, aligns and smooths the
+        conductivity/temperature channels, adds a scan-number channel,
+        populates the ODF instrument header and creation dates, then
+        — for each cast direction ("down"/"up") — subsets to any
+        user-saved profiles (from :meth:`_profile_plots`), populates
+        the parameter headers and history header via
+        :meth:`_populate_parameter_headers`, and writes one ODF file
+        per profile to the folder chosen via
+        :meth:`_choose_export_odf_folder`.
+        """
         msg = colored("Preparing to export to ODF ...", 'yellow')
         print(msg)
 
@@ -638,6 +760,21 @@ class MainWindow(QMainWindow):
             
 
     def _format_positional_value(self, position: float, position_type: str) -> str:
+        """Format a decimal-degree position as a degrees/minutes BTL string.
+
+        Args:
+            position: Position in decimal degrees.
+            position_type: Which axis ``position`` is on — the
+                ``.name`` of a :class:`Position_Type` member (``"LAT"``
+                or ``"LON"``).
+
+        Returns:
+            A string like ``"N 44 30.1234"`` (latitude) or
+            ``"W 063 30.1234"`` (longitude), with the hemisphere
+            letter chosen from the sign of ``position``. Returns
+            ``None`` implicitly if ``position_type`` matches neither
+            ``"LAT"`` nor ``"LON"``.
+        """
         degrees = int(position)
         minutes = abs(position - degrees) * 60
         degrees = abs(degrees)
@@ -655,6 +792,17 @@ class MainWindow(QMainWindow):
 
 
     def _export_btl(self):
+        """Export a fixed-width BTL (bottle) file for the selected RSK cast.
+
+        Prompts for a bottle ID/depth text file, reads the RSK data,
+        builds a :class:`BtlHeader` from the current ODF metadata,
+        looks up ODF parameter formatting via
+        :func:`~datashop_toolbox.read_seaodf_parameters.read_seaodf_parameters`,
+        and for each bottle depth, computes and writes mean and
+        standard-deviation lines for every parameter within a
+        pressure window around that depth, to a ``.btl`` file named
+        after the RSK file.
+        """
 
         # Export .btl file
         msg = colored("Preparing to export to BTL ...", 'yellow')

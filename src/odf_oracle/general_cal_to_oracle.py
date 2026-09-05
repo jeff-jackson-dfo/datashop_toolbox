@@ -6,21 +6,13 @@ from odf_oracle.sytm_to_timestamp import sytm_to_timestamp
 
 
 def general_cal_to_oracle(odfobj: OdfHeader, connection, infile: str):
-    """ "
+    """
     Load the general cal header metadata from the ODF object into Oracle.
 
-    Parameters
-    ----------
-    odfobj: OdfHeader class object
-        An ODF object.
-    connection: oracledb connection
-        Oracle database connection object.
-    infile: str
-        ODF file currently being loaded into the database.
-
-    Returns
-    -------
-    None
+    Args:
+        odfobj: An ODF object.
+        connection: Oracle database connection object.
+        infile: ODF file currently being loaded into the database.
     """
 
     # global i
