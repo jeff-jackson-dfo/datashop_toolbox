@@ -44,13 +44,22 @@ import time
 from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
 import pytz
-from PySide6.QtCore import QPointF, QRectF, Qt
+
+if TYPE_CHECKING:
+    # pyqtgraph re-exports PlotItem at the top level (pg.PlotItem) for runtime
+    # convenience, but that name collides with the submodule it's defined in
+    # (pyqtgraph.graphicsItems.PlotItem.PlotItem), so pyright resolves
+    # `pg.PlotItem` to the module, not the class. Import the class explicitly
+    # from its defining submodule, guarded so this has no runtime cost and
+    # can't raise ImportError if pyqtgraph's internals ever move.
+    from pyqtgraph.graphicsItems.PlotItem.PlotItem import PlotItem as PgPlotItem
+from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import (
     QApplication,
@@ -143,24 +152,6 @@ _PRES_CANDIDATES = ["PRES_01", "PRES_02", "DEPH_01", "DEPH_02"]
 _TEMP_CANDIDATES = ["TEMP_01", "TE90_01", "TEMP_02"]
 
 
-# ---------------------------------------------------------------------------
-# Pylance QtPyGraph Type Solutions
-# ---------------------------------------------------------------------------
-class ViewBoxProtocol(Protocol):
-    def mapSceneToView(self, pos) -> QPointF:
-        ...
-
-    def viewRect(self) -> QRectF:
-        ...
-
-class PlotItemProtocol(Protocol):
-    def getViewBox(self) -> ViewBoxProtocol:
-        ...
-
-    def addItem(self, item) -> None:
-        ...
-
-
 # ===========================================================================
 # Shared: LassoItem
 # ===========================================================================
@@ -175,10 +166,7 @@ class LassoItem(pg.GraphicsObject):
     """
     sigSelected = pg.QtCore.Signal(object)  # emits list[np.ndarray] of int indices
 
-<<<<<<< HEAD
-    def __init__(self, plot_item: PlotItemProtocol, xs: np.ndarray, ys: np.ndarray):
-=======
-    def __init__(self, plot_item: pg.PlotItem, xs: np.ndarray, ys: np.ndarray):
+    def __init__(self, plot_item: "PgPlotItem", xs: np.ndarray, ys: np.ndarray):
         """Initialize the lasso selector.
 
         Args:
@@ -186,7 +174,6 @@ class LassoItem(pg.GraphicsObject):
             xs: Initial x-coordinates of the point set to hit-test.
             ys: Initial y-coordinates of the point set to hit-test.
         """
->>>>>>> 5535a697e7ae4da3f3d1112694deddc8bab63cb0
         super().__init__()
         self._plot = plot_item
         self._vb = plot_item.getViewBox()
@@ -241,22 +228,18 @@ class LassoItem(pg.GraphicsObject):
         """
         return self._vb.viewRect()
 
-<<<<<<< HEAD
     def paint(
         self,
         painter: QPainter,
         option: QStyleOptionGraphicsItem,
         widget: QWidget | None = None,
     ) -> None:
-=======
-    def paint(self, p, *args):
         """Paint the in-progress lasso outline.
 
         Args:
             p: ``QPainter`` to draw with.
             *args: Unused extra Qt paint arguments.
         """
->>>>>>> 5535a697e7ae4da3f3d1112694deddc8bab63cb0
         if len(self._verts) < 2:
             return
 
@@ -488,10 +471,11 @@ class QCWindow(QWidget):
 
             if self._df is None:
                 return
+            df = self._df  # local narrowing survives inside the comprehension below; self._df's doesn't
 
             # Snapshot all per-param flag columns for undo
             self._qflag_snapshots = {
-                f"qualityflag_{d}": self._df[f"qualityflag_{d}"].to_numpy().copy()
+                f"qualityflag_{d}": df[f"qualityflag_{d}"].to_numpy().copy()
                 for d in self._param_map
             }
 
@@ -510,7 +494,11 @@ class QCWindow(QWidget):
                 if all(d in p["param_map"] for p in self._profiles)
             ] or list(primary["param_map"])
 
-            self._x_col = (
+            # x_col_default is only used when it's a member of self._common_params
+            # (a list of str column names), so this can never actually be None —
+            # the cast tells pyright what the branching already guarantees.
+            self._x_col: str = cast(
+                str,
                 x_col_default if x_col_default in self._common_params
                 else "Temperature" if "Temperature" in self._common_params
                 else self._common_params[0]
@@ -642,7 +630,7 @@ class QCWindow(QWidget):
 
             # Lasso: X = timestamps, Y = Temperature
             if xnums is not None and df  is not None:
-                self._lasso = LassoItem(self._pw.getPlotItem(), xnums, df["Temperature"].to_numpy()) # pyright: ignore[reportArgumentType]
+                self._lasso = LassoItem(cast("PgPlotItem", self._pw.getPlotItem()), xnums, df["Temperature"].to_numpy())
 
         elif mode == "ctd":
 
@@ -702,13 +690,13 @@ class QCWindow(QWidget):
                 (valid_pres.min() - y_margin, valid_pres.max() + y_margin)
                 if valid_pres.size else (0, 1)
             )
-            self._pw.setXRange(*self._x_range)
-            self._pw.setYRange(*self._y_range)
+            vb.setXRange(*self._x_range)
+            vb.setYRange(*self._y_range)
             vb.enableAutoRange(enable=False)
 
             # Lasso hit-tests against every overlaid profile simultaneously
             self._lasso = LassoItem(
-                self._pw.getPlotItem(),
+                cast("PgPlotItem", self._pw.getPlotItem()),
                 self._profile_xs(self._profiles[0]),
                 self._profiles[0]["pres_data"],
             )
@@ -943,11 +931,16 @@ class QCWindow(QWidget):
             first column) in CTD mode.
         """
         if self._mode == "thermograph":
+            assert self._xnums is not None, (
+                "xnums is required when mode='thermograph'"
+            )
             return self._xnums
-        col = self._x_col        
+        col = self._x_col
+        assert self._df is not None, "self._df is required when mode='ctd'"
+        df = self._df
         return (
-            self._df[col].to_numpy() if col in self._df.columns
-            else self._df.iloc[:, 0].to_numpy()
+            df[col].to_numpy() if col in df.columns
+            else df.iloc[:, 0].to_numpy()
         )
 
     def _current_ys(self) -> np.ndarray:
@@ -960,9 +953,11 @@ class QCWindow(QWidget):
         """
         if self._mode == "thermograph":
             col = getattr(self, "_y_col", "Temperature")
+            assert self._df is not None, "self._df is required when mode='thermograph'"
+            df = self._df
             return (
-                self._df[col].to_numpy() if col in self._df.columns
-                else self._df["Temperature"].to_numpy()
+                df[col].to_numpy() if col in df.columns
+                else df["Temperature"].to_numpy()
             )
         return self._pres_data
 
@@ -1012,7 +1007,7 @@ class QCWindow(QWidget):
     def _click_lasso(self):
         """Switch to lasso selection mode."""
         self._lasso.resume()
-        self._vb.setMouseMode(pg.ViewBox.PanMode)
+        self._vb.setMouseMode(pg.ViewBox.ViewBox.PanMode)
         self._vb.setMouseEnabled(x=False, y=False)
         self._set_button_active(self._btn_lasso)
         logger.info("Lasso mode activated.")
@@ -1021,7 +1016,7 @@ class QCWindow(QWidget):
         """Switch to rectangular zoom-box mode."""
         self._lasso.pause()
         self._vb.setMouseEnabled(x=True, y=True)
-        self._vb.setMouseMode(pg.ViewBox.RectMode)
+        self._vb.setMouseMode(pg.ViewBox.ViewBox.RectMode)
         self._set_button_active(self._btn_zoom_box)
         logger.info("Zoom Box mode activated.")
 
@@ -1029,7 +1024,7 @@ class QCWindow(QWidget):
         """Switch to pan mode."""
         self._lasso.pause()
         self._vb.setMouseEnabled(x=True, y=True)
-        self._vb.setMouseMode(pg.ViewBox.PanMode)
+        self._vb.setMouseMode(pg.ViewBox.ViewBox.PanMode)
         self._set_button_active(self._btn_pan)
         logger.info("Pan mode activated.")
 
@@ -1051,10 +1046,12 @@ class QCWindow(QWidget):
 
             self._flag_col = f"qualityflag_{col_name}"
             self._state["active_display"] = col_name
-            self._df["qualityflag"] = self._df[self._flag_col].copy()
+            assert self._df is not None, "self._df is required when mode='thermograph'"
+            df = self._df
+            df["qualityflag"] = df[self._flag_col].copy()
             brushes = [
                 pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
-                for f in self._df[self._flag_col]
+                for f in df[self._flag_col]
             ]
 
             self._y_col = col_name
@@ -1067,7 +1064,8 @@ class QCWindow(QWidget):
             if valid.size:
                 y_margin = (valid.max() - valid.min()) * 0.05 or 1.0
                 self._y_range = (valid.min() - y_margin, valid.max() + y_margin)
-                self._pw.setYRange(*self._y_range, padding=0)
+                y_min, y_max = self._y_range
+                cast("PgPlotItem", self._pw.getPlotItem()).getViewBox().setYRange(y_min, y_max, padding=0)
             self._pw.setLabel("left", col_name)
 
         elif self._mode == "ctd":
@@ -1103,7 +1101,8 @@ class QCWindow(QWidget):
                     [p["pres_data"] for p in self._profiles]
                 ))
                 self._x_range = (valid_xs.min() - x_margin, valid_xs.max() + x_margin)
-                self._pw.setXRange(*self._x_range, padding=0)
+                x_min, x_max = self._x_range
+                cast("PgPlotItem", self._pw.getPlotItem()).getViewBox().setXRange(x_min, x_max, padding=0)
             self._pw.setLabel("bottom", col_name)
 
         logger.info(f"Axis switched to: {col_name} (flag col: {self._flag_col})")
@@ -1128,11 +1127,13 @@ class QCWindow(QWidget):
                 flag.
         """
         flag = self._state["current_flag"]
-        self._df.iloc[indices, self._df.columns.get_loc(self._flag_col)] = flag
-        self._df["qualityflag"] = self._df[self._flag_col].copy()
+        assert self._df is not None, "self._df is required when mode='thermograph'"
+        df = self._df
+        df.iloc[indices, cast(int, df.columns.get_loc(self._flag_col))] = flag
+        df["qualityflag"] = df[self._flag_col].copy()
         brushes = [
             pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
-            for f in self._df[self._flag_col]
+            for f in df[self._flag_col]
         ]
 
         if self._mode == "thermograph":
@@ -1170,7 +1171,7 @@ class QCWindow(QWidget):
         flag = self._state["current_flag"]
         prof = self._profiles[profile_idx]
         df = prof["df"]
-        df.iloc[indices, df.columns.get_loc(self._flag_col)] = flag
+        df.iloc[indices, cast(int, df.columns.get_loc(self._flag_col))] = flag
         df["qualityflag"] = df[self._flag_col].copy()
         brushes = [
             pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
@@ -1282,9 +1283,11 @@ class QCWindow(QWidget):
     def _click_reset_view(self):
         """Redraw the scatter(s) with current flag colors and reset the axis ranges."""
         if self._mode == "thermograph":
+            assert self._df is not None, "self._df is required when mode='thermograph'"
+            df = self._df
             brushes = [
                 pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
-                for f in self._df[self._flag_col]
+                for f in df[self._flag_col]
             ]
             self._scatter.setData(
                 x=self._xnums,
@@ -1307,8 +1310,11 @@ class QCWindow(QWidget):
                     connect="finite", name=prof["cast_label"],
                 )
 
-        self._pw.setXRange(*self._x_range, padding=0)
-        self._pw.setYRange(*self._y_range, padding=0)
+        x_min, x_max = self._x_range
+        y_min, y_max = self._y_range
+        vb = cast("PgPlotItem", self._pw.getPlotItem()).getViewBox()
+        vb.setXRange(x_min, x_max, padding=0)
+        vb.setYRange(y_min, y_max, padding=0)
 
     def _click_deselect_all(self):
         """Restore all quality flags to their pre-session snapshot values."""
@@ -1331,12 +1337,14 @@ class QCWindow(QWidget):
             return
 
         self._state["selection_groups"].clear()
+        assert self._df is not None, "self._df is required when mode='thermograph'"
+        df = self._df
         for fc, snap in self._qflag_snapshots.items():
-            self._df[fc] = snap.copy()
-        self._df["qualityflag"] = self._df[self._flag_col].copy()
+            df[fc] = snap.copy()
+        df["qualityflag"] = df[self._flag_col].copy()
         brushes = [
             pg.mkBrush(QColor(FLAG_COLORS[int(f)]))
-            for f in self._df[self._flag_col]
+            for f in df[self._flag_col]
         ]
         self._scatter.setBrush(brushes)
         self._lasso.set_point_sets((self._xnums, self._current_ys()))
@@ -1416,7 +1424,11 @@ class QCWindow(QWidget):
                 )
             return
 
-        df_to_export = self._profiles[0]["df"] if self._mode == "ctd" else self._df
+        if self._mode == "ctd":
+            df_to_export = self._profiles[0]["df"]
+        else:
+            assert self._df is not None, "self._df is required when mode='thermograph'"
+            df_to_export = self._df
         stem = Path(str(current_file)).stem
         export_path, _ = QFileDialog.getSaveFileName(
             self, "Export DataFrame to CSV",
@@ -2088,7 +2100,7 @@ def qc_thermograph_data(
 
         mtr_file_name = mtr_file.name
         logger.info(f"Reading file {idx}/{len(mtr_files)}: {mtr_file}")
-        full_path = str(pathlib.Path(in_folder_path, mtr_file))
+        full_path = pathlib.Path(in_folder_path, mtr_file)
 
         try:
             mtr = ThermographHeader()
@@ -2144,7 +2156,7 @@ def qc_thermograph_data(
         try:
             dt = pd.to_datetime(sytm, format="%d-%b-%Y %H:%M:%S.%f")
         except Exception:
-            dt = pd.to_datetime(sytm, infer_datetime_format=True, errors="coerce")
+            dt = pd.to_datetime(sytm, errors="coerce")
 
         df = pd.DataFrame({"Temperature": temp}, index=dt)
         for display, (data_col, flag_col) in param_map.items():
@@ -2260,7 +2272,7 @@ def qc_thermograph_data(
                         idx_s = meta_subset["datetime"].idxmin()
                         start_datetime_qc = meta_subset.loc[idx_s, "datetime"] - pd.to_timedelta(
                             meta_subset.loc[idx_s, "soak_days"], unit="D"
-                        )
+                        )  # noqa: E501
                         idx_e = meta_subset["datetime"].idxmax()
                         end_datetime_qc = meta_subset.loc[idx_e, "datetime"]
                 elif "date" in meta_subset.columns and not meta_subset["date"].isna().all():
