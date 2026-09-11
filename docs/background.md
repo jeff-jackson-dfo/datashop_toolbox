@@ -29,7 +29,7 @@ MATLAB® toolbox which was preceeded by the original Fortran and VAX/VMS era too
 
 The **Ocean Data Format (ODF)** is a plain ASCII text format, developed at BIO and used
 across DFO facilities, for archiving a single oceanographic data series, such as a single
-profile (e.g. CTD cast) or a time-series (e.g. a thermograph deployment). 
+profile (e.g. CTD cast) or a time-series (e.g. a thermograph deployment).
 
 An ODF file has two parts:
 
@@ -37,7 +37,7 @@ An ODF file has two parts:
    `EVENT_HEADER`, `INSTRUMENT_HEADER`, and so on) that carry all of the file's metadata.
 2. A **data section**, introduced by a `-- DATA --` marker. Version 2.0 of the ODF format
    displays each data row as a white-space delimited columns of numbers. Version 3.0 of
-   the ODF format, has a column header row that immediately follows the marker and 
+   the ODF format, has a column header row that immediately follows the marker and
    each data row is stored as a comma-delimited set of numbers (scan, sample, or reading).
 
 The toolbox targets **ODF specification version 3.0**, the version described in
@@ -54,13 +54,13 @@ Every ODF file is built from the same set of block types, each covering one aspe
 provenance or metadata:
 
 | Block | Mandatory? | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | `ODF_HEADER` | Yes | File specification string and the ODF spec version the file conforms to. |
 | `CRUISE_HEADER` | Yes | The mission the data came from — cruise number, platform, chief scientist, dates. |
 | `EVENT_HEADER` | Yes | The specific sampling event (e.g. one CTD cast) — position, depth, timing, comments. |
 | `METEO_HEADER` | Yes | Meteorological conditions recorded during the event. |
 | `INSTRUMENT_HEADER` | Yes | The instrument that collected the data — type, model, serial number. |
-| `QUALITY_HEADER` | Yes | QC tests applied to the data and related comments. |
+| `QUALITY_HEADER` | Yes | Quality Control (QC) tests applied to the data and related comments. |
 | `POLYNOMIAL_CAL_HEADER` | Optional | Polynomial calibration coefficients for a parameter. |
 | `GENERAL_CAL_HEADER` | Optional | Non-polynomial calibrations (equation plus coefficients). |
 | `COMPASS_CAL_HEADER` | Optional | Compass swing calibration, as direction/correction pairs. |
@@ -170,11 +170,13 @@ one-to-one onto an ODF block: `database_connection_pool.py` configures Oracle se
 `fix_null.py` normalizes ODF's numeric null sentinels (`-99`, `-99.9`, `-999`, `-999.9`)
 to `NaN` before loading.
 
-### `seabird` and `cotede`: vendored dependencies
+### `seabird` and `cotede`: open source dependencies
 
-The toolbox depends on two third-party-derived packages that are vendored into `src/`
-rather than pulled in only as external dependencies, so they can be adapted to DFO's
-data:
+The toolbox utilizes a few third-party-derived packages. Most were written by
+[Guilherme Castelão](https://github.com/castelao). A couple needed to be modified in
+order to get them working because they are not actively maintained. The two such
+packages are stored in `src/` rather than pulled in normally as external dependencies.
+These two packages are:
 
 - **`seabird`** extends the PySeabird project's `.cnv` parser to handle the range of
   Sea-Bird firmware output the toolbox encounters in practice — commented XML/CDATA
@@ -188,13 +190,14 @@ data:
 
 ## How it fits together
 
-A typical workflow moves data through these packages in sequence: raw instrument output
-(a Sea-Bird `.cnv`, an RBR `.rsk`, or a raw MTR/minilog file) is parsed into a pandas
-DataFrame; that DataFrame and its associated metadata populate an `OdfHeader` (or a
-subclass such as `ThermographHeader`); automated QC (via `cotede`) and/or interactive QC
-(via `qc_odf_data.py`) inspect the data and record quality flags and history entries;
-the finished `OdfHeader` is written out as a standards-compliant ODF file with
-`write_odf()`; and, where the data needs to be centrally archived, `odf_oracle` loads
-that same `OdfHeader` object into the `ODF_ARCHIVE` Oracle database. The ODF file itself
-remains the durable, self-describing artifact at the center of that pipeline — which is
-exactly the role the format was designed to play.
+A typical workflow involves data being handled by these packages in sequence: raw
+instrument output (e.g., a Sea-Bird `.cnv`, an RBR `.rsk`, or a raw MTR/minilog file)
+is initially parsed into a `pandas` DataFrame and its associated metadata is populated
+within an `OdfHeader` (or a subclass such as `ThermographHeader`). Next, automated QC
+(via `cotede`) and/or interactive QC (via `qc_odf_data.py`) are used to assess the
+data and assign quality flags and record history entries within the ODF header.
+The completed `OdfHeader` is written out as a standards-compliant ODF file with
+`write_odf()`. The data is then centrally archived by using `odf_oracle` to load
+the output ODF file into the `ODF_ARCHIVE` Oracle database. The ODF object/file
+remains the central self-describing artifact of this pipeline — which is
+exactly the role the ODF format was designed to play.
