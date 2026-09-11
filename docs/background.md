@@ -173,10 +173,10 @@ to `NaN` before loading.
 ### `seabird` and `cotede`: open source dependencies
 
 The toolbox utilizes a few third-party-derived packages. Most were written by
-[Guilherme Castelão](https://github.com/castelao). A couple needed to be modified in
-order to get them working because they are not actively maintained. The two such
-packages are stored in `src/` rather than pulled in normally as external dependencies.
-These two packages are:
+[Guilherme Castelão](https://github.com/castelao). A couple of these needed to be
+modified in order to get them working because they are not actively maintained. The two
+such packages are stored in `src/` rather than pulled in normally as external
+dependencies. These two packages are:
 
 - **`seabird`** extends the PySeabird project's `.cnv` parser to handle the range of
   Sea-Bird firmware output the toolbox encounters in practice — commented XML/CDATA
