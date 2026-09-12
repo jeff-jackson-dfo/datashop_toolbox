@@ -21,9 +21,9 @@ your use case by looking at the different pages.
 
 ## Acknowledgements
 
-I wish to thank [Prodyut Roy](https://github.com/prodyut1978) 
-for his important contributions to this project; especially 
-helping with the GUI development and the code to process 
+I wish to thank [Prodyut Roy](https://github.com/prodyut1978)
+for his important contributions to this project; especially
+helping with the GUI development and the code to process
 thermograph data.
 
 << [Generating Documentation](generating_documentation.md) >>
