@@ -6,7 +6,7 @@ import logging
 
 import numpy as np
 from numpy import ma
-from oceansdb import CARS
+from oceansdb.cars import CARS
 
 from ..utils import day_of_year, extract_coordinates, extract_depth, extract_time
 from .core import QCCheckVar
