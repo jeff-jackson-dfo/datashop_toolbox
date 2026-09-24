@@ -36,7 +36,6 @@ Shared infrastructure (identical for both types)
 import json
 import logging
 import os
-import pathlib
 import re
 import shutil
 import sys
@@ -2100,7 +2099,7 @@ def qc_thermograph_data(
 
         mtr_file_name = mtr_file.name
         logger.info(f"Reading file {idx}/{len(mtr_files)}: {mtr_file}")
-        full_path = pathlib.Path(in_folder_path, mtr_file)
+        full_path = Path(in_folder_path, mtr_file)
 
         try:
             mtr = ThermographHeader()
@@ -2592,7 +2591,7 @@ def qc_thermograph_data(
                         f"Could not determine event number from filename: {mtr_file_name}"
                     )
             mtr.file_specification = file_spec
-            out_file = pathlib.Path(out_odf_path) / f"{file_spec}.ODF"
+            out_file = Path(out_odf_path) / f"{file_spec}.ODF"
             logger.info(f"Writing [{idx}/{len(mtr_files)}]: {out_file}")
             mtr.write_odf(str(out_file), version=2.0)
             logger.info(f"Saved [{idx}/{len(mtr_files)}]: {out_file}")
@@ -2670,7 +2669,7 @@ def _load_ctd_profile(ctd_file: Path, in_folder_path: str, qc_mode_user: int) ->
     """
     ctd_file_name = ctd_file.name
     logger.info(f"Reading file: {ctd_file}")
-    full_path = str(pathlib.Path(in_folder_path, ctd_file))
+    full_path = Path(in_folder_path, ctd_file)
     try:
         ctd = OdfHeader()
         ctd.read_odf(full_path)
@@ -3095,7 +3094,7 @@ def qc_ctd_data(
                             f"Could not determine event number from filename: {ctd_file_name}"
                         )
                 ctd.file_specification = file_spec
-                out_file = pathlib.Path(out_odf_path) / f"{file_spec}.ODF"
+                out_file = Path(out_odf_path) / f"{file_spec}.ODF"
                 logger.info(f"Writing [{group_idx}/{len(groups)}]: {out_file}")
                 ctd.write_odf(str(out_file), version=2.0)
                 logger.info(f"Saved [{group_idx}/{len(groups)}]: {out_file}")
