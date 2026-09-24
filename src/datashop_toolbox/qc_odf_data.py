@@ -1006,7 +1006,7 @@ class QCWindow(QWidget):
     def _click_lasso(self):
         """Switch to lasso selection mode."""
         self._lasso.resume()
-        self._vb.setMouseMode(pg.ViewBox.ViewBox.PanMode)
+        self._vb.setMouseMode(pg.ViewBox.PanMode)
         self._vb.setMouseEnabled(x=False, y=False)
         self._set_button_active(self._btn_lasso)
         logger.info("Lasso mode activated.")
@@ -1015,7 +1015,7 @@ class QCWindow(QWidget):
         """Switch to rectangular zoom-box mode."""
         self._lasso.pause()
         self._vb.setMouseEnabled(x=True, y=True)
-        self._vb.setMouseMode(pg.ViewBox.ViewBox.RectMode)
+        self._vb.setMouseMode(pg.ViewBox.RectMode)
         self._set_button_active(self._btn_zoom_box)
         logger.info("Zoom Box mode activated.")
 
@@ -1023,7 +1023,7 @@ class QCWindow(QWidget):
         """Switch to pan mode."""
         self._lasso.pause()
         self._vb.setMouseEnabled(x=True, y=True)
-        self._vb.setMouseMode(pg.ViewBox.ViewBox.PanMode)
+        self._vb.setMouseMode(pg.ViewBox.PanMode)
         self._set_button_active(self._btn_pan)
         logger.info("Pan mode activated.")
 
