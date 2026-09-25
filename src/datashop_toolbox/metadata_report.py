@@ -74,13 +74,15 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
     worksheet.append(report_headings)
 
     os.chdir(file_path)
-    odf_files = Path.glob(wildcard)
+    pathlib_path = Path(file_path)
+    odf_files = pathlib_path.glob(pattern=wildcard)
 
     for odf_file in odf_files:
         odf = OdfHeader()
-        odf.read_odf(file_path + odf_file)
+        odf.read_odf(pathlib_path / odf_file)
+
         meta = list()
-        meta.append(odf_file)
+        meta.append(odf_file.name)
         meta.append(odf.file_specification.strip("'"))
         meta.append(odf.cruise_header.country_institute_code)
         meta.append(odf.cruise_header.cruise_number.strip("'"))
@@ -146,7 +148,7 @@ def generate_report(file_path: str, wildcard: str, outfile: str) -> None:
 
 if __name__ == "__main__":
     generate_report(
-        "C:/DFO-MPO/DEV/Data/2025/LAT2025146/CTD/DATASHOP_PROCESSING/Step_2_Apply_Calibrations/ODF/",
-        "D*.odf",
+        "C:/DFO-MPO/DEV/Data/2025/LAT2025146/CTD/DATASHOP_PROCESSING/Step_7_Visual_Inspection/",
+        "*_DN.odf",
         "CTD_Metadata.xlsx",
     )
