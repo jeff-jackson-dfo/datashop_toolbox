@@ -1,10 +1,12 @@
-These tutorials will provide concise walk-through 
+# Datashop Toolbox Tutorials
+
+These tutorials will provide concise walk-through
 instructions to teach you the main uses
 of the Datashop Toolbox.
 
-# Datashop Toolbox Installation
+## Datashop Toolbox Installation
 
-## Installing Using Pip
+### Installing Using Pip
 
 === "Windows"
 
@@ -18,19 +20,17 @@ of the Datashop Toolbox.
     $ python3 -m pip install
     ```
 
-## Installing with UV
+### Installing with UV
 
-**uv** is a highly efficient and powerful Python project 
-and package manager.
+**uv** is a highly efficient and powerful Python project and package manager.
 
 > Please refer to [Installing uv](
     https://docs.astral.sh/uv/getting-started/installation/)
 > if the **uv** tool is not currently installed.
 
-In a shell (e.g. terminal or console window), navigate to 
-the folder (create it if necessary) where the virtual 
-environment will be created. Activate the vitrual
-environment.
+In a shell (e.g. terminal or console window), navigate to the folder
+(create it if necessary) where the virtual environment will be created then
+activate the vitrual environment.
 
 === "Windows"
 
@@ -54,10 +54,8 @@ environment.
     ```
 
 - Help newcomers with getting started
-- Teach readers about your library by making them
-    write code
-- Inspire confidence through examples that work for
-    everyone, repeatably
+- Teach readers about your library by making them write code
+- Inspire confidence through examples that work for everyone, repeatably
 - Give readers an immediate sense of achievement
 - Show concrete examples, no abstractions
 - Provide the minimum necessary explanation
