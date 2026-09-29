@@ -360,7 +360,7 @@ def read_file_lines(file_with_path: Path) -> list[str]:
         print(f"'file_with_path' must be Path, got {type(file_with_path).__name__}")
         return []
     try:
-        with Path.open(file_with_path, encoding="utf-8") as file:
+        with Path.open(file_with_path, encoding="cp1252") as file:
             return [line.strip() for line in file if line.strip()]
     except FileNotFoundError:
         print(f"File not found: {file_with_path}")

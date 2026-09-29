@@ -782,7 +782,10 @@ class OdfHeader(ValidatedBase, BaseHeader):
         new_print_formats = {}
 
         pcodes = self.get_parameter_codes()
-        index_sytm = pcodes.index("SYTM_01")
+        if "SYTM_01" in pcodes:
+            index_sytm = pcodes.index("SYTM_01")
+        else:
+            index_sytm = -1
         if index_sytm != -1:
             new_param_list.append(self.parameter_headers[index_sytm])
             new_df["SYTM_01"] = df["SYTM_01"]
@@ -1068,50 +1071,56 @@ def main():
         # my_file = 'mtr_79999_46_61036_14400.odf'
         # my_file = 'MADCPS_BCD2004909_1544_1269-60_3600.ODF' # Fails due to bad null_value in SYTM parameter header and bad data in SYTM channel.  # noqa: E501
         # my_file = "MCTD_CAR2023648_2264_11689_1800.ODF"
-        my_file = "CTD_AT4802_008_1_DN.ODF"
-        my_path = "C:/DFO-MPO/DEV/GitHub/datashop_toolbox/"
+        
+        # my_file = "CTD_AT4802_008_1_DN.ODF"
+        # my_path = "C:/DFO-MPO/DEV/GitHub/datashop_toolbox/"
+        
+        my_file = 'CTD_HUD2001009_1_1_DN.ODF'
+        my_path = "C:/DFO-MPO/DEV/Data/2001/HUD2001009/ODF/"
 
         odf = OdfHeader()
         odf.reset_log_list()
         # print(odf.shared_log_list)
 
-        input_file_path = Path(my_path, "sampledata/ctd/" + my_file)
-        odf.read_odf(input_file_path)
+        # input_file_path = Path(my_path, "sampledata/ctd/" + my_file)
+        input_file_path = Path(my_path, my_file)
+        if input_file_path.exists():
+            odf.read_odf(input_file_path)    
 
-        # Add a new History Header to record the modifications that are made.
-        odf.add_history()
-        user = "Jeff Jackson"
-        odf.log_odf_message(f"{user} made the following modifications to this file:", "base")
-        odf.add_to_history("")
+            # Add a new History Header to record the modifications that are made.
+            odf.add_history()
+            user = "Jeff Jackson"
+            odf.log_odf_message(f"{user} made the following modifications to this file:", "base")
+            odf.add_to_history("")
 
-        odf.event_header.set_event_comment("We had a successful trip!", 1)
+            odf.event_header.set_event_comment("We had a successful trip!", 1)
 
-        print(odf.shared_log_list)
+            print(odf.shared_log_list)
 
-        odf.update_odf()
+            odf.update_odf()
 
-        # Write the ODF file to disk.
-        file_spec = odf.generate_file_spec()
-        odf.file_specification = file_spec
-        out_file = f"{file_spec}.ODF"
-        out_file_path = Path("c:/dfo-mpo/test/output/", out_file)
-        odf.write_odf(out_file_path, version=2.0)
+            # Write the ODF file to disk.
+            file_spec = odf.generate_file_spec()
+            odf.file_specification = file_spec
+            out_file = f"{file_spec}.ODF"
+            out_file_path = Path("c:/dfo-mpo/test/output/", out_file)
+            odf.write_odf(out_file_path, version=2.0)
 
-        if not odf.quality_header:
-            odf.quality_header = QualityHeader()
-            odf.quality_header.set_logger_and_config(odf.logger, odf.config)
-            qd = odf.quality_header.quality_date
-            odf.quality_header.log_quality_message("QUALITY_DATE", qd, "01-JUL-2017 10:45:19.00")
-            odf.quality_header.quality_date = "01-JUL-2017 10:45:19.00"
-            odf.quality_header.set_quality_test("Test 1")
-            odf.quality_header.set_quality_test("Test 2")
-            odf.quality_header.quality_comments = ["Comment 1", "Comment 2"]
-            odf.add_quality_flags()
-            odf.quality_header.add_quality_codes()
-            odf.quality_header.add_qcff_info()
-            qfs_out_file = f"{file_spec}_QFs.ODF"
-            qfs_out_file_path = Path("c:/dfo-mpo/test/output/", qfs_out_file)
-            odf.write_odf(qfs_out_file_path, version=3.0)
+            if not odf.quality_header:
+                odf.quality_header = QualityHeader()
+                odf.quality_header.set_logger_and_config(odf.logger, odf.config)
+                qd = odf.quality_header.quality_date
+                odf.quality_header.log_quality_message("QUALITY_DATE", qd, "01-JUL-2017 10:45:19.00")
+                odf.quality_header.quality_date = "01-JUL-2017 10:45:19.00"
+                odf.quality_header.set_quality_test("Test 1")
+                odf.quality_header.set_quality_test("Test 2")
+                odf.quality_header.quality_comments = ["Comment 1", "Comment 2"]
+                odf.add_quality_flags()
+                odf.quality_header.add_quality_codes()
+                odf.quality_header.add_qcff_info()
+                qfs_out_file = f"{file_spec}_QFs.ODF"
+                qfs_out_file_path = Path("c:/dfo-mpo/test/output/", qfs_out_file)
+                odf.write_odf(qfs_out_file_path, version=3.0)
 
 
 if __name__ == "__main__":
