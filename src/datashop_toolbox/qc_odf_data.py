@@ -2593,7 +2593,7 @@ def qc_thermograph_data(
             mtr.file_specification = file_spec
             out_file = Path(out_odf_path) / f"{file_spec}.ODF"
             logger.info(f"Writing [{idx}/{len(mtr_files)}]: {out_file}")
-            mtr.write_odf(str(out_file), version=2.0)
+            mtr.write_odf(out_file, version=2.0)
             logger.info(f"Saved [{idx}/{len(mtr_files)}]: {out_file}")
         except Exception as e:
             logger.exception(f"Failed writing QC ODF for {mtr_file}: {e}")
@@ -3096,7 +3096,7 @@ def qc_ctd_data(
                 ctd.file_specification = file_spec
                 out_file = Path(out_odf_path) / f"{file_spec}.ODF"
                 logger.info(f"Writing [{group_idx}/{len(groups)}]: {out_file}")
-                ctd.write_odf(str(out_file), version=2.0)
+                ctd.write_odf(out_file, version=2.0)
                 logger.info(f"Saved [{group_idx}/{len(groups)}]: {out_file}")
             except Exception as e:
                 logger.exception(f"Failed writing QC ODF for {ctd_file}: {e}")
