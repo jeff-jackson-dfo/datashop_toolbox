@@ -2567,8 +2567,10 @@ def qc_thermograph_data(
         else:
             logger.info(f"Total flags changed for {mtr_file}: {total_changed}")
 
+
         # Write ODF
         try:
+            orig_df.replace(np.nan, -99.0, inplace=True)
             mtr.data.data_frame = orig_df
             mtr.add_history()
             mtr.add_to_history(
@@ -3073,6 +3075,7 @@ def qc_ctd_data(
 
             # Write ODF
             try:
+                orig_df.replace(np.nan, -99.0, inplace=True)
                 ctd.data.data_frame = orig_df
                 ctd.add_history()
                 ctd.add_to_history(

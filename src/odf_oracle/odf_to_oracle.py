@@ -51,10 +51,7 @@ def odf_to_oracle(
     # Find all ODF files in the current directory using the input wildcard.
     os.listdir(path=mypath)
     filelist = mypath.glob(wildcard)
-
-    if len(list(filelist)) == 0:
-        print("No files found.")
-
+    
     # Loop through the list of ODF files.
     for filename in filelist:
         print(f"\nWorking on loading ODF file << {filename} >>:")
@@ -115,7 +112,7 @@ def odf_to_oracle(
 
 def main():
 
-    load_dotenv(r"C:\Users\JacksonJ\OneDrive - DFO-MPO\Documents\.env")
+    load_dotenv("C:/Users/JacksonJ/Documents/.env")
     username = str(os.environ.get("ODF_ARCHIVE_USERNAME"))
     userpwd = str(os.environ.get("ODF_ARCHIVE_PASSWORD"))
     oracle_host = str(os.environ.get("ORACLE_HOST"))
