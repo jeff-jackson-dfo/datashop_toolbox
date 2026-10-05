@@ -1,5 +1,5 @@
-import glob
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -21,7 +21,7 @@ from odf_oracle.quality_to_oracle import quality_to_oracle
 
 
 def odf_to_oracle(
-    wildcard: str, user: str, password: str, oracle_host: str, oracle_service_name: str, mypath: str
+    wildcard: str, user: str, password: str, oracle_host: str, oracle_service_name: str, mypath: Path
 ) -> None:
     """
     Read ODF files and load them into the ODF_ARCHIVE Oracle database.
@@ -50,9 +50,9 @@ def odf_to_oracle(
 
     # Find all ODF files in the current directory using the input wildcard.
     os.listdir(path=mypath)
-    filelist = glob.glob(wildcard)
+    filelist = mypath.glob(wildcard)
 
-    if len(filelist) == 0:
+    if len(list(filelist)) == 0:
         print("No files found.")
 
     # Loop through the list of ODF files.
@@ -69,7 +69,7 @@ def odf_to_oracle(
         odf.data.data_frame = df
 
         # # Load the Cruise_Header and Event_Header information into Oracle.
-        odf_file = cruise_event_to_oracle(odf, connection, filename)
+        odf_file = cruise_event_to_oracle(odf, connection, filename.name)
 
         # # Load the Event_Header.Event_Comments into Oracle.
         event_comments_to_oracle(odf, connection, odf_file)
@@ -120,17 +120,16 @@ def main():
     userpwd = str(os.environ.get("ODF_ARCHIVE_PASSWORD"))
     oracle_host = str(os.environ.get("ORACLE_HOST"))
     oracle_service_name = str(os.environ.get("ORACLE_SERVICE_NAME"))
-
+    path_to_files_to_load = Path("C:/DFO-MPO/DEV/LOAD_TO_ODF_ARCHIVE/")
+    
     odf_to_oracle(
         wildcard="*.ODF",
         user=username,
         password=userpwd,
         oracle_host=oracle_host,
         oracle_service_name=oracle_service_name,
-        mypath=r"C:\\DFO-MPO\\DEV\\LOAD_TO_ODF_ARCHIVE\\",
+        mypath=path_to_files_to_load,
     )
-    # mypath = r'C:\\DFO-MPO\\DEV\\TEMP\\TEST\\')
-    # mypath = r'C:\\DFO-MPO\\DEV\\GitHub\\datashop_toolbox\\tests\\LOAD_TO_ORACLE\\')
 
 
 if __name__ == "__main__":
