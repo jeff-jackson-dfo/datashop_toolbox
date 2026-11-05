@@ -96,9 +96,7 @@ The codebase is split into a few packages, each with a distinct responsibility:
 ```text
 src/
 ├── datashop_toolbox/   # ODF data model, processing pipelines, interactive QC, GUI
-├── odf_oracle/         # Loads populated ODF objects into the ODF_ARCHIVE Oracle database
-├── seabird/            # Sea-Bird .cnv file parsing (extends the PySeabird project)
-└── cotede/             # Vendored CoTeDe QC-test library, used for automated flagging
+└── odf_oracle/         # Loads populated ODF objects into the ODF_ARCHIVE Oracle database
 ```
 
 ### `datashop_toolbox`: the ODF Data Model
@@ -151,10 +149,9 @@ Around this data model sit the processing pipelines and tools:
   Qt-Designer-generated `ui_*.py` files back these widgets but are treated as generated
   code, not hand-maintained source.
 
-Two runnable entry points at the repository root tie these pieces together for everyday
+A runnable entry point at the repository root tie these pieces together for everyday
 use: `run_MTR_tools.py` (a small menu for processing raw MTR files, running thermograph
-QC, or trying the experimental AI-assisted QC) and `run_SEABIRD_tools.py` (an example of
-loading a Sea-Bird `.cnv` file with the bundled `seabird` parser).
+QC, or trying the experimental AI-assisted QC).
 
 ### `odf_oracle`: archiving to Oracle
 
@@ -170,31 +167,13 @@ one-to-one onto an ODF block: `database_connection_pool.py` configures Oracle se
 `fix_null.py` normalizes ODF's numeric null sentinels (`-99`, `-99.9`, `-999`, `-999.9`)
 to `NaN` before loading.
 
-### `seabird` and `cotede`: open source dependencies
-
-The toolbox utilizes a few third-party-derived packages. Most were written by
-[Guilherme Castelão](https://github.com/castelao). A couple of these needed to be
-modified in order to get them working because they are not actively maintained. The two
-such packages are stored in `src/` rather than pulled in normally as external
-dependencies. These two packages are:
-
-- **`seabird`** extends the PySeabird project's `.cnv` parser to handle the range of
-  Sea-Bird firmware output the toolbox encounters in practice — commented XML/CDATA
-  blocks, partial or missing position/station metadata, and conversion of
-  degrees-minutes-seconds coordinates to decimal degrees — exposing parsed profiles as
-  NumPy masked arrays or pandas DataFrames.
-- **`cotede`** (CoTeDe) supplies a configurable library of QC tests (range checks,
-  spike detection, gradient checks, climatology comparisons, and more) that can be
-  applied to a profile and combined into an overall QC flag, used as the automated
-  quality-control layer underneath the toolbox's interactive QC tools.
-
 ## How it fits together
 
 A typical workflow involves data being handled by these packages in sequence: raw
 instrument output (e.g., a Sea-Bird `.cnv`, an RBR `.rsk`, or a raw MTR/minilog file)
 is initially parsed into a `pandas` DataFrame and its associated metadata is populated
 within an `OdfHeader` (or a subclass such as `ThermographHeader`). Next, automated QC
-(via `cotede`) and/or interactive QC (via `qc_odf_data.py`) are used to assess the
+(via `run_gtspp.py`) and/or interactive QC (via `qc_odf_data.py`) are used to assess the
 data and assign quality flags and record history entries within the ODF header.
 The completed `OdfHeader` is written out as a standards-compliant ODF file with
 `write_odf()`. The data is then centrally archived by using `odf_oracle` to load
