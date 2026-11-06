@@ -60,7 +60,7 @@ profiles read with :class:`~datashop_toolbox.odfhdr.OdfHeader`. It builds on
 
   From the command line (runs both stages and writes CSV files):
 
-      python gtspp_stage2.py odf_folder --platforms known.txt --out-prefix cruise
+      python gtspp_stage2.py odf_folder --out-prefix cruise
 """
 
 from __future__ import annotations
@@ -78,15 +78,18 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from datashop_toolbox.gtspp_stage1 import (
-    QF,
-    Bathymetry,
-    NetCDFBathymetry,
-    Stage1Config,
-    Station,
-    load_stations,
-    run_stage1,
-)
+try:  # inside the datashop_toolbox package ...
+    from datashop_toolbox.gtspp_stage1 import (
+        QF,
+        Bathymetry,
+        NetCDFBathymetry,
+        Stage1Config,
+        Station,
+        load_stations,
+        run_stage1,
+    )
+except ImportError:  # ... or side by side in a plain folder
+    from gtspp_stage1 import QF, Bathymetry, NetCDFBathymetry, Stage1Config, Station, load_stations, run_stage1
 
 log = logging.getLogger("gtspp_stage2")
 
@@ -1412,9 +1415,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="GTSPP Stage 1 + Stage 2 QC on a folder of ODF files")
     ap.add_argument("folder")
     ap.add_argument("--pattern", default="*.ODF")
-    ap.add_argument("--platforms", help="text file: known platform identifiers, one per line")
+    ap.add_argument(
+        "--platforms",
+        help="text file: known platform identifiers, one per line (default: the toolbox lookups/platforms.csv)",
+    )
     ap.add_argument("--bathy", help="GEBCO/ETOPO netCDF (tests 1.4, 1.6, 2.11)")
-    ap.add_argument("--max-speed-knots", type=float)
+    ap.add_argument(
+        "--max-speed-knots", type=float, help="speed limit in knots for platforms that are not in the lookup table"
+    )
     ap.add_argument("--inversion-amplitude", type=float, help="enable test 2.12 (deg C)")
     ap.add_argument("--out-prefix", default="gtspp")
     args = ap.parse_args()

@@ -46,19 +46,20 @@ The original files are never overwritten.
   Usage
   ─────
       stations = load_stations("odf_folder")
-      run_stage1(stations, Stage1Config(known_platforms={"HUDSON"}))
+      run_stage1(stations, Stage1Config())
       profiles = load_profiles(stations)
       run_stage2(profiles, Stage2Config())
       save_stage2_to_odf(profiles, "qc_odf")
 
   From the command line:
 
-      python gtspp_odf_output.py odf_folder --out-dir qc_odf --platforms known.txt
+      python gtspp_odf_output.py odf_folder --out-dir qc_odf
 
   Requirements
   ────────────
   ``datashop_toolbox`` must be installed. ``gsw`` is needed for test 2.10 and
-  ``netCDF4`` only for ``--bathy``; the toolbox installs neither.
+  ``xarray`` with a netCDF engine (``netCDF4`` or ``h5netcdf``) only for
+  ``--bathy``; the toolbox installs none of them.
 """
 
 from __future__ import annotations
@@ -73,16 +74,23 @@ from pathlib import Path
 
 import numpy as np
 
-from datashop_toolbox.gtspp_stage1 import (
-    DATE_PARTS,
-    NetCDFBathymetry,
-    Stage1Config,
-    Station,
-    load_stations,
-    run_stage1,
-)
-from datashop_toolbox.gtspp_stage1 import Test as Test1
-from datashop_toolbox.gtspp_stage2 import Profile, Stage2Config, Test2, load_profiles, run_stage2
+# The three gtspp_*.py modules work either side by side in any folder, or inside the
+# datashop_toolbox package (src/datashop_toolbox/).
+try:
+    from datashop_toolbox.gtspp_stage1 import (
+        DATE_PARTS,
+        NetCDFBathymetry,
+        Stage1Config,
+        Station,
+        load_stations,
+        run_stage1,
+    )
+    from datashop_toolbox.gtspp_stage1 import Test as Test1
+    from datashop_toolbox.gtspp_stage2 import Profile, Stage2Config, Test2, load_profiles, run_stage2
+except ImportError:
+    from gtspp_stage1 import DATE_PARTS, NetCDFBathymetry, Stage1Config, Station, load_stations, run_stage1
+    from gtspp_stage1 import Test as Test1
+    from gtspp_stage2 import Profile, Stage2Config, Test2, load_profiles, run_stage2
 
 log = logging.getLogger("gtspp_odf_output")
 
@@ -591,7 +599,8 @@ def print_summary(stations: Sequence[Station], profiles: Sequence[Profile]) -> N
     """Print the Stage 1 and Stage 2 results to the console.
 
     For each test, shows how many stations or profiles failed out of how
-    many were run, and names the failures. Also prints notes on corrections
+    many were run (and how many of those had data to examine, if fewer),
+    and names the failures. Also prints notes on corrections
     and lists files that could not be written.
 
     Args:
@@ -603,9 +612,11 @@ def print_summary(stations: Sequence[Station], profiles: Sequence[Profile]) -> N
     for spec in STAGE1_SCHEME:
         bad = [s.label for s in stations if spec.test in s.failed]
         ran = sum(1 for s in stations if spec.test in s.ran)
+        done = sum(1 for s in stations if spec.test in s.performed)
         if ran:
             print(
                 f"  Test {spec.number} {spec.name}: {len(bad)} failed of {ran} run"
+                + (f" ({done} had data)" if done != ran else "")
                 + (f"  -> {', '.join(bad)}" if bad else "")
             )
             any1 |= bool(bad)
@@ -620,9 +631,11 @@ def print_summary(stations: Sequence[Station], profiles: Sequence[Profile]) -> N
     for spec in SCHEME:
         bad = [p.label for p in profiles if spec.test in p.failed]
         ran = sum(1 for p in profiles if spec.test in p.ran)
+        done = sum(1 for p in profiles if spec.test in p.performed)
         if ran:
             print(
                 f"  Test {spec.number} {spec.name}: {len(bad)} failed of {ran} run"
+                + (f" ({done} had data)" if done != ran else "")
                 + (f"  -> {', '.join(bad)}" if bad else "")
             )
 
@@ -669,9 +682,14 @@ def main() -> None:
     ap.add_argument("folder")
     ap.add_argument("--out-dir", required=True, help="folder for the QC'd ODF files")
     ap.add_argument("--pattern", default="*.ODF")
-    ap.add_argument("--platforms", help="text file: known platform identifiers, one per line")
+    ap.add_argument(
+        "--platforms",
+        help="text file: known platform identifiers, one per line (default: the toolbox lookups/platforms.csv)",
+    )
     ap.add_argument("--bathy", help="GEBCO/ETOPO netCDF (tests 1.4, 1.6, 2.11)")
-    ap.add_argument("--max-speed-knots", type=float)
+    ap.add_argument(
+        "--max-speed-knots", type=float, help="speed limit in knots for platforms that are not in the lookup table"
+    )
     ap.add_argument("--no-history", action="store_true", help="do not add a HISTORY_HEADER entry")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")

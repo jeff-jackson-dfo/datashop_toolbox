@@ -29,44 +29,50 @@ You need:
 > supported: the existing flags are kept and values already flagged doubtful are not re-tested,
 > so the results differ from a first run. The script logs a warning if it sees this.
 
-## 1. Install the two extra packages
+## 1. Install the extra packages
 
-The toolbox installs neither of these.
+The toolbox installs none of these.
 
 === "Windows"
 
     ```powershell
-    (venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install gsw netCDF4
+    (venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install gsw xarray netCDF4
     ```
 
 === "Linux / macOS"
 
     ```bash
-    (venv) $ uv pip install gsw netCDF4
+    (venv) $ uv pip install gsw xarray netCDF4
     ```
 
 - `gsw` is needed for test 2.10 (Density Inversion) and for converting pressure to depth. Without
   it, test 2.10 is skipped and left out of the quality header.
-- `netCDF4` is only needed if you use a bathymetry file (step 3).
+- `xarray` and a netCDF engine for it (`netCDF4` here, or `h5netcdf`) are only needed if you use a bathymetry file
+  (step 3).
 
-## 2. Check the known platforms
+## 2. Check the platform table
 
-Test 1.1 checks each platform against a list of known platforms. By default the scripts read that list from the
-toolbox lookup table `src/datashop_toolbox/lookups/platforms.csv`: the first column is used and the first row is
-treated as a header. The path is relative to the current folder, so **run the scripts from the repository root**.
+Two tests use the toolbox lookup table `src/datashop_toolbox/lookups/platforms.csv`, which has the columns
+`platform_name`, `call_sign` and `max_velocity`. The path is relative to the current folder, so **run the scripts from
+the repository root**.
 
-Check that every platform in your ODF files (`PLATFORM` in the `CRUISE_HEADER`) is in that table. Case and repeated
-spaces are ignored.
+- **Test 1.1 (Platform Identification)** checks each platform against `platform_name`. Case and repeated spaces are
+  ignored.
+- **Test 1.5 (Impossible Speed)** uses `max_velocity`, in knots, as the speed limit of each platform. If a name
+  appears twice (vessels with the same name and different call signs), the larger limit is used.
 
-To use a different list for one run, pass `--platforms FILE`, a text file with one platform name per line. It
-replaces the lookup table for that run.
+Check that every platform in your ODF files (`PLATFORM` in the `CRUISE_HEADER`) is in the table.
+
+To use a different platform list for one run, pass `--platforms FILE`, a text file with one platform name per line. It
+replaces the names used by test 1.1 only; the speed limits still come from the table.
 
 ```text
 HUDSON
 ```
 
-If the lookup table cannot be found, the scripts log a warning (`Known platforms not loaded`) and start with an empty
-list, so test 1.1 flags any platform that appears in only one file as doubtful (3).
+If the table cannot be found, the scripts log a warning (`Known platforms not loaded`) and start with empty lists. Test
+1.1 then flags any platform that appears in only one file as doubtful (3), and test 1.5 runs only if you give
+`--max-speed-knots`.
 
 ## 3. Run the QC
 
@@ -75,8 +81,7 @@ list, so test 1.1 flags any platform that appears in only one file as doubtful (
     ```powershell
     (venv) PS C:\Dev\GitHub\datashop_toolbox> python src\datashop_toolbox\gtspp_odf_output.py `
         C:\Data\HUD2008004\ODF `
-        --out-dir C:\Data\HUD2008004\QC `
-        --max-speed-knots 15
+        --out-dir C:\Data\HUD2008004\QC
     ```
 
 === "Linux / macOS"
@@ -84,8 +89,7 @@ list, so test 1.1 flags any platform that appears in only one file as doubtful (
     ```bash
     (venv) $ python src/datashop_toolbox/gtspp_odf_output.py \
         /data/HUD2008004/ODF \
-        --out-dir /data/HUD2008004/QC \
-        --max-speed-knots 15
+        --out-dir /data/HUD2008004/QC
     ```
 
 If the scripts are inside the `datashop_toolbox` package you can also run
@@ -96,7 +100,7 @@ If the scripts are inside the `datashop_toolbox` package you can also run
 | `FOLDER` | Folder with the original ODF files. |
 | `--out-dir DIR` | **Required.** Folder for the QC'd files, which keep their original names. The script refuses to write into the folder the file came from. |
 | `--platforms FILE` | Known platforms, one per line. Default: the lookup table `lookups/platforms.csv` (step 2). |
-| `--max-speed-knots N` | Speed limit for every platform, in knots. Turns on test 1.5. |
+| `--max-speed-knots N` | Speed limit, in knots, for platforms that are **not** in the lookup table. Platforms in the table always use their own limit (step 2). |
 | `--bathy FILE` | GEBCO or ETOPO netCDF grid. Turns on tests 1.4, 1.6 and 2.11. |
 | `--pattern GLOB` | Which files to read. Default `*.ODF`. |
 | `--no-history` | Do not add a `HISTORY_HEADER` entry. |
@@ -105,7 +109,7 @@ Tests that need an input you did not give are not run, and are not listed in the
 
 | If you omit | These tests are not run |
 |---|---|
-| `--max-speed-knots` | 1.5 Impossible Speed |
+| `--max-speed-knots` | Nothing is lost: test 1.5 still runs for every platform in the lookup table. Platforms that are not in it are not speed-tested. |
 | `--bathy` | 1.4 Position on Land, 1.6 Impossible Sounding, 2.11 Bottom |
 | (no command-line option) | 2.12 Temperature Inversion — see [below](#turn-on-the-temperature-inversion-test) |
 
@@ -129,6 +133,9 @@ Stage 2 (profile), 10 profiles:
   Test 2.10 Density Inversion: 2 failed of 10 run  -> CTD_HUD2008004_001, CTD_HUD2008004_034
 10 ODF files written to C:\Data\HUD2008004\QC
 ```
+
+When fewer stations or profiles had data to examine than were run, the line adds `(N had data)`: for example,
+`Test 1.4 Position on Land: 0 failed of 10 run (6 had data)` when four stations lie outside the bathymetry grid.
 
 The toolbox also prints one `ODF file written to:` line per file. Two other lines are worth
 watching for:
@@ -210,10 +217,10 @@ format the scripts read directly:
 
 ```powershell
 python src\datashop_toolbox\gtspp_odf_output.py C:\Data\HUD2008004\ODF --out-dir C:\Data\HUD2008004\QC `
-    --max-speed-knots 15 --bathy C:\Data\GEBCO_2026_cruise_area.nc
+    --bathy C:\Data\GEBCO_2026_cruise_area.nc
 ```
 
-The scripts need `netCDF4` (step 1 of this guide). They look for latitude, longitude and elevation variables
+The scripts read the file with `xarray` (step 1 of this guide). They look for latitude, longitude and elevation variables
 (elevation negative at sea) and find them by name. If a file does not match, the error message lists the variables it
 contains; for a different elevation variable name, pass `NetCDFBathymetry(path, var="<name>")` from Python.
 
@@ -225,27 +232,33 @@ contains; for a different elevation variable name, pass `NetCDFBathymetry(path, 
 - A position on land, and a sounding that differs from the bathymetry by more than 10%, are flagged doubtful. As in
   the manual, a bad sounding fails both test 1.4 and test 1.6.
 
-### Use a different speed limit for each platform
+### Change a speed limit
 
-The command line applies one limit to every platform. For per-platform limits, use Python (see
-[Run it from Python](#run-it-from-python)) and pass
-`Stage1Config(max_speed_knots={"HUDSON": 14.0, "TELEOST": 12.0})`. Platforms with no limit are
-not tested.
+Speed limits come from the `max_velocity` column of `platforms.csv`; edit the table to change one for good. To change
+one for a single run, use Python (see [Run it from Python](#run-it-from-python)). Passing `max_speed_knots` replaces the
+whole table, so start from the table's values:
+
+```python
+from datashop_toolbox.gtspp_stage1 import Stage1Config, get_platform_speeds
+
+cfg1 = Stage1Config(max_speed_knots={**get_platform_speeds(), "HUDSON": 14.0})
+```
 
 ### Run it from Python
 
 This is how to change thresholds, the flags assigned on failure, or the derived-parameter rules:
 
 ```python
-from datashop_toolbox.gtspp_stage1 import QF, NetCDFBathymetry, Stage1Config, load_stations, run_stage1
+from datashop_toolbox.gtspp_stage1 import (
+    QF, NetCDFBathymetry, Stage1Config, get_platform_speeds, load_stations, run_stage1,
+)
 from datashop_toolbox.gtspp_stage2 import Stage2Config, flagged_values, load_profiles, run_stage2
 from datashop_toolbox.gtspp_odf_output import print_summary, save_stage2_to_odf
 
 bathy = NetCDFBathymetry(r"C:\Data\GEBCO_2024.nc")
 
 cfg1 = Stage1Config(
-    known_platforms={"HUDSON"},
-    max_speed_knots={"HUDSON": 14.0},
+    max_speed_knots={**get_platform_speeds(), "HUDSON": 14.0},
     bathymetry=bathy,
     land_flag=QF.ERRONEOUS,          # flag a position on land 4 instead of 3
 )
@@ -279,7 +292,7 @@ cfg2 = Stage2Config(inversion_amplitude_c=0.5)   # example value: pick your own
 
 ```powershell
 python src\datashop_toolbox\gtspp_stage2.py C:\Data\HUD2008004\ODF `
-    --max-speed-knots 15 --out-prefix HUD2008004
+    --out-prefix HUD2008004
 ```
 
 This writes `HUD2008004_stage1.csv` (one row per station), `HUD2008004_stage2.csv` (one row per
@@ -292,7 +305,8 @@ the tests responsible and, for derived parameters, the source column the flag ca
 |---|---|---|
 | `NameError: name 'Test1' is not defined` (or a similar `ImportError`) when starting | The three scripts are from different versions, or an import line was edited. | Replace all three scripts with the current versions and do not edit their `import` lines. They work in a plain folder and inside the package. |
 | `ModuleNotFoundError: No module named 'datashop_toolbox'` | The toolbox is not installed in the active environment. | Activate the environment, or run `uv pip install -e .` in the toolbox folder. |
-| `ModuleNotFoundError: No module named 'netCDF4'` | You passed `--bathy` without the package. | `uv pip install netCDF4` |
+| `NetCDFBathymetry needs the 'xarray' package and a netCDF engine` | You passed `--bathy` without `xarray`. | `uv pip install xarray netCDF4` |
+| `ValueError: found the following matches with the input file in xarray's IO backends: ['netcdf4', 'h5netcdf']. But their dependencies may not be installed` | `xarray` is installed but no netCDF engine is. | `uv pip install netCDF4` (or `h5netcdf`). |
 | Test 2.10 is missing from the console summary and the quality header | `gsw` is not installed. | `uv pip install gsw` and run again. |
 | `NOT WRITTEN (toolbox could not read the file; Stage 1 only)` | The toolbox rejects the file, for example an impossible `START_DATE_TIME` such as `31-FEB-2008`. Stage 1 still tested it. | The console shows a `Toolbox could not read <file> (...)` warning with the reason. Correct the header value in the original file and run again. |
 | A platform is flagged `unknown, single-occurrence platform` | Its name is not in the known-platform list. | Add it to `lookups/platforms.csv`, or pass a list with `--platforms`. |
