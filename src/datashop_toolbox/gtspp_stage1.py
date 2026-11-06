@@ -82,7 +82,6 @@ import pandas as pd
 
 log = logging.getLogger("gtspp_stage1")
 
-
 # --------------------------------------------------------------------------- #
 # Flags and test indices
 # --------------------------------------------------------------------------- #
@@ -134,11 +133,42 @@ BAD = (QF.ERRONEOUS, QF.MISSING)
 DATE_PARTS = ("year", "month", "day", "hour", "minute")
 FLAG_KEYS = ("platform", *DATE_PARTS, "latitude", "longitude", "sounding")
 
+
+# --------------------------------------------------------------------------- #
+# Lookups
+# --------------------------------------------------------------------------- #
 def get_platforms() -> list:
-    platform_path = Path.cwd() / 'src/datashop_toolbox/lookups/platforms.csv'
+    """Read the known platform names from the toolbox lookup table.
+
+    Reads ``src/datashop_toolbox/lookups/platforms.csv`` relative to the
+    current working directory, so run from the repository root. The first
+    row of the file is treated as a header and the first column is used.
+
+    Returns:
+        The values of the first column, in file order.
+
+    Raises:
+        FileNotFoundError: If the lookup file does not exist.
+    """
+    platform_path = Path.cwd() / "src/datashop_toolbox/lookups/platforms.csv"
     df = pd.read_csv(platform_path)
     my_list = df.iloc[:, 0].tolist()
     return my_list
+
+
+def _default_known_platforms() -> set[str]:
+    """Return the default for :attr:`Stage1Config.known_platforms`.
+
+    Returns:
+        The platforms from :func:`get_platforms`, or an empty set, with a
+        warning, if the lookup file cannot be found from the current working
+        directory.
+    """
+    try:
+        return set(get_platforms())
+    except FileNotFoundError as exc:
+        log.warning("Known platforms not loaded (%s); pass known_platforms or --platforms", exc)
+        return set()
 
 
 # --------------------------------------------------------------------------- #
@@ -154,7 +184,8 @@ class Stage1Config:
 
     Attributes:
         known_platforms: Platform identifiers accepted by test 1.1. Case and
-            repeated spaces are ignored.
+            repeated spaces are ignored. Defaults to the platforms in the
+            toolbox lookup table (see :func:`get_platforms`).
         unknown_platform_flag: Flag for a platform that is not in
             ``known_platforms`` and occurs only once in the run.
         now: Reference time for the date/time tests. Defaults to the current
@@ -187,7 +218,7 @@ class Stage1Config:
     """
 
     # Test 1.1 -- list of known platform identifiers (as they appear in ODF)
-    known_platforms = set(get_platforms())
+    known_platforms: set[str] = field(default_factory=_default_known_platforms)
     unknown_platform_flag: QF = QF.DOUBTFUL
 
     # Test 1.2
@@ -523,8 +554,10 @@ class Bathymetry(Protocol):
 class NetCDFBathymetry:
     """Nearest-grid-cell water depth from a netCDF grid.
 
-    Works with GEBCO and ETOPO style files. Requires the ``netCDF4``
-    package, which ``datashop_toolbox`` does not install.
+    Works with GEBCO and ETOPO style files, whole or a downloaded
+    sub-area. Positions outside the grid return ``None`` (no data) rather
+    than the nearest edge cell. Requires the ``netCDF4`` package, which
+    ``datashop_toolbox`` does not install.
 
     Attributes:
         ds: The open ``netCDF4.Dataset``.
@@ -560,14 +593,20 @@ class NetCDFBathymetry:
         def pick(opts):
             return next((names[o] for o in opts if o in names), None)
 
-        self.lat_name = pick(("lat", "latitude", "y"))
-        self.lon_name = pick(("lon", "longitude", "x"))
-        self.var = var or pick(("elevation", "z", "depth", "bathymetry", "topo"))
-        if not (self.lat_name and self.lon_name and self.var):
+        lat_name = pick(("lat", "latitude", "y"))
+        lon_name = pick(("lon", "longitude", "x"))
+        var_name = var or pick(("elevation", "z", "depth", "bathymetry", "topo"))
+        if lat_name is None or lon_name is None or var_name is None:
             raise ValueError(f"Cannot identify lat/lon/elevation variables in {path}: {list(names)}")
+        self.lat_name: str = lat_name
+        self.lon_name: str = lon_name
+        self.var: str = var_name
         self.lat = np.asarray(self.ds[self.lat_name][:], dtype=float)
         self.lon = np.asarray(self.ds[self.lon_name][:], dtype=float)
         self.positive_up = elevation_positive_up
+        # half a grid cell, so a position on the outer edge of the grid still counts as inside it
+        self._half_lat = float(np.abs(np.diff(self.lat)).mean()) / 2 if len(self.lat) > 1 else 0.0
+        self._half_lon = float(np.abs(np.diff(self.lon)).mean()) / 2 if len(self.lon) > 1 else 0.0
 
     def depth_at(self, lat: float, lon: float) -> float | None:
         """Return the water depth at the grid cell nearest a position.
@@ -580,10 +619,15 @@ class NetCDFBathymetry:
 
         Returns:
             Water depth in metres, positive down (zero or less on land), or
-            ``None`` if the grid cell is masked.
+            ``None`` if the position is outside the grid or the grid cell is
+            masked. Tests that need a depth skip such positions.
         """
         if self.lon.max() > 180 and lon < 0:
             lon += 360.0
+        if not (self.lat.min() - self._half_lat <= lat <= self.lat.max() + self._half_lat) or not (
+            self.lon.min() - self._half_lon <= lon <= self.lon.max() + self._half_lon
+        ):
+            return None  # outside the grid (for example a downloaded sub-area): no data
         i = int(np.abs(self.lat - lat).argmin())
         j = int(np.abs(self.lon - lon).argmin())
         v = self.ds[self.var][i, j]
@@ -825,9 +869,10 @@ def test_1_4_position_on_land(s: Station, cfg: Stage1Config) -> None:
         s: Station to test; its flags and messages are updated.
         cfg: Test settings.
     """
-    if cfg.bathymetry is None or not s.position_ok:
+    lat, lon = s.latitude, s.longitude
+    if cfg.bathymetry is None or lat is None or lon is None or not s.position_ok:
         return  # rule 1.4.1: skip
-    depth = cfg.bathymetry.depth_at(s.latitude, s.longitude)
+    depth = cfg.bathymetry.depth_at(lat, lon)
     if depth is None or not math.isfinite(depth):
         return  # no bathymetry here
     s.performed |= Test.ON_LAND
@@ -849,9 +894,11 @@ def test_1_6_impossible_sounding(s: Station, cfg: Stage1Config) -> None:
     """Run test 1.6, Impossible Sounding.
 
     Compares the header sounding with the bathymetry at the station's
-    position. The flag is set to 1 when they agree, to
-    :attr:`Stage1Config.sounding_flag` when they do not, and left at 0 when
-    the position is unusable.
+    position. The flag is set to 1 when they agree and to
+    :attr:`Stage1Config.sounding_flag` when they do not. If there is nothing
+    to compare (no sounding, an unusable position, or no bathymetry value at
+    the position, including a position outside the grid) the flag stays at 0
+    and the test is not counted as performed.
 
     Args:
         s: Station to test; its flags and messages are updated.
@@ -862,14 +909,15 @@ def test_1_6_impossible_sounding(s: Station, cfg: Stage1Config) -> None:
     snd = _sounding_value(s, cfg)
     if snd is None:
         return  # rules 1.6.2 / 1.6.4
-    s.performed |= Test.SOUNDING
-    if not s.position_ok:
+    lat, lon = s.latitude, s.longitude
+    if lat is None or lon is None or not s.position_ok:
         s.flags["sounding"] = QF.UNCHECKED  # rule 1.6.3
         return
-    depth = cfg.bathymetry.depth_at(s.latitude, s.longitude)
+    depth = cfg.bathymetry.depth_at(lat, lon)
     if depth is None or not math.isfinite(depth) or depth <= 0:
         s.flags["sounding"] = QF.UNCHECKED  # on land / no data: nothing to compare
         return
+    s.performed |= Test.SOUNDING
     if _sounding_agrees(snd, depth, cfg.sounding_tolerance):
         s.flags["sounding"] = QF.GOOD
     else:
@@ -906,25 +954,32 @@ def test_1_5_impossible_speed(stations: Sequence[Station], cfg: Stage1Config) ->
         vmax = table.get(key, cfg.default_max_speed_knots)
         if vmax is None:
             continue  # rule 1.5.2: platform not in table
-        eligible = [g for g in grp if g.position_ok and g.when is not None]  # rules 1.5.3-4
-        eligible.sort(key=lambda g: g.when)
+        # (time, latitude, longitude, station) for every usable station of this platform
+        eligible: list[tuple[datetime, float, float, Station]] = []
+        for g in grp:  # rules 1.5.3-4
+            when = g.when
+            if g.position_ok and when is not None and g.latitude is not None and g.longitude is not None:
+                eligible.append((when, g.latitude, g.longitude, g))
+        eligible.sort(key=lambda e: e[0])
         if len(eligible) < 2:  # rule 1.5.1
             continue
 
-        ref = eligible[0]
-        for s in eligible[1:]:
+        ref = eligible[0][3]
+        for when, lat, lon, s in eligible[1:]:
             s.performed |= Test.SPEED
             # use the end of the previous cast if it is usable, else its start
-            lat0, lon0, t0 = ref.latitude, ref.longitude, ref.when
+            ref_when = ref.when
+            assert ref_when is not None and ref.latitude is not None and ref.longitude is not None
+            lat0, lon0, t0 = ref.latitude, ref.longitude, ref_when
             if (
                 ref.end_latitude is not None
                 and ref.end_longitude is not None
                 and (e := _to_datetime(ref.end_obs)) is not None
-                and t0 <= e <= s.when
+                and t0 <= e <= when
             ):
                 lat0, lon0, t0 = ref.end_latitude, ref.end_longitude, e
-            dist = haversine_m(lat0, lon0, s.latitude, s.longitude)
-            dt = (s.when - t0).total_seconds()
+            dist = haversine_m(lat0, lon0, lat, lon)
+            dt = (when - t0).total_seconds()
             speed_kn = math.inf if dt <= 0 and dist > 0 else (0.0 if dist == 0 else dist / dt / 0.514444)
             if speed_kn > vmax:
                 # the later station is assumed to be the suspect one
@@ -999,7 +1054,7 @@ def results_frame(stations: Sequence[Station]) -> pd.DataFrame:
         }
         row.update({f"qf_{k}": int(s.flags[k]) for k in FLAG_KEYS})
         row["QCP"], row["QCF"] = s.qcp_hex, s.qcf_hex
-        row["failed_tests"] = ",".join(t.name for t in Test if t and t in s.failed)
+        row["failed_tests"] = ",".join(str(t.name) for t in Test if t and t in s.failed)
         row["messages"] = " | ".join(s.messages)
         rows.append(row)
     return pd.DataFrame(rows)
@@ -1092,7 +1147,7 @@ def _pos(x: Any) -> float | None:
     return None if v is None or any(abs(v - n) < 1e-9 for n in ODF_NULL_POSITIONS) else v
 
 
-def station_from_odf(odf: Any, source: str = "") -> Station:
+def station_from_odf(odf: Any, source: str | Path = "") -> Station:
     """Build a :class:`Station` from a toolbox object.
 
     Args:
@@ -1227,7 +1282,10 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="GTSPP Stage 1 QC on a folder of ODF files")
     ap.add_argument("folder", help="folder containing .ODF files")
     ap.add_argument("--pattern", default="*.ODF")
-    ap.add_argument("--platforms", help="text file: one known platform identifier per line")
+    ap.add_argument(
+        "--platforms",
+        help="text file: one known platform identifier per line (default: the toolbox lookups/platforms.csv)",
+    )
     ap.add_argument("--bathy", help="GEBCO/ETOPO netCDF file (enables tests 1.4 and 1.6)")
     ap.add_argument("--max-speed-knots", type=float, help="speed limit applied to every platform (enables test 1.5)")
     ap.add_argument("--realtime", action="store_true")

@@ -323,18 +323,24 @@ def build_quality_header(p: Profile, date: str | None = None):
     from datashop_toolbox.validated_base import get_current_date_time
 
     specs = [s for s in SCHEME if s.test in p.ran]
+    tests1: list[str] = []
+    results1: list[str] = []
     st = p.station
-    specs1 = [s for s in STAGE1_SCHEME if st is not None and s.test in st.ran]  # none if Stage 1 not run
+    if st is not None:  # Stage 1 is omitted if it was not run
+        for s1 in STAGE1_SCHEME:
+            if s1.test in st.ran:
+                tests1.append(f"Test {s1.number}: GTSPP {s1.name} ({s1.bit})")
+                results1.append(f"Test {s1.number} {s1.name} -> {_result_stage1(st, s1)}")
     qh = QualityHeader()
     qh.quality_date = date or get_current_date_time()
-    qh.quality_tests = ["QUALITY CONTROL TESTS RUN"] + [
-        f"Test {s.number}: GTSPP {s.name} ({s.bit})" for s in specs1 + specs
-    ]
+    qh.quality_tests = (
+        ["QUALITY CONTROL TESTS RUN"] + tests1 + [f"Test {s.number}: GTSPP {s.name} ({s.bit})" for s in specs]
+    )
     qh.quality_comments = (
         QUALITY_CODES_TEXT
         + QCFF_TEXT
         + ["QUALITY CONTROL TEST RESULTS"]
-        + [f"Test {s.number} {s.name} -> {_result_stage1(st, s)}" for s in specs1]
+        + results1
         + [f"Test {s.number} {s.name} -> {_result(p, s)}" for s in specs]
     )
     return qh
@@ -415,12 +421,19 @@ def apply_profile_to_odf(p: Profile, add_history: bool = True) -> None:
     quality header and, optionally, adds a history entry. The ODF file is
     not written; see :func:`write_profile_odf`.
 
+    Run this on original files. If the file already has a ``QCFF_01``
+    column from an earlier run, a warning is logged: its flags are kept as
+    the starting point and values already flagged doubtful are not
+    re-tested, so the new QCFF and test results differ from a first run.
+
     Args:
         p: Profile that has been through Stage 2, with a station that holds
             the toolbox object.
         add_history: If ``True``, add a ``HISTORY_HEADER`` entry listing the
             tests run.
     """
+    if p.station is None or p.station.odf is None:
+        raise ValueError(f"{p.label}: no toolbox object to write")
     odf = p.station.odf
     ensure_flag_columns(odf)
     df = odf.data.data_frame
@@ -434,6 +447,14 @@ def apply_profile_to_odf(p: Profile, add_history: bool = True) -> None:
     # 2. QCFF column (+ parameter header)
     qcff = compute_qcff(p)
     new_header = QCFF_CODE not in df.columns
+    if not new_header:
+        log.warning(
+            "%s already has a %s column from an earlier QC run. Its flags were used as the starting point and "
+            "values already flagged doubtful are not re-tested, so QCFF and the test results will not match a "
+            "first run. Run the QC on the original files for a fresh result.",
+            p.label,
+            QCFF_CODE,
+        )
     df[QCFF_CODE] = qcff
     if new_header:
         odf.parameter_headers.append(_qcff_header())
@@ -447,7 +468,7 @@ def apply_profile_to_odf(p: Profile, add_history: bool = True) -> None:
 
     # 3. quality header
     if odf.quality_header is not None and any("QUALITY CONTROL" in t for t in odf.quality_header.quality_tests):
-        log.info("%s: replacing the quality header written by an earlier QC run", p.label)
+        log.info("%s: replacing the quality header written by an earlier QC run", p.label)  # see warning above
     odf.quality_header = build_quality_header(p)
 
     # 4. processing history

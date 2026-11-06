@@ -845,8 +845,8 @@ def test_2_6_freezing_point(p: Profile, cfg: Stage2Config) -> None:
         i = np.flatnonzero(ok)  # only compute where inputs are usable
         S = p.values[scol][i]
         fail = np.zeros(len(p.values[tcol]), dtype=bool)
-        if cfg.freezing_method == "teos10" and p._gsw():
-            gsw = p._gsw()
+        gsw = p._gsw()
+        if cfg.freezing_method == "teos10" and gsw is not None:
             SA = gsw.SA_from_SP(S, P[i], p.longitude, p.latitude) if p.pos_ok else gsw.SR_from_SP(S)
             fail[i] = p.t90(tcol, cfg)[i] < gsw.t_freezing(SA, P[i], 0.0)
         else:
@@ -1006,7 +1006,7 @@ def test_2_11_bottom(p: Profile, cfg: Stage2Config) -> None:
         p: Profile to test.
         cfg: Test settings.
     """
-    if cfg.bathymetry is None or not p.pos_ok or not p.depth_col:
+    if cfg.bathymetry is None or p.latitude is None or p.longitude is None or not p.pos_ok or not p.depth_col:
         return
     water = cfg.bathymetry.depth_at(p.latitude, p.longitude)
     if water is None or not math.isfinite(water) or water <= 0:
@@ -1192,12 +1192,12 @@ def profile_summary(profiles: Sequence[Profile]) -> pd.DataFrame:
     rows = []
     for p in profiles:
         qcp, qcf = combined_codes(p.station, p)
-        row = {
+        row: dict[str, Any] = {
             "file": Path(p.source).name,
             "station": p.label,
             "QCP": qcp,
             "QCF": qcf,
-            "stage2_failed": ",".join(t.name for t in Test2 if t and t in p.failed),
+            "stage2_failed": ",".join(str(t.name) for t in Test2 if t and t in p.failed),
         }
         for col, f in p.flags.items():
             if col == p.depth_col or p.code(col) in ("DEPH", "PRES") or kind_of(p.code(col)):
@@ -1319,13 +1319,13 @@ def profile_from_station(st: Station, default_null: float = -99.0) -> Profile:
     for col in df.columns:
         if not COL_RE.match(str(col)) or str(col)[:4] in SKIP_CODES:
             continue
-        v = pd.to_numeric(df[col], errors="coerce").to_numpy(dtype=float).copy()
+        v = np.array(pd.to_numeric(df[col], errors="coerce"), dtype=float)
         if np.isnan(v).all():
             continue
         v[np.isclose(v, nulls.get(col, default_null))] = np.nan
         qcol = f"Q{col}"  # existing ODF flag column, if any
         f = (
-            pd.to_numeric(df[qcol], errors="coerce").fillna(0).to_numpy(dtype=int).copy()
+            np.nan_to_num(np.array(pd.to_numeric(df[qcol], errors="coerce"), dtype=float), nan=0.0).astype(int)
             if qcol in df.columns
             else np.zeros(len(v), dtype=int)
         )

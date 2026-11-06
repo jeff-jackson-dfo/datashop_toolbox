@@ -94,6 +94,8 @@ Nearest-grid-cell water depth from a netCDF grid.
 
 | Function | Description |
 |---|---|
+| `get_platforms() -> list` | Read the known platform names from the toolbox lookup table. |
+| `_default_known_platforms() -> set[str]` | Return the default for :attr:`Stage1Config.known_platforms`. |
 | `_norm(s: Any) -> str \| None` | Normalise an identifier for comparison. |
 | `_to_float(x: Any) -> float \| None` | Convert a value to a finite float. |
 | `parse_datetime_parts(value: Any) -> dict \| None` | Split a date/time into integer parts without validating it. |
@@ -113,7 +115,7 @@ Nearest-grid-cell water depth from a netCDF grid.
 | `_fetch(odf: Any, key: str) -> Any` | Read one header field from a toolbox object. |
 | `read_odf_file(path: str \| Path) -> Any` | Read one ODF file with ``datashop_toolbox``. |
 | `_pos(x: Any) -> float \| None` | Convert a position to a float, treating ODF null markers as missing. |
-| `station_from_odf(odf: Any, source: str = '') -> Station` | Build a :class:`Station` from a toolbox object. |
+| `station_from_odf(odf: Any, source: str \| Path = '') -> Station` | Build a :class:`Station` from a toolbox object. |
 | `station_from_raw_text(path: str \| Path) -> Station` | Build a :class:`Station` from the raw header text of an ODF file. |
 | `load_stations(folder: str \| Path, pattern: str = '*.ODF') -> list[Station]` | Read a folder of ODF files into stations. |
 | `main() -> None` | Run Stage 1 from the command line and write a CSV summary. |
