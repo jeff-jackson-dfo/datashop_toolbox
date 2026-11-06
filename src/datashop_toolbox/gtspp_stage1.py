@@ -54,12 +54,12 @@ files read with :class:`~datashop_toolbox.odfhdr.OdfHeader`.
   Usage
   ─────
       stations = load_stations("odf_folder")
-      cfg = Stage1Config(known_platforms={"HUDSON"}, default_max_speed_knots=15.0)
+      cfg = Stage1Config()  # known platforms and speed limits come from lookups/platforms.csv
       summary = run_stage1(stations, cfg)
 
   From the command line:
 
-      python gtspp_stage1.py odf_folder --platforms known.txt --max-speed-knots 15
+      python gtspp_stage1.py odf_folder
 """
 
 from __future__ import annotations
@@ -81,6 +81,7 @@ import numpy as np
 import pandas as pd
 
 log = logging.getLogger("gtspp_stage1")
+
 
 # --------------------------------------------------------------------------- #
 # Flags and test indices
@@ -137,12 +138,18 @@ FLAG_KEYS = ("platform", *DATE_PARTS, "latitude", "longitude", "sounding")
 # --------------------------------------------------------------------------- #
 # Lookups
 # --------------------------------------------------------------------------- #
+def _platforms_csv_path() -> Path:
+    """Return the path of the platform lookup table, relative to the working directory."""
+    return Path.cwd() / "src/datashop_toolbox/lookups/platforms.csv"
+
+
 def get_platforms() -> list:
     """Read the known platform names from the toolbox lookup table.
 
     Reads ``src/datashop_toolbox/lookups/platforms.csv`` relative to the
     current working directory, so run from the repository root. The first
-    row of the file is treated as a header and the first column is used.
+    row of the file is treated as a header and the first column
+    (``platform_name``) is used.
 
     Returns:
         The values of the first column, in file order.
@@ -150,10 +157,40 @@ def get_platforms() -> list:
     Raises:
         FileNotFoundError: If the lookup file does not exist.
     """
-    platform_path = Path.cwd() / "src/datashop_toolbox/lookups/platforms.csv"
+    platform_path = _platforms_csv_path()
     df = pd.read_csv(platform_path)
     my_list = df.iloc[:, 0].tolist()
     return my_list
+
+
+def get_platform_speeds() -> dict[str, float]:
+    """Read the maximum speed of each platform from the toolbox lookup table.
+
+    Uses the ``platform_name`` and ``max_velocity`` columns of the table
+    described in :func:`get_platforms`. The speeds are taken to be in knots.
+    If a name appears more than once (vessels with the same name and
+    different call signs), the largest speed is kept, so that test 1.5 does
+    not fail a vessel because of the slower namesake.
+
+    Returns:
+        Maximum speed in knots, by platform name as written in the table.
+
+    Raises:
+        FileNotFoundError: If the lookup file does not exist.
+        ValueError: If the file has no ``platform_name`` or ``max_velocity``
+            column.
+    """
+    df = pd.read_csv(_platforms_csv_path())
+    missing = {"platform_name", "max_velocity"} - set(df.columns)
+    if missing:
+        raise ValueError(f"platforms.csv has no column(s): {sorted(missing)}")
+    speeds: dict[str, float] = {}
+    names = df["platform_name"].tolist()
+    values = np.asarray(pd.to_numeric(df["max_velocity"], errors="coerce"), dtype=float)
+    for name, v in zip(names, values, strict=True):
+        if isinstance(name, str) and math.isfinite(v):
+            speeds[name] = max(float(v), speeds.get(name, float(v)))
+    return speeds
 
 
 def _default_known_platforms() -> set[str]:
@@ -169,6 +206,21 @@ def _default_known_platforms() -> set[str]:
     except FileNotFoundError as exc:
         log.warning("Known platforms not loaded (%s); pass known_platforms or --platforms", exc)
         return set()
+
+
+def _default_max_speeds() -> dict[str, float]:
+    """Return the default for :attr:`Stage1Config.max_speed_knots`.
+
+    Returns:
+        The speeds from :func:`get_platform_speeds`, or an empty dict if the
+        lookup file cannot be found. :func:`_default_known_platforms` already
+        warns about that, so this logs only at debug level.
+    """
+    try:
+        return get_platform_speeds()
+    except FileNotFoundError as exc:
+        log.debug("Platform speeds not loaded (%s)", exc)
+        return {}
 
 
 # --------------------------------------------------------------------------- #
@@ -210,9 +262,10 @@ class Stage1Config:
             bathymetry (1.4, 1.6).
         sounding_null_values: Sounding values that mean "missing".
         max_speed_knots: Maximum plausible speed in knots, by platform
-            identifier (1.5).
+            identifier (1.5). Defaults to the ``max_velocity`` column of the
+            toolbox lookup table (see :func:`get_platform_speeds`).
         default_max_speed_knots: Limit for platforms that are not in
-            ``max_speed_knots``. ``None`` means such platforms are not
+            ``max_speed_knots`` (the lookup table by default). ``None`` means such platforms are not
             tested, as in the manual.
         speed_flag: Flag for a position that implies an impossible speed.
     """
@@ -240,7 +293,7 @@ class Stage1Config:
     sounding_null_values: tuple = (-99.0,)  # ODF null for numerics
 
     # Test 1.5 -- knots; platform must be in this table (or default is given)
-    max_speed_knots: Mapping[str, float] = field(default_factory=dict)
+    max_speed_knots: Mapping[str, float] = field(default_factory=_default_max_speeds)
     default_max_speed_knots: float | None = None
     speed_flag: QF = QF.DOUBTFUL
 
@@ -552,23 +605,30 @@ class Bathymetry(Protocol):
 
 
 class NetCDFBathymetry:
-    """Nearest-grid-cell water depth from a netCDF grid.
+    """Nearest-grid-cell water depth from a netCDF grid, read with xarray.
 
     Works with GEBCO and ETOPO style files, whole or a downloaded
-    sub-area. Positions outside the grid return ``None`` (no data) rather
-    than the nearest edge cell. Requires the ``netCDF4`` package, which
-    ``datashop_toolbox`` does not install.
+    sub-area. Positions are matched to the nearest grid cell, as with
+    ``DataArray.sel(..., method="nearest")``, and many positions can be
+    looked up at once with :meth:`depths_at`. Positions outside the grid
+    return ``None`` (no data) rather than the nearest edge cell.
+
+    Requires the ``xarray`` package and a netCDF engine for it (``netCDF4``
+    or ``h5netcdf``). ``datashop_toolbox`` installs none of them.
 
     Attributes:
-        ds: The open ``netCDF4.Dataset``.
-        lat_name: Name of the latitude variable.
-        lon_name: Name of the longitude variable.
+        ds: The open ``xarray.Dataset``.
+        da: The elevation (or depth) ``DataArray``.
+        lat_name: Name of the latitude coordinate.
+        lon_name: Name of the longitude coordinate.
         var: Name of the elevation or depth variable.
         lat: Latitude grid values.
         lon: Longitude grid values.
         positive_up: ``True`` if the variable is an elevation (negative
             below sea level), as in GEBCO.
     """
+
+    _BATCH = 500  # positions per xarray lookup, to bound memory for long lists
 
     def __init__(self, path: str | Path, var: str | None = None, elevation_positive_up: bool = True):
         """Open a bathymetry grid.
@@ -582,13 +642,21 @@ class NetCDFBathymetry:
                 (negative at sea), ``False`` if it is a depth (positive at sea).
 
         Raises:
+            ImportError: If ``xarray`` is not installed.
             ValueError: If the latitude, longitude or elevation variable cannot
-                be identified.
+                be identified, or latitude and longitude are not dimensions of
+                the elevation variable.
         """
-        from netCDF4 import Dataset
+        try:
+            import xarray as xr
+        except ImportError as exc:
+            raise ImportError(
+                "NetCDFBathymetry needs the 'xarray' package and a netCDF engine: pip install xarray netCDF4"
+            ) from exc
 
-        self.ds = Dataset(str(path))
-        names = {n.lower(): n for n in self.ds.variables}
+        self._xr = xr
+        self.ds = xr.open_dataset(path)
+        names = {str(n).lower(): str(n) for n in self.ds.variables}
 
         def pick(opts):
             return next((names[o] for o in opts if o in names), None)
@@ -597,21 +665,80 @@ class NetCDFBathymetry:
         lon_name = pick(("lon", "longitude", "x"))
         var_name = var or pick(("elevation", "z", "depth", "bathymetry", "topo"))
         if lat_name is None or lon_name is None or var_name is None:
-            raise ValueError(f"Cannot identify lat/lon/elevation variables in {path}: {list(names)}")
+            raise ValueError(f"Cannot identify lat/lon/elevation variables in {path}: {list(names.values())}")
+        self.da = self.ds[var_name]
+        if lat_name not in self.da.dims or lon_name not in self.da.dims:
+            raise ValueError(f"{var_name} must have {lat_name} and {lon_name} as dimensions; it has {self.da.dims}")
         self.lat_name: str = lat_name
         self.lon_name: str = lon_name
         self.var: str = var_name
-        self.lat = np.asarray(self.ds[self.lat_name][:], dtype=float)
-        self.lon = np.asarray(self.ds[self.lon_name][:], dtype=float)
+        self.lat = np.asarray(self.ds[lat_name].values, dtype=float)
+        self.lon = np.asarray(self.ds[lon_name].values, dtype=float)
         self.positive_up = elevation_positive_up
         # half a grid cell, so a position on the outer edge of the grid still counts as inside it
         self._half_lat = float(np.abs(np.diff(self.lat)).mean()) / 2 if len(self.lat) > 1 else 0.0
         self._half_lon = float(np.abs(np.diff(self.lon)).mean()) / 2 if len(self.lon) > 1 else 0.0
 
+    def close(self) -> None:
+        """Close the underlying file."""
+        self.ds.close()
+
+    def __enter__(self) -> NetCDFBathymetry:
+        return self
+
+    def __exit__(self, *exc_info) -> None:
+        self.close()
+
+    def depths_at(self, lats: Sequence[float], lons: Sequence[float]) -> list[float | None]:
+        """Return the water depth at each of a list of positions.
+
+        Each position is matched to its nearest grid cell in one vectorised
+        xarray lookup (in batches of 500). Longitudes are shifted by 360
+        degrees if the grid uses 0 to 360.
+
+        Args:
+            lats: Latitudes in degrees.
+            lons: Longitudes in degrees, matching ``lats`` index for index.
+
+        Returns:
+            Water depth in metres, positive down (zero or less on land), for
+            each position. ``None`` for a position that is outside the grid,
+            not finite, or on a masked grid cell.
+
+        Raises:
+            ValueError: If ``lats`` and ``lons`` differ in length.
+        """
+        lat_arr = np.asarray(lats, dtype=float)
+        lon_arr = np.asarray(lons, dtype=float)
+        if lat_arr.shape != lon_arr.shape:
+            raise ValueError("lats and lons must have the same length")
+        if self.lon.max() > 180:
+            lon_arr = np.where(lon_arr < 0, lon_arr + 360.0, lon_arr)
+        with np.errstate(invalid="ignore"):  # NaN positions compare False, so they are not "inside"
+            inside = (
+                (lat_arr >= self.lat.min() - self._half_lat)
+                & (lat_arr <= self.lat.max() + self._half_lat)
+                & (lon_arr >= self.lon.min() - self._half_lon)
+                & (lon_arr <= self.lon.max() + self._half_lon)
+            )
+        out: list[float | None] = [None] * len(lat_arr)
+        idx = np.flatnonzero(inside)
+        for start in range(0, len(idx), self._BATCH):
+            chunk = idx[start : start + self._BATCH]
+            picked = self.da.sel(
+                {
+                    self.lat_name: self._xr.DataArray(lat_arr[chunk], dims="point"),
+                    self.lon_name: self._xr.DataArray(lon_arr[chunk], dims="point"),
+                },
+                method="nearest",
+            )
+            for k, v in zip(chunk, np.asarray(picked.values, dtype=float), strict=True):
+                if np.isfinite(v):
+                    out[int(k)] = -float(v) if self.positive_up else float(v)
+        return out
+
     def depth_at(self, lat: float, lon: float) -> float | None:
         """Return the water depth at the grid cell nearest a position.
-
-        Longitudes are shifted by 360 degrees if the grid uses 0 to 360.
 
         Args:
             lat: Latitude in degrees.
@@ -622,19 +749,7 @@ class NetCDFBathymetry:
             ``None`` if the position is outside the grid or the grid cell is
             masked. Tests that need a depth skip such positions.
         """
-        if self.lon.max() > 180 and lon < 0:
-            lon += 360.0
-        if not (self.lat.min() - self._half_lat <= lat <= self.lat.max() + self._half_lat) or not (
-            self.lon.min() - self._half_lon <= lon <= self.lon.max() + self._half_lon
-        ):
-            return None  # outside the grid (for example a downloaded sub-area): no data
-        i = int(np.abs(self.lat - lat).argmin())
-        j = int(np.abs(self.lon - lon).argmin())
-        v = self.ds[self.var][i, j]
-        if np.ma.is_masked(v):
-            return None
-        v = float(v)
-        return -v if self.positive_up else v
+        return self.depths_at([lat], [lon])[0]
 
 
 # --------------------------------------------------------------------------- #
@@ -1287,7 +1402,9 @@ def main() -> None:
         help="text file: one known platform identifier per line (default: the toolbox lookups/platforms.csv)",
     )
     ap.add_argument("--bathy", help="GEBCO/ETOPO netCDF file (enables tests 1.4 and 1.6)")
-    ap.add_argument("--max-speed-knots", type=float, help="speed limit applied to every platform (enables test 1.5)")
+    ap.add_argument(
+        "--max-speed-knots", type=float, help="speed limit in knots for platforms that are not in the lookup table"
+    )
     ap.add_argument("--realtime", action="store_true")
     ap.add_argument("--out", default="gtspp_stage1_results.csv")
     args = ap.parse_args()

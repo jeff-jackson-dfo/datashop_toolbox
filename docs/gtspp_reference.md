@@ -85,17 +85,24 @@ Protocol for a source of water depth.
 
 **class `NetCDFBathymetry`**
 
-Nearest-grid-cell water depth from a netCDF grid.
+Nearest-grid-cell water depth from a netCDF grid, read with xarray.
 
 | Method | Description |
 |---|---|
 | `__init__(path: str \| Path, var: str \| None = None, elevation_positive_up: bool = True)` | Open a bathymetry grid. |
+| `close() -> None` | Close the underlying file. |
+| `__enter__() -> NetCDFBathymetry` |  |
+| `__exit__(*exc_info) -> None` |  |
+| `depths_at(lats: Sequence[float], lons: Sequence[float]) -> list[float \| None]` | Return the water depth at each of a list of positions. |
 | `depth_at(lat: float, lon: float) -> float \| None` | Return the water depth at the grid cell nearest a position. |
 
 | Function | Description |
 |---|---|
+| `_platforms_csv_path() -> Path` | Return the path of the platform lookup table, relative to the working directory. |
 | `get_platforms() -> list` | Read the known platform names from the toolbox lookup table. |
+| `get_platform_speeds() -> dict[str, float]` | Read the maximum speed of each platform from the toolbox lookup table. |
 | `_default_known_platforms() -> set[str]` | Return the default for :attr:`Stage1Config.known_platforms`. |
+| `_default_max_speeds() -> dict[str, float]` | Return the default for :attr:`Stage1Config.max_speed_knots`. |
 | `_norm(s: Any) -> str \| None` | Normalise an identifier for comparison. |
 | `_to_float(x: Any) -> float \| None` | Convert a value to a finite float. |
 | `parse_datetime_parts(value: Any) -> dict \| None` | Split a date/time into integer parts without validating it. |
