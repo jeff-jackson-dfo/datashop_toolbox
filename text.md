@@ -70,15 +70,7 @@ datashop_toolbox/
 │   │   ├── thermograph.py               # Thermograph processing core
 │   │   ├── qc_thermograph_data.py       # QC for thermograph data
 │   │   └── process_mtr_files.py         # MTR processing pipeline
-│   │
-│   ├── seabird/
-│   │   ├── cnv.py                       # Sea-Bird CNV parser
-│   │   └── cnv.json                     # CNV parsing rules
-│   │
-│   ├── CoTeDe/
-│   │   └── qc.py                        # Custom QC tests
 │
-├── ▶️ run_SEABIRD_tools.py                 # Example Sea-Bird runner to Load DFO standard .CNV files
 ├── ▶️ run_MTR_tools.py                     # Example MTR runner to process MTR Data
 ├── README.md
 └── ODF_File_Specification.md
@@ -101,27 +93,3 @@ Implements core processing using Python OOP principles:
 👉 https://github.com/jeff-jackson-dfo/datashop_toolbox/blob/master/ODF_File_Specification.md  
 
 ---
-
-### 2️⃣ Sea-Bird CNV Parsing (`seabird`)
-
-Extends the PySeabird parser for CNV files.
-
-#### ✨ Features
-- Supports multiple Sea-Bird firmware formats  
-- Handles:
-  - Commented XML / CDATA blocks  
-  - Partial metadata (lat/lon, station, cast)  
-- Stores data as NumPy masked arrays  
-- Converts DMS → decimal degrees automatically  
-
-#### 💡 Example
-```python
-from seabird.cnv import fCNV
-
-profile = fCNV("input_file.CNV")
-
-# Defensive defaults (recommended)
-profile.attrs.setdefault("LATITUDE", "")
-profile.attrs.setdefault("LONGITUDE", "")
-
-df = profile.as_DataFrame()
