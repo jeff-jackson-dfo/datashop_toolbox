@@ -36,7 +36,7 @@ def get_bathymetry_for_points(nc_file_path: Path, lats: list[float], lons: list[
 
 def main():
     # --- Example Usage ---
-    gebco_file_path = Path('C:/DFO-MPO/DEV/GitHub/datashop_toolbox/src/datashop_toolbox/lookups/GEBCO_2026_subset_35N_80N_100W_42W.nc')  # noqa: E501
+    gebco_file_path = Path('C:/DFO-MPO/DEV/Bathymetry/GEBCO_2026_subset_35N_80N_100W_42W.nc')  # noqa: E501
     
     # # Sample lists of matching coordinate pairs
     my_lats = [44.6947, 52.3, 44.7340, 74.5]

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datashop-toolbox"
-version = "1.1.1.17"
+version = "1.1.2.0"
 description = "Python toolbox for oceanographic data processing"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -26,6 +26,9 @@ dependencies = [
     "shapely>=2.1.2",
     "click>=8.4.1",
     "scikit-fuzzy>=0.5.0",
+    "xarray>=2026.9.0",
+    "netcdf4>=1.7.5.1.post1",
+    "h5netcdf>=1.8.2",
 ]
 
 # --- Dependency groups (PEP 735 / uv standard) ---

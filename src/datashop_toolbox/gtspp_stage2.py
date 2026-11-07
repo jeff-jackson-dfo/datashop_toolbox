@@ -78,18 +78,15 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-try:  # inside the datashop_toolbox package ...
-    from datashop_toolbox.gtspp_stage1 import (
-        QF,
-        Bathymetry,
-        NetCDFBathymetry,
-        Stage1Config,
-        Station,
-        load_stations,
-        run_stage1,
-    )
-except ImportError:  # ... or side by side in a plain folder
-    from gtspp_stage1 import QF, Bathymetry, NetCDFBathymetry, Stage1Config, Station, load_stations, run_stage1
+from datashop_toolbox.gtspp_stage1 import (
+    QF,
+    Bathymetry,
+    NetCDFBathymetry,
+    Stage1Config,
+    Station,
+    load_stations,
+    run_stage1,
+)
 
 log = logging.getLogger("gtspp_stage2")
 

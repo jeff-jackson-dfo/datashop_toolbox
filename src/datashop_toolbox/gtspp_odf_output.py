@@ -74,23 +74,16 @@ from pathlib import Path
 
 import numpy as np
 
-# The three gtspp_*.py modules work either side by side in any folder, or inside the
-# datashop_toolbox package (src/datashop_toolbox/).
-try:
-    from datashop_toolbox.gtspp_stage1 import (
-        DATE_PARTS,
-        NetCDFBathymetry,
-        Stage1Config,
-        Station,
-        load_stations,
-        run_stage1,
-    )
-    from datashop_toolbox.gtspp_stage1 import Test as Test1
-    from datashop_toolbox.gtspp_stage2 import Profile, Stage2Config, Test2, load_profiles, run_stage2
-except ImportError:
-    from gtspp_stage1 import DATE_PARTS, NetCDFBathymetry, Stage1Config, Station, load_stations, run_stage1
-    from gtspp_stage1 import Test as Test1
-    from gtspp_stage2 import Profile, Stage2Config, Test2, load_profiles, run_stage2
+from datashop_toolbox.gtspp_stage1 import (
+    DATE_PARTS,
+    NetCDFBathymetry,
+    Stage1Config,
+    Station,
+    load_stations,
+    run_stage1,
+)
+from datashop_toolbox.gtspp_stage1 import Test as Test1
+from datashop_toolbox.gtspp_stage2 import Profile, Stage2Config, Test2, load_profiles, run_stage2
 
 log = logging.getLogger("gtspp_odf_output")
 
