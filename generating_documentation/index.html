@@ -8,6 +8,8 @@
       
       
       
+        <link rel="canonical" href="https://jeff-jackson-dfo.github.io/datashop_toolbox/generating_documentation/">
+      
       
       
       
@@ -336,10 +338,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-required-mkdocs-packages" class="md-nav__link">
+  <a href="#install-the-required-packages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install Required mkdocs Packages
+        Install the Required Packages
       
     </span>
   </a>
@@ -358,10 +360,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-the-mkdocs-structure-for-your-project" class="md-nav__link">
+  <a href="#create-the-zensical-structure-for-your-project" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Create the Mkdocs Structure for Your Project
+        Create the Zensical Structure for Your Project
       
     </span>
   </a>
@@ -392,10 +394,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-add-required-functionality" class="md-nav__link">
+  <a href="#2-set-the-site_url" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Add Required Functionality
+        2. Set the site_url
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-add-required-functionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Add Required Functionality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-new-markdown-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Create New Markdown Files
       
     </span>
   </a>
@@ -404,17 +428,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#create-new-markdown-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Create New Markdown Files
-      
-    </span>
-  </a>
   
 </li>
       
@@ -437,6 +450,45 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Publish the Documentation to GitHub">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-time-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One-Time Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publish-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Publish Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-the-build-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check the Build Locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -461,25 +513,37 @@
 <blockquote>
 <p>Note: development was performed in the project's
 root folder using a virtual environment created
-by uv.</p>
+by uv. The documentation is built with
+<a href="https://zensical.org/">Zensical</a>, the successor to
+Material for MkDocs.</p>
 </blockquote>
-<h2 id="install-required-mkdocs-packages">Install Required <code>mkdocs</code> Packages</h2>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">mkdocs</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="s2">"mkdocstrings[python]"</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">mkdocs-material</span>
+<h2 id="install-the-required-packages">Install the Required Packages</h2>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">zensical</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">mkdocstrings-python</span>
 </span></code></pre></div>
+<p><code>zensical</code> builds and serves the site and includes the theme.
+<code>mkdocstrings-python</code> generates the API reference from the
+docstrings. No separate <code>mkdocs</code> or <code>mkdocs-material</code> install
+is needed.</p>
 <h2 id="create-the-docstrings">Create the Docstrings</h2>
 <p>The docstrings are created using the Google-style
 because it involves less text (cleaner) and it
-is the preferred style for Mkdocs.</p>
+is the preferred style for <code>mkdocstrings</code>.</p>
 <p>Once docstrings are created for say a module
 called <code>tabulate</code>, one can access the info
 using the help command:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">help</span><span class="p">(</span><span class="n">tabulate</span><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="create-the-mkdocs-structure-for-your-project">Create the Mkdocs Structure for Your Project</h2>
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">mkdocs</span> <span class="n">new</span> <span class="p">.</span>
+<h2 id="create-the-zensical-structure-for-your-project">Create the Zensical Structure for Your Project</h2>
+<p>For a new project, run the following in the project's root folder:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">zensical</span> <span class="n">new</span> <span class="p">.</span>
 </span></code></pre></div>
+<p>This creates a <code>zensical.toml</code> configuration file, a <code>docs</code> folder
+with starter pages, and a GitHub Actions workflow in
+<code>.github/workflows/docs.yml</code>.</p>
+<p>This project already has a <code>docs</code> folder and keeps its
+configuration in <code>mkdocs.yml</code>. Zensical reads that file directly
+when there is no <code>zensical.toml</code>, so there is no need to convert it.</p>
 <h2 id="update-the-mkdocsyml-file">Update the <code>mkdocs.yml</code> File</h2>
 <h3 id="1-change-the-site_name">1. Change the <code>site_name</code></h3>
 <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">site_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My Docs</span>
@@ -487,29 +551,44 @@ using the help command:</p>
 <p>to</p>
 <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">site_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Datashop Toolbox Docs</span>
 </span></code></pre></div>
-<h3 id="2-add-required-functionality">2. Add Required Functionality</h3>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">site_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Datashop Toolbox Docs</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nt">theme</span><span class="p">:</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"material"</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">features</span><span class="p">:</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">content.code.copy</span><span class="w">  </span><span class="c1"># This enables the copy button globally</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="nt">plugins</span><span class="p">:</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mkdocstrings</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="nt">markdown_extensions</span><span class="p">:</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pymdownx.highlight</span><span class="p">:</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">      </span><span class="nt">anchor_linenums</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">      </span><span class="nt">line_spans</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">__span</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pymdownx.superfences</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pymdownx.tabbed</span><span class="p">:</span>
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">      </span><span class="nt">alternate_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pymdownx.mark</span>
+<h3 id="2-set-the-site_url">2. Set the <code>site_url</code></h3>
+<p>Add the address where the site will be published. For GitHub
+Pages this is <code>https://&lt;username&gt;.github.io/&lt;repository&gt;/</code>, and the
+trailing slash is required:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">site_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://jeff-jackson-dfo.github.io/datashop_toolbox/</span>
 </span></code></pre></div>
-<h2 id="create-new-markdown-files">Create New Markdown Files</h2>
+<h3 id="3-add-required-functionality">3. Add Required Functionality</h3>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">site_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Datashop Toolbox Docs</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">site_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://jeff-jackson-dfo.github.io/datashop_toolbox/</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nt">theme</span><span class="p">:</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"material"</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nt">features</span><span class="p">:</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">content.code.copy</span><span class="w">  </span><span class="c1"># This enables the copy button globally</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="nt">plugins</span><span class="p">:</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mkdocstrings</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="nt">markdown_extensions</span><span class="p">:</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pymdownx.highlight</span><span class="p">:</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">      </span><span class="nt">anchor_linenums</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">      </span><span class="nt">line_spans</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">__span</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pymdownx.superfences</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pymdownx.tabbed</span><span class="p">:</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">      </span><span class="nt">alternate_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pymdownx.mark</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">attr_list</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">md_in_html</span>
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pymdownx.emoji</span><span class="p">:</span>
+</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">      </span><span class="nt">emoji_index</span><span class="p">:</span><span class="w"> </span><span class="kt">!!python/name:zensical.extensions.emoji.twemoji</span>
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">      </span><span class="nt">emoji_generator</span><span class="p">:</span><span class="w"> </span><span class="kt">!!python/name:zensical.extensions.emoji.to_svg</span>
+</span></code></pre></div>
+<p><code>attr_list</code>, <code>md_in_html</code> and <code>pymdownx.emoji</code> enable the
+grid cards and icons used on the home and how-to pages.</p>
+<h3 id="4-create-new-markdown-files">4. Create New Markdown Files</h3>
 <p>The only Markdown file that exists when you run
-mkdocs the first time is index.md; which needs
+<code>zensical new</code> the first time is <code>index.md</code> (plus a
+<code>markdown.md</code> example page); <code>index.md</code> needs
 to be modified as it is the home page for the
 documentation.</p>
 <p>It is highly recommended that documentation follow
@@ -525,69 +604,63 @@ and consists of four separate parts:</p>
 </ol>
 <p>Once these four documents have been created,
 navigation to them should be added in the
-mkdocs.yml file, like so:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">site_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Datashop Toolbox Docs</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nt">theme</span><span class="p">:</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"material"</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">features</span><span class="p">:</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">content.code.copy</span><span class="w">  </span><span class="c1"># This enables the copy button globally</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="nt">plugins</span><span class="p">:</span>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mkdocstrings</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="nt">markdown_extensions</span><span class="p">:</span>
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pymdownx.highlight</span><span class="p">:</span>
-</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">      </span><span class="nt">anchor_linenums</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">      </span><span class="nt">line_spans</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">__span</span>
-</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pymdownx.superfences</span>
-</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pymdownx.tabbed</span><span class="p">:</span>
-</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">      </span><span class="nt">alternate_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pymdownx.mark</span>
-</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>
-</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="nt">nav</span><span class="p">:</span>
-</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Datashop Toolbox Docs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">index.md</span>
-</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">background.md</span>
-</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutorials.md</span>
-</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">How-To Guides</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">how-to-guides.md</span>
-</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reference.md</span>
+<code>mkdocs.yml</code> file, like so:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">nav</span><span class="p">:</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Datashop Toolbox Docs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">index.md</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">background.md</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutorials.md</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">How-To Guides</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">how-to-guides.md</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Reference</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reference.md</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">GTSPP Reference</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gtspp_reference.md</span>
 </span></code></pre></div>
 <h2 id="view-while-editing-the-documentation">View While Editing the Documentation</h2>
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">mkdocs</span> <span class="n">serve</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a> <span class="err">│</span>  <span class="err">⚠</span>  <span class="n">Warning</span> <span class="n">from</span> <span class="n">the</span> <span class="n">Material</span> <span class="k">for</span> <span class="n">MkDocs</span> <span class="n">team</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a> <span class="err">│</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a> <span class="err">│</span>  <span class="n">MkDocs</span> <span class="n">2</span><span class="p">.</span><span class="n">0</span><span class="p">,</span> <span class="n">the</span> <span class="n">underlying</span> <span class="n">framework</span> <span class="n">of</span> <span class="n">Material</span> <span class="k">for</span> <span class="n">MkDocs</span><span class="p">,</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a> <span class="err">│</span>  <span class="n">will</span> <span class="n">introduce</span> <span class="n">backward-incompatible</span> <span class="n">changes</span><span class="p">,</span> <span class="n">including</span><span class="p">:</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a> <span class="err">│</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a> <span class="err">│</span>  <span class="err">×</span> <span class="n">All</span> <span class="n">plugins</span> <span class="n">will</span> <span class="n">stop</span> <span class="n">working</span> <span class="err">–</span> <span class="n">the</span> <span class="n">plugin</span> <span class="n">system</span> <span class="n">has</span> <span class="n">been</span> <span class="n">removed</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a> <span class="err">│</span>  <span class="err">×</span> <span class="n">All</span> <span class="n">theme</span> <span class="n">overrides</span> <span class="n">will</span> <span class="k">break</span> <span class="err">–</span> <span class="n">the</span> <span class="n">theming</span> <span class="n">system</span> <span class="n">has</span> <span class="n">been</span> <span class="n">rewritten</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a> <span class="err">│</span>  <span class="err">×</span> <span class="n">No</span> <span class="n">migration</span> <span class="n">path</span> <span class="n">exists</span> <span class="err">–</span> <span class="n">existing</span> <span class="n">projects</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">upgraded</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a> <span class="err">│</span>  <span class="err">×</span> <span class="n">Closed</span> <span class="n">contribution</span> <span class="n">model</span> <span class="err">–</span> <span class="n">community</span> <span class="n">members</span> <span class="n">can</span><span class="s1">'t report bugs</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="s1"> │  × Currently unlicensed – unsuitable for production use</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="s1"> │</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="s1"> │  Our full analysis:</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="s1"> │</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="s1"> │  https://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/</span>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
-</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="s1">INFO    -  Building documentation...</span>
-</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="s1">INFO    -  Cleaning site directory</span>
-</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="s1">INFO    -  The following pages exist in the docs directory, but are not included in the "nav" configuration:</span>
-</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="s1">             - generating_documentation.md</span>
-</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="s1">INFO    -  Documentation built in 0.68 seconds</span>
-</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="s1">INFO    -  [15:05:39] Watching paths for changes: '</span><span class="n">docs</span><span class="s1">', '</span><span class="n">mkdocs</span><span class="p">.</span><span class="n">yml</span><span class="err">'</span>
-</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="n">INFO</span>    <span class="p">-</span>  <span class="p">[</span><span class="n">15</span><span class="p">:</span><span class="n">05</span><span class="p">:</span><span class="n">39</span><span class="p">]</span> <span class="n">Serving</span> <span class="n">on</span> <span class="n">http</span><span class="p">://</span><span class="n">127</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">1</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span>
+<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">zensical</span> <span class="n">serve</span>
 </span></code></pre></div>
-<p>One of the more useful features of Mkdocs is that
+<p>Zensical builds the site and serves it on
+<code>http://localhost:8000</code>.</p>
+<p>One of the more useful features of Zensical is that
 when working on the documentation locally, any
-changes made are automatically pushed to the
+changes made are automatically rebuilt and shown on the
 webpage running on the local webserver.</p>
 <h2 id="publish-the-documentation-to-github">Publish the Documentation to GitHub</h2>
-<p>The final step once the documentation is ready
-for public release is to push it to your GitHub
-repository in a branch called <code>gh-deploy</code>:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">mkdocs</span> <span class="n">gh-deploy</span>
+<p>The documentation is published to GitHub Pages by a GitHub Actions
+workflow. Every push to the <code>master</code> (or <code>main</code>) branch rebuilds the
+site with Zensical and deploys it. This replaces the <code>mkdocs gh-deploy</code>
+command used with MkDocs.</p>
+<h3 id="one-time-setup">One-Time Setup</h3>
+<ol>
+<li>
+<p>Copy the workflow file <code>docs.yml</code> into the repository as
+   <code>.github/workflows/docs.yml</code>.</p>
+</li>
+<li>
+<p>In the repository on GitHub, go to <strong>Settings</strong> &gt; <strong>Pages</strong> and,
+   under <strong>Build and deployment</strong>, set <strong>Source</strong> to <strong>GitHub Actions</strong>.</p>
+</li>
+<li>
+<p>Commit and push the workflow file:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">git</span> <span class="n">add</span> <span class="p">.</span><span class="n">github</span><span class="p">/</span><span class="n">workflows</span><span class="p">/</span><span class="n">docs</span><span class="p">.</span><span class="n">yml</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">git</span> <span class="n">commit</span> <span class="n">-m</span> <span class="s2">"Add documentation workflow"</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">git</span> <span class="n">push</span>
 </span></code></pre></div>
+<h3 id="publish-changes">Publish Changes</h3>
+<p>Once the one-time setup is done, publishing is just a push:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">git</span> <span class="n">add</span> <span class="p">.</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">git</span> <span class="n">commit</span> <span class="n">-m</span> <span class="s2">"Update documentation"</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">git</span> <span class="n">push</span>
+</span></code></pre></div>
+<p>Follow the progress on the <strong>Actions</strong> tab of the repository. When the
+workflow finishes, the site is available at
+<code>https://&lt;username&gt;.github.io/&lt;repository&gt;/</code>. The workflow can also be
+started by hand from the <strong>Actions</strong> tab (<strong>Documentation</strong> &gt;
+<strong>Run workflow</strong>).</p>
+<h3 id="check-the-build-locally">Check the Build Locally</h3>
+<p>To check that the site builds without errors before pushing:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">DEV</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">zensical</span> <span class="n">build</span> <span class="p">-</span><span class="n">-clean</span>
+</span></code></pre></div>
+<p>The generated site is written to the <code>site</code> folder.</p>
 
 
 
