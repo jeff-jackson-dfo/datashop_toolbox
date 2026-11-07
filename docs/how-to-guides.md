@@ -11,7 +11,7 @@ Pick the task you want to accomplish.
 
 <div class="grid cards" markdown>
 
--   :material-file-plus-outline: __Create a new ODF file from scratch__
+-   :material-file-plus-outline:{ .lg .middle } __Create a new ODF file from scratch__
 
     ---
 
@@ -27,7 +27,7 @@ Pick the task you want to accomplish.
 
 <div class="grid cards" markdown>
 
--   :material-check-circle-outline: __Run the GTSPP quality control__
+-   :material-check-circle-outline:{ .lg .middle } __Run the GTSPP quality control__
 
     ---
 
@@ -43,7 +43,7 @@ Pick the task you want to accomplish.
 
 <div class="grid cards" markdown>
 
--   :material-text-box-outline: __Generate the package documentation__
+-   :material-text-box-outline:{ .lg .middle } __Generate the package documentation__
 
     ---
 
@@ -58,7 +58,15 @@ Pick the task you want to accomplish.
 
 <div class="grid cards" markdown>
 
--   :material-school: __Tutorials__
+-   :material-lightbulb-outline:{ .lg .middle } __Background__
+
+    ---
+
+    Why the ODF format and the processing pipeline work the way they do.
+
+    [:octicons-arrow-right-24: Background](background.md)
+
+-   :material-school:{ .lg .middle } __Tutorials__
 
     ---
 
@@ -66,7 +74,7 @@ Pick the task you want to accomplish.
 
     [:octicons-arrow-right-24: Tutorials](tutorials.md)
 
--   :material-api: __Reference__
+-   :material-api:{ .lg .middle } __Reference__
 
     ---
 
@@ -75,14 +83,6 @@ Pick the task you want to accomplish.
 
     [:octicons-arrow-right-24: Reference](reference.md) ·
     [:octicons-arrow-right-24: GTSPP reference](gtspp_reference.md)
-
--   :material-lightbulb-outline: __Background__
-
-    ---
-
-    Why the ODF format and the processing pipeline work the way they do.
-
-    [:octicons-arrow-right-24: Background](background.md)
 
 </div>
 

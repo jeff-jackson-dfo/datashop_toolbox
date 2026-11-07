@@ -1,4 +1,5 @@
 site_name: Datashop Toolbox Docs
+site_url: https://jeff-jackson-dfo.github.io/datashop_toolbox/
 
 theme:
   name: "material"
@@ -19,14 +20,14 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:zensical.extensions.emoji.twemoji
+      emoji_generator: !!python/name:zensical.extensions.emoji.to_svg
 
 nav:
   - Datashop Toolbox Docs: index.md
+  - background.md
   - tutorials.md
   - How-To Guides: how-to-guides.md
-  - reference.md
-  - gtspp_reference.md
-  - explanation.md
+  - Reference: reference.md
+  - GTSPP Reference: gtspp_reference.md
   

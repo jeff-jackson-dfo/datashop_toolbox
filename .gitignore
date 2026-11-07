@@ -32,3 +32,6 @@ build/
 dist/
 wheels/
 *.egg-info
+
+site/
+.cache/
