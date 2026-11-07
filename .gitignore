@@ -20,7 +20,6 @@ Thumbs.db
 # Data files
 *.btl
 *.cnv
-*.csv
 *.odf
 *.txt
 *.rsk
