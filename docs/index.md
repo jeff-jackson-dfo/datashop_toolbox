@@ -13,7 +13,15 @@ and consists of four separate parts:
 
 <div class="grid cards" markdown>
 
--   :material-school: __Tutorials__
+-   :material-lightbulb-outline:{ .lg .middle } __Background__
+
+    ---
+
+    Understand the ODF format and the data pipeline behind the toolbox.
+
+    [:octicons-arrow-right-24: Background](background.md)
+
+-   :material-school:{ .lg .middle } __Tutorials__
 
     ---
 
@@ -21,7 +29,7 @@ and consists of four separate parts:
 
     [:octicons-arrow-right-24: Tutorials](tutorials.md)
 
--   :material-clipboard-check-outline: __How-To Guides__
+-   :material-clipboard-check-outline:{ .lg .middle } __How-To Guides__
 
     ---
 
@@ -30,21 +38,13 @@ and consists of four separate parts:
 
     [:octicons-arrow-right-24: How-To Guides](how-to-guides.md)
 
--   :material-api: __Reference__
+-   :material-api:{ .lg .middle } __Reference__
 
     ---
 
     Look up the classes, functions and modules in the toolbox.
 
     [:octicons-arrow-right-24: Reference](reference.md)
-
--   :material-lightbulb-outline: __Background__
-
-    ---
-
-    Understand the ODF format and the data pipeline behind the toolbox.
-
-    [:octicons-arrow-right-24: Background](background.md)
 
 </div>
 
