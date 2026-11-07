@@ -1,0 +1,3930 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>ODF Format Specification - Datashop Toolbox Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#odf-format-specification" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Datashop Toolbox Docs" class="md-header__button md-logo" aria-label="Datashop Toolbox Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Datashop Toolbox Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ODF Format Specification
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Datashop Toolbox Docs" class="md-nav__button md-logo" aria-label="Datashop Toolbox Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Datashop Toolbox Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datashop Toolbox Docs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Background
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datashop Toolbox Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to-guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gtspp_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GTSPP Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odf-version-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF Version 3.0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odf-header-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF Header Section
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ODF Header Section">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#indents-commas-capitalisation-and-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Indents, Commas, Capitalisation and Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datetime-fields-in-the-header-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Date/Time Fields in the Header Blocks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cruise_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CRUISE_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EVENT_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meteo_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        METEO_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrument_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        INSTRUMENT_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        QUALITY_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polynomial_cal_header-block-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POLYNOMIAL_CAL_HEADER Block (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general_cal_header-block-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GENERAL_CAL_HEADER Block (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compass_cal_header-block-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        COMPASS_CAL_HEADER Block (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#history_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HISTORY_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PARAMETER_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#record_header-block-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RECORD_HEADER Block (mandatory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odf-data-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF Data Section
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ODF Data Section">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#date-time-fields-in-the-data-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Date-Time Fields in the Data Block
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-30-release-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version 3.0 Release Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="odf-format-specification">ODF Format Specification</h1>
+<p>author : Jeff Jackson</p>
+<p>Created: 03-JAN-2024</p>
+<p>Last updated: 06-AUG-2024</p>
+<p>version : 3.0</p>
+<p>© 2024, Fisheries and Oceans Canada (DFO).</p>
+<p>The Oceans Data Format (ODF) is an ASCII text file format used for the
+primary storage of an oceanographic data series. It consists of a set of
+header blocks that contain the metadata followed by rows of data
+records.</p>
+<h2 id="introduction">Introduction</h2>
+<p>The following document presents the details of the ODF file format
+specification.</p>
+<h2 id="odf-version-30">ODF Version 3.0</h2>
+<p>This specification details both the ODF Header section and the ODF Data
+section.</p>
+<p>The specification underwent a major revision for this version.</p>
+<p>The major reasons for this were:</p>
+<ul>
+<li>to improve its usefulness by making the data easier to read into other
+  software systems, and</li>
+<li>to clean up the format by removing information that was of no use and
+  adding important information that was missing.</li>
+</ul>
+<p>This major revision coincides with the development of a new ODF toolbox
+using the Python programming language.</p>
+<h2 id="odf-header-section">ODF Header Section</h2>
+<h3 id="indents-commas-capitalisation-and-strings">Indents, Commas, Capitalisation and Strings</h3>
+<p>It is common to have indents on field lines (normally two spaces) but
+this is not a strict requirement. However, indents are recommended
+because they increase human readability.</p>
+<p>Header lines will no longer have a trailing comma.</p>
+<p>Uppercase block and field names are mandatory in the ODF format
+specification.</p>
+<p>All values in string fields are enclosed by single quotes.</p>
+<h3 id="datetime-fields-in-the-header-blocks">Date/Time Fields in the Header Blocks</h3>
+<p>Date/Time information is stored as a text string in this specification.
+The format of the system had its beginnings in the CMSYS system in the
+mid-1980s. The format, was referred to as SYstem TiMe or SYTM, and
+represents Date/Time values in the following way:</p>
+<p>dd-MMM-yyyy hh<img alt="🇲🇲" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f1f2-1f1f2.svg" title=":mm:" />ss.ss</p>
+<p>where there is a single space exists between the date and time, and the
+seconds are displayed to the nearest hundredth.</p>
+<p>Examples would be:</p>
+<blockquote>
+<p>14-JUN-1999 14:47:40.37</p>
+<p>02-SEP-1997 01:08:06.67</p>
+</blockquote>
+<p>This field always consists of 23 characters.</p>
+<blockquote>
+<p>[!NOTE]</p>
+<p>The SYTM null value is: 17-NOV-1858 00:00:00.00.</p>
+<p>This value was chosen because it corresponded to time = 0 on the
+original ODF computing platform (VAX / VMS).</p>
+<p>Once placed into a field, the value carries forward as a valid date.</p>
+</blockquote>
+<h3 id="odf_header-block-mandatory">ODF_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ODF_HEADER</td>
+<td>FILE_SPECIFICATION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>ODF_HEADER</td>
+<td>ODF_SPECIFICATION_VERSION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3.0</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 1 - ODF_HEADER block details</p>
+<p><br/></p>
+<p>The ODF_HEADER block is mandatory.</p>
+<p>All fields in the ODF_HEADER block are mandatory.</p>
+<p>An empty string is the default null value for the FILE_SPECIFICATION
+field.</p>
+<p>Normally this field contains the standard ODF file name without the
+extension.</p>
+<p>Where the standard ODF file name is a concatenation of the following
+list of strings separated by underscores: - EVENT_HEADER.DATA_TYPE
+(e.g. ‘CTD’) - CRUISE_HEADER.CRUISE_NUMBER (e.g. ‘CAR2023011’) -
+EVENT_HEADER.EVENT_NUMBER (e.g. ‘017’) - EVENT_HEADER.EVENT_QUALIFIER1
+(e.g. ‘496844’) - EVENT_HEADER.EVENT_QUALIFIER2 (e.g. ‘DN’)</p>
+<p>The ODF_HEADER block is the first block presented in an ODF file.</p>
+<p>An example of an ODF_HEADER block follows:</p>
+<pre>
+ODF_HEADER
+  FILE_SPECIFICATION = 'CTD_CAR2023011_017_496844_DN'
+  ODF_SPECIFICATION_VERSION = 3.0
+</pre>
+<p><br/></p>
+<h3 id="cruise_header-block-mandatory">CRUISE_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>COUNTRY_INSTITUTE_CODE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>CRUISE_NUMBER</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>ORGANIZATION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>CHIEF_SCIENTIST</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>START_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>END_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>PLATFORM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>AREA_OF_OPERATION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>CRUISE_NAME</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>CRUISE_HEADER</td>
+<td>CRUISE_DESCRIPTION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 2 - CRUISE_HEADER block details</p>
+<p><br/></p>
+<p>The CRUISE_HEADER block consists of metadata that relates to the entire
+mission.</p>
+<p>The CRUISE_HEADER block is mandatory.</p>
+<p>All fields in the CRUISE_HEADER block are mandatory.</p>
+<p>The fields are also order dependent and must conform to the above order.</p>
+<p>Only COUNTRY_INSTITUTE_CODE is a number while all other fields are
+strings.</p>
+<p>There is no requirement for trailing spaces in any of the field strings.</p>
+<p>If a string field is empty, then only two successive single quotes are
+required.</p>
+<p>The START_DATE and END_DATE fields are given in SYTM format.</p>
+<p>The CRUISE_HEADER block follows the ODF_HEADER block.</p>
+<p>An example CRUISE_HEADER block follows:</p>
+<pre>
+CRUISE_HEADER
+  COUNTRY_INSTITUTE_CODE = 1810
+  CRUISE_NUMBER = '96006'
+  ORGANIZATION = 'PCS BIO'
+  CHIEF_SCIENTIST = ''
+  START_DATE = '17-NOV-1858 00:00:00.00'
+  END_DATE = '17-NOV-1858 00:00:00.00'
+  PLATFORM = 'CSS Hudson'
+  AREA_OF_OPERATION = 'SCOTIAN SLOPE'
+  CRUISE_NAME = 'WOCE LABRADOR SEA'
+  CRUISE_DESCRIPTION = 'WOCE AR7W LABRADOR SEA'
+</pre>
+<p><br/></p>
+<h3 id="event_header-block-mandatory">EVENT_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EVENT_HEADER</td>
+<td>DATA_TYPE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>EVENT_NUMBER</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>EVENT_QUALIFIER1</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>EVENT_QUALIFIER2</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>CREATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>ORIG_CREATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>START_DATE_TIME</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>END_DATE_TIME</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>INITIAL_LATITUDE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>INITIAL_LONGITUDE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-999</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>END_LATITUDE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>END_LONGITUDE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-999</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>MIN_DEPTH</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>MAX_DEPTH</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>SAMPLING_INTERVAL</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>SOUNDING</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>DEPTH_OFF_BOTTOM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>EVENT_HEADER</td>
+<td>EVENT_COMMENTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1+</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 3 - EVENT_HEADER block details</p>
+<p><br/></p>
+<p>The EVENT_HEADER block consists of metadata related to a specific event
+that occurred during the mission.</p>
+<p>The EVENT_HEADER block is mandatory.</p>
+<p>All fields in the EVENT_HEADER block are mandatory.</p>
+<p>The fields are also order dependent and must conform to the above order.</p>
+<p>Multiple EVENT_COMMENTS are permitted within the EVENT_HEADER block.</p>
+<p>All other fields have a single occurrence.</p>
+<p>The EVENT_HEADER block follows the CRUISE_HEADER block.</p>
+<p>An example EVENT_HEADER block follows:</p>
+<pre>
+EVENT_HEADER
+  DATA_TYPE = 'CTD'
+  EVENT_NUMBER = '012'
+  EVENT_QUALIFIER1 = '1'
+  EVENT_QUALIFIER2 = 'DN'
+  CREATION_DATE = '04-JUN-1999 14:47:40.34'
+  ORIG_CREATION_DATE = '26-JUN-1996 18:15:25.05'
+  START_DATE_TIME = '15-MAY-1996 05:50:15.00'
+  END_DATE_TIME = '17-NOV-1858 00:00:00.00'
+  INITIAL_LATITUDE = 43.7823
+  INITIAL_LONGITUDE = -57.8332
+  END_LATITUDE = -99.0000
+  END_LONGITUDE = -999.0000
+  MIN_DEPTH = 1.0
+  MAX_DEPTH = 205.0
+  SAMPLING_INTERVAL = 0.0000
+  SOUNDING = 2450.0
+  DEPTH_OFF_BOTTOM = 2245.0
+  EVENT_COMMENTS = ''
+  EVENT_COMMENTS = '04-JUN-1999 14:47:40.00 - NOTE THERE IS BAD DATA FROM SURFACE TO 10 DBARS'
+</pre>
+
+<blockquote>
+<p>[!WARNING]</p>
+<p>Sampling_Interval must always be in seconds.</p>
+</blockquote>
+<p><br/></p>
+<h3 id="meteo_header-block-mandatory">METEO_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>METEO_HEADER</td>
+<td>AIR_TEMPERATURE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>METEO_HEADER</td>
+<td>ATMOSPHERIC_PRESSURE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>METEO_HEADER</td>
+<td>WIND_SPEED</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>METEO_HEADER</td>
+<td>WIND_DIRECTION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>METEO_HEADER</td>
+<td>SEA_STATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>METEO_HEADER</td>
+<td>CLOUD_COVER</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>METEO_HEADER</td>
+<td>ICE_THICKNESS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>METEO_HEADER</td>
+<td>METEO_COMMENTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1…n</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 4 - METEO_HEADER block details</p>
+<p><br/></p>
+<p>The METEO_HEADER block consists of metadata that relates to
+meteorological data obtained during the mission’s event.</p>
+<p>The METEO_HEADER block is not mandatory.</p>
+<p>All fields in the METEO_HEADER block are mandatory when the block is
+present.</p>
+<p>The fields are also order dependent and must conform to the above order.</p>
+<p>If a string field is empty, then only two successive single quotes are
+required.</p>
+<p>The METEO_HEADER block follows the EVENT_HEADER block.</p>
+<p>An example METEO_HEADER block follows:</p>
+<pre>
+METEO_HEADER,
+  AIR_TEMPERATURE = -99.00,
+  ATMOSPHERIC_PRESSURE = -99.00,
+  WIND_SPEED = 4.60,
+  WIND_DIRECTION = 135.00,
+  SEA_STATE = 3,
+  CLOUD_COVER = 8,
+  ICE_THICKNESS = 0.000,
+  METEO_COMMENTS = ''
+</pre>
+<p><br/></p>
+<h3 id="instrument_header-block-mandatory">INSTRUMENT_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">RestrictedValues</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INSTRUMENT_HEADER</td>
+<td>INST_TYPE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>INSTRUMENT_HEADER</td>
+<td>MODEL</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>INSTRUMENT_HEADER</td>
+<td>SERIAL_NUMBER</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>INSTRUMENT_HEADER</td>
+<td>DESCRIPTION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 5 - INSTRUMENT_HEADER block details</p>
+<p><br/></p>
+<p>The INSTRUMENT_HEADER block consists of metadata describing the
+instrument used to acquire the data in the file.</p>
+<p>The INSTRUMENT_HEADER block is mandatory.</p>
+<p>All fields in the INSTRUMENT_HEADER block are mandatory.</p>
+<p>The fields are also order dependent and must conform to the above order.</p>
+<p>The INSTRUMENT_HEADER block follows the METEO_HEADER block (if present)
+otherwise the EVENT_HEADER block.</p>
+<p>An example of the INSTRUMENT_HEADER block follows:</p>
+<pre>
+INSTRUMENT_HEADER
+  INST_TYPE = 'Sea-Bird'
+  MODEL = 'SBE 9' 
+  SERIAL_NUMBER = '9P 7356-299'
+  DESCRIPTION = '006A012.DAT 006A012.CON'
+</pre>
+<p><br/></p>
+<h3 id="quality_header-block-mandatory">QUALITY_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QUALITY_HEADER</td>
+<td>QUALITY_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>QUALITY_HEADER</td>
+<td>QUALITY_TESTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>QUALITY_HEADER</td>
+<td>QUALITY_COMMENTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1…n</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 6 - QUALITY_HEADER block details</p>
+<p><br/></p>
+<p>The QUALITY_HEADER block consists of metadata that relates to the file’s
+data quality.</p>
+<p>The QUALITY_HEADER block is not mandatory.</p>
+<p>All fields in the QUALITY_HEADER block are mandatory when the block is
+present.</p>
+<p>The fields are also order dependent and must conform to the above order.</p>
+<p>If a string field is empty, then only two successive single quotes are
+required.</p>
+<p>The QUALITY_DATE field is given in SYTM format.</p>
+<p>The QUALITY_HEADER block follows the INSTRUMENT_HEADER block.</p>
+<p>An example QUALITY_HEADER block follows:</p>
+<pre>
+QUALITY_HEADER
+  QUALITY_DATE='29-NOV-2023 14:34:11.02',
+  QUALITY_TESTS='QUALITY CONTROL TESTS RUN',
+  QUALITY_TESTS='Test 2.1: GTSPP Global Impossible Parameter Values (4)',
+  QUALITY_TESTS='Test 2.2: GTSPP Regional Impossible Parameter Values (8)',
+  QUALITY_TESTS='Test 2.3: GTSPP Increasing Depth (16)',
+  QUALITY_TESTS='Test 2.4: GTSPP Profile Envelope (Temperature and Salinity) (32)',
+  QUALITY_TESTS='Test 2.5: GTSPP Constant Profile (64)',
+  QUALITY_TESTS='Test 2.6: GTSPP Freezing Point (128)',
+  QUALITY_TESTS='Test 2.7: GTSPP Spike in Temperature and Salinity (one point) (256)',
+  QUALITY_TESTS='Test 2.8: GTSPP Top and Bottom Spike in Temperature and Salinity (512)',
+  QUALITY_TESTS='Test 2.9: GTSPP Gradient in Temperature and Salinity (1024)',
+  QUALITY_TESTS='Test 2.10: GTSPP Density Inversion (point to point) (2048)',
+  QUALITY_TESTS='Test 2.11: IML Spike in Pressure, Temperature and Salinity (one point or more) (4096)',
+  QUALITY_TESTS='Test 2.12: IML Density Inversion (overall profile) (8192)'
+  QUALITY_COMMENTS='QUALITY CODES',
+  QUALITY_COMMENTS='0: Value has not been quality controlled',
+  QUALITY_COMMENTS='1: Value seems to be correct',
+  QUALITY_COMMENTS='2: Value appears inconsistent with other values',
+  QUALITY_COMMENTS='3: Value seems doubtful',
+  QUALITY_COMMENTS='4: Value seems erroneous',
+  QUALITY_COMMENTS='5: Value was modified',
+  QUALITY_COMMENTS='9: Value is missing',
+  QUALITY_COMMENTS='QCFF CHANNEL',
+  QUALITY_COMMENTS='The QCFF flag allows one to determine from which test(s) the quality flag(s) originate',
+  QUALITY_COMMENTS='It only applies to the stage 2 quality control tests.',
+  QUALITY_COMMENTS='Each test in this step is associated with a number 2x, where x is a whole positive number.',
+  QUALITY_COMMENTS='Before running the quality control, a QCFF value of 0 is attributed to each line of data.',
+  QUALITY_COMMENTS='When a test fails, the value of 2x that is associated with that test is added to the QCFF.',
+  QUALITY_COMMENTS='In this way one can easily identify which tests failed by analyzing the QCFF value.',
+  QUALITY_COMMENTS='If the QC flag of a record is modified by hand, a value of 1 is added to the QCFF.',
+  QUALITY_COMMENTS='QUALITY CONTROL TEST RESULTS',
+  QUALITY_COMMENTS='Test 2.1 Global Impossible Parameter Values -> ok',
+  QUALITY_COMMENTS='Test 2.2 Regional Impossible Parameter Values -> ok',
+  QUALITY_COMMENTS='Test 2.3 Increasing Depth -> ok',
+  QUALITY_COMMENTS='Test 2.4 Profile Envelope -> ok',
+  QUALITY_COMMENTS='Test 2.5 Constant Profile -> ok',
+  QUALITY_COMMENTS='Test 2.6 Freezing Point -> ok',
+  QUALITY_COMMENTS='Test 2.7 Spike in Temperature and Salinity (one point) -> ok',
+  QUALITY_COMMENTS='Test 2.8 Top and Bottom Spike in Temperature and Salinity (one point) -> ok',
+  QUALITY_COMMENTS='Test 2.9 Gradient (point to point) -> ok',
+  QUALITY_COMMENTS='Test 2.10 Density Inversion (point to point) -> Density inversion found (SIGP_01)',
+  QUALITY_COMMENTS='Test 2.11 Spike (one point or more) (supplementary test) -> ok',
+  QUALITY_COMMENTS='Test 2.12 Density Inversion (overall profile) -> Density inversion found (SIGP_01)'
+</pre>
+<p><br/></p>
+<h3 id="polynomial_cal_header-block-optional">POLYNOMIAL_CAL_HEADER Block (optional)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POLYNOMIAL_CAL_HEADER</td>
+<td>PARAMETER_CODE</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>POLYNOMIAL_CAL_HEADER</td>
+<td>CALIBRATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>POLYNOMIAL_CAL_HEADER</td>
+<td>APPLICATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>POLYNOMIAL_CAL_HEADER</td>
+<td>NUMBER_OF_COEFFICIENTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>POLYNOMIAL_CAL_HEADER</td>
+<td>COEFFICIENTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number(s)</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1…n</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 7 - POLYNOMIAL_CAL_HEADER block details</p>
+<p><br/></p>
+<p>The POLYNOMIAL_CAL_HEADER block consists of metadata describing a
+polynomial calibration applied to a parameter in the file.</p>
+<p>The POLYNOMIAL_CAL_HEADER block is not mandatory.</p>
+<p>All fields in the POLYNOMIAL_CAL_HEADER block are mandatory when the
+block is present.</p>
+<p>The fields are also order dependent and must conform to the above order.</p>
+<p>The NUMBER_COEFFICIENTS value must correspond to the actual number of
+coefficients listed in the block.</p>
+<p>The POLYNOMIAL_CAL_HEADER block(s) must precede the HISTORY_HEADER
+block(s).</p>
+<p>An example POLYNOMIAL_CAL_HEADER block follows:</p>
+<pre>
+ POLYNOMIAL_CAL_HEADER
+  PARAMETER_CODE = 'PSAL_02'
+  CALIBRATION_DATE = '11-SEP-1996 14:51:25.74'
+  APPLICATION_DATE = '11-SEP-1996 14:51:25.74'
+  NUMBER_COEFFICIENTS = 2
+  COEFFICIENTS = -.31800001D-03 0.10000000D+01
+</pre>
+<p><br/></p>
+<h3 id="general_cal_header-block-optional">GENERAL_CAL_HEADER Block (optional)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GENERAL_CAL_HEADER</td>
+<td>PARAMETER_CODE</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>GENERAL_CAL_HEADER</td>
+<td>CALIBRATION_TYPE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>GENERAL_CAL_HEADER</td>
+<td>CALIBRATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>GENERAL_CAL_HEADER</td>
+<td>APPLICATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>GENERAL_CAL_HEADER</td>
+<td>NUMBER_OF_COEFFICIENTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>GENERAL_CAL_HEADER</td>
+<td>COEFFICIENTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number(s)</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1…n</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>GENERAL_CAL_HEADER</td>
+<td>CALIBRATION_EQUATION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>GENERAL_CAL_HEADER</td>
+<td>CALIBRATION_COMMENTS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1…n</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 8 - GENERAL_CAL_HEADER block details</p>
+<p><br/></p>
+<p>The GENERAL_CAL_HEADER block consists of metadata describing a general
+calibration applied to a parameter in the file.</p>
+<p>The GENERAL_CAL_HEADER block is not mandatory.</p>
+<p>All fields in the GENERAL_CAL_HEADER block are mandatory when the block
+is present.</p>
+<p>The fields are also order dependent and must conform to the above order.</p>
+<p>The NUMBER_COEFFICIENTS value must correspond to the actual number of
+coefficients listed in the block.</p>
+<p>The GENERAL_CAL_HEADER block(s) must precede the HISTORY_HEADER
+block(s).</p>
+<p>An example GENERAL_CAL_HEADER block follows:</p>
+<pre>
+ GENERAL_CAL_HEADER
+  PARAMETER_CODE = 'PRES_01',
+  CALIBRATION_TYPE = 'PRES04',
+  CALIBRATION_DATE = '04-NOV-1997 00:00:00.00',
+  APPLICATION_DATE = '23-AUG-2000 11:56:23.00',
+  NUMBER_OF_COEFFICIENTS = 4,
+  COEFFICIENTS = -3.97110200e-02 -7.14514600e+03 0.00000000e+00 0.00000000e+00 ,
+  CALIBRATION_EQUATION = 'PRES = (C0 + C1*N + C2*N^2 + C3)/1.450377',
+  CALIBRATION_COMMENTS = '',
+</pre>
+<p><br/></p>
+<h3 id="compass_cal_header-block-optional">COMPASS_CAL_HEADER Block (optional)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>COMPASS_CAL_HEADER</td>
+<td>PARAMETER_CODE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>COMPASS_CAL_HEADER</td>
+<td>CALIBRATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>COMPASS_CAL_HEADER</td>
+<td>APPLICATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>COMPASS_CAL_HEADER</td>
+<td>DIRECTIONS</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">number(s)</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1…n</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>COMPASS_CAL_HEADER</td>
+<td>CORRECTIONS</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">number(s)</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1…n</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 9 - COMPASS_CAL_HEADER block details</p>
+<p><br/></p>
+<p>The COMPASS_CAL_HEADER block consists of metadata describing a
+calibration applied to the current meter data in the file.</p>
+<p>The COMPASS_CAL_HEADER block is not mandatory.</p>
+<p>All fields in the COMPASS_CAL_HEADER block are mandatory when the block
+is present.</p>
+<p>The fields are also order dependent and must conform to the above order.</p>
+<p>Multiple COMPASS_CAL_HEADER blocks can exist in one ODF file.</p>
+<p>The COMPASS_CAL_HEADER block(s) must precede the HISTORY_HEADER
+block(s).</p>
+<pre>
+COMPASS_CAL_HEADER,
+  PARAMETER_NAME='HCDT_01',
+  CALIBRATION_DATE='26-JUL-2011 10:43:10.19',
+  APPLICATION_DATE='26-JUL-2011 10:43:10.19',
+  DIRECTIONS=8.30000000E+000  1.83000000E+001  2.83000000E+001  3.83000000E+001  4.83000000E+001  5.83000000E+001  6.83000000E+001  7.83000000E+001  8.83000000E+001  9.83000000E+001  1.08300000E+002  1.18300000E+002  1.28300000E+002  1.38300000E+002  1.48300000E+002  1.58300000E+002  1.68300000E+002  1.78300000E+002  1.88300000E+002  1.98300000E+002  2.08300000E+002  2.18300000E+002  2.28300000E+002  2.38300000E+002  2.48300000E+002  2.58300000E+002  2.68300000E+002  2.78300000E+002  2.88300000E+002  2.98300000E+002  3.08300000E+002  3.18300000E+002  3.28300000E+002  3.38300000E+002  3.48300000E+002  3.58300000E+002,
+  CORRECTIONS=1.40000000E+000  1.20000000E+000  9.00000000E-001  2.00000000E-001  8.00000000E-001  1.00000000E+000  8.00000000E-001  8.00000000E-001  3.00000000E-001  0.00000000E+000  0.00000000E+000  -5.00000000E-001  -4.00000000E-001  1.00000000E-001  -4.00000000E-001  -7.00000000E-001  -9.00000000E-001  -8.00000000E-001  -1.30000000E+000  -1.30000000E+000  -1.30000000E+000  -1.40000000E+000  -2.10000000E+000  -1.20000000E+000  -1.20000000E+000  -1.70000000E+000  -1.60000000E+000  -1.60000000E+000  -1.60000000E+000  -1.00000000E+000  -1.00000000E+000  -8.00000000E-001  -1.30000000E+000  -1.10000000E+000  -1.40000000E+000  5.00000000E-001,
+</pre>
+<p><br/></p>
+<h3 id="history_header-block-mandatory">HISTORY_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HISTORY_HEADER</td>
+<td>CREATION_DATE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">SYTM</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">17-NOV-1858 00:00:00.00</td>
+</tr>
+<tr>
+<td>HISTORY_HEADER</td>
+<td>PROCESS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">0…n</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 10 - HISTORY_HEADER block details</p>
+<p><br/></p>
+<p>The HISTORY_HEADER block is mandatory.</p>
+<p>All fields in the HISTORY_HEADER block are mandatory.</p>
+<p>The fields are order dependent and must conform to the above order.</p>
+<p>All HISTORY_HEADER blocks must be grouped together.</p>
+<p>The HISTORY_HEADER block(s) precede the PARAMETER_HEADER block(s).</p>
+<p>An example HISTORY_HEADER block follows:</p>
+<pre>
+HISTORY_HEADER
+  CREATION_DATE = '04-JUN-1999 14:47:40.37'
+  PROCESS = 'SELECT_FILE,FILE_SPEC=D7:CTD_96006*.ODF'
+</pre>
+<p><br/></p>
+<hr/>
+
+<h3 id="parameter_header-block-mandatory">PARAMETER_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>TYPE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>NAME</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>UNITS</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>CODE</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>NULL_VALUE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>PRINT_FIELD_ORDER</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>PRINT_FIELD_WIDTH</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>PRINT_DECIMAL_PLACES</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>ANGLE_OF_SECTION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>MAGNETIC_VARIATION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>DEPTH</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>MINIMUM_VALUE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>MAXIMUM_VALUE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>NUMBER_VALID</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+<tr>
+<td>PARAMETER_HEADER</td>
+<td>NUMBER_NULL</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">-99</td>
+</tr>
+</tbody>
+</table>
+<p>Table 11 - PARAMETER_HEADER block details</p>
+<p><br/></p>
+<p>At least one PARAMETER_HEADER block is mandatory.</p>
+<p>Multiple PARAMETER_HEADER blocks are permitted within the ODF file.</p>
+<p>All fields in the PARAMETER_HEADER block are mandatory.</p>
+<p>The mandatory fields are:</p>
+<ul>
+<li>TYPE</li>
+<li>CODE</li>
+<li>ANGLE_OF_SECTION</li>
+<li>MAGNETIC_VARIATION</li>
+<li>DEPTH</li>
+<li>PRINT_FIELD_ORDER</li>
+</ul>
+<p>The fields in the PARAMETER_HEADER block are not order dependent.</p>
+<p>The order of the individual PARAMETER_HEADER blocks is independent of
+the order of the data channels within the data section of the ODF file.</p>
+<p>All PARAMETER_HEADER blocks must be grouped together.</p>
+<p>The PARAMETER_HEADER block(s) follow the HISTORY_HEADER block(s).</p>
+<p>All data parameters in an ODF file must have a valid parameter code.</p>
+<p>An example PARAMETER_HEADER block follows:</p>
+<pre>
+PARAMETER_HEADER,
+  TYPE = 'DOUB',
+  NAME = 'Sea Pressure (sea surface - 0)',
+  UNITS = 'decibars',
+  CODE = 'PRES_01',
+  NULL_VALUE = 173.00,
+  PRINT_FIELD_WIDTH = 10,
+  PRINT_DECIMAL_PLACES = 3,
+  ANGLE_OF_SECTION = 0.000000,
+  MAGNETIC_VARIATION = 0.000000,
+  DEPTH = 0.000000,
+  MINIMUM_VALUE = 1.2,
+  MAXIMUM_VALUE = 35.6,
+  NUMBER_VALID = -99,
+  NUMBER_NULL = 0,
+</pre>
+<p>The following table lists all of the valid parameter codes:</p>
+<p><br/><details class="code-fold">
+<summary>Code</summary>
+
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">tabulate</span><span class="w"> </span><span class="kn">import</span> <span class="n">tabulate</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">d</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"gf3defs_sorted.csv"</span><span class="p">)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">md</span> <span class="o">=</span> <span class="n">tabulate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s1">'keys'</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">'pipe'</span><span class="p">,</span><span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">d</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+</span></code></pre></div>
+
+</details>
+</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Code</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Units</th>
+<th style="text-align: right;">Field Width</th>
+<th style="text-align: right;">Decimal Places</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">412E</td>
+<td style="text-align: left;">Irradiance 412nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">412E</td>
+<td style="text-align: left;">Irradiance 412nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">412ESDEV</td>
+<td style="text-align: left;">Irradiance 412nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">412ESDEV</td>
+<td style="text-align: left;">Irradiance 412nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">412L</td>
+<td style="text-align: left;">Radiance 412nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">412L</td>
+<td style="text-align: left;">Radiance 412nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">412LSDEV</td>
+<td style="text-align: left;">Radiance 412nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">412LSDEV</td>
+<td style="text-align: left;">Radiance 412nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">443E</td>
+<td style="text-align: left;">Irradiance 443nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">443E</td>
+<td style="text-align: left;">Irradiance 443nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">443ESDEV</td>
+<td style="text-align: left;">Irradiance 443nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">443ESDEV</td>
+<td style="text-align: left;">Irradiance 443nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">443L</td>
+<td style="text-align: left;">Radiance 443nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">443L</td>
+<td style="text-align: left;">Radiance 443nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">443LSDEV</td>
+<td style="text-align: left;">Radiance 443nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">443LSDEV</td>
+<td style="text-align: left;">Radiance 443nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">490E</td>
+<td style="text-align: left;">Irradiance 490nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">490E</td>
+<td style="text-align: left;">Irradiance 490nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">490ESDEV</td>
+<td style="text-align: left;">Irradiance 490nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">490ESDEV</td>
+<td style="text-align: left;">Irradiance 490nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">490L</td>
+<td style="text-align: left;">Radiance 490nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">490L</td>
+<td style="text-align: left;">Radiance 490nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">490LSDEV</td>
+<td style="text-align: left;">Radiance 490nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">490LSDEV</td>
+<td style="text-align: left;">Radiance 490nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">510E</td>
+<td style="text-align: left;">Irradiance 510nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">510E</td>
+<td style="text-align: left;">Irradiance 510nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">510ESDEV</td>
+<td style="text-align: left;">Irradiance 510nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">510ESDEV</td>
+<td style="text-align: left;">Irradiance 510nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">510L</td>
+<td style="text-align: left;">Radiance 510nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">510L</td>
+<td style="text-align: left;">Radiance 510nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">510LSDEV</td>
+<td style="text-align: left;">Radiance 510nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">510LSDEV</td>
+<td style="text-align: left;">Radiance 510nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">555E</td>
+<td style="text-align: left;">Irradiance 555nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">555E</td>
+<td style="text-align: left;">Irradiance 555nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">555ESDEV</td>
+<td style="text-align: left;">Irradiance 555nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">555ESDEV</td>
+<td style="text-align: left;">Irradiance 555nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">555L</td>
+<td style="text-align: left;">Radiance 555nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">555L</td>
+<td style="text-align: left;">Radiance 555nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">555LSDEV</td>
+<td style="text-align: left;">Radiance 555nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">555LSDEV</td>
+<td style="text-align: left;">Radiance 555nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">669E</td>
+<td style="text-align: left;">Irradiance 669nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">669E</td>
+<td style="text-align: left;">Irradiance 669nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">669ESDEV</td>
+<td style="text-align: left;">Irradiance 669nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">669ESDEV</td>
+<td style="text-align: left;">Irradiance 669nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">669L</td>
+<td style="text-align: left;">Radiance 669nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">669L</td>
+<td style="text-align: left;">Radiance 669nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">669LSDEV</td>
+<td style="text-align: left;">Radiance 669nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">669LSDEV</td>
+<td style="text-align: left;">Radiance 669nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">683E</td>
+<td style="text-align: left;">Irradiance 683nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">683E</td>
+<td style="text-align: left;">Irradiance 683nm</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">683ESDEV</td>
+<td style="text-align: left;">Irradiance 683nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">683ESDEV</td>
+<td style="text-align: left;">Irradiance 683nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">683L</td>
+<td style="text-align: left;">Radiance 683nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">683L</td>
+<td style="text-align: left;">Radiance 683nm</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">683LSDEV</td>
+<td style="text-align: left;">Radiance 683nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">683LSDEV</td>
+<td style="text-align: left;">Radiance 683nm standard deviation</td>
+<td style="text-align: left;">uW/cm**2/nm/sr</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">ABSH</td>
+<td style="text-align: left;">Absolute Humidity</td>
+<td style="text-align: left;">g/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ALKY</td>
+<td style="text-align: left;">Total Alkalinity</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ALPO</td>
+<td style="text-align: left;">Alpha - 0</td>
+<td style="text-align: left;">m**3/kg</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ALTB</td>
+<td style="text-align: left;">Height/Altitude above Bottom</td>
+<td style="text-align: left;">metres</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td style="text-align: left;">ALTS</td>
+<td style="text-align: left;">Height/Altitude above Mean Sea Level</td>
+<td style="text-align: left;">metres</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">AMON</td>
+<td style="text-align: left;">Ammonium (NH4-N) Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ATMP</td>
+<td style="text-align: left;">Atmospheric pressure</td>
+<td style="text-align: left;">hPa</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td style="text-align: left;">ATMS</td>
+<td style="text-align: left;">Atmospheric Pressure at Sea Level</td>
+<td style="text-align: left;">hpa</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ATP_</td>
+<td style="text-align: left;">Adenosine Triphosphate content</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">ATRK</td>
+<td style="text-align: left;">Along Track Displacement</td>
+<td style="text-align: left;">metres</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ATTU</td>
+<td style="text-align: left;">Attenuance (ADCP)</td>
+<td style="text-align: left;">/m</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">AUTH</td>
+<td style="text-align: left;">Authority</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">BAC_</td>
+<td style="text-align: left;">Bacteria Counts</td>
+<td style="text-align: left;">10**6/L</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">BATH</td>
+<td style="text-align: left;">Bathymetric Depth</td>
+<td style="text-align: left;">metres</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">BATT</td>
+<td style="text-align: left;">Battery Voltage</td>
+<td style="text-align: left;">volts</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">BEAM</td>
+<td style="text-align: left;">ADCP Echo Intensity</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">BIOV</td>
+<td style="text-align: left;">Organism Volume</td>
+<td style="text-align: left;">mL</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">BNO7</td>
+<td style="text-align: left;">Best NODC7 number</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">CALK</td>
+<td style="text-align: left;">Carbonate Alkalinity</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CAL_</td>
+<td style="text-align: left;">Detail data: Calorimetric bomb</td>
+<td style="text-align: left;">cal/mg</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">CDOM</td>
+<td style="text-align: left;">Fluorescence of CDOM (Coloured Dissolved Organic Matter)</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CDOMSDEV</td>
+<td style="text-align: left;">Fluorescence of CDOM (Coloured Dissolved Organic Matter) standard deviation</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CDOMSDEV</td>
+<td style="text-align: left;">Fluorescence of CDOM (Coloured Dissolved Organic Matter) standard deviation</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CDWT</td>
+<td style="text-align: left;">Detail data: Calculated dry weight derived using a regression</td>
+<td style="text-align: left;">mg/m³</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">CHLR</td>
+<td style="text-align: left;">Chlorinity (parts/thousand)</td>
+<td style="text-align: left;">g/kg</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CHLS</td>
+<td style="text-align: left;">Chlorosity</td>
+<td style="text-align: left;">kg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CMET</td>
+<td style="text-align: left;">Method used for sample collection</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">CMNT</td>
+<td style="text-align: left;">Comments</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">CMTM</td>
+<td style="text-align: left;">CMCTD Time YYJJJHHMMSSss</td>
+<td style="text-align: left;">GMT</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CNDC</td>
+<td style="text-align: left;">Electrical Conductivity</td>
+<td style="text-align: left;">mhos/m</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">CNTR</td>
+<td style="text-align: left;">Counter</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CNTS</td>
+<td style="text-align: left;">Number of Organisms Counted</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">COLL</td>
+<td style="text-align: left;">Detail data: Name of the collector for the data</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">COND</td>
+<td style="text-align: left;">Conductivity</td>
+<td style="text-align: left;">mmHo</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">CORG</td>
+<td style="text-align: left;">Organic Carbon Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CPCT</td>
+<td style="text-align: left;">Identifies the Percentage of Specified Plankton</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CPHL</td>
+<td style="text-align: left;">Chlorophyll-a Content</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">CRAT</td>
+<td style="text-align: left;">Conductivity Ratio</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">CTAX</td>
+<td style="text-align: left;">Collector Taxonomic Identifier</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">CTOT</td>
+<td style="text-align: left;">Total Carbon (C) Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">DCHG</td>
+<td style="text-align: left;">Discharge</td>
+<td style="text-align: left;">m**3/s</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td style="text-align: left;">DENS</td>
+<td style="text-align: left;">Sea Density</td>
+<td style="text-align: left;">kg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">DEPH</td>
+<td style="text-align: left;">Sensor Depth below Sea Surface</td>
+<td style="text-align: left;">metres</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td style="text-align: left;">DEWT</td>
+<td style="text-align: left;">Dew Point Temperature</td>
+<td style="text-align: left;">degrees C</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">DOC_</td>
+<td style="text-align: left;">Dissolved Organic Carbon content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">DON_</td>
+<td style="text-align: left;">Dissolved Organic Nitrogen content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">DOXY</td>
+<td style="text-align: left;">Dissolved Oxygen</td>
+<td style="text-align: left;">ml/l</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">DPDT</td>
+<td style="text-align: left;">Lowering Rate</td>
+<td style="text-align: left;">metres/sec</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">DRDP</td>
+<td style="text-align: left;">Depth of Drogue</td>
+<td style="text-align: left;">metres</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">DRWT</td>
+<td style="text-align: left;">Dry Weight of Organisms</td>
+<td style="text-align: left;">g</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">DRYT</td>
+<td style="text-align: left;">Dry Bulb Temperature</td>
+<td style="text-align: left;">degrees C</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">DYNH</td>
+<td style="text-align: left;">Geopotential Dynamic Height</td>
+<td style="text-align: left;">m</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ERRV</td>
+<td style="text-align: left;">Error Velocity (ADCP)</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">EWCM</td>
+<td style="text-align: left;">East (magnetic) Component of Current</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">EWCT</td>
+<td style="text-align: left;">East (true) Component of Current</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">FFFF</td>
+<td style="text-align: left;">Quality Control Flag</td>
+<td style="text-align: left;">code</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">FLOR</td>
+<td style="text-align: left;">Fluorescence</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">FLORSDEV</td>
+<td style="text-align: left;">Fluorescence standard deviation</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">FLORSDEV</td>
+<td style="text-align: left;">Fluorescence standard deviation</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">FLU_</td>
+<td style="text-align: left;">Fluorescence</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">GDIR</td>
+<td style="text-align: left;">Gust Wind Direction</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">GEAR</td>
+<td style="text-align: left;">Gear used for sample collection</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">GEOP</td>
+<td style="text-align: left;">Geopotential</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">GSPD</td>
+<td style="text-align: left;">Gust Wind Speed</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">HCDM</td>
+<td style="text-align: left;">Horizontal Current Direction (magnetic)</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">HCDT</td>
+<td style="text-align: left;">Horizontal Current Direction (true)</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">HCSP</td>
+<td style="text-align: left;">Horizontal Current Speed</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">HEAD</td>
+<td style="text-align: left;">Heading</td>
+<td style="text-align: left;">True degrees</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">HEAD</td>
+<td style="text-align: left;">Heading</td>
+<td style="text-align: left;">True degrees</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">HGHT</td>
+<td style="text-align: left;">Height/Altitude above Sea Surface</td>
+<td style="text-align: left;">metres</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">HSUL</td>
+<td style="text-align: left;">Hydrogen Sulphide (H2S-S) Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">IDEN</td>
+<td style="text-align: left;">Data identifier</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">LATD</td>
+<td style="text-align: left;">Latitude (North +ve)</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">LCHL</td>
+<td style="text-align: left;">Chlorophyll-a Content from cells &gt; 5um</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">LHIS</td>
+<td style="text-align: left;">Life History or Development Stage</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">LOND</td>
+<td style="text-align: left;">Longitude (East +ve)</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">LPHA</td>
+<td style="text-align: left;">Phaeopigment content from cells &gt; 5um</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">MAGN</td>
+<td style="text-align: left;">Magnetic Variation From True North</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">MNSV</td>
+<td style="text-align: left;">Retention Filter Size</td>
+<td style="text-align: left;">microns</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">MNSZ</td>
+<td style="text-align: left;">Minimum size of organisms</td>
+<td style="text-align: left;">microns</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">MODF</td>
+<td style="text-align: left;">Additional taxonomic information</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">MXSV</td>
+<td style="text-align: left;">Largest Sieve Used</td>
+<td style="text-align: left;">microns</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">MXSZ</td>
+<td style="text-align: left;">Maximum size of organisms</td>
+<td style="text-align: left;">microns</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">NETR</td>
+<td style="text-align: left;">Net Solar Radiation</td>
+<td style="text-align: left;">watts/m**2</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">NONE</td>
+<td style="text-align: left;">No WMO assigned</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">NORG</td>
+<td style="text-align: left;">Organic Nitrogen Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">NSCM</td>
+<td style="text-align: left;">North (magnetic) Component of Current</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">NSCT</td>
+<td style="text-align: left;">North (true) Component of Current</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">NTOT</td>
+<td style="text-align: left;">Total Nitrogen (N) Content</td>
+<td style="text-align: left;">mmol/**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">NTRA</td>
+<td style="text-align: left;">Nitrate (NO3-N) Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">NTRI</td>
+<td style="text-align: left;">Nitrite (NO2-N) Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">NTRZ</td>
+<td style="text-align: left;">Nitrate + Nitrite Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">NUM_</td>
+<td style="text-align: left;">Number of scans averaged</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">OCUR</td>
+<td style="text-align: left;">Oxygen Sensor Current</td>
+<td style="text-align: left;">uA</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">OPPR</td>
+<td style="text-align: left;">Oxygen Partial Pressure</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">OSAT</td>
+<td style="text-align: left;">Oxygen Saturation</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">OTMP</td>
+<td style="text-align: left;">Oxygen Sensor Temperature</td>
+<td style="text-align: left;">degrees C</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">OXV_</td>
+<td style="text-align: left;">Raw oxygen voltage</td>
+<td style="text-align: left;">volts</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">OXYG</td>
+<td style="text-align: left;">Dissolved Oxygen</td>
+<td style="text-align: left;">umol/kg</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PCGD</td>
+<td style="text-align: left;">Percent Good Signal Return (ADCP)</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">PGDP</td>
+<td style="text-align: left;">Percent Good Pings</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PHA_</td>
+<td style="text-align: left;">Phaeopigment content</td>
+<td style="text-align: left;">mg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PHOS</td>
+<td style="text-align: left;">Phosphate (PO4-P) Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PHPH</td>
+<td style="text-align: left;">Hydrogen Ion Concentration (pH)</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PHY_</td>
+<td style="text-align: left;">Phytoplankton Counts</td>
+<td style="text-align: left;">10**3cells/L</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PIM_</td>
+<td style="text-align: left;">Bottle sample particulate inorganic matter</td>
+<td style="text-align: left;">g/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PLT_</td>
+<td style="text-align: left;">Percentage of the incident surface light remaining at the sampled depth</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">POC_</td>
+<td style="text-align: left;">Particulate Organic Carbon content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">POM_</td>
+<td style="text-align: left;">Bottle sample particulate organic matter</td>
+<td style="text-align: left;">g/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PON_</td>
+<td style="text-align: left;">Particulate Organic Nitrogen content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">POTM</td>
+<td style="text-align: left;">Potential Temperature</td>
+<td style="text-align: left;">degrees C</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">POTT</td>
+<td style="text-align: left;">Potential Air Temperature</td>
+<td style="text-align: left;">degrees C</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">PPR_</td>
+<td style="text-align: left;">Primary Production</td>
+<td style="text-align: left;">mgC/m**3/h</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td style="text-align: left;">PPTR</td>
+<td style="text-align: left;">PIPE Internal Pointer</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PRES</td>
+<td style="text-align: left;">Sea Pressure (sea surface - 0)</td>
+<td style="text-align: left;">decibars</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td style="text-align: left;">PROC</td>
+<td style="text-align: left;">Identifies the state of the sample analysis</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">PRP_</td>
+<td style="text-align: left;">Production primaire à partir d`incubations</td>
+<td style="text-align: left;">mgC/m**3/h</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PRSN</td>
+<td style="text-align: left;">Indicates presence (1) or absence (0) of organisms if not counted</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">PRSV</td>
+<td style="text-align: left;">Method used for sample preservation</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">PSAL</td>
+<td style="text-align: left;">Practical Salinity</td>
+<td style="text-align: left;">psu</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">PSAR</td>
+<td style="text-align: left;">Photosynthetic Active Radiation</td>
+<td style="text-align: left;">ueinsteins/s/m**2</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PTCH</td>
+<td style="text-align: left;">Pitch Angle</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">PTCHSDEV</td>
+<td style="text-align: left;">Pitch Angle standard deviation</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">PTCHSDEV</td>
+<td style="text-align: left;">Pitch Angle standard deviation</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">PVAR</td>
+<td style="text-align: left;">PIPE Variable</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">QCFF</td>
+<td style="text-align: left;">Quality flag: QCFF</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">QQQQ</td>
+<td style="text-align: left;">Quality Control Flag (GTSPP)</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">RANG</td>
+<td style="text-align: left;">Distance of Object from Reference Point</td>
+<td style="text-align: left;">metres</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">REFR</td>
+<td style="text-align: left;">Reference</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">RELH</td>
+<td style="text-align: left;">Relative Humidity</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">RELP</td>
+<td style="text-align: left;">Relative Total Pressure</td>
+<td style="text-align: left;">decibars</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ROLL</td>
+<td style="text-align: left;">Roll Angle</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">ROLLSDEV</td>
+<td style="text-align: left;">Roll Angle standard deviation</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ROLLSDEV</td>
+<td style="text-align: left;">Roll Angle standard deviation</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">RPOT</td>
+<td style="text-align: left;">Redox Potential</td>
+<td style="text-align: left;">mV</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SDEV</td>
+<td style="text-align: left;">Standard deviation of preceding parameter</td>
+<td style="text-align: left;">same as preceding parameter</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SECC</td>
+<td style="text-align: left;">SECCHI disc depth</td>
+<td style="text-align: left;">m</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">SEX_</td>
+<td style="text-align: left;">Sex</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">SIGO</td>
+<td style="text-align: left;">Sigma-0</td>
+<td style="text-align: left;">kg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">SIGP</td>
+<td style="text-align: left;">Sigma-Theta</td>
+<td style="text-align: left;">kg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">SIGT</td>
+<td style="text-align: left;">Sigma-T</td>
+<td style="text-align: left;">kg/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">SLCA</td>
+<td style="text-align: left;">Silicate (SIO4-SI) Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SNCN</td>
+<td style="text-align: left;">Scan Counter</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SPAR</td>
+<td style="text-align: left;">Surface Photosynthetic Active Radiation</td>
+<td style="text-align: left;">ueinsteins/s/m**2</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SPARSDEV</td>
+<td style="text-align: left;">Surface Photosynthetic Active Radiation standard deviation</td>
+<td style="text-align: left;">ueinsteins/s/m**2</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SPARSDEV</td>
+<td style="text-align: left;">Surface Photosynthetic Active Radiation standard deviation</td>
+<td style="text-align: left;">ueinsteins/s/m**2</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SPEH</td>
+<td style="text-align: left;">Specific Humidity</td>
+<td style="text-align: left;">g/kg</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SPFR</td>
+<td style="text-align: left;">Fraction of Sample</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">SPVA</td>
+<td style="text-align: left;">Specific Volume Anomoly</td>
+<td style="text-align: left;">m**3/kg</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SPVO</td>
+<td style="text-align: left;">Specific Volume</td>
+<td style="text-align: left;">m**3/kg</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SSAL</td>
+<td style="text-align: left;">Salinity</td>
+<td style="text-align: left;">g/kg or o/oo</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">STOR</td>
+<td style="text-align: left;">Description of sample storage between collection and analysis</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">STRA</td>
+<td style="text-align: left;">Stress Amplitude</td>
+<td style="text-align: left;">Pa</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">STRD</td>
+<td style="text-align: left;">Stress Direction</td>
+<td style="text-align: left;">degrees T</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">STRU</td>
+<td style="text-align: left;">Stress (U Component)</td>
+<td style="text-align: left;">Pa</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">STRV</td>
+<td style="text-align: left;">Stress (V Component)</td>
+<td style="text-align: left;">Pa</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SVEL</td>
+<td style="text-align: left;">Sound Velocity</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">SYTM</td>
+<td style="text-align: left;">PIPE Time Format DD-MMM-YYYY HH:MM:SS.ss</td>
+<td style="text-align: left;">GMT</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">TAXN</td>
+<td style="text-align: left;">Taxonomic Name</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">TE90</td>
+<td style="text-align: left;">Temperature (ITS-90 scale)</td>
+<td style="text-align: left;">degrees C</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">TEMP</td>
+<td style="text-align: left;">Temperature (IPTS-68 Scale)</td>
+<td style="text-align: left;">degrees C</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">TEXT</td>
+<td style="text-align: left;">Plain Language Text</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TILT</td>
+<td style="text-align: left;">Tilt Angle</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">TILTSDEV</td>
+<td style="text-align: left;">Tilt Angle standard deviation</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TILTSDEV</td>
+<td style="text-align: left;">Tilt Angle standard deviation</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">TLENBSEQ</td>
+<td style="text-align: left;">Frequency data: Sequential number attached to bugs having a given total length</td>
+<td style="text-align: left;">nan</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">TLENCNTP</td>
+<td style="text-align: left;">Frequency data: Percentage of bugs having a given total length</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">TLENCOLL</td>
+<td style="text-align: left;">Frequency data: Name of the collector</td>
+<td style="text-align: left;">nan</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">TLENLBIN</td>
+<td style="text-align: left;">Frequency data: Bug total length lower frequency bin</td>
+<td style="text-align: left;">mm</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TLENQQQQ</td>
+<td style="text-align: left;">Frequency data: Quality control code of bugs having a given total length</td>
+<td style="text-align: left;">nan</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">TLENTLEN</td>
+<td style="text-align: left;">Frequency data: Bug total length</td>
+<td style="text-align: left;">mm</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TLENUBIN</td>
+<td style="text-align: left;">Frequency data: Bug total length upper frequency bin</td>
+<td style="text-align: left;">mm</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TOFF</td>
+<td style="text-align: left;">CMCTD Time Offset</td>
+<td style="text-align: left;">s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TOTP</td>
+<td style="text-align: left;">Total Pressure (Atmosphere + Sea Pressure)</td>
+<td style="text-align: left;">decibars</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TPHS</td>
+<td style="text-align: left;">Total Phosphorous (P) Content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TRAN</td>
+<td style="text-align: left;">Light Transmission</td>
+<td style="text-align: left;">%</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TRPH</td>
+<td style="text-align: left;">Trophic Descriptor</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">TSM_</td>
+<td style="text-align: left;">Bottle sample total suspended matter</td>
+<td style="text-align: left;">g/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">TSN_</td>
+<td style="text-align: left;">Taxonomic Serial Number</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">TURB</td>
+<td style="text-align: left;">OBS Turbidity</td>
+<td style="text-align: left;">FTU</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">UNKN</td>
+<td style="text-align: left;">Unknown WMO Code</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">URE_</td>
+<td style="text-align: left;">Urea content</td>
+<td style="text-align: left;">mmol/m**3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">VAIS</td>
+<td style="text-align: left;">Brunt Vaissala Frequency</td>
+<td style="text-align: left;">hertz</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">VCSP</td>
+<td style="text-align: left;">Vertical Current Speed (positive up)</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">VMET</td>
+<td style="text-align: left;">Method used to determine the volume of water</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">-99</td>
+</tr>
+<tr>
+<td style="text-align: left;">VOLT</td>
+<td style="text-align: left;">Sensor Volts</td>
+<td style="text-align: left;">volts</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">WDIR</td>
+<td style="text-align: left;">Wind Direction relative to North (T)</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">WETECOBB</td>
+<td style="text-align: left;">Turbidity, WET Labs ECO BB</td>
+<td style="text-align: left;">m^-1/sr</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">WETT</td>
+<td style="text-align: left;">Wet Bulb Temperature</td>
+<td style="text-align: left;">degrees C</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">WSPD</td>
+<td style="text-align: left;">Horizontal Wind Speed</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">WSPE</td>
+<td style="text-align: left;">Eastward (true) Component of Wind Speed</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">WSPN</td>
+<td style="text-align: left;">Northward (True) Component of Wind Speed</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">WTWT</td>
+<td style="text-align: left;">Wet Weight of Organisms</td>
+<td style="text-align: left;">g</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;">WVER</td>
+<td style="text-align: left;">Vertical Wind Speed</td>
+<td style="text-align: left;">m/s</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ZNTH</td>
+<td style="text-align: left;">Zenith Angle of Object From Reference</td>
+<td style="text-align: left;">degrees</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">ZOO_</td>
+<td style="text-align: left;">Zooplankton counts</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">3</td>
+</tr>
+</tbody>
+</table>
+<p>Table 12 - Parameter codes</p>
+<h3 id="record_header-block-mandatory">RECORD_HEADER Block (mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Block Name</th>
+<th>Field Name</th>
+<th style="text-align: center;">Restricted Values</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Content Mandatory</th>
+<th style="text-align: center;">Number of Occurrences</th>
+<th style="text-align: center;">Default Value</th>
+<th style="text-align: center;">Null Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RECORD_HEADER</td>
+<td>NUM_CALIBRATION</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>RECORD_HEADER</td>
+<td>NUM_SWING</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>RECORD_HEADER</td>
+<td>NUM_HISTORY</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>RECORD_HEADER</td>
+<td>NUM_CYCLE</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+<tr>
+<td>RECORD_HEADER</td>
+<td>NUM_PARAM</td>
+<td style="text-align: center;">n</td>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">y</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">empty</td>
+<td style="text-align: center;">none</td>
+</tr>
+</tbody>
+</table>
+<p>Table 13 - RECORD_HEADER block details</p>
+<p><br/></p>
+<p>One RECORD_HEADER block must exist in an ODF file.</p>
+<p>All fields are mandatory.</p>
+<p>The fields do not have a required order.</p>
+<p>The RECORD_HEADER block identifies the number of calibration (polynomial
+or general) blocks, swing (compass) blocks, history blocks, data cycles
+(records or rows) and parameters in the ODF file.</p>
+<p>The RECORD_HEADER block follow the PARAMETER_HEADER block(s).</p>
+<pre>
+RECORD_HEADER,
+  NUM_CALIBRATION = 0
+  NUM_SWING = 0
+  NUM_HISTORY = 5
+  NUM_CYCLE = 372
+  NUM_PARAM = 8
+</pre>
+
+<h2 id="odf-data-section">ODF Data Section</h2>
+<p>The ODF data section is the part of the file following the – DATA –
+identifier.</p>
+<p>– DATA – (which is dash dash space DATA space dash dash)</p>
+<p>The line that follows this one is the column header line. This line
+contains a comma delimited list of all parameter codes associated with
+the values in the data records.</p>
+<p>Each code matches what is given in their corresponding PARAMETER_HEADER.</p>
+<h3 id="date-time-fields-in-the-data-block">Date-Time Fields in the Data Block</h3>
+<p>Date-Time values in the data section of the ODF file must be in SYTM
+format.</p>
+<p>In the data section, the character space occupied by the leading and
+trailing single quotes are not counted in the value noted within the
+PARAMETER_HEADER block field named PRINT_FIELD_WIDTH.</p>
+<h3 id="data-values">Data Values</h3>
+<p>The data values in the data section of the ODF file will conform to the
+print and decimal specifications defined for each parameter in the
+PARAMETER_HEADER fields denoted PRINT_FIELD_WIDTH and
+PRINT_DECIMAL_PLACES.</p>
+<p>Each data record will be comma delimited.</p>
+<h2 id="version-30-release-notes">Version 3.0 Release Notes</h2>
+<p>The list of changes from version 2.0 to 3.0 of the ODF file format
+specification follows:</p>
+<ul>
+<li>Added the field ODF_SPECIFICATION_VERSION to the ODF_HEADER to
+  identify which version of the ODF specification the file follows.
+  Default value is 3.0.</li>
+<li>Commas at the end of header lines are no longer required, expected or
+  recommended.</li>
+<li>Added the field AREA_OF_OPERATION to the CRUISE_HEADER instead of
+  using the practice of using CRUISE_NAME to hold that information.</li>
+<li>Added the field PRINT_FIELD_ORDER to the PARAMETER_HEADER to identify
+  its corresponding column in the data section.</li>
+<li>All fields in the PARAMETER_HEADER and RECORD_HEADER are now
+  mandatory.</li>
+<li>The order of the PARAMETER_HEADER blocks can now be independent of the
+  order of the data columns in the data section.</li>
+<li>The data section in an ODF file now starts with a column header line
+  that is a list of parameter codes delimited by commas.</li>
+<li>The data records are no longer delimited by whitespace; instead they
+  are now comma delimited records.</li>
+<li>Added the GENERAL_CAL_HEADER, QUALITY_HEADER, and METEO_HEADER blocks.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

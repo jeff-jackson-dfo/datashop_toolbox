@@ -1,0 +1,970 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>How-To: Run the GTSPP Quality Control on a Folder of ODF Files - Datashop Toolbox Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#how-to-run-the-gtspp-quality-control-on-a-folder-of-odf-files" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Datashop Toolbox Docs" class="md-header__button md-logo" aria-label="Datashop Toolbox Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Datashop Toolbox Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              How-To: Run the GTSPP Quality Control on a Folder of ODF Files
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Datashop Toolbox Docs" class="md-nav__button md-logo" aria-label="Datashop Toolbox Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Datashop Toolbox Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datashop Toolbox Docs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Background
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datashop Toolbox Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to-guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gtspp_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GTSPP Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will get
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before you start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-install-the-extra-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Install the extra packages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-check-the-platform-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Check the platform table
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-run-the-qc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Run the QC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-read-the-console-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Read the console summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-check-the-quality-controlled-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Check the quality-controlled files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Check the quality-controlled files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#find-out-which-tests-flagged-a-row" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find out which tests flagged a row
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-variations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common variations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common variations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#turn-on-the-land-sounding-and-bottom-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Turn on the land, sounding and bottom tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-a-speed-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Change a speed limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-it-from-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run it from Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turn-on-the-temperature-inversion-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Turn on the temperature inversion test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-csv-reports-without-writing-odf-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get CSV reports without writing ODF files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="how-to-run-the-gtspp-quality-control-on-a-folder-of-odf-files">How-To: Run the GTSPP Quality Control on a Folder of ODF Files</h1>
+<blockquote>
+<p><strong>Status:</strong> Draft.
+<strong>Diátaxis quadrant:</strong> <a href="https://diataxis.fr/how-to-guides/">How-to guide</a> — this document is
+goal-oriented and assumes you already know what the GTSPP tests are. It lists the steps to get
+a folder of ODF files quality controlled, and the common variations. For the interface of the
+modules, see the <a href="../gtspp_reference/">reference</a>.</p>
+</blockquote>
+<h2 id="what-you-will-get">What you will get</h2>
+<p>Quality-controlled copies of your ODF files in a new folder. In each copy:</p>
+<ul>
+<li>the per-value flags are in the <code>Q&lt;code&gt;</code> columns (for example <code>QTEMP_01</code>);</li>
+<li>a <code>QCFF_01</code> column shows, for every data row, which Stage 2 tests flagged it;</li>
+<li>the <code>QUALITY_HEADER</code> lists the Stage 1 and Stage 2 tests that were run and the result of each;</li>
+<li>your original files are not touched.</li>
+</ul>
+<h2 id="before-you-start">Before you start</h2>
+<p>You need:</p>
+<ul>
+<li><code>datashop_toolbox</code> installed in the active environment (Python 3.13 or later);</li>
+<li>the three scripts <code>gtspp_stage1.py</code>, <code>gtspp_stage2.py</code> and <code>gtspp_odf_output.py</code>, kept
+  <strong>together in one folder</strong> — either <code>src/datashop_toolbox/</code> or any other folder;</li>
+<li>the <strong>original</strong> ODF files, in one folder;</li>
+<li>to be in the repository root when you run the scripts, so the platform lookup table is found (or use <code>--platforms</code>).</li>
+</ul>
+<blockquote>
+<p>Run the QC on original files. Running it again on already quality-controlled files is not
+supported: the existing flags are kept and values already flagged doubtful are not re-tested,
+so the results differ from a first run. The script logs a warning if it sees this.</p>
+</blockquote>
+<h2 id="1-install-the-extra-packages">1. Install the extra packages</h2>
+<p>The toolbox installs none of these.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Windows</label><label for="__tabbed_1_2">Linux / macOS</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">gsw</span> <span class="n">xarray</span> <span class="n">netCDF4</span>
+</span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="o">(</span>venv<span class="o">)</span><span class="w"> </span>$<span class="w"> </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>gsw<span class="w"> </span>xarray<span class="w"> </span>netCDF4
+</span></code></pre></div>
+</div>
+</div>
+</div>
+<ul>
+<li><code>gsw</code> is needed for test 2.10 (Density Inversion) and for converting pressure to depth. Without
+  it, test 2.10 is skipped and left out of the quality header.</li>
+<li><code>xarray</code> and a netCDF engine for it (<code>netCDF4</code> here, or <code>h5netcdf</code>) are only needed if you use a bathymetry file
+  (step 3).</li>
+</ul>
+<h2 id="2-check-the-platform-table">2. Check the platform table</h2>
+<p>Two tests use the toolbox lookup table <code>src/datashop_toolbox/lookups/platforms.csv</code>, which has the columns
+<code>platform_name</code>, <code>call_sign</code> and <code>max_velocity</code>. The path is relative to the current folder, so <strong>run the scripts from
+the repository root</strong>.</p>
+<ul>
+<li><strong>Test 1.1 (Platform Identification)</strong> checks each platform against <code>platform_name</code>. Case and repeated spaces are
+  ignored.</li>
+<li><strong>Test 1.5 (Impossible Speed)</strong> uses <code>max_velocity</code>, in knots, as the speed limit of each platform. If a name
+  appears twice (vessels with the same name and different call signs), the larger limit is used.</li>
+</ul>
+<p>Check that every platform in your ODF files (<code>PLATFORM</code> in the <code>CRUISE_HEADER</code>) is in the table.</p>
+<p>To use a different platform list for one run, pass <code>--platforms FILE</code>, a text file with one platform name per line. It
+replaces the names used by test 1.1 only; the speed limits still come from the table.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>HUDSON
+</span></code></pre></div>
+<p>If the table cannot be found, the scripts log a warning (<code>Known platforms not loaded</code>) and start with empty lists. Test
+1.1 then flags any platform that appears in only one file as doubtful (3), and test 1.5 runs only if you give
+<code>--max-speed-knots</code>.</p>
+<h2 id="3-run-the-qc">3. Run the QC</h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Windows</label><label for="__tabbed_2_2">Linux / macOS</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">(</span><span class="n">venv</span><span class="p">)</span> <span class="nb">PS </span><span class="n">C</span><span class="p">:\</span><span class="n">Dev</span><span class="p">\</span><span class="n">GitHub</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">&gt;</span> <span class="n">python</span> <span class="n">src</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">\</span><span class="n">gtspp_odf_output</span><span class="p">.</span><span class="n">py</span> <span class="p">`</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">C</span><span class="p">:\</span><span class="n">Data</span><span class="p">\</span><span class="n">HUD2008004</span><span class="p">\</span><span class="n">ODF</span> <span class="p">`</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="p">-</span><span class="n">-out-dir</span> <span class="n">C</span><span class="p">:\</span><span class="n">Data</span><span class="p">\</span><span class="n">HUD2008004</span><span class="p">\</span><span class="n">QC</span>
+</span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="o">(</span>venv<span class="o">)</span><span class="w"> </span>$<span class="w"> </span>python<span class="w"> </span>src/datashop_toolbox/gtspp_odf_output.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span>/data/HUD2008004/ODF<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span>--out-dir<span class="w"> </span>/data/HUD2008004/QC
+</span></code></pre></div>
+</div>
+</div>
+</div>
+<p>If the scripts are inside the <code>datashop_toolbox</code> package you can also run
+<code>python -m datashop_toolbox.gtspp_odf_output</code> with the same arguments.</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FOLDER</code></td>
+<td>Folder with the original ODF files.</td>
+</tr>
+<tr>
+<td><code>--out-dir DIR</code></td>
+<td><strong>Required.</strong> Folder for the QC'd files, which keep their original names. The script refuses to write into the folder the file came from.</td>
+</tr>
+<tr>
+<td><code>--platforms FILE</code></td>
+<td>Known platforms, one per line. Default: the lookup table <code>lookups/platforms.csv</code> (step 2).</td>
+</tr>
+<tr>
+<td><code>--max-speed-knots N</code></td>
+<td>Speed limit, in knots, for platforms that are <strong>not</strong> in the lookup table. Platforms in the table always use their own limit (step 2).</td>
+</tr>
+<tr>
+<td><code>--bathy FILE</code></td>
+<td>GEBCO or ETOPO netCDF grid. Turns on tests 1.4, 1.6 and 2.11.</td>
+</tr>
+<tr>
+<td><code>--pattern GLOB</code></td>
+<td>Which files to read. Default <code>*.ODF</code>.</td>
+</tr>
+<tr>
+<td><code>--no-history</code></td>
+<td>Do not add a <code>HISTORY_HEADER</code> entry.</td>
+</tr>
+</tbody>
+</table>
+<p>Tests that need an input you did not give are not run, and are not listed in the quality header:</p>
+<table>
+<thead>
+<tr>
+<th>If you omit</th>
+<th>These tests are not run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--max-speed-knots</code></td>
+<td>Nothing is lost: test 1.5 still runs for every platform in the lookup table. Platforms that are not in it are not speed-tested.</td>
+</tr>
+<tr>
+<td><code>--bathy</code></td>
+<td>1.4 Position on Land, 1.6 Impossible Sounding, 2.11 Bottom</td>
+</tr>
+<tr>
+<td>(no command-line option)</td>
+<td>2.12 Temperature Inversion — see <a href="#turn-on-the-temperature-inversion-test">below</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-read-the-console-summary">4. Read the console summary</h2>
+<p>For each test, the summary shows how many stations or profiles failed out of how many were run,
+and names the failures:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Stage 1 (location and identification), 10 stations:
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  Test 1.1 Platform Identification: 0 failed of 10 run
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  Test 1.2 Impossible Date/Time: 0 failed of 10 run
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  Test 1.3 Impossible Location: 0 failed of 10 run
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  Test 1.5 Impossible Speed: 0 failed of 10 run
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>Stage 2 (profile), 10 profiles:
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>  Test 2.1 Global Impossible Parameter Values: 0 failed of 10 run
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>  ...
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>  Test 2.7 Spike: 1 failed of 10 run  -&gt; CTD_HUD2008004_001
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>  ...
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>  Test 2.10 Density Inversion: 2 failed of 10 run  -&gt; CTD_HUD2008004_001, CTD_HUD2008004_034
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>10 ODF files written to C:\Data\HUD2008004\QC
+</span></code></pre></div>
+<p>When fewer stations or profiles had data to examine than were run, the line adds <code>(N had data)</code>: for example,
+<code>Test 1.4 Position on Land: 0 failed of 10 run (6 had data)</code> when four stations lie outside the bathymetry grid.</p>
+<p>The toolbox also prints one <code>ODF file written to:</code> line per file. Two other lines are worth
+watching for:</p>
+<ul>
+<li><code>NOT WRITTEN (toolbox could not read the file; Stage 1 only): ...</code> — see
+  <a href="#troubleshooting">Troubleshooting</a>.</li>
+<li><code>verification failed</code> — each file is read back and compared with the results. This should
+  never appear; if it does, keep the message and report it.</li>
+</ul>
+<h2 id="5-check-the-quality-controlled-files">5. Check the quality-controlled files</h2>
+<p>Open a file from the output folder. Three things have changed.</p>
+<p><strong>The quality header</strong> lists the tests run and the result of each:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>QUALITY_HEADER,
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  QUALITY_DATE='05-NOV-2026 12:12:17.73',
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  QUALITY_TESTS='QUALITY CONTROL TESTS RUN',
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  QUALITY_TESTS='Test 1.1: GTSPP Platform Identification (1)',
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  ...
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  QUALITY_TESTS='Test 2.10: GTSPP Density Inversion (32768)',
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  QUALITY_COMMENTS='QUALITY CODES',
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>  ...
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>  QUALITY_COMMENTS='Test 2.7 Spike -&gt; failed (PSAL_02: 1 value(s) flagged)',
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>  QUALITY_COMMENTS='Test 2.10 Density Inversion -&gt; Density inversion found (SIGP_01, SIGP_02)'
+</span></code></pre></div>
+<p>The number in parentheses is the GTSPP test index. A test that found nothing to examine reads
+<code>not applicable (...)</code>; for example, test 1.5 on the earliest station of a platform has no earlier
+station to compare with.</p>
+<p><strong>The flag columns.</strong> Each parameter has a <code>Q&lt;code&gt;</code> column: 1 for values that passed, 3 for
+doubtful, 4 for erroneous, 9 for missing. Derived parameters (<code>PSAL</code>, <code>POTM</code>, <code>SIGP</code>, <code>DOXY</code>, ...)
+take the worse flag of the parameters they are computed from.</p>
+<p><strong>The <code>QCFF_01</code> column.</strong> For each data row it holds the sum of the GTSPP test indices of the
+Stage 2 tests that flagged any value in that row. <code>0</code> means no test flagged the row.</p>
+<h3 id="find-out-which-tests-flagged-a-row">Find out which tests flagged a row</h3>
+<blockquote>
+<p>The Python snippets in this guide import from <code>datashop_toolbox.gtspp_*</code>, which works when the scripts are in
+<code>src/datashop_toolbox/</code>. If they are in a plain folder, drop the <code>datashop_toolbox.</code> prefix
+(<code>from gtspp_odf_output import SCHEME</code>).</p>
+</blockquote>
+<p>Subtract the indices, or let Python do it:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.gtspp_odf_output</span><span class="w"> </span><span class="kn">import</span> <span class="n">SCHEME</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">qcff</span> <span class="o">=</span> <span class="mi">36864</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">print</span><span class="p">([</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">SCHEME</span> <span class="k">if</span> <span class="n">qcff</span> <span class="o">&amp;</span> <span class="n">s</span><span class="o">.</span><span class="n">bit</span><span class="p">])</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># ['2.7 Spike', '2.10 Density Inversion']</span>
+</span></code></pre></div>
+<p>To list the flagged rows of a written file:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.odfhdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">OdfHeader</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">odf</span> <span class="o">=</span> <span class="n">OdfHeader</span><span class="p">()</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">odf</span><span class="o">.</span><span class="n">read_odf</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="sa">r</span><span class="s2">"C:\Data\HUD2008004\QC\CTD_HUD2008004_001_1_DN.ODF"</span><span class="p">))</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="n">df</span> <span class="o">=</span> <span class="n">odf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">data_frame</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">"QCFF_01"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">][[</span><span class="s2">"PRES_01"</span><span class="p">,</span> <span class="s2">"TEMP_01"</span><span class="p">,</span> <span class="s2">"QTEMP_01"</span><span class="p">,</span> <span class="s2">"PSAL_01"</span><span class="p">,</span> <span class="s2">"QPSAL_01"</span><span class="p">,</span> <span class="s2">"QCFF_01"</span><span class="p">]])</span>
+</span></code></pre></div>
+<h2 id="common-variations">Common variations</h2>
+<h3 id="turn-on-the-land-sounding-and-bottom-tests">Turn on the land, sounding and bottom tests</h3>
+<p>These tests (1.4, 1.6 and 2.11) need water depth from a GEBCO (or ETOPO) grid. To get a GEBCO_2026 grid in the
+format the scripts read directly:</p>
+<ol>
+<li>Open the <a href="https://download.gebco.net">GEBCO download application</a>.</li>
+<li>Select the area: a box that covers every station of the cruise, with a margin of at least one degree.</li>
+<li>Choose <strong>GEBCO_2026 Grid (sub-ice topo/bathy)</strong> and the <strong>netCDF</strong> format. You do not need the TID grid.</li>
+<li>Pass the downloaded file with <code>--bathy</code>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">python</span> <span class="n">src</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">\</span><span class="n">gtspp_odf_output</span><span class="p">.</span><span class="n">py</span> <span class="n">C</span><span class="p">:\</span><span class="n">Data</span><span class="p">\</span><span class="n">HUD2008004</span><span class="p">\</span><span class="n">ODF</span> <span class="p">-</span><span class="n">-out-dir</span> <span class="n">C</span><span class="p">:\</span><span class="n">Data</span><span class="p">\</span><span class="n">HUD2008004</span><span class="p">\</span><span class="n">QC</span> <span class="p">`</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="p">-</span><span class="n">-bathy</span> <span class="n">C</span><span class="p">:\</span><span class="n">Data</span><span class="p">\</span><span class="n">GEBCO_2026_cruise_area</span><span class="p">.</span><span class="n">nc</span>
+</span></code></pre></div>
+<p>The scripts read the file with <code>xarray</code> (step 1 of this guide). They look for latitude, longitude and elevation variables
+(elevation negative at sea) and find them by name. If a file does not match, the error message lists the variables it
+contains; for a different elevation variable name, pass <code>NetCDFBathymetry(path, var="&lt;name&gt;")</code> from Python.</p>
+<ul>
+<li><strong>A position outside the downloaded area</strong> has no depth. The tests skip it, report <code>not applicable</code> in the quality
+  header, and leave its sounding flag at 0. If you see this for stations that should be covered, download a larger
+  area.</li>
+<li><strong>The global file</strong> (about 4 GB, 7 GB unpacked) also works, but a cruise-area subset is faster to download and
+  easier to keep with the data.</li>
+<li>A position on land, and a sounding that differs from the bathymetry by more than 10%, are flagged doubtful. As in
+  the manual, a bad sounding fails both test 1.4 and test 1.6.</li>
+</ul>
+<h3 id="change-a-speed-limit">Change a speed limit</h3>
+<p>Speed limits come from the <code>max_velocity</code> column of <code>platforms.csv</code>; edit the table to change one for good. To change
+one for a single run, use Python (see <a href="#run-it-from-python">Run it from Python</a>). Passing <code>max_speed_knots</code> replaces the
+whole table, so start from the table's values:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.gtspp_stage1</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stage1Config</span><span class="p">,</span> <span class="n">get_platform_speeds</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">cfg1</span> <span class="o">=</span> <span class="n">Stage1Config</span><span class="p">(</span><span class="n">max_speed_knots</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">get_platform_speeds</span><span class="p">(),</span> <span class="s2">"HUDSON"</span><span class="p">:</span> <span class="mf">14.0</span><span class="p">})</span>
+</span></code></pre></div>
+<h3 id="run-it-from-python">Run it from Python</h3>
+<p>This is how to change thresholds, the flags assigned on failure, or the derived-parameter rules:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.gtspp_stage1</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="n">QF</span><span class="p">,</span> <span class="n">NetCDFBathymetry</span><span class="p">,</span> <span class="n">Stage1Config</span><span class="p">,</span> <span class="n">get_platform_speeds</span><span class="p">,</span> <span class="n">load_stations</span><span class="p">,</span> <span class="n">run_stage1</span><span class="p">,</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="p">)</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.gtspp_stage2</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stage2Config</span><span class="p">,</span> <span class="n">flagged_values</span><span class="p">,</span> <span class="n">load_profiles</span><span class="p">,</span> <span class="n">run_stage2</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.gtspp_odf_output</span><span class="w"> </span><span class="kn">import</span> <span class="n">print_summary</span><span class="p">,</span> <span class="n">save_stage2_to_odf</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">bathy</span> <span class="o">=</span> <span class="n">NetCDFBathymetry</span><span class="p">(</span><span class="sa">r</span><span class="s2">"C:\Data\GEBCO_2024.nc"</span><span class="p">)</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="n">cfg1</span> <span class="o">=</span> <span class="n">Stage1Config</span><span class="p">(</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="n">max_speed_knots</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">get_platform_speeds</span><span class="p">(),</span> <span class="s2">"HUDSON"</span><span class="p">:</span> <span class="mf">14.0</span><span class="p">},</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="n">bathymetry</span><span class="o">=</span><span class="n">bathy</span><span class="p">,</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="n">land_flag</span><span class="o">=</span><span class="n">QF</span><span class="o">.</span><span class="n">ERRONEOUS</span><span class="p">,</span>          <span class="c1"># flag a position on land 4 instead of 3</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="p">)</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="n">cfg2</span> <span class="o">=</span> <span class="n">Stage2Config</span><span class="p">(</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    <span class="n">bathymetry</span><span class="o">=</span><span class="n">bathy</span><span class="p">,</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>    <span class="n">spike_thresholds</span><span class="o">=</span><span class="p">{</span><span class="s2">"temperature"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"salinity"</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="p">)</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>
+</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="n">stations</span> <span class="o">=</span> <span class="n">load_stations</span><span class="p">(</span><span class="sa">r</span><span class="s2">"C:\Data\HUD2008004\ODF"</span><span class="p">)</span>
+</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="n">run_stage1</span><span class="p">(</span><span class="n">stations</span><span class="p">,</span> <span class="n">cfg1</span><span class="p">)</span>
+</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a><span class="n">profiles</span> <span class="o">=</span> <span class="n">load_profiles</span><span class="p">(</span><span class="n">stations</span><span class="p">)</span>
+</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a><span class="n">run_stage2</span><span class="p">(</span><span class="n">profiles</span><span class="p">,</span> <span class="n">cfg2</span><span class="p">)</span>
+</span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>
+</span><span id="__span-11-24"><a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="n">print_summary</span><span class="p">(</span><span class="n">stations</span><span class="p">,</span> <span class="n">profiles</span><span class="p">)</span>
+</span><span id="__span-11-25"><a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a><span class="n">save_stage2_to_odf</span><span class="p">(</span><span class="n">profiles</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"C:\Data\HUD2008004\QC"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The available settings, and the flag each test assigns by default, are listed in
+<code>Stage1Config</code> and <code>Stage2Config</code> in the <a href="../gtspp_reference/">reference</a>.</p>
+<h3 id="turn-on-the-temperature-inversion-test">Turn on the temperature inversion test</h3>
+<p>Test 2.12 is off until you set the smallest temperature difference to count as an inversion.
+Choose it for your data and pass it in Python:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">cfg2</span> <span class="o">=</span> <span class="n">Stage2Config</span><span class="p">(</span><span class="n">inversion_amplitude_c</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>   <span class="c1"># example value: pick your own</span>
+</span></code></pre></div>
+<h3 id="get-csv-reports-without-writing-odf-files">Get CSV reports without writing ODF files</h3>
+<div class="highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">python</span> <span class="n">src</span><span class="p">\</span><span class="n">datashop_toolbox</span><span class="p">\</span><span class="n">gtspp_stage2</span><span class="p">.</span><span class="n">py</span> <span class="n">C</span><span class="p">:\</span><span class="n">Data</span><span class="p">\</span><span class="n">HUD2008004</span><span class="p">\</span><span class="n">ODF</span> <span class="p">`</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="p">-</span><span class="n">-out-prefix</span> <span class="n">HUD2008004</span>
+</span></code></pre></div>
+<p>This writes <code>HUD2008004_stage1.csv</code> (one row per station), <code>HUD2008004_stage2.csv</code> (one row per
+profile) and <code>HUD2008004_stage2_flagged_values.csv</code> (one row per doubtful or erroneous value, with
+the tests responsible and, for derived parameters, the source column the flag came from).</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NameError: name 'Test1' is not defined</code> (or a similar <code>ImportError</code>) when starting</td>
+<td>The three scripts are from different versions, or an import line was edited.</td>
+<td>Replace all three scripts with the current versions and do not edit their <code>import</code> lines. They work in a plain folder and inside the package.</td>
+</tr>
+<tr>
+<td><code>ModuleNotFoundError: No module named 'datashop_toolbox'</code></td>
+<td>The toolbox is not installed in the active environment.</td>
+<td>Activate the environment, or run <code>uv pip install -e .</code> in the toolbox folder.</td>
+</tr>
+<tr>
+<td><code>NetCDFBathymetry needs the 'xarray' package and a netCDF engine</code></td>
+<td>You passed <code>--bathy</code> without <code>xarray</code>.</td>
+<td><code>uv pip install xarray netCDF4</code></td>
+</tr>
+<tr>
+<td><code>ValueError: found the following matches with the input file in xarray's IO backends: ['netcdf4', 'h5netcdf']. But their dependencies may not be installed</code></td>
+<td><code>xarray</code> is installed but no netCDF engine is.</td>
+<td><code>uv pip install netCDF4</code> (or <code>h5netcdf</code>).</td>
+</tr>
+<tr>
+<td>Test 2.10 is missing from the console summary and the quality header</td>
+<td><code>gsw</code> is not installed.</td>
+<td><code>uv pip install gsw</code> and run again.</td>
+</tr>
+<tr>
+<td><code>NOT WRITTEN (toolbox could not read the file; Stage 1 only)</code></td>
+<td>The toolbox rejects the file, for example an impossible <code>START_DATE_TIME</code> such as <code>31-FEB-2008</code>. Stage 1 still tested it.</td>
+<td>The console shows a <code>Toolbox could not read &lt;file&gt; (...)</code> warning with the reason. Correct the header value in the original file and run again.</td>
+</tr>
+<tr>
+<td>A platform is flagged <code>unknown, single-occurrence platform</code></td>
+<td>Its name is not in the known-platform list.</td>
+<td>Add it to <code>lookups/platforms.csv</code>, or pass a list with <code>--platforms</code>.</td>
+</tr>
+<tr>
+<td><code>Known platforms not loaded (...)</code> warning</td>
+<td><code>lookups/platforms.csv</code> was not found from the current folder.</td>
+<td>Run from the repository root, or pass <code>--platforms FILE</code>.</td>
+</tr>
+<tr>
+<td><code>Test 1.5 ... not applicable</code> on one station</td>
+<td>It is the earliest station of its platform in this run, so there is no earlier station to compare with.</td>
+<td>None needed.</td>
+</tr>
+<tr>
+<td><code>refusing to overwrite the input file</code></td>
+<td><code>--out-dir</code> is the folder the file was read from.</td>
+<td>Choose a different <code>--out-dir</code>.</td>
+</tr>
+<tr>
+<td><code>Partial set of quality-flag columns</code></td>
+<td>The file has <code>Q</code> columns for some parameters but not all.</td>
+<td>Remove the partial <code>Q</code> columns from a copy of the file, or complete them, and run again.</td>
+</tr>
+<tr>
+<td><code>already has a QCFF_01 column from an earlier QC run</code></td>
+<td>The input is itself a QC'd file.</td>
+<td>Run the QC on the original files instead.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><a href="../gtspp_reference/">Reference for the GTSPP modules</a></li>
+<li>The GTSPP Real-Time Quality Control Manual (IOC Manuals and Guides 22, first revised edition, 2010)</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

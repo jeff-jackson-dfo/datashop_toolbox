@@ -1,0 +1,5261 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../how-to-guides/">
+      
+      
+        <link rel="next" href="../gtspp_reference/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Reference - Datashop Toolbox Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#datashop_toolbox-odf_oracle-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Datashop Toolbox Docs" class="md-header__button md-logo" aria-label="Datashop Toolbox Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Datashop Toolbox Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Datashop Toolbox Docs" class="md-nav__button md-logo" aria-label="Datashop Toolbox Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Datashop Toolbox Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datashop Toolbox Docs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Background
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datashop Toolbox Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to-guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#about-this-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        About this document
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#packages-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Packages covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datashop_toolbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        datashop_toolbox
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="datashop_toolbox">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#odf-header-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF Header Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ODF Header Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basehdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basehdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validated_basepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        validated_base.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odfhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odfhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cruisehdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cruisehdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eventhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        eventhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#historyhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        historyhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#qualityhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qualityhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameterhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parameterhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrumenthdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        instrumenthdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recordhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        recordhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recordspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        records.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polynomialhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        polynomialhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generalhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        generalhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compasshdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        compasshdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meteohdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meteohdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrument-file-format-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instrument &amp; File-Format Utilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instrument &amp; File-Format Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compare_seabird_xmlconspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        compare_seabird_xmlcons.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concatenate_qat_filespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        concatenate_qat_files.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix_btl_headerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fix_btl_header.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lookup_parameterpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lookup_parameter.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netcdfhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        netcdfhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf_to_exchange_formatpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_to_exchange_format.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_seaodf_inipy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_seaodf_ini.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_seaodf_parameterspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_seaodf_parameters.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbr_to_odfpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rbr_to_odf.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove_parameterpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove_parameter.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mtr-thermograph-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MTR / Thermograph Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MTR / Thermograph Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#thermographpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        thermograph.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multinetpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        multinet.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process_mtr_filespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        process_mtr_files.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai_thermograph_datapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ai_thermograph_data.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality-control-reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality Control &amp; Reporting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quality Control &amp; Reporting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#qc_odf_datapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qc_odf_data.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metadata_reportpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metadata_report.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gui-support-widgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GUI Support Widgets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GUI Support Widgets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#log_windowpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        log_window.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#select_metadata_file_and_data_folderpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        select_metadata_file_and_data_folder.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#package-setup-entry-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package Setup / Entry Scripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package Setup / Entry Scripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__py" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create_parameters_databasepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_parameters_database.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demo_validated_basepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo_validated_base.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate_metadata_reportpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        generate_metadata_report.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odf_oracle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_oracle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="odf_oracle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connection Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__py_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database_connection_poolpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database_connection_pool.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#value-conversion-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value Conversion Helpers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Value Conversion Helpers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fix_nullpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fix_null.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sytm_to_timestamppy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sytm_to_timestamp.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf-to-oracle-loaders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF-to-Oracle Loaders
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ODF-to-Oracle Loaders">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#odf_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cruise_event_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cruise_event_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event_comments_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        event_comments_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrument_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        instrument_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#history_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        history_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meteo_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meteo_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meteo_comments_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meteo_comments_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        quality_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality_tests_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        quality_tests_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality_comments_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        quality_comments_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compass_cal_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        compass_cal_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polynomial_cal_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        polynomial_cal_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general_cal_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        general_cal_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general_cal_equation_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        general_cal_equation_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general_cal_comments_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        general_cal_comments_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entry-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entry Scripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Entry Scripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load_files_to_odf_archive_dbpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_files_to_odf_archive_db.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datashop_toolboxgui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        datashop_toolbox.gui
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="datashop_toolbox.gui">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#package-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__py_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf-metadata-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF Metadata Entry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ODF Metadata Entry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#odf_metadata_dialogpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_metadata_dialog.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf_metadata_formpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_metadata_form.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbr-rsk-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBR / RSK Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RBR / RSK Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rbr_to_odf_mainwindowpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rbr_to_odf_mainwindow.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbr_profile_plotpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rbr_profile_plot.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thermograph-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Thermograph Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Thermograph Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#thermograph_gui_loaderpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        thermograph_gui_loader.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example_btl_generationpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        example_btl_generation.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gtspp_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GTSPP Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#about-this-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        About this document
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#packages-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Packages covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datashop_toolbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        datashop_toolbox
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="datashop_toolbox">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#odf-header-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF Header Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ODF Header Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basehdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basehdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validated_basepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        validated_base.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odfhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odfhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cruisehdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cruisehdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eventhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        eventhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#historyhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        historyhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#qualityhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qualityhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameterhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parameterhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrumenthdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        instrumenthdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recordhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        recordhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recordspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        records.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polynomialhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        polynomialhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generalhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        generalhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compasshdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        compasshdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meteohdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meteohdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrument-file-format-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instrument &amp; File-Format Utilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instrument &amp; File-Format Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compare_seabird_xmlconspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        compare_seabird_xmlcons.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concatenate_qat_filespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        concatenate_qat_files.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix_btl_headerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fix_btl_header.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lookup_parameterpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lookup_parameter.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netcdfhdrpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        netcdfhdr.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf_to_exchange_formatpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_to_exchange_format.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_seaodf_inipy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_seaodf_ini.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_seaodf_parameterspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_seaodf_parameters.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbr_to_odfpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rbr_to_odf.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove_parameterpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove_parameter.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mtr-thermograph-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MTR / Thermograph Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MTR / Thermograph Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#thermographpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        thermograph.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multinetpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        multinet.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process_mtr_filespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        process_mtr_files.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai_thermograph_datapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ai_thermograph_data.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality-control-reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality Control &amp; Reporting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quality Control &amp; Reporting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#qc_odf_datapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qc_odf_data.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metadata_reportpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metadata_report.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gui-support-widgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GUI Support Widgets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GUI Support Widgets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#log_windowpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        log_window.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#select_metadata_file_and_data_folderpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        select_metadata_file_and_data_folder.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#package-setup-entry-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package Setup / Entry Scripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package Setup / Entry Scripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__py" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create_parameters_databasepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_parameters_database.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demo_validated_basepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo_validated_base.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate_metadata_reportpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        generate_metadata_report.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odf_oracle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_oracle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="odf_oracle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connection Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__py_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database_connection_poolpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database_connection_pool.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#value-conversion-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value Conversion Helpers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Value Conversion Helpers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fix_nullpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fix_null.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sytm_to_timestamppy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sytm_to_timestamp.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf-to-oracle-loaders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF-to-Oracle Loaders
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ODF-to-Oracle Loaders">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#odf_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cruise_event_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cruise_event_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event_comments_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        event_comments_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrument_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        instrument_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#history_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        history_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meteo_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meteo_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meteo_comments_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meteo_comments_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        quality_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality_tests_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        quality_tests_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality_comments_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        quality_comments_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compass_cal_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        compass_cal_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polynomial_cal_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        polynomial_cal_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general_cal_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        general_cal_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general_cal_equation_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        general_cal_equation_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general_cal_comments_to_oraclepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        general_cal_comments_to_oracle.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entry-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entry Scripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Entry Scripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load_files_to_odf_archive_dbpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_files_to_odf_archive_db.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datashop_toolboxgui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        datashop_toolbox.gui
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="datashop_toolbox.gui">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#package-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__py_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf-metadata-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ODF Metadata Entry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ODF Metadata Entry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#odf_metadata_dialogpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_metadata_dialog.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#odf_metadata_formpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odf_metadata_form.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbr-rsk-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBR / RSK Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RBR / RSK Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rbr_to_odf_mainwindowpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rbr_to_odf_mainwindow.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbr_profile_plotpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rbr_profile_plot.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thermograph-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Thermograph Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Thermograph Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#thermograph_gui_loaderpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        thermograph_gui_loader.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example_btl_generationpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        example_btl_generation.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="datashop_toolbox-odf_oracle-reference"><code>datashop_toolbox</code> / <code>odf_oracle</code> — Reference</h1>
+<blockquote>
+<p><strong>Status:</strong> Draft, generated from the in-code docstrings.
+<strong>Diátaxis quadrant:</strong> <a href="https://diataxis.fr/reference/">Reference</a> — this document is
+information-oriented and describes the toolbox's public interface as it exists in code.
+It is not a tutorial (see a future <code>doc/tutorials.md</code>) and not a how-to guide (see a
+future <code>doc/how-to.md</code>); it does not explain <em>why</em> the toolbox is built this way (see a
+future <code>doc/explanation.md</code>). Its only job is to be an accurate, complete, and
+consistently structured description of the API.</p>
+</blockquote>
+<h2 id="about-this-document">About this document</h2>
+<p>This reference is organized around the codebase's own structure — one subsection per
+Python module, in the order a reader would encounter them when browsing <code>src/</code>. Each
+module entry lists:</p>
+<ul>
+<li>a one-line summary (from the module's own docstring, where one exists),</li>
+<li>its public classes, with their constructor and methods, and</li>
+<li>its public module-level functions.</li>
+</ul>
+<p>Signatures and descriptions are pulled directly from the current source and docstrings,
+so this document should be regenerated whenever the underlying code changes materially —
+it is not meant to be hand-maintained prose. Private/internal helpers (names beginning
+with a single underscore) are still listed where they materially affect how a class
+behaves, since maintainers are a primary audience for this reference; genuinely
+implementation-only helpers are omitted only where doing so doesn't lose information a
+caller would need. Qt-Designer–generated <code>ui_*.py</code> files are excluded, since their
+docstrings are regenerated automatically and are not hand-maintained.</p>
+<h2 id="packages-covered">Packages covered</h2>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Location</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#datashop_toolbox"><code>datashop_toolbox</code></a></td>
+<td><code>src/datashop_toolbox/</code></td>
+<td>ODF header data model, CTD/thermograph processing pipelines, interactive QC tooling, and supporting file-format utilities.</td>
+</tr>
+<tr>
+<td><a href="#datashop_toolboxgui"><code>datashop_toolbox.gui</code></a></td>
+<td><code>src/datashop_toolbox/gui/</code></td>
+<td>PySide6 widgets and dialogs used by the toolbox's interactive tools (ODF metadata entry, RBR→ODF conversion).</td>
+</tr>
+<tr>
+<td><a href="#odf_oracle"><code>odf_oracle</code></a></td>
+<td><code>src/odf_oracle/</code></td>
+<td>Loaders that write a populated <code>OdfHeader</code> object into the ODF_ARCHIVE Oracle database, plus the connection-pool and value-conversion helpers they depend on.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="datashop_toolbox"><code>datashop_toolbox</code></h2>
+<h3 id="odf-header-classes">ODF Header Classes</h3>
+<h4 id="basehdrpy"><code>basehdr.py</code></h4>
+<p><strong>class <code>LogLevel(enum.StrEnum)</code></strong></p>
+<p>Enumeration of the logging levels supported by :class:<code>LoggerConfig</code>.</p>
+<p><strong>class <code>LoggerConfig(BaseModel)</code></strong></p>
+<p>Configuration model for logging settings.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>configure_logger() -&gt; logging.Logger</code></td>
+<td>Configure and return a root logger instance.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>BaseHeader</code></strong></p>
+<p>Base class providing shared logging + constants for ODF headers.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config: LoggerConfig \| None = None)</code></td>
+<td>Initialize the header with a logger configuration.</td>
+</tr>
+<tr>
+<td><code>log(message: str, level: LogLevel = LogLevel.INFO) -&gt; None</code></td>
+<td>Log a message with the specified level.</td>
+</tr>
+<tr>
+<td><code>log_message(message: str) -&gt; None</code></td>
+<td>Log a message and store it in the shared log list.</td>
+</tr>
+<tr>
+<td><code>reset_logging() -&gt; None</code></td>
+<td>Reconfigure logger using the stored config.</td>
+</tr>
+<tr>
+<td><em>(classmethod)</em> <code>reset_log_list(cls) -&gt; None</code></td>
+<td>Clear the shared log list.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>matches_sytm_format(date_str: str) -&gt; bool</code></td>
+<td>Check whether a string matches the standard ODF SYTM format.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="validated_basepy"><code>validated_base.py</code></h4>
+<p><strong>class <code>ValidatedBase(BaseModel)</code></strong></p>
+<p>Base model providing validation/normalization similar to old check_* functions.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>(field_validator('</em>', mode='before'))* <code>normalize_values(cls, v, info: ValidationInfo)</code></td>
+<td>Fill in null sentinels and strip quoted strings for any field.</td>
+</tr>
+<tr>
+<td><em>(field_validator('</em>', mode='before'))* <code>validate_datetime_format(cls, v, info: ValidationInfo)</code></td>
+<td>Special handling for fields named *_date (must match SYTM_FORMAT).</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list_to_dict(lst: list[Any]) -&gt; dict[Any, Any]</code></td>
+<td>Convert alternating list elements into a dictionary.</td>
+</tr>
+<tr>
+<td><code>clean_strings(lst: list[str]) -&gt; list[str]</code></td>
+<td>Strip trailing commas and whitespace from each list element.</td>
+</tr>
+<tr>
+<td><code>check_string(value: str) -&gt; str</code></td>
+<td>Ensure value is a string. Convert Fortran-style exponents (D to E) only in numbers.</td>
+</tr>
+<tr>
+<td><code>check_datetime(value: str \| None) -&gt; str</code></td>
+<td>Validate datetime string according to SYTM_FORMAT, or return NULL value.</td>
+</tr>
+<tr>
+<td><code>is_valid_datetime(date_str: str) -&gt; bool</code></td>
+<td>Check whether a string can be parsed as a date/time.</td>
+</tr>
+<tr>
+<td><code>matches_datetime_format(date_str: str, fmt: str) -&gt; bool</code></td>
+<td>Return True if date_str matches the datetime format fmt.</td>
+</tr>
+<tr>
+<td><code>coerce_datetime(date_str: str, output_fmt: str = '%d-%b-%Y %H:%M:%S.%f') -&gt; str</code></td>
+<td>Reformat a date/time string to a target format, best-effort.</td>
+</tr>
+<tr>
+<td><code>split_string_with_quotes(input_string: str) -&gt; list[str]</code></td>
+<td>Split a string into tokens, respecting quoted substrings.</td>
+</tr>
+<tr>
+<td><code>convert_to_float(item: Any) -&gt; Any</code></td>
+<td>Convert value to float if possible, otherwise return unchanged.</td>
+</tr>
+<tr>
+<td><code>convert_dataframe(df: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Convert DataFrame values to floats where possible.</td>
+</tr>
+<tr>
+<td><code>add_commas(lines: str, skip_last: bool = False) -&gt; str</code></td>
+<td>Add commas at end of each line, skip last if requested.</td>
+</tr>
+<tr>
+<td><code>get_current_date_time() -&gt; str</code></td>
+<td>Return current date/time in SYTM_FORMAT (truncated).</td>
+</tr>
+<tr>
+<td><code>read_file_lines(file_with_path: Path) -&gt; list[str]</code></td>
+<td>Read all lines from a file and strip whitespace. Print errors to console, always return a list.</td>
+</tr>
+<tr>
+<td><code>find_lines_with_text(odf_file_lines: list[str], substrings: list[str]) -&gt; list[tuple[int, str]]</code></td>
+<td>Find all lines containing any of the given substrings.</td>
+</tr>
+<tr>
+<td><code>split_lines_into_dict(lines: list) -&gt; dict</code></td>
+<td>Convert alternating header lines into a dictionary.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="odfhdrpy"><code>odfhdr.py</code></h4>
+<p><strong>class <code>HeaderFieldRangeSchema(TypedDict)</code></strong></p>
+<p><strong>class <code>OdfHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>Store metadata, headers, and data associated with an ODF file.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the ODF header and its child header objects.</td>
+</tr>
+<tr>
+<td><code>log_odf_message(message: str, type: str = 'self')</code></td>
+<td>Log a message for the ODF header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('file_specification'))</em> <code>validate_file_specification(cls, v: str) -&gt; str</code></td>
+<td>Validate that the file specification is not empty.</td>
+</tr>
+<tr>
+<td><em>(field_validator('compass_cal_headers', 'history_headers', 'parameter_headers'))</em> <code>ensure_list_items_are_models(cls, v, field)</code></td>
+<td>Validate that list items provide an ODF serialization method.</td>
+</tr>
+<tr>
+<td><em>(field_validator('quality_header', 'meteo_header'))</em> <code>check_optional_headers(cls, v, field)</code></td>
+<td>Validate an optional header object.</td>
+</tr>
+<tr>
+<td><code>populate_object(odf_dict: dict)</code></td>
+<td>Populate ODF-level fields from a dictionary.</td>
+</tr>
+<tr>
+<td><code>print_object(file_version: float = 2.0) -&gt; str</code></td>
+<td>Serialize the ODF header and data to ODF-formatted text.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>repair_text(text: str) -&gt; str</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>read_odf(odf_file_path: Path)</code></td>
+<td>Read an ODF file and populate this object.</td>
+</tr>
+<tr>
+<td><code>update_odf() -&gt; None</code></td>
+<td>Update derived ODF metadata from the current contents.</td>
+</tr>
+<tr>
+<td><code>write_odf(odf_file_path: Path, version: float = 2.0) -&gt; None</code></td>
+<td>Write the ODF object to a file.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>generate_creation_date() -&gt; str</code></td>
+<td>Generate the current timestamp in ODF history-header format.</td>
+</tr>
+<tr>
+<td><code>add_history() -&gt; None</code></td>
+<td>Append a new processing history header.</td>
+</tr>
+<tr>
+<td><code>add_to_history(history_comment) -&gt; None</code></td>
+<td>Add a processing comment to the most recent history entry.</td>
+</tr>
+<tr>
+<td><code>add_log_to_history() -&gt; None</code></td>
+<td>Add pending shared log messages to processing history.</td>
+</tr>
+<tr>
+<td><code>add_to_log(message: str) -&gt; None</code></td>
+<td>Append a message to the shared ODF log.</td>
+</tr>
+<tr>
+<td><code>get_parameter_codes() -&gt; list</code></td>
+<td>Return the codes of all parameter headers.</td>
+</tr>
+<tr>
+<td><code>get_parameter_names() -&gt; list</code></td>
+<td>Return the names of all parameter headers.</td>
+</tr>
+<tr>
+<td><code>generate_file_spec() -&gt; str</code></td>
+<td>Generate a file specification from cruise and event metadata.</td>
+</tr>
+<tr>
+<td><code>generate_set_file_spec() -&gt; str</code></td>
+<td>Generate a file specification for an event set.</td>
+</tr>
+<tr>
+<td><code>is_parameter_code(code: str) -&gt; bool</code></td>
+<td>Check whether a parameter code is present.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>null2empty(df: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Replace ODF null values with <code>None</code> in a DataFrame.</td>
+</tr>
+<tr>
+<td><code>add_quality_flags()</code></td>
+<td>Add quality-flag parameters and columns to the ODF data.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="cruisehdrpy"><code>cruisehdr.py</code></h4>
+<p><strong>class <code>CruiseHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a Cruise Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the cruise header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('start_date', 'end_date', mode='before'))</em> <code>handle_empty_dates(cls, v)</code></td>
+<td>Replace an empty date string with the ODF SYTM null value.</td>
+</tr>
+<tr>
+<td><em>(field_validator('</em>', mode='before'))* <code>strip_strings(cls, v, info)</code></td>
+<td>Strip surrounding quotes and whitespace from string fields.</td>
+</tr>
+<tr>
+<td><code>log_cruise_message(field: str, old_value, new_value) -&gt; None</code></td>
+<td>Log a change made to a cruise header field.</td>
+</tr>
+<tr>
+<td><code>populate_object(cruise_fields: list[str])</code></td>
+<td>Populate fields from parsed ODF cruise header lines.</td>
+</tr>
+<tr>
+<td><code>print_object(file_version: float = 2.0) -&gt; str</code></td>
+<td>Serialize the cruise header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="eventhdrpy"><code>eventhdr.py</code></h4>
+<p><strong>class <code>EventHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent an Event Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the event header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('</em>', mode='before'))* <code>strip_strings(cls, v)</code></td>
+<td>Strip surrounding quotes, asterisks, and whitespace from strings.</td>
+</tr>
+<tr>
+<td><em>(field_validator('initial_latitude', 'initial_longitude', 'end_latitude', 'end_longitude', 'min_depth', 'max_depth', 'sampling_interval', 'sounding', 'depth_off_bottom', mode='before'))</em> <code>validate_floats(cls, v, info: ValidationInfo)</code></td>
+<td>Coerce a numeric field to a native Python float.</td>
+</tr>
+<tr>
+<td><code>log_event_message(field: str, old_value, new_value) -&gt; None</code></td>
+<td>Log a change made to an event header field.</td>
+</tr>
+<tr>
+<td><code>set_event_comment(event_comment: str, comment_number: int = 0) -&gt; None</code></td>
+<td>Add or replace an entry in <code>event_comments</code>.</td>
+</tr>
+<tr>
+<td><code>populate_object(event_fields: list)</code></td>
+<td>Populate fields from parsed ODF event header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the event header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="historyhdrpy"><code>historyhdr.py</code></h4>
+<p><strong>class <code>HistoryHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a History Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the history header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('creation_date', mode='before'))</em> <code>validate_creation_date(cls, v)</code></td>
+<td>Normalize the creation date to a stripped, upper-case string.</td>
+</tr>
+<tr>
+<td><em>(field_validator('processes', mode='before'))</em> <code>validate_processes(cls, v)</code></td>
+<td>Normalize the <code>processes</code> field to a list of stripped strings.</td>
+</tr>
+<tr>
+<td><code>log_history_message(field: str, old_value: str, new_value: str) -&gt; None</code></td>
+<td>Log a change made to a history header field.</td>
+</tr>
+<tr>
+<td><code>set_process(process: str, process_number: int = 0) -&gt; None</code></td>
+<td>Add or replace an entry in <code>processes</code>.</td>
+</tr>
+<tr>
+<td><code>add_process(process: str) -&gt; None</code></td>
+<td>Append a processing step to <code>processes</code>.</td>
+</tr>
+<tr>
+<td><code>find_process(search_string: str) -&gt; list[int]</code></td>
+<td>Find the indices of processes containing a search string.</td>
+</tr>
+<tr>
+<td><code>populate_object(history_fields: list) -&gt; 'HistoryHeader'</code></td>
+<td>Populate fields from parsed ODF history header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the history header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="qualityhdrpy"><code>qualityhdr.py</code></h4>
+<p><strong>class <code>QualityHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a Quality Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the quality header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('quality_date', mode='before'))</em> <code>validate_quality_date(cls, v)</code></td>
+<td>Normalize and validate the quality date.</td>
+</tr>
+<tr>
+<td><em>(field_validator('quality_tests', 'quality_comments', mode='before'))</em> <code>validate_lists(cls, v)</code></td>
+<td>Normalize <code>quality_tests</code>/<code>quality_comments</code> to a list of strings.</td>
+</tr>
+<tr>
+<td><code>log_quality_message(field: str, old_value: str, new_value: str) -&gt; None</code></td>
+<td>Log a change made to a quality header field.</td>
+</tr>
+<tr>
+<td><code>set_quality_test(quality_test: str, test_number: int = 0) -&gt; None</code></td>
+<td>Add or replace an entry in <code>quality_tests</code>.</td>
+</tr>
+<tr>
+<td><code>add_quality_test(quality_test: str) -&gt; None</code></td>
+<td>Append a quality-control test description to <code>quality_tests</code>.</td>
+</tr>
+<tr>
+<td><code>set_quality_comment(quality_comment: str, comment_number: int = 0) -&gt; None</code></td>
+<td>Add or replace an entry in <code>quality_comments</code>.</td>
+</tr>
+<tr>
+<td><code>add_quality_comment(quality_comment: str) -&gt; None</code></td>
+<td>Append a comment to <code>quality_comments</code>.</td>
+</tr>
+<tr>
+<td><code>add_quality_codes() -&gt; None</code></td>
+<td>Append the standard quality-code definitions and set the date.</td>
+</tr>
+<tr>
+<td><code>add_qcff_info() -&gt; None</code></td>
+<td>Append the standard QCFF flag description and set the date.</td>
+</tr>
+<tr>
+<td><code>populate_object(quality_fields: list) -&gt; 'QualityHeader'</code></td>
+<td>Populate fields from parsed ODF quality header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the quality header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="parameterhdrpy"><code>parameterhdr.py</code></h4>
+<p><strong>class <code>ParameterHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a Parameter Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the parameter header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('</em>', mode='before'))* <code>strip_strings(cls, v)</code></td>
+<td>Strip surrounding quotes and whitespace from string fields.</td>
+</tr>
+<tr>
+<td><code>log_parameter_message(field: str, old_value: str, new_value: str) -&gt; None</code></td>
+<td>Log a change made to a parameter header field.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>is_float_and_int(value) -&gt; bool</code></td>
+<td>Check whether a value represents a whole-number float.</td>
+</tr>
+<tr>
+<td><code>populate_object(parameter_fields: list) -&gt; 'ParameterHeader'</code></td>
+<td>Populate fields from parsed ODF parameter header lines.</td>
+</tr>
+<tr>
+<td><code>print_object(file_version: float = 2.0) -&gt; str</code></td>
+<td>Serialize the parameter header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="instrumenthdrpy"><code>instrumenthdr.py</code></h4>
+<p><strong>class <code>InstrumentHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent an Instrument Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the instrument header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('</em>', mode='before'))* <code>strip_strings(cls, v)</code></td>
+<td>Strip surrounding quotes and whitespace from string fields.</td>
+</tr>
+<tr>
+<td><code>log_instrument_message(field: str, old_value: str, new_value: str) -&gt; None</code></td>
+<td>Log a change made to an instrument header field.</td>
+</tr>
+<tr>
+<td><code>populate_object(instrument_fields: list)</code></td>
+<td>Populate fields from parsed ODF instrument header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the instrument header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="recordhdrpy"><code>recordhdr.py</code></h4>
+<p><strong>class <code>RecordHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a Record Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the record header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('num_calibration', 'num_swing', 'num_history', 'num_cycle', 'num_param', mode='before'))</em> <code>validate_ints(cls, v)</code></td>
+<td>Coerce a count field to a native Python int.</td>
+</tr>
+<tr>
+<td><code>log_record_message(field: str, old_value: Any, new_value: Any) -&gt; None</code></td>
+<td>Log a change made to a record header field.</td>
+</tr>
+<tr>
+<td><code>populate_object(record_fields: list) -&gt; 'RecordHeader'</code></td>
+<td>Populate fields from parsed ODF record header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the record header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="recordspy"><code>records.py</code></h4>
+<p><strong>class <code>DataRecords(ValidatedBase, BaseHeader)</code></strong></p>
+<p>Represents the data records stored within an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the data records container.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this object.</td>
+</tr>
+<tr>
+<td><em>(field_validator('data_frame'))</em> <code>validate_dataframe(cls, v: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Validate that <code>data_frame</code> is a pandas DataFrame.</td>
+</tr>
+<tr>
+<td><em>(field_validator('parameter_list', mode='before'))</em> <code>validate_parameters(cls, v: list[str]) -&gt; list[str]</code></td>
+<td>Normalize each parameter code in <code>parameter_list</code>.</td>
+</tr>
+<tr>
+<td><em>(field_validator('print_formats', mode='before'))</em> <code>validate_print_formats(cls, v: dict[str, str]) -&gt; dict[str, str]</code></td>
+<td>Validate and normalize the <code>print_formats</code> mapping.</td>
+</tr>
+<tr>
+<td><code>log_data_message(field: str, old_value, new_value) -&gt; None</code></td>
+<td>Log a change made to a data field.</td>
+</tr>
+<tr>
+<td><code>populate_object(parameter_list: list[str], data_formats: dict[str, str], data_lines_list: list[str]) -&gt; Self</code></td>
+<td>Populate the data frame from parsed ODF data lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Return V3 style CSV representation of the data.</td>
+</tr>
+<tr>
+<td><code>print_object_old_style() -&gt; str</code></td>
+<td>Return V2 style fixed-width string representation of the data.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="polynomialhdrpy"><code>polynomialhdr.py</code></h4>
+<p><strong>class <code>PolynomialCalHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a Polynomial Calibration Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the polynomial calibration header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('parameter_code', mode='before'))</em> <code>strip_param_code(cls, v)</code></td>
+<td>Strip surrounding quotes and whitespace from the parameter code.</td>
+</tr>
+<tr>
+<td><em>(field_validator('calibration_date', 'application_date', mode='before'))</em> <code>validate_dates(cls, v)</code></td>
+<td>Validate and normalize a calibration or application date.</td>
+</tr>
+<tr>
+<td><em>(field_validator('number_coefficients', mode='before'))</em> <code>validate_num_coeffs(cls, v)</code></td>
+<td>Coerce <code>number_coefficients</code> to a native Python int.</td>
+</tr>
+<tr>
+<td><em>(field_validator('coefficients', mode='before'))</em> <code>validate_coefficients(cls, v)</code></td>
+<td>Normalize <code>coefficients</code> to a list of floats.</td>
+</tr>
+<tr>
+<td><code>log_poly_message(field: str, old_value, new_value) -&gt; None</code></td>
+<td>Log a change made to a polynomial calibration header field.</td>
+</tr>
+<tr>
+<td><code>set_coefficient(coefficient: float, coefficient_number: int = 0) -&gt; None</code></td>
+<td>Add or replace a coefficient and update <code>number_coefficients</code>.</td>
+</tr>
+<tr>
+<td><code>populate_object(polynomial_cal_fields: list) -&gt; 'PolynomialCalHeader'</code></td>
+<td>Populate fields from parsed ODF polynomial calibration header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the polynomial calibration header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="generalhdrpy"><code>generalhdr.py</code></h4>
+<p><strong>class <code>GeneralCalHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a General Cal Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the general calibration header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('parameter_code', mode='before'))</em> <code>strip_param_code(cls, v)</code></td>
+<td>Normalize the parameter code to a stripped, upper-case string.</td>
+</tr>
+<tr>
+<td><em>(field_validator('calibration_type', mode='before'))</em> <code>strip_cal_type(cls, v)</code></td>
+<td>Strip surrounding quotes and whitespace from the calibration type.</td>
+</tr>
+<tr>
+<td><em>(field_validator('calibration_date', 'application_date', mode='before'))</em> <code>validate_dates(cls, v)</code></td>
+<td>Validate and normalize a calibration or application date.</td>
+</tr>
+<tr>
+<td><em>(field_validator('number_coefficients', mode='before'))</em> <code>validate_num_coeffs(cls, v)</code></td>
+<td>Coerce <code>number_coefficients</code> to a native Python int.</td>
+</tr>
+<tr>
+<td><em>(field_validator('coefficients', mode='before'))</em> <code>validate_coefficients(cls, v)</code></td>
+<td>Normalize <code>coefficients</code> to a list of floats.</td>
+</tr>
+<tr>
+<td><em>(field_validator('calibration_equation', mode='before'))</em> <code>strip_cal_eqn(cls, v)</code></td>
+<td>Strip surrounding quotes and whitespace from the calibration equation.</td>
+</tr>
+<tr>
+<td><em>(field_validator('calibration_comments', mode='before'))</em> <code>validate_comments(cls, v)</code></td>
+<td>Normalize <code>calibration_comments</code> to a list of stripped strings.</td>
+</tr>
+<tr>
+<td><code>log_general_message(field: str, old_value, new_value) -&gt; None</code></td>
+<td>Log a change made to a general calibration header field.</td>
+</tr>
+<tr>
+<td><code>set_coefficient(general_coefficient: float, general_coefficient_number: int = 0) -&gt; None</code></td>
+<td>Add or replace a coefficient and update <code>number_coefficients</code>.</td>
+</tr>
+<tr>
+<td><code>set_calibration_comment(calibration_comment: str, comment_number: int = 0) -&gt; None</code></td>
+<td>Add or replace an entry in <code>calibration_comments</code>.</td>
+</tr>
+<tr>
+<td><code>add_calibration_comment(calibration_comment: str) -&gt; None</code></td>
+<td>Append a comment to <code>calibration_comments</code>.</td>
+</tr>
+<tr>
+<td><code>populate_object(general_cal_fields: list) -&gt; 'GeneralCalHeader'</code></td>
+<td>Populate fields from parsed ODF general calibration header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the general calibration header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="compasshdrpy"><code>compasshdr.py</code></h4>
+<p><strong>class <code>CompassCalHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a Compass Cal Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the compass calibration header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('parameter_code', mode='before'))</em> <code>strip_param_code(cls, v)</code></td>
+<td>Strip surrounding quotes and whitespace from the parameter code.</td>
+</tr>
+<tr>
+<td><em>(field_validator('calibration_date', 'application_date', mode='before'))</em> <code>validate_dates(cls, v)</code></td>
+<td>Validate and normalize a calibration or application date.</td>
+</tr>
+<tr>
+<td><em>(field_validator('directions', 'corrections', mode='before'))</em> <code>validate_float_lists(cls, v)</code></td>
+<td>Normalize <code>directions</code>/<code>corrections</code> to a list of floats.</td>
+</tr>
+<tr>
+<td><code>log_compass_message(field: str, old_value, new_value) -&gt; None</code></td>
+<td>Log a change made to a compass calibration header field.</td>
+</tr>
+<tr>
+<td><code>set_direction(direction: float, direction_number: int = 0) -&gt; None</code></td>
+<td>Add or replace an entry in <code>directions</code>.</td>
+</tr>
+<tr>
+<td><code>set_correction(correction: float, correction_number: int = 0) -&gt; None</code></td>
+<td>Add or replace an entry in <code>corrections</code>.</td>
+</tr>
+<tr>
+<td><code>populate_object(compass_cal_fields: list) -&gt; 'CompassCalHeader'</code></td>
+<td>Populate fields from parsed ODF compass calibration header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the compass calibration header to ODF-formatted text.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="meteohdrpy"><code>meteohdr.py</code></h4>
+<p><strong>class <code>MeteoHeader(ValidatedBase, BaseHeader)</code></strong></p>
+<p>A class to represent a Meteo Header in an ODF object.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(config = None, **data)</code></td>
+<td>Initialize the meteo header.</td>
+</tr>
+<tr>
+<td><code>set_logger_and_config(logger, config)</code></td>
+<td>Attach a shared logger and config to this header.</td>
+</tr>
+<tr>
+<td><em>(field_validator('meteo_comments', mode='before'))</em> <code>validate_comments(cls, v)</code></td>
+<td>Normalize <code>meteo_comments</code> to a list of stripped strings.</td>
+</tr>
+<tr>
+<td><code>log_meteo_message(field: str, old_value, new_value) -&gt; None</code></td>
+<td>Log a change made to a meteo header field.</td>
+</tr>
+<tr>
+<td><code>set_meteo_comment(meteo_comment: str, comment_number: int = 0) -&gt; None</code></td>
+<td>Add or replace an entry in <code>meteo_comments</code>.</td>
+</tr>
+<tr>
+<td><code>add_meteo_comment(meteo_comment: str) -&gt; None</code></td>
+<td>Append a comment to <code>meteo_comments</code>.</td>
+</tr>
+<tr>
+<td><code>populate_object(meteo_fields: list) -&gt; 'MeteoHeader'</code></td>
+<td>Populate fields from parsed ODF meteo header lines.</td>
+</tr>
+<tr>
+<td><code>print_object() -&gt; str</code></td>
+<td>Serialize the meteo header to ODF-formatted text.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>wind_speed_knots_to_ms(wind_speed_knots: float) -&gt; float</code></td>
+<td>Convert wind speed from knots to metres per second.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>cloud_cover_percentage_to_wmo_code(cloud_cover_percentage: float) -&gt; int</code></td>
+<td>Convert a cloud-cover fraction to its WMO cloud-cover code.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>wave_height_meters_to_wmo_code(wave_height_meters: float) -&gt; int</code></td>
+<td>Convert a wave height to its WMO wave-height (sea-state) code.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="instrument-file-format-utilities">Instrument &amp; File-Format Utilities</h3>
+<h4 id="compare_seabird_xmlconspy"><code>compare_seabird_xmlcons.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>parse_xmlcon(filename: str) -&gt; pd.DataFrame</code></td>
+<td>Parse a Sea-Bird .xmlcon file into a sensor DataFrame.</td>
+</tr>
+<tr>
+<td><code>compare_xmlcons(df: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Find rows where a sensor's serial number changes between events.</td>
+</tr>
+<tr>
+<td><code>transform_to_wide_format(df: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Pivot a long-format sensor-change table to wide format.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="concatenate_qat_filespy"><code>concatenate_qat_files.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>concatenate_qat_files(mission_number: str, qat_folder_path: str)</code></td>
+<td>Concatenate all .qat files in a folder into one CSV file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="fix_btl_headerpy"><code>fix_btl_header.py</code></h4>
+<p>fix_btl_header.py</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fix_header(header: str) -&gt; str</code></td>
+<td>Return the header with the proper spacing between column names.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="lookup_parameterpy"><code>lookup_parameter.py</code></h4>
+<p><strong>class <code>ParamInfo(TypedDict)</code></strong></p>
+<p>Metadata describing an ODF parameter code.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lookup_parameter(database: str, parameter: str) -&gt; ParamInfo</code></td>
+<td>Get the parameter information from the a database.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="netcdfhdrpy"><code>netcdfhdr.py</code></h4>
+<p><strong>class <code>NetCdfHeader(OdfHeader)</code></strong></p>
+<p>NetCdfHeader Class: subclass of OdfHeader.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Method that initializes an NetCdf class object.</td>
+</tr>
+<tr>
+<td><code>generate_creation_date() -&gt; str</code></td>
+<td>Generate a creation date in SYTM format.</td>
+</tr>
+<tr>
+<td><code>populate_parameter_headers(df: pd.DataFrame, seabird_names: list, long_names: list, units: list) -&gt; NoReturn</code></td>
+<td>Populate the parameter headers and the data object.</td>
+</tr>
+<tr>
+<td><code>main()</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="odf_to_exchange_formatpy"><code>odf_to_exchange_format.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>odf2exchange(odf_folder: Path, wildcard: str) -&gt; None</code></td>
+<td>Generate CCHDO Exchange Formatted files from ODF files.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="read_seaodf_inipy"><code>read_seaodf_ini.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read_seaodf_ini()</code></td>
+<td>Parse the shared <code>seaodf.ini</code> parameter mapping file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="read_seaodf_parameterspy"><code>read_seaodf_parameters.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read_seaodf_parameters() -&gt; pd.DataFrame</code></td>
+<td>Read the packaged SeaODF parameters lookup table.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="rbr_to_odfpy"><code>rbr_to_odf.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>convert_rbr_to_odf(rsk_file_path: str, station_latitude: float = 0.0, station_longitude: float = 0.0)</code></td>
+<td>Read an RBR .rsk file, derive sigma-t, and plot selected profiles.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remove_parameterpy"><code>remove_parameter.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>remove_parameter(odfobj: OdfHeader, code: str) -&gt; OdfHeader</code></td>
+<td>Removes a parameter from the input OdfHeader object.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mtr-thermograph-processing">MTR / Thermograph Processing</h3>
+<h4 id="thermographpy"><code>thermograph.py</code></h4>
+<p><strong>class <code>ThermographHeader(OdfHeader)</code></strong></p>
+<p>Mtr Class: subclass of OdfHeader.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__() -&gt; None</code></td>
+<td>Initialize the thermograph header.</td>
+</tr>
+<tr>
+<td><code>get_date_format() -&gt; str</code></td>
+<td>Return the <code>strptime</code> format used for the <code>date</code> column.</td>
+</tr>
+<tr>
+<td><code>get_time_format() -&gt; str</code></td>
+<td>Return the <code>strptime</code> format used for the <code>time</code> column.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>clean_lfa(value)</code></td>
+<td>Coerce an LFA value to an int where possible.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>clean_soakday(value)</code></td>
+<td>Coerce a soak-days value to an int where possible.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>load_meta_file(metafile)</code></td>
+<td>Load a metadata file into a DataFrame, dispatching by extension.</td>
+</tr>
+<tr>
+<td><code>start_date_time(df: pd.DataFrame) -&gt; datetime</code></td>
+<td>Retrieve the first date-time value from the data frame.</td>
+</tr>
+<tr>
+<td><code>end_date_time(df: pd.DataFrame) -&gt; datetime</code></td>
+<td>Retrieve the last date-time value from the data frame.</td>
+</tr>
+<tr>
+<td><code>get_sampling_interval(df: pd.Series) -&gt; float</code></td>
+<td>Compute the time interval between the first two date-time values.</td>
+</tr>
+<tr>
+<td><code>create_sytm(df: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Updated the data frame with the proper SYTM column.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>check_datetime_format(date_string, format)</code></td>
+<td>Check whether a string matches a given date/time format.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>fix_datetime(df: pd.DataFrame, date_times: bool) -&gt; pd.DataFrame</code></td>
+<td>Fix the date and time columns in the data frame.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>convert_to_decimal_degrees(pos: str) -&gt; float</code></td>
+<td>Convert a degrees/decimal-minutes position string to decimal degrees.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>extract_number(s: str) -&gt; float \| None</code></td>
+<td>Extract a numeric value from a string, ignoring non-numeric characters.</td>
+</tr>
+<tr>
+<td><code>populate_parameter_headers(df: pd.DataFrame)</code></td>
+<td>Populate the parameter headers and the data object.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>is_minilog_file(file_path: str) -&gt; bool</code></td>
+<td>Check whether a file looks like a Minilog MTR file.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>read_mtr(mtrfile: str, instrument_type: str = 'minilog') -&gt; dict</code></td>
+<td>Read an MTR data file and return a pandas DataFrame.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>read_metadata(metafile: str, institution: str) -&gt; pd.DataFrame</code></td>
+<td>Read a Metadata file and return a pandas DataFrame.</td>
+</tr>
+<tr>
+<td><code>process_thermograph(institution_name: str, instrument_type: str, metadata_file_path: str, data_file_path: str, user_input_metadata: dict) -&gt; None</code></td>
+<td>Populate this ODF object from raw MTR data and metadata.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="multinetpy"><code>multinet.py</code></h4>
+<p><strong>class <code>MultinetHeader(OdfHeader)</code></strong></p>
+<p>Multinet Class: subclass of OdfHeader.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(calibrations = None) -&gt; NoReturn</code></td>
+<td>Initialize the multinet header.</td>
+</tr>
+<tr>
+<td><em>(property)</em> <code>calibrations()</code></td>
+<td>dict: Calibration coefficients, keyed by channel name.</td>
+</tr>
+<tr>
+<td><code>calibrations(cals: dict) -&gt; NoReturn</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>get_date_format() -&gt; str</code></td>
+<td>Return the <code>strptime</code> format used for the <code>date</code> column.</td>
+</tr>
+<tr>
+<td><code>get_time_format() -&gt; str</code></td>
+<td>Return the <code>strptime</code> format used for the <code>time</code> column.</td>
+</tr>
+<tr>
+<td><code>start_date_time(df: pd.Series) -&gt; datetime</code></td>
+<td>Retrieve the first date-time value from the data frame.</td>
+</tr>
+<tr>
+<td><code>end_date_time(df: pd.Series) -&gt; datetime</code></td>
+<td>Retrieve the last date-time value from the data frame.</td>
+</tr>
+<tr>
+<td><code>sampling_interval(df: pd.Series) -&gt; int</code></td>
+<td>Compute the time interval between the first two date-time values.</td>
+</tr>
+<tr>
+<td><code>create_sytm(df: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Updated the data frame with the proper SYTM column.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>check_datetime_format(date_string, format)</code></td>
+<td>Check whether a string matches a given date/time format.</td>
+</tr>
+<tr>
+<td><code>fix_datetime(df: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Fix the date and time columns in the data frame.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>read_tab_delimited_file(file_path)</code></td>
+<td>Reads a text file with header lines and tab-delimited data,</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>fix_column_names(names: list) -&gt; list</code></td>
+<td>Normalize raw column-name strings into snake_case identifiers.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>split_calibration(cal_string: str) -&gt; list</code></td>
+<td>Splits a calibration string into a list of floats.</td>
+</tr>
+<tr>
+<td><code>extract_calibrations(header_lines) -&gt; NoReturn</code></td>
+<td>Parse temperature/conductivity/pressure/volume calibrations.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>compute_conductivity(conductivity_raw: pd.Series, ccal: list) -&gt; float</code></td>
+<td>Computes the conductivity in mS/cm by applying a calibration equation to the raw conductivity values.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>compute_temperature(temp_raw: pd.Series, tcal: list) -&gt; float</code></td>
+<td>Computes the temperature in Celsius by applying a calibration equation to the raw temperature voltavaluesge.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>compute_pressure(pressure_raw: pd.Series, pressure_temp_raw: pd.Series, pcal: list) -&gt; float</code></td>
+<td>Computes the pressure in dbar by applying a calibration equation to the raw pressure values.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>compute_volume(volume_raw: pd.Series, vcal: float) -&gt; float</code></td>
+<td>Computes the volume in m**3 by applying a calibration equation to the raw volume values.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>compute_flow(flow_raw: pd.Series) -&gt; float</code></td>
+<td>Computes the flow rate by applying a calibration to the raw flow rate.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>compute_flow_ratio(flow_in: pd.Series, flow_out: pd.Series) -&gt; pd.Series</code></td>
+<td>Computes the flow rate by applying a calibration to the raw flow rate.</td>
+</tr>
+<tr>
+<td><code>populate_odf_headers(df: pd.DataFrame)</code></td>
+<td>Populate the ODF headers and the data object.</td>
+</tr>
+<tr>
+<td><code>populate_parameter_headers(df: pd.DataFrame)</code></td>
+<td>Populate the parameter headers and the data object.</td>
+</tr>
+<tr>
+<td><code>read_multinet_files(file_type: str, file_path: str) -&gt; pd.DataFrame</code></td>
+<td>Main function to read a tab-delimited file and print the header and data lines.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="process_mtr_filespy"><code>process_mtr_files.py</code></h4>
+<p><strong>class <code>MTRProcessingThread(QThread)</code></strong></p>
+<p>Worker thread to process MTR data without blocking the GUI.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(metadata_file_path, input_path, output_path, operator, institution, instrument, user_metadata, batch_id)</code></td>
+<td>Initialize the processing thread.</td>
+</tr>
+<tr>
+<td><code>run()</code></td>
+<td>Run :func:<code>run_process_thermograph_data</code> and emit :attr:<code>finished</code>.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>process_mtr_files_for_worker(log, metadata_file_path, input_data_folder_path, output_data_folder_path, operator, institution, instrument, batch_id, user_input_metadata)</code></td>
+<td>Process a batch of raw MTR <code>.csv</code> files into ODF files (worker entry point).</td>
+</tr>
+<tr>
+<td><code>run_automated_start_qc()</code></td>
+<td>Run the automated (multi-batch, background-worker) MTR processing UI.</td>
+</tr>
+<tr>
+<td><code>process_thermograph_data(metadata_file_path, input_data_folder_path, output_data_folder_path, operator, institution, instrument, user_input_metadata, batch_id)</code></td>
+<td>Process a batch of raw MTR <code>.csv</code> files into ODF files (synchronous).</td>
+</tr>
+<tr>
+<td><code>run_process_thermograph_data(metadata_file_path, input_data_folder_path, output_data_folder_path, operator, institution, instrument, user_input_metadata, batch_id)</code></td>
+<td>Run :func:<code>process_thermograph_data</code> and log the outcome.</td>
+</tr>
+<tr>
+<td><code>main_select_inputs()</code></td>
+<td>Show the input selection dialog and block until it closes.</td>
+</tr>
+<tr>
+<td><code>initialize_mtr_process(log_ui: LogWindowProcessMTR, logger)</code></td>
+<td>Collect processing inputs and start the MTR processing thread.</td>
+</tr>
+<tr>
+<td><code>exit_program(app, log_ui)</code></td>
+<td>Stop any running MTR processing thread and quit the application.</td>
+</tr>
+<tr>
+<td><code>run_manual_start_qc()</code></td>
+<td>Run the manual (single-batch, button-driven) MTR processing UI.</td>
+</tr>
+<tr>
+<td><code>logger_setup()</code></td>
+<td>Create (or return the existing) MTR-processing logger.</td>
+</tr>
+<tr>
+<td><code>attach_gui_logger(logger, gui_handler)</code></td>
+<td>Attach a GUI log handler to a logger via a background queue listener.</td>
+</tr>
+<tr>
+<td><code>on_mtr_processing_finished(log_ui, success)</code></td>
+<td>Handle completion of an :class:<code>MTRProcessingThread</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ai_thermograph_datapy"><code>ai_thermograph_data.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>regional_meta_bioregions()</code></td>
+<td>Load the DFO marine bioregions GeoJSON lookup file.</td>
+</tr>
+<tr>
+<td><code>regional_meta_temp_climatology()</code></td>
+<td>Load the seasonal surface-temperature climatology lookup file.</td>
+</tr>
+<tr>
+<td><code>point_in_polygon(lon, lat, polygon)</code></td>
+<td>Check whether a point lies inside a polygon (ray-casting test).</td>
+</tr>
+<tr>
+<td><code>get_bioregion(lat, lon)</code></td>
+<td>Determine which DFO marine bioregion contains a point.</td>
+</tr>
+<tr>
+<td><code>get_surface_temp_profile(lat, lon)</code></td>
+<td>Look up the seasonal surface-temperature profile for a location.</td>
+</tr>
+<tr>
+<td><code>get_season(dt)</code></td>
+<td>Return climatological season name for a datetime.</td>
+</tr>
+<tr>
+<td><code>prepare_output_folder(in_folder_path: str, out_folder_path: str, qc_operator: str) -&gt; str</code></td>
+<td>Create (or clear and recreate) the <code>Step_2_Assign_QFlag</code> output folder.</td>
+</tr>
+<tr>
+<td><code>qc_ai_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str, qc_operator: str)</code></td>
+<td>Automatically quality-flag a batch of thermograph ODF files.</td>
+</tr>
+<tr>
+<td><code>main_select_inputs()</code></td>
+<td>Show the input/output folder selection dialog and block until closed.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="quality-control-reporting">Quality Control &amp; Reporting</h3>
+<h4 id="qc_odf_datapy"><code>qc_odf_data.py</code></h4>
+<p>qc_odf_data.py</p>
+<p><strong>class <code>LassoItem(pg.GraphicsObject)</code></strong></p>
+<p>Freehand lasso selector.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(plot_item: pg.PlotItem, xs: np.ndarray, ys: np.ndarray)</code></td>
+<td>Initialize the lasso selector.</td>
+</tr>
+<tr>
+<td><code>set_point_sets(point_sets)</code></td>
+<td>Replace the data the lasso hit-tests against.</td>
+</tr>
+<tr>
+<td><code>pause()</code></td>
+<td>Disable the lasso and discard any in-progress selection.</td>
+</tr>
+<tr>
+<td><code>resume()</code></td>
+<td>Re-enable the lasso for left-button drawing.</td>
+</tr>
+<tr>
+<td><code>boundingRect()</code></td>
+<td>Return the current view's bounding rectangle.</td>
+</tr>
+<tr>
+<td><code>paint(p, *args)</code></td>
+<td>Paint the in-progress lasso outline.</td>
+</tr>
+<tr>
+<td><code>_scene_to_data(scene_pos)</code></td>
+<td>Convert a scene position to data coordinates.</td>
+</tr>
+<tr>
+<td><code>mousePressEvent(ev)</code></td>
+<td>Start a new lasso outline on a left-button press.</td>
+</tr>
+<tr>
+<td><code>mouseMoveEvent(ev)</code></td>
+<td>Extend the in-progress lasso outline as the mouse moves.</td>
+</tr>
+<tr>
+<td><code>mouseReleaseEvent(ev)</code></td>
+<td>Close the lasso outline and finalize the selection on release.</td>
+</tr>
+<tr>
+<td><code>_finish()</code></td>
+<td>Hit-test the closed lasso polygon and emit :attr:<code>sigSelected</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>QCWindow(QWidget)</code></strong></p>
+<p>Unified interactive QC window.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(mode: str, df: pd.DataFrame \| None, state: dict, xnums: np.ndarray \| None = None, qc_start_ts: float \| None = None, qc_end_ts: float \| None = None, start_datetime_qc = None, end_datetime_qc = None, batch_name: str = '', pres_col: str \| None = None, x_col_default: str \| None = None, station: str = '—', event_num: str = '—', ctd_profiles: list[dict] \| None = None, colors_initial: list \| None = None, instrument: str = '', organization: str = '', qc_mode_: str = '', qc_mode_code_: int = 0, block_next_: int = 0, idx: int = 1, file_list: list \| None = None, current_file = None, param_map: dict \| None = None)</code></td>
+<td>Initialise the QC window and build all UI components.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>_compute_margins(xs: np.ndarray, ys: np.ndarray)</code></td>
+<td>Compute 5% plot-range margins for a pair of coordinate arrays.</td>
+</tr>
+<tr>
+<td><code>_current_active_col() -&gt; str</code></td>
+<td>Return the name of the column currently plotted on the selectable axis.</td>
+</tr>
+<tr>
+<td><code>_current_xs() -&gt; np.ndarray</code></td>
+<td>X-values for the current scatter (thermograph: timestamps; CTD: param).</td>
+</tr>
+<tr>
+<td><code>_current_ys() -&gt; np.ndarray</code></td>
+<td>Y-values for the current scatter (thermograph: param; CTD: pressure).</td>
+</tr>
+<tr>
+<td><code>_profile_xs(prof: dict) -&gt; np.ndarray</code></td>
+<td>X-values (current axis param) for one CTD profile in self._profiles.</td>
+</tr>
+<tr>
+<td><code>_set_button_active(active_btn)</code></td>
+<td>Highlight the active interaction-mode button.</td>
+</tr>
+<tr>
+<td><code>_click_lasso()</code></td>
+<td>Switch to lasso selection mode.</td>
+</tr>
+<tr>
+<td><code>_click_zoom_box()</code></td>
+<td>Switch to rectangular zoom-box mode.</td>
+</tr>
+<tr>
+<td><code>_click_pan()</code></td>
+<td>Switch to pan mode.</td>
+</tr>
+<tr>
+<td><code>_switch_axis(col_name: str)</code></td>
+<td>Handle Y-axis switch (thermograph) or X-axis switch (CTD).</td>
+</tr>
+<tr>
+<td><code>_on_flag_selected(flag_id: int)</code></td>
+<td>Store the newly selected QC flag as the "current" flag to apply.</td>
+</tr>
+<tr>
+<td><code>_apply_flags_to_points(indices: np.ndarray)</code></td>
+<td>Apply the current flag to points at the given indices and recolor them.</td>
+</tr>
+<tr>
+<td><code>_apply_flags_to_profile(profile_idx: int, indices: np.ndarray)</code></td>
+<td>CTD-only: apply the current flag to one overlaid profile's points.</td>
+</tr>
+<tr>
+<td><code>_record_selection(profile_idx: int, indices: np.ndarray)</code></td>
+<td>CTD-only: track a selection group against a specific profile for undo/export.</td>
+</tr>
+<tr>
+<td><code>_on_lasso_select(selections)</code></td>
+<td>Apply the current flag to points selected by the lasso.</td>
+</tr>
+<tr>
+<td><code>_on_points_clicked(_plot, points, profile_idx: int = 0)</code></td>
+<td>Apply the current flag to individually clicked scatter points.</td>
+</tr>
+<tr>
+<td><code>_click_reset_view()</code></td>
+<td>Redraw the scatter(s) with current flag colors and reset the axis ranges.</td>
+</tr>
+<tr>
+<td><code>_click_deselect_all()</code></td>
+<td>Restore all quality flags to their pre-session snapshot values.</td>
+</tr>
+<tr>
+<td><code>_click_continue()</code></td>
+<td>Mark the QC session as applied and close the window.</td>
+</tr>
+<tr>
+<td><code>_click_exit()</code></td>
+<td>Mark the QC session as user-exited and close the window.</td>
+</tr>
+<tr>
+<td><code>_toggle_profile_visibility(profile_idx: int, cb_state)</code></td>
+<td>CTD-only: show/hide one overlaid profile without affecting its flags.</td>
+</tr>
+<tr>
+<td><code>_export_dataframe(current_file)</code></td>
+<td>Export the QC'd DataFrame(s) to CSV.</td>
+</tr>
+<tr>
+<td><code>closeEvent(ev)</code></td>
+<td>Emit :attr:<code>closed</code> before handling the standard close event.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>InputDialog(QMainWindow)</code></strong></p>
+<p>Unified input dialog.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(mode: str, review_mode: bool)</code></td>
+<td>Build the dialog's widgets and layout.</td>
+</tr>
+<tr>
+<td><code>_choose_input()</code></td>
+<td>Prompt for and store the ODF input folder.</td>
+</tr>
+<tr>
+<td><code>_choose_output()</code></td>
+<td>Prompt for and store the QC output folder.</td>
+</tr>
+<tr>
+<td><code>_choose_metadata()</code></td>
+<td>Prompt for and store the metadata file (thermograph mode).</td>
+</tr>
+<tr>
+<td><code>_on_accept()</code></td>
+<td>Validate required fields, optionally persist the name, and close.</td>
+</tr>
+<tr>
+<td><code>_on_reject()</code></td>
+<td>Set :attr:<code>result</code> to <code>"reject"</code> and close the window.</td>
+</tr>
+<tr>
+<td><code>_save_name()</code></td>
+<td>Persist the operator/reviewer name to :attr:<code>_meta_store</code> as JSON.</td>
+</tr>
+<tr>
+<td><code>_clear_saved()</code></td>
+<td>Delete the persisted name file, if one exists.</td>
+</tr>
+<tr>
+<td><code>_load_saved()</code></td>
+<td>Load and apply a previously persisted operator/reviewer name, if any.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>LogWindow(QWidget)</code></strong></p>
+<p>Unified log window with data-type selector, QC mode radio, Start and</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Build the window's widgets and layout.</td>
+</tr>
+<tr>
+<td><em>(property)</em> <code>selected_data_type() -&gt; str</code></td>
+<td>str: <code>"thermograph"</code> or <code>"ctd"</code>, per the selected radio button.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>_FilenameMismatchError(Exception)</code></strong></p>
+<p>Raised by _load_ctd_profile when the ODF's generated file spec doesn't</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prepare_output_folder(in_folder_path: str, out_folder_path: str, qc_operator: str) -&gt; str</code></td>
+<td>Create the appropriate QC output folder for initial or review mode.</td>
+</tr>
+<tr>
+<td><code>_parse_datetime(date_str, time_str)</code></td>
+<td>Parse separate date/time strings into a combined datetime string.</td>
+</tr>
+<tr>
+<td><code>_parse_to_utc(dt_str, tz_mode)</code></td>
+<td>Parse a datetime string and convert it to UTC.</td>
+</tr>
+<tr>
+<td><code>_validate_bio_metadata(meta: pd.DataFrame) -&gt; bool</code></td>
+<td>Check that a BIO metadata DataFrame has the required columns.</td>
+</tr>
+<tr>
+<td><code>_null_to_na(df: pd.DataFrame) -&gt; pd.DataFrame</code></td>
+<td>Replace ODF's numeric null sentinel with NaN.</td>
+</tr>
+<tr>
+<td><code>qc_thermograph_data(in_folder_path: str, wildcard: str, out_folder_path: str, qc_operator: str, metadata_file_path: str, review_mode: bool, batch_name: str) -&gt; dict</code></td>
+<td>Run the interactive visual QC loop over a batch of thermograph ODF files.</td>
+</tr>
+<tr>
+<td><code>_cast_label_from_filename(ctd_file_name: str) -&gt; str</code></td>
+<td>Infer a human-readable cast label from an ODF filename suffix.</td>
+</tr>
+<tr>
+<td><code>_load_ctd_profile(ctd_file: Path, in_folder_path: str, qc_mode_user: int) -&gt; dict \| None</code></td>
+<td>Read one ODF file and prepare everything QCWindow needs to plot it.</td>
+</tr>
+<tr>
+<td><code>_group_ctd_profiles(profiles: list[dict]) -&gt; list[list[dict]]</code></td>
+<td>Group loaded CTD profiles by (station, event) so that associated</td>
+</tr>
+<tr>
+<td><code>qc_ctd_data(in_folder_path: str, wildcard: str, out_folder_path: str, qc_operator: str, review_mode: bool) -&gt; dict</code></td>
+<td>Run the interactive visual QC loop over a batch of CTD ODF files.</td>
+</tr>
+<tr>
+<td><code>main_select_inputs(mode: str, review_mode: bool)</code></td>
+<td>Open the input dialog and return collected values.</td>
+</tr>
+<tr>
+<td><code>run_qc_thermograph_data(input_path: str, output_path: str, qc_operator: str, metadata_file_path: str, review_mode: bool, batch_name: str, wildcard: str) -&gt; dict</code></td>
+<td>Run :func:<code>qc_thermograph_data</code> and log the outcome.</td>
+</tr>
+<tr>
+<td><code>run_qc_ctd_data(input_path: str, output_path: str, qc_operator: str, review_mode: bool, wildcard: str) -&gt; dict</code></td>
+<td>Run :func:<code>qc_ctd_data</code> and log the outcome.</td>
+</tr>
+<tr>
+<td><code>start_qc_process(log_ui: LogWindow)</code></td>
+<td>Handle the log window's "Start" button: collect inputs and run QC.</td>
+</tr>
+<tr>
+<td><code>exit_program(app_inst)</code></td>
+<td>Signal the running QC loop to stop and quit the application.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="metadata_reportpy"><code>metadata_report.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate_report(file_path: str, wildcard: str, outfile: str) -&gt; None</code></td>
+<td>Generates a report based on the metadata from ODF files as an Excel file.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="gui-support-widgets">GUI Support Widgets</h3>
+<h4 id="log_windowpy"><code>log_window.py</code></h4>
+<p><strong>class <code>LogEmitter(QObject)</code></strong></p>
+<p>Qt object that emits a signal carrying a line of log text.</p>
+<p><strong>class <code>LogWindow(QWidget)</code></strong></p>
+<p>Standalone window that displays streamed log/print output.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(parent = None)</code></td>
+<td>Build the log window's widgets and layout.</td>
+</tr>
+<tr>
+<td><code>_append_text(text: str)</code></td>
+<td>Append a line of text to the log box and scroll to it.</td>
+</tr>
+<tr>
+<td><code>write(text: str)</code></td>
+<td>Directly append text (convenience).</td>
+</tr>
+<tr>
+<td><code>redirect_prints_to_log()</code></td>
+<td>Call this to redirect sys.stdout to the log window (optional).</td>
+</tr>
+<tr>
+<td><code>export_log()</code></td>
+<td>Export the current log content to a text file.</td>
+</tr>
+<tr>
+<td><code>_exit_app()</code></td>
+<td>Emit exit request to Main Application.</td>
+</tr>
+<tr>
+<td><code>_bring_to_front_and_maximize()</code></td>
+<td>Brings the window to the front and maximizes it.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>Worker(QThread)</code></strong></p>
+<p>Background thread that runs a callable and reports its outcome.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(func, *args, **kwargs)</code></td>
+<td>Initialize the worker.</td>
+</tr>
+<tr>
+<td><code>run()</code></td>
+<td>Run <code>func</code> on this thread and emit the resulting signal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>SafeConsoleFilter(logging.Filter)</code></strong></p>
+<p>Ensures console output is cp1252-safe by stripping unsupported characters.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filter(record)</code></td>
+<td>Strip characters that cp1252 cannot encode from a log record.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>QTextEditLogger(logging.Handler)</code></strong></p>
+<p>A logging.Handler that appends logs to a QTextEdit widget in the GUI.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(text_edit: QTextEdit)</code></td>
+<td>Initialize the handler.</td>
+</tr>
+<tr>
+<td><code>emit(record)</code></td>
+<td>Format a log record and append it to the text widget.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>LogWindowThermographQC(QWidget)</code></strong></p>
+<p>Log window for the interactive thermograph QC workflow.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Build the window's widgets and layout.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>LogWindowProcessMTR(QWidget)</code></strong></p>
+<p>Log window for processing raw MTR (thermograph) files to ODF.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Build the window's widgets and layout.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>LogWindowCTDQC(QWidget)</code></strong></p>
+<p>Log window for the interactive CTD QC workflow.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Build the window's widgets and layout.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>LogWindowProcessCTD(QWidget)</code></strong></p>
+<p>Log window for the CTD ODF-file processing/inspection workflow.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Build the window's widgets and layout.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="select_metadata_file_and_data_folderpy"><code>select_metadata_file_and_data_folder.py</code></h4>
+<p><strong>class <code>MainWindow(QMainWindow)</code></strong></p>
+<p>Dialog for collecting MTR/thermograph processing inputs.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Build the window's widgets and layout.</td>
+</tr>
+<tr>
+<td><code>editing_finished()</code></td>
+<td>Store and log the processor name once editing of the field ends.</td>
+</tr>
+<tr>
+<td><code>institution_text_changed(s)</code></td>
+<td>Update the instrument options for the newly selected institution.</td>
+</tr>
+<tr>
+<td><code>instrument_text_changed(s)</code></td>
+<td>Store the newly selected instrument.</td>
+</tr>
+<tr>
+<td><code>find_raw_data_folder(base_dir)</code></td>
+<td>Search for a folder containing 'raw' in its name (case-insensitive)</td>
+</tr>
+<tr>
+<td><code>choose_metadata_file()</code></td>
+<td>Prompt for the metadata file and auto-fill the folder fields.</td>
+</tr>
+<tr>
+<td><code>choose_input_data_folder()</code></td>
+<td>Prompt for and store the input data folder.</td>
+</tr>
+<tr>
+<td><code>choose_output_data_folder()</code></td>
+<td>Prompt for and store the output data folder.</td>
+</tr>
+<tr>
+<td><code>on_accept()</code></td>
+<td>Collect all field values, optionally persist them, and close.</td>
+</tr>
+<tr>
+<td><code>on_reject()</code></td>
+<td>Set :attr:<code>result</code> to <code>"reject"</code> and close the window.</td>
+</tr>
+<tr>
+<td><code>save_last_user_metadata()</code></td>
+<td>Persist :attr:<code>remember_input_dict</code> to :attr:<code>meta_store_path</code> as JSON.</td>
+</tr>
+<tr>
+<td><code>clear_last_user_metadata()</code></td>
+<td>Delete the persisted metadata file, if one exists.</td>
+</tr>
+<tr>
+<td><code>populate_defaults(institution)</code></td>
+<td>Populate 4 fields based on institution selection.</td>
+</tr>
+<tr>
+<td><code>load_last_user_metadata()</code></td>
+<td>Load and apply any previously persisted metadata, or defaults.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>class <code>SubWindowOne(QMainWindow)</code></strong></p>
+<p>Dialog for collecting QC-flagging run inputs.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(review_mode: bool)</code></td>
+<td>Build the window's widgets and layout.</td>
+</tr>
+<tr>
+<td><code>editing_finished()</code></td>
+<td>Store and log the reviewer/operator name once editing ends.</td>
+</tr>
+<tr>
+<td><code>find_raw_data_folder(base_dir)</code></td>
+<td>Search for a folder containing 'raw' in its name (case-insensitive)</td>
+</tr>
+<tr>
+<td><code>build_batch_name(meta_path: str) -&gt; str</code></td>
+<td>Derive a batch name (e.g. <code>"LFA-34-2024"</code>) from a metadata filename.</td>
+</tr>
+<tr>
+<td><code>choose_metadata_file()</code></td>
+<td>Prompt for the metadata file and auto-fill folder/batch fields.</td>
+</tr>
+<tr>
+<td><code>choose_input_data_folder()</code></td>
+<td>Prompt for and store the input ODF folder.</td>
+</tr>
+<tr>
+<td><code>choose_output_data_folder()</code></td>
+<td>Prompt for and store the QC output folder.</td>
+</tr>
+<tr>
+<td><code>on_accept()</code></td>
+<td>Validate required fields, optionally persist them, and close.</td>
+</tr>
+<tr>
+<td><code>on_reject()</code></td>
+<td>Set :attr:<code>result</code> to <code>"reject"</code> and close the window.</td>
+</tr>
+<tr>
+<td><code>save_last_user_metadata()</code></td>
+<td>Persist :attr:<code>remember_input_dict</code> to :attr:<code>meta_store_path</code> as JSON.</td>
+</tr>
+<tr>
+<td><code>clear_last_user_metadata()</code></td>
+<td>Delete the persisted metadata file, if one exists.</td>
+</tr>
+<tr>
+<td><code>load_last_user_metadata()</code></td>
+<td>Load and apply any previously persisted reviewer name, or defaults.</td>
+</tr>
+<tr>
+<td><code>populate_defaults()</code></td>
+<td>Set the reviewer-name field's placeholder text.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="package-setup-entry-scripts">Package Setup / Entry Scripts</h3>
+<h4 id="__init__py"><code>__init__.py</code></h4>
+<p>datashop_toolbox package initialization.</p>
+<p>Re-exports the package's public API:</p>
+<p><code>BaseHeader</code>, <code>CompassCalHeader</code>, <code>CruiseHeader</code>, <code>EventHeader</code>, <code>GeneralCalHeader</code>, <code>HistoryHeader</code>, <code>InstrumentHeader</code>, <code>MeteoHeader</code>, <code>OdfHeader</code>, <code>ParameterHeader</code>, <code>PolynomialCalHeader</code>, <code>QualityHeader</code>, <code>RecordHeader</code>, <code>DataRecords</code>, <code>ValidatedBase</code>, <code>ThermographHeader</code>, <code>generate_report</code>, <code>MainWindow</code>, <code>SubWindowOne</code></p>
+<h4 id="create_parameters_databasepy"><code>create_parameters_database.py</code></h4>
+<p><em>No public classes or functions (script / entry point).</em></p>
+<h4 id="demo_validated_basepy"><code>demo_validated_base.py</code></h4>
+<p><strong>class <code>SampleHeader(ValidatedBase)</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>demo_validated_base()</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="generate_metadata_reportpy"><code>generate_metadata_report.py</code></h4>
+<p><em>No public classes or functions (script / entry point).</em></p>
+<h2 id="odf_oracle"><code>odf_oracle</code></h2>
+<h3 id="connection-management">Connection Management</h3>
+<h4 id="__init__py_1"><code>__init__.py</code></h4>
+<p>Re-exports the package's public API:</p>
+<p><code>compass_cal_to_oracle</code>, <code>cruise_event_to_oracle</code>, <code>data_to_oracle</code>, <code>event_comments_to_oracle</code>, <code>fix_null</code>, <code>general_cal_comments_to_oracle</code>, <code>general_cal_equation_to_oracle</code>, <code>general_cal_to_oracle</code>, <code>history_to_oracle</code>, <code>instrument_to_oracle</code>, <code>meteo_comments_to_oracle</code>, <code>meteo_to_oracle</code>, <code>odf_to_oracle</code>, <code>polynomial_cal_to_oracle</code>, <code>quality_to_oracle</code>, <code>quality_comments_to_oracle</code>, <code>quality_tests_to_oracle</code>, <code>sytm_to_timestamp</code></p>
+<h4 id="database_connection_poolpy"><code>database_connection_pool.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>init_session(connection, requested_tag)</code></td>
+<td>Modify some settings of the Oracle connection.</td>
+</tr>
+<tr>
+<td><code>get_database_pool()</code></td>
+<td>Create an Oracle connection pool for the ODF_ARCHIVE database.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="value-conversion-helpers">Value Conversion Helpers</h3>
+<h4 id="fix_nullpy"><code>fix_null.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fix_null(x)</code></td>
+<td>Convert all null values in the input matrix to NaNs.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sytm_to_timestamppy"><code>sytm_to_timestamp.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sytm_to_timestamp(sytm: str, strid: str) -&gt; datetime</code></td>
+<td>Convert SYTM strings to Oracle timestamps.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="odf-to-oracle-loaders">ODF-to-Oracle Loaders</h3>
+<h4 id="odf_to_oraclepy"><code>odf_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>odf_to_oracle(wildcard: str, user: str, password: str, oracle_host: str, oracle_service_name: str, mypath: str) -&gt; None</code></td>
+<td>Read ODF files and load them into the ODF_ARCHIVE Oracle database.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="cruise_event_to_oraclepy"><code>cruise_event_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cruise_event_to_oracle(odfobj: OdfHeader, connection, infile: str) -&gt; str</code></td>
+<td>Load the ODF object's cruise header and event header metadata into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="event_comments_to_oraclepy"><code>event_comments_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event_comments_to_oracle(odfobj: OdfHeader, connection, infile: str) -&gt; None</code></td>
+<td>Load the ODF object's event header comments into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="instrument_to_oraclepy"><code>instrument_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>instrument_to_oracle(odfobj: OdfHeader, connection, infile: str) -&gt; None</code></td>
+<td>Load the ODF object's instrument header metadata into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="history_to_oraclepy"><code>history_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>history_to_oracle(odfobj: OdfHeader, connection, infile: str)</code></td>
+<td>Load the ODF object's history header metadata into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="data_to_oraclepy"><code>data_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data_to_oracle(odfobj: OdfHeader, connection, infile: str)</code></td>
+<td>Load the data records from an OdfHeader object into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="meteo_to_oraclepy"><code>meteo_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>meteo_to_oracle(odfobj: OdfHeader, connection, infile: str) -&gt; None</code></td>
+<td>Load the meteo header metadata from the ODF object into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="meteo_comments_to_oraclepy"><code>meteo_comments_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>meteo_comments_to_oracle(odfobj: OdfHeader, connection, infile)</code></td>
+<td>Load the meteo header comments into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="quality_to_oraclepy"><code>quality_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>quality_to_oracle(odfobj: OdfHeader, connection, infile: str) -&gt; None</code></td>
+<td>Load the ODF object's quality header information into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="quality_tests_to_oraclepy"><code>quality_tests_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>quality_tests_to_oracle(odfobj: OdfHeader, connection, infile: str)</code></td>
+<td>Load the ODF object's quality header tests into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="quality_comments_to_oraclepy"><code>quality_comments_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>quality_comments_to_oracle(odfobj: OdfHeader, connection, infile: str)</code></td>
+<td>Load the ODF object's quality header comments into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="compass_cal_to_oraclepy"><code>compass_cal_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compass_cal_to_oracle(odfobj: OdfHeader, connection, infile: str) -&gt; None</code></td>
+<td>Load the compass cal header metadata from the ODF object into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="polynomial_cal_to_oraclepy"><code>polynomial_cal_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>polynomial_cal_to_oracle(odfobj: OdfHeader, connection, infile: str)</code></td>
+<td>Load the polynomial cal header metadata from the ODF object into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="general_cal_to_oraclepy"><code>general_cal_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>general_cal_to_oracle(odfobj: OdfHeader, connection, infile: str)</code></td>
+<td>Load the general cal header metadata from the ODF object into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="general_cal_equation_to_oraclepy"><code>general_cal_equation_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>general_cal_equation_to_oracle(general_cal_header: GeneralCalHeader, connection, gg: int, filename: str) -&gt; None</code></td>
+<td>Load a GENERAL_CAL_Header equation into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="general_cal_comments_to_oraclepy"><code>general_cal_comments_to_oracle.py</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>general_cal_comments_to_oracle(general_cal_header: GeneralCalHeader, connection, gg: int, filename: str) -&gt; None</code></td>
+<td>Load comments from a GENERAL_CAL_Header into Oracle.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="entry-scripts">Entry Scripts</h3>
+<h4 id="load_files_to_odf_archive_dbpy"><code>load_files_to_odf_archive_db.py</code></h4>
+<p><em>No public classes or functions (script / entry point).</em></p>
+<h2 id="datashop_toolboxgui"><code>datashop_toolbox.gui</code></h2>
+<h3 id="package-setup">Package Setup</h3>
+<h4 id="__init__py_2"><code>__init__.py</code></h4>
+<p>UI subpackage for datashop_toolbox.</p>
+<p>Re-exports the package's public API:</p>
+<p><code>OdfMetadataDialog</code>, <code>OdfMetadataForm</code>, <code>Ui_main_window</code>, <code>Ui_odf_metadata_form</code>, <code>Ui_plot_dialog</code>, <code>Ui_thermograph_main_window</code></p>
+<h3 id="odf-metadata-entry">ODF Metadata Entry</h3>
+<h4 id="odf_metadata_dialogpy"><code>odf_metadata_dialog.py</code></h4>
+<p><strong>class <code>OdfMetadataDialog(QDialog)</code></strong></p>
+<p>Modal dialog that wraps :class:<code>OdfMetadataForm</code> for editing ODF metadata.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(parent = None)</code></td>
+<td>Build the dialog and wire up the embedded form's signals.</td>
+</tr>
+<tr>
+<td><code>_on_submitted(odf)</code></td>
+<td>Store the submitted ODF object and accept the dialog.</td>
+</tr>
+<tr>
+<td><code>odf()</code></td>
+<td>Return the ODF object captured on OK (or None if cancelled).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="odf_metadata_formpy"><code>odf_metadata_form.py</code></h4>
+<p><strong>class <code>OdfMetadataForm(QWidget)</code></strong></p>
+<p>Reusable content widget that hosts the controls from Ui_ODF_Metadata_Window.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(parent = None, mission_templates_path: Path \| None = None)</code></td>
+<td>Build the form, load mission templates, and wire up its widgets.</td>
+</tr>
+<tr>
+<td><code>_setup_validators()</code></td>
+<td>Set placeholder text and numeric validators on the input fields.</td>
+</tr>
+<tr>
+<td><code>_populate_mission_templates()</code></td>
+<td>Load top-level keys from mission_header_templates.json into the combo.</td>
+</tr>
+<tr>
+<td><code>_populate_year()</code></td>
+<td>Populate the year field with the current year.</td>
+</tr>
+<tr>
+<td><code>_show_warning_dialog()</code></td>
+<td>Show (after the current event loop tick) a warning about the auto-filled year.</td>
+</tr>
+<tr>
+<td><code>showEvent(event) -&gt; None</code></td>
+<td>Overrides the show event to run code after the dialog is visible.</td>
+</tr>
+<tr>
+<td><code>_on_dialog_visible()</code></td>
+<td>Function that runs when the dialog appears.</td>
+</tr>
+<tr>
+<td><code>_connect_signals()</code></td>
+<td>Wire the template selector and OK/Cancel buttons to their handlers.</td>
+</tr>
+<tr>
+<td><code>_clear_cruise_header_fields()</code></td>
+<td>Clear all CRUISE_HEADER input fields.</td>
+</tr>
+<tr>
+<td><code>_clear_event_header_fields()</code></td>
+<td>Clear all EVENT_HEADER input fields.</td>
+</tr>
+<tr>
+<td><code>_on_template_changed(name: str) -&gt; None</code></td>
+<td>Load CRUISE_HEADER + default EVENT_HEADER from selected template.</td>
+</tr>
+<tr>
+<td><code>_parse_datetime(widget, label: str)</code></td>
+<td>Parse a date/time from a Q_line_edit using check_datetime.</td>
+</tr>
+<tr>
+<td><code>_parse_float(widget, label: str)</code></td>
+<td>Parse a float from a Q_line_edit. Uses Python float() for semantic validation.</td>
+</tr>
+<tr>
+<td><code>collect_metadata() -&gt; OdfHeader</code></td>
+<td>Create and fill an OdfHeader from current UI values.</td>
+</tr>
+<tr>
+<td><code>export_to_odf() -&gt; None</code></td>
+<td>Example action: build and print the header (replace with real writer).</td>
+</tr>
+<tr>
+<td><code>_on_ok_clicked()</code></td>
+<td>Collect and validate form input, then emit :attr:<code>submitted</code> or show an error.</td>
+</tr>
+<tr>
+<td><code>_on_cancel_clicked()</code></td>
+<td>Emit :attr:<code>cancelled</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rbr-rsk-processing">RBR / RSK Processing</h3>
+<h4 id="rbr_to_odf_mainwindowpy"><code>rbr_to_odf_mainwindow.py</code></h4>
+<p><strong>class <code>BtlHeader</code></strong></p>
+<p>Bottle header information to export BTL file.</p>
+<p><strong>class <code>MainWindow(QMainWindow)</code></strong></p>
+<p>Main window for converting RBR <code>.rsk</code> CTD files to ODF and BTL files.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(parent = None)</code></td>
+<td>Build the window, restore saved state, and connect signals.</td>
+</tr>
+<tr>
+<td><code>_setup_validators()</code></td>
+<td>Set placeholder text and numeric validators on the lat/lon fields.</td>
+</tr>
+<tr>
+<td><code>_connect_signals()</code></td>
+<td>Wire the window's buttons and list widget to their handlers.</td>
+</tr>
+<tr>
+<td><em>(property)</em> <code>rsk_file_path() -&gt; str</code></td>
+<td>str: Full path to the currently selected <code>.rsk</code> file, or <code>""</code>.</td>
+</tr>
+<tr>
+<td><code>_on_rsk_selected(current, previous)</code></td>
+<td>Update the channel list when the selected RSK file changes.</td>
+</tr>
+<tr>
+<td><code>_save_settings()</code></td>
+<td>Persist the folder, lat/lon, selections, and window geometry to disk.</td>
+</tr>
+<tr>
+<td><code>_load_settings()</code></td>
+<td>Restore the folder, lat/lon, selections, and window geometry from disk.</td>
+</tr>
+<tr>
+<td><code>close_event(event)</code></td>
+<td>Persist settings before closing.</td>
+</tr>
+<tr>
+<td><code>_choose_rsk_folder()</code></td>
+<td>Prompt for the RSK folder and populate the RSK file list.</td>
+</tr>
+<tr>
+<td><code>_update_channel_list()</code></td>
+<td>Read the selected RSK file's channels and restore prior selections.</td>
+</tr>
+<tr>
+<td><code>_profile_plots()</code></td>
+<td>Build and show a profile-plot dialog for the selected RSK file.</td>
+</tr>
+<tr>
+<td><code>_clear_settings()</code></td>
+<td>Clear the folder, RSK/channel lists, and lat/lon fields.</td>
+</tr>
+<tr>
+<td><code>_edit_metadata()</code></td>
+<td>Open the ODF metadata dialog and store the resulting ODF object.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>_split_string_get_end_number(s)</code></td>
+<td>Split a string into its non-numeric prefix and trailing digits.</td>
+</tr>
+<tr>
+<td><code>_populate_parameter_headers(df: pd.DataFrame) -&gt; dict</code></td>
+<td>Populate the parameter headers and the data object.</td>
+</tr>
+<tr>
+<td><code>_choose_export_odf_folder() -&gt; str</code></td>
+<td>Prompt for the ODF export folder.</td>
+</tr>
+<tr>
+<td><em>(static)</em> <code>round_to_nearest_half(number)</code></td>
+<td>Round a number to the nearest half (e.g. <code>1.3</code> -&gt; <code>1.5</code>).</td>
+</tr>
+<tr>
+<td><code>_export_odf()</code></td>
+<td>Process the selected RSK file and write down-cast/up-cast ODF files.</td>
+</tr>
+<tr>
+<td><code>_format_positional_value(position: float, position_type: str) -&gt; str</code></td>
+<td>Format a decimal-degree position as a degrees/minutes BTL string.</td>
+</tr>
+<tr>
+<td><code>_export_btl()</code></td>
+<td>Export a fixed-width BTL (bottle) file for the selected RSK cast.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="rbr_profile_plotpy"><code>rbr_profile_plot.py</code></h4>
+<p><strong>class <code>PlotDialog(QDialog)</code></strong></p>
+<p>Dialog that displays RSK profile figures one at a time with Next/Prev navigation</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(fig_handles: list \| None = None, parent = None, title: str = 'RSK Profiles')</code></td>
+<td>Build the dialog and display the first profile, if any.</td>
+</tr>
+<tr>
+<td><code>_add_navigation_actions()</code></td>
+<td>Add only Prev/Next actions (no jump, no up/down arrows).</td>
+</tr>
+<tr>
+<td><code>_update_nav_enabled()</code></td>
+<td>Enable/disable the prev/next actions based on the current index.</td>
+</tr>
+<tr>
+<td><code>_clear_plot_area()</code></td>
+<td>Remove and delete the current toolbar/canvas widgets from the layout.</td>
+</tr>
+<tr>
+<td><code>display_current_profile()</code></td>
+<td>Display the current profile figure in the dialog.</td>
+</tr>
+<tr>
+<td><code>_connect_key_navigation(figure)</code></td>
+<td>Wire left/right arrow key presses on a figure to prev/next navigation.</td>
+</tr>
+<tr>
+<td><code>on_prev_profile()</code></td>
+<td>Display the previous profile, if not already at the first.</td>
+</tr>
+<tr>
+<td><code>on_next_profile()</code></td>
+<td>Display the next profile, if not already at the last.</td>
+</tr>
+<tr>
+<td><code>on_save_checkbox_changed(state)</code></td>
+<td>Add or remove the current profile from :attr:<code>saved_profiles</code>.</td>
+</tr>
+<tr>
+<td><code>on_accept()</code></td>
+<td>Accept the dialog.</td>
+</tr>
+<tr>
+<td><code>on_reject()</code></td>
+<td>Reject the dialog.</td>
+</tr>
+<tr>
+<td><code>get_saved_profiles()</code></td>
+<td>Return the indices of profiles the user marked as saved.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_create_sample_profiles(num_profiles = 5)</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="thermograph-processing">Thermograph Processing</h3>
+<h4 id="thermograph_gui_loaderpy"><code>thermograph_gui_loader.py</code></h4>
+<p><strong>class <code>ThermographMainWindow(QMainWindow)</code></strong></p>
+<p>Main window for collecting thermograph processing inputs.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Build the window from the generated UI and connect its signals.</td>
+</tr>
+<tr>
+<td><code>on_name_entered()</code></td>
+<td>Store and log the processor name once editing of the field ends.</td>
+</tr>
+<tr>
+<td><code>on_institution_changed(text: str)</code></td>
+<td>Store the newly selected institution.</td>
+</tr>
+<tr>
+<td><code>on_instrument_changed(text: str)</code></td>
+<td>Store the newly selected instrument.</td>
+</tr>
+<tr>
+<td><code>choose_metadata_file()</code></td>
+<td>Prompt for and store the metadata file.</td>
+</tr>
+<tr>
+<td><code>choose_data_folder()</code></td>
+<td>Prompt for and store the data folder.</td>
+</tr>
+<tr>
+<td><code>accept_clicked()</code></td>
+<td>Set :attr:<code>result</code> to <code>"accept"</code> and close the window.</td>
+</tr>
+<tr>
+<td><code>reject_clicked()</code></td>
+<td>Set :attr:<code>result</code> to <code>"reject"</code> and close the window.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples">Examples</h3>
+<h4 id="example_btl_generationpy"><code>example_btl_generation.py</code></h4>
+<p><strong>class <code>columns(Enum)</code></strong></p>
+<p>Bottle data to export BTL file (header labels / order).</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_fmt_value(val: Any) -&gt; str</code></td>
+<td>Format values similarly to the example: integers as-is, floats right-aligned,</td>
+</tr>
+<tr>
+<td><code>_pad_left(text: str, width: int) -&gt; str</code></td>
+<td>Left-align text within a fixed-width field.</td>
+</tr>
+<tr>
+<td><code>_pad_right(text: str, width: int) -&gt; str</code></td>
+<td>Right-align text within a fixed-width field.</td>
+</tr>
+<tr>
+<td><code>print_btl_table(rows: Iterable[Mapping[str, Any]], param_enum: Iterable[columns] = (columns.oxygen, columns.salinity, columns.potential_temperature, columns.sigma_theta, columns.scan, columns.pressure, columns.conductivity, columns.par, columns.turbidity, columns.fluorescence, columns.cdom), widths: Mapping[str, int] = print_widths) -&gt; None</code></td>
+<td>Print a BTL-style table with:</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

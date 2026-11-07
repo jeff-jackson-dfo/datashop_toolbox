@@ -1,0 +1,833 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>How to create a new ODF file from scratch - Datashop Toolbox Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#how-to-create-a-new-odf-file-from-scratch" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Datashop Toolbox Docs" class="md-header__button md-logo" aria-label="Datashop Toolbox Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Datashop Toolbox Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              How to create a new ODF file from scratch
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Datashop Toolbox Docs" class="md-nav__button md-logo" aria-label="Datashop Toolbox Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Datashop Toolbox Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datashop Toolbox Docs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Background
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datashop Toolbox Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to-guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gtspp_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GTSPP Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before you start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-the-odf-object-and-reset-the-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create the ODF object and reset the log
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-log-who-is-making-the-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Log who is making the file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-fill-in-the-cruise-header" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Fill in the Cruise header
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-fill-in-the-event-header" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Fill in the Event header
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-fill-in-the-instrument-header" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Fill in the Instrument header
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-optional-add-a-meteo-header" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. (Optional) Add a Meteo header
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6b-optional-add-a-quality-header" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6b. (Optional) Add a Quality header
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-optional-add-calibration-and-history-headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. (Optional) Add calibration and history headers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-define-each-parameter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Define each parameter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-attach-the-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Attach the data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-update-derived-values-set-the-file-name-and-write" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Update derived values, set the file name, and write
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-check-the-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Check the result
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="how-to-create-a-new-odf-file-from-scratch">How to create a new ODF file from scratch</h1>
+<p>This guide shows how to build an ODF (Ocean Data Format) file in Python with <code>datashop_toolbox</code>, starting from an empty <code>OdfHeader</code> object and ending with a file on disk.</p>
+<p>It follows the creation branch of <code>main()</code> in <code>odfhdr.py</code> (the branch that runs when <code>test_creation = True</code>). That branch builds an ODF in memory and prints it. The guide adds the final write-to-disk step, which <code>main()</code> only demonstrates in its other branch (the one that reads an existing file).</p>
+<h2 id="before-you-start">Before you start</h2>
+<ul>
+<li><code>datashop_toolbox</code> is installed in your Python environment.</li>
+<li>You know the values you want to record: cruise, event, instrument, and at least one parameter with data.</li>
+<li>You know which output version you need. <code>2.0</code> writes the comma-delimited format; <code>3.0</code> and later write the non-comma-delimited format.</li>
+</ul>
+<h2 id="steps">Steps</h2>
+<h3 id="1-create-the-odf-object-and-reset-the-log">1. Create the ODF object and reset the log</h3>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.odfhdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">OdfHeader</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">odf</span> <span class="o">=</span> <span class="n">OdfHeader</span><span class="p">()</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">odf</span><span class="o">.</span><span class="n">reset_log_list</span><span class="p">()</span>
+</span></code></pre></div>
+<p><code>OdfHeader()</code> creates the object with empty Cruise, Event, Instrument, and Record headers. <code>meteo_header</code> and <code>quality_header</code> start as <code>None</code>. <code>reset_log_list()</code> clears the log shared by all headers so that only messages from this session are kept.</p>
+<h3 id="2-log-who-is-making-the-file">2. Log who is making the file</h3>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">odf</span><span class="o">.</span><span class="n">log_odf_message</span><span class="p">(</span><span class="s2">"Jane Doe made the following modifications to this file:"</span><span class="p">,</span> <span class="s2">"base"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Passing <code>"base"</code> writes the message to the shared log, which <code>print_object()</code> later adds to the History header.</p>
+<h3 id="3-fill-in-the-cruise-header">3. Fill in the Cruise header</h3>
+<p>Attach the shared logger and config to the header first, then set its fields.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">cruise_number</span> <span class="o">=</span> <span class="s2">"HUD2022001"</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">organization</span> <span class="o">=</span> <span class="s2">"DFO BIO"</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">chief_scientist</span> <span class="o">=</span> <span class="s2">"GLEN HARRISON"</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">start_date</span> <span class="o">=</span> <span class="s2">"01-APR-2022 00:00:00.00"</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">end_date</span> <span class="o">=</span> <span class="s2">"31-OCT-2022 00:00:00.00"</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">platform</span> <span class="o">=</span> <span class="s2">"LATALANTE"</span>
+</span></code></pre></div>
+<p>Dates use the ODF format <code>DD-MON-YYYY HH:MM:SS.ss</code>.</p>
+<p>To record the change in the log, call the header's log method before assigning. This is the pattern <code>main()</code> uses:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">org</span> <span class="o">=</span> <span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">organization</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">log_cruise_message</span><span class="p">(</span><span class="s2">"ORGANIZATION"</span><span class="p">,</span> <span class="n">org</span><span class="p">,</span> <span class="s2">"DFO BIO"</span><span class="p">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">organization</span> <span class="o">=</span> <span class="s2">"DFO BIO"</span>
+</span></code></pre></div>
+<h3 id="4-fill-in-the-event-header">4. Fill in the Event header</h3>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s2">"CTD"</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">event_number</span> <span class="o">=</span> <span class="s2">"001"</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">event_qualifier1</span> <span class="o">=</span> <span class="s2">"1"</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">event_qualifier2</span> <span class="o">=</span> <span class="s2">"DN"</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">station_name</span> <span class="o">=</span> <span class="s2">"AR7W_15"</span>
+</span></code></pre></div>
+<p><code>data_type</code>, <code>event_number</code>, and the two event qualifiers, together with the cruise number, are what <code>generate_file_spec()</code> uses to build the file name in step 10. If you leave them empty, the file name will be mostly underscores.</p>
+<h3 id="5-fill-in-the-instrument-header">5. Fill in the Instrument header</h3>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">odf</span><span class="o">.</span><span class="n">instrument_header</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">odf</span><span class="o">.</span><span class="n">instrument_header</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">"RBR Concerto CTD"</span>
+</span></code></pre></div>
+<h3 id="6-optional-add-a-meteo-header">6. (Optional) Add a Meteo header</h3>
+<p>The Meteo header is optional. Create it and attach the logger and config before setting values.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.meteohdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">MeteoHeader</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span> <span class="o">=</span> <span class="n">MeteoHeader</span><span class="p">()</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">air_temperature</span> <span class="o">=</span> <span class="mf">10.0</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">atmospheric_pressure</span> <span class="o">=</span> <span class="mf">1063.1</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">wind_speed</span> <span class="o">=</span> <span class="n">MeteoHeader</span><span class="o">.</span><span class="n">wind_speed_knots_to_ms</span><span class="p">(</span><span class="mf">50.0</span><span class="p">)</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">wind_direction</span> <span class="o">=</span> <span class="mf">180.0</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">sea_state</span> <span class="o">=</span> <span class="n">MeteoHeader</span><span class="o">.</span><span class="n">wave_height_meters_to_wmo_code</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">cloud_cover</span> <span class="o">=</span> <span class="n">MeteoHeader</span><span class="o">.</span><span class="n">cloud_cover_percentage_to_wmo_code</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">ice_thickness</span> <span class="o">=</span> <span class="mf">0.5</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="n">odf</span><span class="o">.</span><span class="n">meteo_header</span><span class="o">.</span><span class="n">set_meteo_comment</span><span class="p">(</span><span class="s2">"A comment about the conditions"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The static helpers convert knots to m/s, wave height in metres to a WMO sea-state code, and cloud cover to a WMO code.</p>
+<h3 id="6b-optional-add-a-quality-header">6b. (Optional) Add a Quality header</h3>
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.qualityhdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">QualityHeader</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">odf</span><span class="o">.</span><span class="n">quality_header</span> <span class="o">=</span> <span class="n">QualityHeader</span><span class="p">()</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">odf</span><span class="o">.</span><span class="n">quality_header</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">odf</span><span class="o">.</span><span class="n">quality_header</span><span class="o">.</span><span class="n">quality_date</span> <span class="o">=</span> <span class="s2">"01-JUL-2017 10:45:19.00"</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="n">odf</span><span class="o">.</span><span class="n">quality_header</span><span class="o">.</span><span class="n">set_quality_test</span><span class="p">(</span><span class="s2">"Test 1"</span><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">odf</span><span class="o">.</span><span class="n">quality_header</span><span class="o">.</span><span class="n">quality_comments</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Comment 1"</span><span class="p">]</span>
+</span></code></pre></div>
+<h3 id="7-optional-add-calibration-and-history-headers">7. (Optional) Add calibration and history headers</h3>
+<p>Each of these is a list on the ODF object. Build the header, attach the logger and config, and append it.</p>
+<p><strong>Polynomial calibration</strong></p>
+<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.polynomialhdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolynomialCalHeader</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">poly</span> <span class="o">=</span> <span class="n">PolynomialCalHeader</span><span class="p">()</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">poly</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">poly</span><span class="o">.</span><span class="n">parameter_code</span> <span class="o">=</span> <span class="s2">"PRES_01"</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="n">poly</span><span class="o">.</span><span class="n">calibration_date</span> <span class="o">=</span> <span class="s2">"11-JUN-1995 05:35:46.82"</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">poly</span><span class="o">.</span><span class="n">application_date</span> <span class="o">=</span> <span class="s2">"11-JUN-1995 05:35:46.82"</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">poly</span><span class="o">.</span><span class="n">number_coefficients</span> <span class="o">=</span> <span class="mi">2</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="n">poly</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">]</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="n">odf</span><span class="o">.</span><span class="n">polynomial_cal_headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>General calibration</strong> (<code>GeneralCalHeader</code>, appended to <code>odf.general_cal_headers</code>) uses <code>parameter_code</code>, <code>calibration_type</code>, <code>calibration_date</code>, <code>application_date</code>, <code>number_coefficients</code>, <code>coefficients</code>, and <code>calibration_equation</code>.</p>
+<p><strong>Compass calibration</strong> (<code>CompassCalHeader</code>, appended to <code>odf.compass_cal_headers</code>) is populated from a list of <code>KEY = value</code> strings with <code>populate_object()</code>.</p>
+<p><strong>History</strong> (<code>HistoryHeader</code>, appended to <code>odf.history_headers</code>) can be populated the same way, from <code>CREATION_DATE</code> and <code>PROCESS</code> lines.</p>
+<h3 id="8-define-each-parameter">8. Define each parameter</h3>
+<p>Create one <code>ParameterHeader</code> for every data column.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.basehdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseHeader</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.parameterhdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterHeader</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">param</span> <span class="o">=</span> <span class="n">ParameterHeader</span><span class="p">(</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="nb">type</span><span class="o">=</span><span class="s2">"DOUB"</span><span class="p">,</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"Pressure"</span><span class="p">,</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">units</span><span class="o">=</span><span class="s2">"decibars"</span><span class="p">,</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    <span class="n">code</span><span class="o">=</span><span class="s2">"PRES_01"</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    <span class="n">wmo_code</span><span class="o">=</span><span class="s2">"PRES"</span><span class="p">,</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>    <span class="n">null_string</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BaseHeader</span><span class="o">.</span><span class="n">NULL_VALUE</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="n">print_field_width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>    <span class="n">print_decimal_places</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    <span class="n">angle_of_section</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>    <span class="n">magnetic_variation</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>    <span class="n">depth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>    <span class="n">minimum_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>    <span class="n">maximum_value</span><span class="o">=</span><span class="mf">7.0</span><span class="p">,</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>    <span class="n">number_valid</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>    <span class="n">number_null</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="p">)</span>
+</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="n">param</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="n">odf</span><span class="o">.</span><span class="n">parameter_headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The <code>code</code> must match the column name in your data frame (step 9). Codes follow the pattern four capital letters, an underscore, and two digits, such as <code>PRES_01</code>.</p>
+<h3 id="9-attach-the-data">9. Attach the data</h3>
+<p>Put the data in a pandas DataFrame, wrap it in a <code>DataRecords</code> object, and assign it to <code>odf.data</code>.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.records</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataRecords</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">records</span> <span class="o">=</span> <span class="n">DataRecords</span><span class="p">()</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">records</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">records</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="p">{</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>        <span class="s2">"PRES_01"</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">],</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>        <span class="s2">"TEMP_01"</span><span class="p">:</span> <span class="p">[</span><span class="mf">8.2</span><span class="p">,</span> <span class="mf">5.6</span><span class="p">,</span> <span class="mf">2.45</span><span class="p">],</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>        <span class="s2">"PSAL_01"</span><span class="p">:</span> <span class="p">[</span><span class="mf">31.5</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">,</span> <span class="mf">32.88</span><span class="p">],</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>    <span class="p">}</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="p">)</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="n">records</span><span class="o">.</span><span class="n">parameter_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"PRES_01"</span><span class="p">,</span> <span class="s2">"TEMP_01"</span><span class="p">,</span> <span class="s2">"PSAL_01"</span><span class="p">]</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="n">records</span><span class="o">.</span><span class="n">print_formats</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"PRES_01"</span><span class="p">:</span> <span class="s2">"10.1"</span><span class="p">,</span> <span class="s2">"TEMP_01"</span><span class="p">:</span> <span class="s2">"10.4"</span><span class="p">,</span> <span class="s2">"PSAL_01"</span><span class="p">:</span> <span class="s2">"10.4"</span><span class="p">}</span>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="n">odf</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">records</span>
+</span></code></pre></div>
+<p>If you have three data columns, you need three <code>ParameterHeader</code> objects from step 8 (one each for <code>PRES_01</code>, <code>TEMP_01</code>, and <code>PSAL_01</code>).</p>
+<h3 id="10-update-derived-values-set-the-file-name-and-write">10. Update derived values, set the file name, and write</h3>
+<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">odf</span><span class="o">.</span><span class="n">update_odf</span><span class="p">()</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="n">odf</span><span class="o">.</span><span class="n">file_specification</span> <span class="o">=</span> <span class="n">odf</span><span class="o">.</span><span class="n">generate_file_spec</span><span class="p">()</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="n">out_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"output"</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">odf</span><span class="o">.</span><span class="n">file_specification</span><span class="si">}</span><span class="s2">.ODF"</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">odf</span><span class="o">.</span><span class="n">write_odf</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>update_odf()</code> fills in values that are derived from what you added:</p>
+<ul>
+<li>the Record header counts (calibrations, history, swing, parameters, cycles);</li>
+<li>the Event header minimum and maximum depth, taken from <code>DEPH_01</code> or, if that is absent, <code>PRES_01</code>, when they have not been set;</li>
+<li><code>depth_off_bottom</code>, when <code>sounding</code> is set;</li>
+<li>the minimum and maximum value in each Parameter header.</li>
+</ul>
+<p><code>generate_file_spec()</code> builds the name as <code>DATATYPE_CRUISENUMBER_EVENTNUMBER_QUALIFIER1_QUALIFIER2</code>, for example <code>CTD_HUD2022001_001_1_DN</code>. <code>write_odf()</code> creates the file in ISO-8859-1 encoding and prints the path. The output directory must already exist, and <code>version</code> must be a float (<code>2.0</code>, not <code>2</code>).</p>
+<h3 id="11-check-the-result">11. Check the result</h3>
+<p>To preview the file without writing it, print the serialized text:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">print</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">print_object</span><span class="p">())</span>
+</span></code></pre></div>
+<p>To review what was logged during the session:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">odf</span><span class="o">.</span><span class="n">shared_log_list</span><span class="p">:</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="complete-example">Complete example</h2>
+<p>This is a minimal end-to-end script: one parameter, no optional headers.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.basehdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseHeader</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.odfhdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">OdfHeader</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.parameterhdr</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterHeader</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datashop_toolbox.records</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataRecords</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="n">odf</span> <span class="o">=</span> <span class="n">OdfHeader</span><span class="p">()</span>
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="n">odf</span><span class="o">.</span><span class="n">reset_log_list</span><span class="p">()</span>
+</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="n">odf</span><span class="o">.</span><span class="n">log_odf_message</span><span class="p">(</span><span class="s2">"Jane Doe made the following modifications to this file:"</span><span class="p">,</span> <span class="s2">"base"</span><span class="p">)</span>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>
+</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">cruise_number</span> <span class="o">=</span> <span class="s2">"HUD2022001"</span>
+</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">organization</span> <span class="o">=</span> <span class="s2">"DFO BIO"</span>
+</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">chief_scientist</span> <span class="o">=</span> <span class="s2">"GLEN HARRISON"</span>
+</span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">start_date</span> <span class="o">=</span> <span class="s2">"01-APR-2022 00:00:00.00"</span>
+</span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">end_date</span> <span class="o">=</span> <span class="s2">"31-OCT-2022 00:00:00.00"</span>
+</span><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a><span class="n">odf</span><span class="o">.</span><span class="n">cruise_header</span><span class="o">.</span><span class="n">platform</span> <span class="o">=</span> <span class="s2">"LATALANTE"</span>
+</span><span id="__span-14-21"><a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>
+</span><span id="__span-14-22"><a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-14-23"><a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s2">"CTD"</span>
+</span><span id="__span-14-24"><a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">event_number</span> <span class="o">=</span> <span class="s2">"001"</span>
+</span><span id="__span-14-25"><a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">event_qualifier1</span> <span class="o">=</span> <span class="s2">"1"</span>
+</span><span id="__span-14-26"><a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">event_qualifier2</span> <span class="o">=</span> <span class="s2">"DN"</span>
+</span><span id="__span-14-27"><a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a><span class="n">odf</span><span class="o">.</span><span class="n">event_header</span><span class="o">.</span><span class="n">station_name</span> <span class="o">=</span> <span class="s2">"AR7W_15"</span>
+</span><span id="__span-14-28"><a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a>
+</span><span id="__span-14-29"><a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a><span class="n">odf</span><span class="o">.</span><span class="n">instrument_header</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-14-30"><a id="__codelineno-14-30" name="__codelineno-14-30" href="#__codelineno-14-30"></a><span class="n">odf</span><span class="o">.</span><span class="n">instrument_header</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">"RBR Concerto CTD"</span>
+</span><span id="__span-14-31"><a id="__codelineno-14-31" name="__codelineno-14-31" href="#__codelineno-14-31"></a>
+</span><span id="__span-14-32"><a id="__codelineno-14-32" name="__codelineno-14-32" href="#__codelineno-14-32"></a><span class="n">param</span> <span class="o">=</span> <span class="n">ParameterHeader</span><span class="p">(</span>
+</span><span id="__span-14-33"><a id="__codelineno-14-33" name="__codelineno-14-33" href="#__codelineno-14-33"></a>    <span class="nb">type</span><span class="o">=</span><span class="s2">"DOUB"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Pressure"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">"decibars"</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s2">"PRES_01"</span><span class="p">,</span> <span class="n">wmo_code</span><span class="o">=</span><span class="s2">"PRES"</span><span class="p">,</span>
+</span><span id="__span-14-34"><a id="__codelineno-14-34" name="__codelineno-14-34" href="#__codelineno-14-34"></a>    <span class="n">null_string</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BaseHeader</span><span class="o">.</span><span class="n">NULL_VALUE</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">print_field_width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">print_decimal_places</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-14-35"><a id="__codelineno-14-35" name="__codelineno-14-35" href="#__codelineno-14-35"></a>    <span class="n">angle_of_section</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">magnetic_variation</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-14-36"><a id="__codelineno-14-36" name="__codelineno-14-36" href="#__codelineno-14-36"></a>    <span class="n">minimum_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">maximum_value</span><span class="o">=</span><span class="mf">7.0</span><span class="p">,</span> <span class="n">number_valid</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">number_null</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-14-37"><a id="__codelineno-14-37" name="__codelineno-14-37" href="#__codelineno-14-37"></a><span class="p">)</span>
+</span><span id="__span-14-38"><a id="__codelineno-14-38" name="__codelineno-14-38" href="#__codelineno-14-38"></a><span class="n">param</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-14-39"><a id="__codelineno-14-39" name="__codelineno-14-39" href="#__codelineno-14-39"></a><span class="n">odf</span><span class="o">.</span><span class="n">parameter_headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+</span><span id="__span-14-40"><a id="__codelineno-14-40" name="__codelineno-14-40" href="#__codelineno-14-40"></a>
+</span><span id="__span-14-41"><a id="__codelineno-14-41" name="__codelineno-14-41" href="#__codelineno-14-41"></a><span class="n">records</span> <span class="o">=</span> <span class="n">DataRecords</span><span class="p">()</span>
+</span><span id="__span-14-42"><a id="__codelineno-14-42" name="__codelineno-14-42" href="#__codelineno-14-42"></a><span class="n">records</span><span class="o">.</span><span class="n">set_logger_and_config</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">odf</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-14-43"><a id="__codelineno-14-43" name="__codelineno-14-43" href="#__codelineno-14-43"></a><span class="n">records</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"PRES_01"</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">]})</span>
+</span><span id="__span-14-44"><a id="__codelineno-14-44" name="__codelineno-14-44" href="#__codelineno-14-44"></a><span class="n">records</span><span class="o">.</span><span class="n">parameter_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"PRES_01"</span><span class="p">]</span>
+</span><span id="__span-14-45"><a id="__codelineno-14-45" name="__codelineno-14-45" href="#__codelineno-14-45"></a><span class="n">records</span><span class="o">.</span><span class="n">print_formats</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"PRES_01"</span><span class="p">:</span> <span class="s2">"10.1"</span><span class="p">}</span>
+</span><span id="__span-14-46"><a id="__codelineno-14-46" name="__codelineno-14-46" href="#__codelineno-14-46"></a><span class="n">odf</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">records</span>
+</span><span id="__span-14-47"><a id="__codelineno-14-47" name="__codelineno-14-47" href="#__codelineno-14-47"></a>
+</span><span id="__span-14-48"><a id="__codelineno-14-48" name="__codelineno-14-48" href="#__codelineno-14-48"></a><span class="n">odf</span><span class="o">.</span><span class="n">update_odf</span><span class="p">()</span>
+</span><span id="__span-14-49"><a id="__codelineno-14-49" name="__codelineno-14-49" href="#__codelineno-14-49"></a><span class="n">odf</span><span class="o">.</span><span class="n">file_specification</span> <span class="o">=</span> <span class="n">odf</span><span class="o">.</span><span class="n">generate_file_spec</span><span class="p">()</span>
+</span><span id="__span-14-50"><a id="__codelineno-14-50" name="__codelineno-14-50" href="#__codelineno-14-50"></a>
+</span><span id="__span-14-51"><a id="__codelineno-14-51" name="__codelineno-14-51" href="#__codelineno-14-51"></a><span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"output"</span><span class="p">)</span>
+</span><span id="__span-14-52"><a id="__codelineno-14-52" name="__codelineno-14-52" href="#__codelineno-14-52"></a><span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-14-53"><a id="__codelineno-14-53" name="__codelineno-14-53" href="#__codelineno-14-53"></a><span class="n">odf</span><span class="o">.</span><span class="n">write_odf</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">odf</span><span class="o">.</span><span class="n">file_specification</span><span class="si">}</span><span class="s2">.ODF"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p><strong><code>KeyError</code> from <code>update_odf()</code>.</strong> Every <code>ParameterHeader.code</code> must be a column in <code>odf.data.data_frame</code>. Check the spelling, or add the missing header or column.</p>
+<p><strong><code>file_specification cannot be empty</code>.</strong> Assign <code>odf.file_specification</code> before writing, as in step 10, and make sure the event and cruise fields it is built from are set.</p>
+<p><strong><code>AssertionError</code> in <code>write_odf()</code>.</strong> The first argument must be a <code>Path</code>, not a string, and <code>version</code> must be a float.</p>
+<p><strong>The file name is mostly underscores.</strong> <code>data_type</code>, <code>cruise_number</code>, <code>event_number</code>, and the qualifiers were left empty (steps 3 and 4).</p>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><code>docs/ODF_File_Specification.md</code> for the header blocks and field definitions.</li>
+<li><code>OdfHeader.read_odf()</code> to start from an existing ODF file instead of an empty object.</li>
+<li><code>OdfHeader.add_quality_flags()</code> and <code>write_odf(..., version=3.0)</code> for writing quality-flagged files, as shown in the read-and-modify branch of <code>main()</code>.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
