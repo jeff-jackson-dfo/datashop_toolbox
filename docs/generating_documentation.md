@@ -2,21 +2,27 @@
 
 > Note: development was performed in the project's
 > root folder using a virtual environment created
-> by uv.
+> by uv. The documentation is built with
+> [Zensical](https://zensical.org/), the successor to
+> Material for MkDocs.
 
-## Install Required `mkdocs` Packages
+## Install the Required Packages
 
 ```powershell
-(venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install mkdocs
-(venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install "mkdocstrings[python]"
-(venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install mkdocs-material
+(venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install zensical
+(venv) PS C:\Dev\GitHub\datashop_toolbox> uv pip install mkdocstrings-python
 ```
+
+`zensical` builds and serves the site and includes the theme.
+`mkdocstrings-python` generates the API reference from the
+docstrings. No separate `mkdocs` or `mkdocs-material` install
+is needed.
 
 ## Create the Docstrings
 
 The docstrings are created using the Google-style
 because it involves less text (cleaner) and it
-is the preferred style for Mkdocs.
+is the preferred style for `mkdocstrings`.
 
 Once docstrings are created for say a module
 called `tabulate`, one can access the info
@@ -26,11 +32,21 @@ using the help command:
 >>> help(tabulate)
 ```
 
-## Create the Mkdocs Structure for Your Project
+## Create the Zensical Structure for Your Project
+
+For a new project, run the following in the project's root folder:
 
 ```powershell
-(venv) PS C:\Dev\GitHub\datashop_toolbox> mkdocs new .
+(venv) PS C:\Dev\GitHub\datashop_toolbox> zensical new .
 ```
+
+This creates a `zensical.toml` configuration file, a `docs` folder
+with starter pages, and a GitHub Actions workflow in
+`.github/workflows/docs.yml`.
+
+This project already has a `docs` folder and keeps its
+configuration in `mkdocs.yml`. Zensical reads that file directly
+when there is no `zensical.toml`, so there is no need to convert it.
 
 ## Update the `mkdocs.yml` File
 
@@ -46,10 +62,21 @@ to
 site_name: Datashop Toolbox Docs
 ```
 
-### 2. Add Required Functionality
+### 2. Set the `site_url`
+
+Add the address where the site will be published. For GitHub
+Pages this is `https://<username>.github.io/<repository>/`, and the
+trailing slash is required:
+
+```yaml
+site_url: https://jeff-jackson-dfo.github.io/datashop_toolbox/
+```
+
+### 3. Add Required Functionality
 
 ```yaml
 site_name: Datashop Toolbox Docs
+site_url: https://jeff-jackson-dfo.github.io/datashop_toolbox/
 
 theme:
   name: "material"
@@ -67,13 +94,21 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.mark
-  
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:zensical.extensions.emoji.twemoji
+      emoji_generator: !!python/name:zensical.extensions.emoji.to_svg
 ```
 
-## Create New Markdown Files
+`attr_list`, `md_in_html` and `pymdownx.emoji` enable the
+grid cards and icons used on the home and how-to pages.
+
+### 4. Create New Markdown Files
 
 The only Markdown file that exists when you run
-mkdocs the first time is index.md; which needs
+`zensical new` the first time is `index.md` (plus a
+`markdown.md` example page); `index.md` needs
 to be modified as it is the home page for the
 documentation.
 
@@ -83,83 +118,84 @@ described by Daniele Procida in the
 [Diátaxis documentation framework](https://diataxis.fr/)
 and consists of four separate parts:
 
-1. [Tutorials](tutorials.md)
-2. [How-To Guides](how-to-guides.md)
-3. [Reference](reference.md)
-4. [Explanation](explanation.md)
+1. [Background](background.md)
+2. [Tutorials](tutorials.md)
+3. [How-To Guides](how-to-guides.md)
+4. [Reference](reference.md)
 
 Once these four documents have been created,
 navigation to them should be added in the
-mkdocs.yml file, like so:
+`mkdocs.yml` file, like so:
 
 ```yaml
-site_name: Datashop Toolbox Docs
-
-theme:
-  name: "material"
-  features:
-    - content.code.copy  # This enables the copy button globally
-
-plugins:
-  - mkdocstrings
-
-markdown_extensions:
-  - pymdownx.highlight:
-      anchor_linenums: true
-      line_spans: __span
-  - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.mark
-
 nav:
   - Datashop Toolbox Docs: index.md
+  - background.md
   - tutorials.md
   - How-To Guides: how-to-guides.md
-  - reference.md
-  - explanation.md
+  - Reference: reference.md
+  - GTSPP Reference: gtspp_reference.md
 ```
 
 ## View While Editing the Documentation
 
 ```powershell
-(venv) PS C:\DEV\GitHub\datashop_toolbox> mkdocs serve
-
- │  ⚠  Warning from the Material for MkDocs team
- │
- │  MkDocs 2.0, the underlying framework of Material for MkDocs,
- │  will introduce backward-incompatible changes, including:
- │
- │  × All plugins will stop working – the plugin system has been removed
- │  × All theme overrides will break – the theming system has been rewritten
- │  × No migration path exists – existing projects cannot be upgraded
- │  × Closed contribution model – community members can't report bugs
- │  × Currently unlicensed – unsuitable for production use
- │
- │  Our full analysis:
- │
- │  https://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/
-
-INFO    -  Building documentation...
-INFO    -  Cleaning site directory
-INFO    -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
-             - generating_documentation.md
-INFO    -  Documentation built in 0.68 seconds
-INFO    -  [15:05:39] Watching paths for changes: 'docs', 'mkdocs.yml'
-INFO    -  [15:05:39] Serving on http://127.0.0.1:8000/
+(venv) PS C:\DEV\GitHub\datashop_toolbox> zensical serve
 ```
 
-One of the more useful features of Mkdocs is that
+Zensical builds the site and serves it on
+`http://localhost:8000`.
+
+One of the more useful features of Zensical is that
 when working on the documentation locally, any
-changes made are automatically pushed to the
+changes made are automatically rebuilt and shown on the
 webpage running on the local webserver.
 
 ## Publish the Documentation to GitHub
 
-The final step once the documentation is ready
-for public release is to push it to your GitHub
-repository in a branch called `gh-deploy`:
+The documentation is published to GitHub Pages by a GitHub Actions
+workflow. Every push to the `master` (or `main`) branch rebuilds the
+site with Zensical and deploys it. This replaces the `mkdocs gh-deploy`
+command used with MkDocs.
+
+### One-Time Setup
+
+1. Copy the workflow file `docs.yml` into the repository as
+   `.github/workflows/docs.yml`.
+
+2. In the repository on GitHub, go to **Settings** > **Pages** and,
+   under **Build and deployment**, set **Source** to **GitHub Actions**.
+
+3. Commit and push the workflow file:
 
 ```powershell
-(venv) PS C:\DEV\GitHub\datashop_toolbox> mkdocs gh-deploy
+(venv) PS C:\DEV\GitHub\datashop_toolbox> git add .github/workflows/docs.yml
+(venv) PS C:\DEV\GitHub\datashop_toolbox> git commit -m "Add documentation workflow"
+(venv) PS C:\DEV\GitHub\datashop_toolbox> git push
 ```
+
+### Publish Changes
+
+Once the one-time setup is done, publishing is just a push:
+
+```powershell
+(venv) PS C:\DEV\GitHub\datashop_toolbox> git add .
+(venv) PS C:\DEV\GitHub\datashop_toolbox> git commit -m "Update documentation"
+(venv) PS C:\DEV\GitHub\datashop_toolbox> git push
+```
+
+Follow the progress on the **Actions** tab of the repository. When the
+workflow finishes, the site is available at
+`https://<username>.github.io/<repository>/`. The workflow can also be
+started by hand from the **Actions** tab (**Documentation** >
+**Run workflow**).
+
+### Check the Build Locally
+
+To check that the site builds without errors before pushing:
+
+```powershell
+(venv) PS C:\DEV\GitHub\datashop_toolbox> zensical build --clean
+```
+
+The generated site is written to the `site` folder.
