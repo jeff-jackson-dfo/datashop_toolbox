@@ -304,14 +304,6 @@ for file_path in sorted(path_to_orig.glob("*.ODF")):
     odf.write_odf(path_to_revised / out_file, version=2.0)
 ```
 
-## How this differs from `update_JC291.py`
-
-The steps above keep the logic of the original script. Three things were changed:
-
-- The folder changes (`os.chdir`) are gone. The file is read from its full path and written to the revised folder by full path, so the working folder no longer matters.
-- `read_odf()` is given the `Path` object (`file_path`) instead of the file name. In the version of `odfhdr.py` on the `master` branch, `read_odf()` raises an `AssertionError` unless it receives a `Path`.
-- The file is written with `write_odf()`. The original wrote the text with `open(out_file, "w")`, which uses the system's default encoding. `write_odf()` always uses ISO-8859-1.
-
 ## Common variations
 
 **Change an Event comment or an Instrument field.** Use the same log-then-assign pattern:
@@ -347,4 +339,4 @@ odf.add_to_history("Station names were checked against the cruise log.")
 ## See also
 
 - [Create a new ODF file from scratch](how-to-create-an-odf-file.md)
-- `docs/ODF_File_Specification.md` for the header blocks and field definitions.
+- See [ODF_File_Specification.md](ODF_File_Specification.md) for the header blocks and field definitions.
