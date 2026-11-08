@@ -21,6 +21,15 @@ Pick the task you want to accomplish.
 
     [:octicons-arrow-right-24: Create an ODF file](how-to-create-an-odf-file.md)
 
+-   :material-file-edit-outline:{ .lg .middle } __Edit a set of ODF files__
+
+    ---
+
+    Apply the same metadata corrections to every ODF file in a folder, record each
+    change in a new History header, and write the revised files to a new folder.
+
+    [:octicons-arrow-right-24: Edit a set of ODF files](how-to-edit-a-set-of-odf-files.md)
+
 </div>
 
 ## Quality control
