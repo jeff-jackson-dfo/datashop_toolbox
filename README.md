@@ -119,5 +119,5 @@ Implements core processing using Python OOP principles:
 📄 **ODF Specification (v3.0):**  
 👉 https://github.com/jeff-jackson-dfo/datashop_toolbox/blob/master/ODF_File_Specification.md  
 
-Documentation for the Datashop Toolbox is found [https://jeff-jackson-dfo.github.io/datashop_toolbox/](https://jeff-jackson-dfo.github.io/datashop_toolbox/).
+The documentation for the Datashop Toolbox is located at https://jeff-jackson-dfo.github.io/datashop_toolbox/.
 ---
