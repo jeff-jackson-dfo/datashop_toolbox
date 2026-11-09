@@ -6,6 +6,9 @@ theme:
   features:
     - content.code.copy  # This enables the copy button globally
 
+extra_css:
+  - stylesheets/extra.css
+
 plugins:
   - mkdocstrings
 
