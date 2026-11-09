@@ -1,0 +1,24 @@
+/* background.md: the ODF block table (Block | Mandatory? | Purpose).
+ *
+ * The theme lets code spans break anywhere (`word-break: break-word`), which
+ * splits long names such as POLYNOMIAL_CAL_HEADER across two lines. These rules
+ * are scoped to tables wrapped in <div class="odf-blocks">, so no other table
+ * on the site is affected.
+ */
+
+/* Column 1 (Block): never wrap, and never break inside a name. */
+.md-typeset .odf-blocks table:not([class]) th:first-child,
+.md-typeset .odf-blocks table:not([class]) td:first-child {
+  white-space: nowrap;
+}
+
+.md-typeset .odf-blocks table:not([class]) td:first-child code {
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+/* Column 3 (Purpose): a narrower preferred width so the text wraps sooner. */
+.md-typeset .odf-blocks table:not([class]) th:nth-child(3),
+.md-typeset .odf-blocks table:not([class]) td:nth-child(3) {
+  width: 24rem;
+}

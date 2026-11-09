@@ -53,6 +53,8 @@ in the header no longer has to match column order in the data, and the `GENERAL_
 Every ODF file is built from the same set of block types, each covering one aspect of
 provenance or metadata:
 
+<div class="odf-blocks" markdown>
+
 | Block | Mandatory? | Purpose |
 | --- | --- | --- |
 | `ODF_HEADER` | Yes | File specification string and the ODF spec version the file conforms to. |
@@ -67,6 +69,8 @@ provenance or metadata:
 | `HISTORY_HEADER` | Yes | When the data were last modified, and the ordered list of processing steps applied. |
 | `PARAMETER_HEADER` | Yes (one per column) | Describes one data column: code, name, units, null value, print formatting, and value range/counts. |
 | `RECORD_HEADER` | Yes | Counts of calibration, swing, history, and parameter blocks, and of data cycles. |
+
+</div>
 
 Two conventions recur throughout the format and are worth calling out on their own:
 
