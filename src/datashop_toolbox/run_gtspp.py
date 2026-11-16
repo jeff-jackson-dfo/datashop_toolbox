@@ -40,13 +40,15 @@ stage2_cfg = Stage2Config(
     # spike_thresholds={"temperature": 1.0, "salinity": 0.2},
 )
 
-def main(odf_folder: Path):
+def main(odf_folder: Path, out_folder: Path):
     stations = load_stations(odf_folder)
     run_stage1(stations, stage1_cfg)
     profiles = load_profiles(stations)
     run_stage2(profiles, stage2_cfg)
-    save_stage2_to_odf(profiles, "qc_odf")
+    save_stage2_to_odf(profiles, out_folder)
 
 
 if __name__ == "__main__":
-    main(Path('C:/DFO-MPO/DEV/Testing/data/HUD2008004/'))
+    in_path = Path('C:/DFO-MPO/DEV/Testing/data/HUD2008004/')
+    out_path = Path('C:/DFO-MPO/DEV/Testing/data/HUD2008004/qc_odf/')
+    main(in_path, out_path)
