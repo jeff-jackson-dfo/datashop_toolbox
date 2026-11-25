@@ -272,6 +272,8 @@ class Stage2Config:
             from (see :data:`DERIVED_FROM`).
         allow_equal_depth: Allow equal consecutive depths in test 2.3. The
             manual requires strictly increasing depths.
+        skip_on_upcast: Tests that are not run on up casts (profiles whose
+            depth decreases overall). Combine tests with ``|``.
         digitized_at_inflection_points: Use the first form of test 2.5
             (three identical consecutive values) instead of the "selected
             depths" form (the whole profile is constant).
@@ -321,6 +323,10 @@ class Stage2Config:
     derived_from: Mapping[str, Sequence[str]] = field(default_factory=lambda: dict(DERIVED_FROM))
 
     allow_equal_depth: bool = False  # 2.3: the manual requires strictly deeper
+
+    # Tests to skip on up casts (depth decreasing). 2.3 would fail every level.
+    skip_on_upcast: Test2 = Test2.INCREASING_DEPTH | Test2.DENSITY_INVERSION | Test2.TEMPERATURE_INVERSION
+
     digitized_at_inflection_points: bool = False  # 2.5: False -> "selected depths" form
 
     freezing_method: str = "unesco83"  # or "teos10" (gsw.t_freezing)
@@ -1079,6 +1085,24 @@ STAGE2_TESTS = (
 )
 
 
+def is_upcast(p: Profile) -> bool:
+    """Check whether a profile was recorded going up.
+
+    Args:
+        p: Profile to check.
+
+    Returns:
+        ``True`` if, among the usable depth values, more steps go shallower
+        than deeper. ``False`` if there is no depth column or fewer than two
+        usable values.
+    """
+    col = p.depth_col
+    if not col:
+        return False
+    z = p.values[col][p.eligible(col)]
+    return z.size > 1 and float(np.sum(np.sign(np.diff(z)))) < 0
+
+
 def test_enabled(test: Test2, p: Profile, cfg: Stage2Config) -> bool:
     """Check whether a test can run in this configuration.
 
@@ -1089,9 +1113,12 @@ def test_enabled(test: Test2, p: Profile, cfg: Stage2Config) -> bool:
 
     Returns:
         ``False`` if an input is missing: no bathymetry for 2.11, no
-        amplitude for 2.12 or no ``gsw`` package for 2.10. ``True``
-        otherwise.
+        amplitude for 2.12 or no ``gsw`` package for 2.10 or the test
+        is listed in skip_on_upcast and the profile is an up cast.
+        ``True`` otherwise.
     """
+    if (test & cfg.skip_on_upcast) and is_upcast(p):
+        return False
     if test is Test2.BOTTOM:
         return cfg.bathymetry is not None
     if test is Test2.TEMPERATURE_INVERSION:
